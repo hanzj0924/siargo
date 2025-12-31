@@ -1,0 +1,97 @@
+<div class="card jb_vflex">
+	<div class="card-header jb_vheader_card">
+		<button onclick="ajaxSubmitForm('codeGenRouteForm')" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> 保存配置</button>
+	</div>
+	<div class="card-body jb_vbody">
+		<form class="form" onsubmit="return false;" id="codeGenRouteForm" action="admin/codegen/updateBase" method="post">
+			<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+			<input type="hidden" name="codeGen.isViewUsePath" value="#(codeGen.isViewUsePath?? true)" autocomplete="off" />
+			<!--<div class="form-group row"
+				data-radio
+				data-rule="radio"
+				data-value="#(codeGen.isViewUsePath?? 'true')"
+				data-name="codeGen.isViewUsePath"
+				data-default="true"
+				>
+				<label class="col-sm-3 col-form-label is_required" >启用Path注解</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isViewUsePath_true" type="radio" name="codeGen.isViewUsePath"   value="true"/>
+						<label for="r_isViewUsePath_true">启用</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isViewUsePath_false" type="radio" name="codeGen.isViewUsePath"   value="false"/>
+						<label for="r_isViewUsePath_false">不启用</label>
+					</div>
+				</div>
+		 	</div>-->
+
+			<div class="form-group row">
+				<label class="col-sm-3 col-form-label">路由扫描包</label>
+				<div class="col">
+					<input type="text" data-with-clearbtn="true" data-autocomplete data-mustmatch="false" data-url="admin/codegen/javaPackageAutocomplete" data-with-clearbtn placeholder="请输入需要扫描的package" class="form-control" name="codeGen.routesScanPackage" value="#(codeGen.routesScanPackage??)" autocomplete="off" />
+					<small class="text-danger">注意：这个扫描包会生成到临时路由配置里面：cn.jbolt.extend.config.ProjectCodeGenRoutesConfig中，可自行调整到cn.jbolt.extend.config.ExtendProjectConfig中的configRoute中，如果是独立大模块，可以独立创建自己的Routes配置类在此配置</small>
+				</div>
+			</div>
+
+<!--
+			<div class="form-group row"
+				data-radio
+				data-rule="radio"
+				data-value="#(codeGen.isNeedNewRoute?? 'false')"
+				data-name="codeGen.isNeedNewRoute"
+				data-default="false"
+				>
+				<label class="col-sm-3 col-form-label is_required" >需要新的Routes类？</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isNeedNewRoute_true" type="radio" name="codeGen.isNeedNewRoute"   value="true"/>
+						<label for="r_isNeedNewRoute_true">启用</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isNeedNewRoute_false" type="radio" name="codeGen.isNeedNewRoute"   value="false"/>
+						<label for="r_isNeedNewRoute_false">不启用</label>
+					</div>
+				</div>
+		 	</div>
+
+		 	<div class="form-group row">
+				 <label class="col-sm-3 col-form-label">Routes路由类</label>
+				<div class="col-6">
+					<div class="input-group">
+					<input data-width="600" id="routes_list_autocomplate" data-text-align="left" data-column-attr="text-500-left" type="text" autocomplete="off" data-mustmatch="false" data-autocomplete data-url="admin/codegen/routesOptions/#(codeGen.id)" class="form-control"  placeholder="请选择Routes类"  data-tips="请选择Routes类"  maxlength="100" name="codeGen.routesClassName" value="#(codeGen.routesClassName??)">
+					<div class="input-group-append">
+						<span class="input-group-text"><a data-ajaxbtn data-input-id="routes_list_autocomplate" href="admin/codegen/refreshRoutesCache" tooltip data-title="刷新路由数据" data-handler="flushTheAutocompleteCache"><i class="fa fa-refresh"></i></a></span>
+					</div>
+					</div>
+				</div>
+			</div>-->
+
+
+			<div class="form-group row"
+				data-radio
+				data-rule="radio"
+				data-value="#(codeGen.isNeedAdminInterceptor?? 'true')"
+				data-name="codeGen.isNeedAdminInterceptor"
+				data-default="true"
+				>
+				<label class="col-sm-3 col-form-label is_required" >后台权限拦截器</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isNeedAdminInterceptor_true" type="radio" name="codeGen.isNeedAdminInterceptor"   value="true"/>
+						<label for="r_isNeedAdminInterceptor_true">启用</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isNeedAdminInterceptor_false" type="radio" name="codeGen.isNeedAdminInterceptor"   value="false"/>
+						<label for="r_isNeedAdminInterceptor_false">不启用</label>
+					</div>
+					<small class="text-danger">注意：启用后台权限拦截器，会在这次生成的Controller类中添加@Before(JBoltAdminAuthInterceptor.class)注解</small>
+				</div>
+			</div>
+
+		</form>
+	</div>
+</div>

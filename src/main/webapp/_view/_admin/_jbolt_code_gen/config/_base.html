@@ -1,0 +1,246 @@
+<div class="card jb_vflex">
+	<div class="card-header jb_vheader_card">
+		<button onclick="ajaxSubmitForm('codeGenBaseForm',function(res){AjaxPortalUtil.refresh('#codegen_table_preview_portal_#(pageId),#codegen_form_preview_portal_#(pageId)');})" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> 保存配置</button>
+		<button class="btn btn-info btn-sm" data-dialogbtn data-area="100%,100%" data-title="系统字典管理" data-btn="close" data-url="admin/dictionary"><i class="fa fa-cogs"></i> 字典数据管理</button>
+	</div>
+	<div class="card-body jb_vbody">
+		<form class="form" onsubmit="return false;" id="codeGenBaseForm" action="admin/codegen/updateBase" method="post">
+			<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+			<div class="form-group row" 
+						data-radio 
+						data-rule="radio"  
+						data-value="#(codeGen.isGenModel?? 'true')" 
+						data-name="codeGen.isGenModel" 
+						data-default="true"
+						data-handler="changeIsGenModel_#(pageId)">
+						<label class="col-sm-3 col-form-label is_required" >是否生成Model</label>
+						<div class="col"  style="padding-top: 1px;">
+							<div class="radio radio-primary  radio-inline">
+								<input  id="r_isGenModel_true" type="radio" name="codeGen.isGenModel"   value="true"/>
+								<label for="r_isGenModel_true">生成Model和BaseModel</label>
+							</div>
+							
+							<div class="radio radio-primary  radio-inline">
+								<input  id="r_isGenModel_false" type="radio" name="codeGen.isGenModel"   value="false"/>
+								<label for="r_isGenModel_false">不生成Model 用Record</label>
+							</div>
+						</div>
+			 </div>
+			 
+			 
+			<div class="form-group row" 
+			    data-radio 
+			    data-rule="radio"  
+			    data-value="#(codeGen.mainTableIdgenmode?? 'auto')" 
+			    data-value-attr="sn"
+			    data-name="codeGen.mainTableIdgenmode" 
+			    data-default="options_first"
+			    data-url="admin/dictionary/options?key=code_gen_idgenmode"
+			    data-label="主键策略"
+			    data-width="col-sm-3,col-9"
+			    data-inline="true"></div>
+			    
+			#if(codeGen.isEditable)   
+			<div class="form-group row" 
+				data-radio 
+				data-rule="radio"  
+				data-value="#(codeGen.editableSubmitType?? 'all')" 
+				data-name="codeGen.editableSubmitType" 
+				data-default="all"
+				>
+				<label class="col-sm-3 col-form-label is_required" >可编辑提交方式</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_est_all" type="radio" name="codeGen.editableSubmitType"   value="all"/>
+						<label for="r_est_all">整体提交</label>
+					</div>
+					
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_est_cell" type="radio" name="codeGen.editableSubmitType"   value="cell"/>
+						<label for="r_est_cell">单元格提交</label>
+					</div>
+				</div>
+		 	</div>
+		 	#end
+
+			<div class="form-group row"
+				 data-radio
+				 data-rule="radio"
+				 data-value="#(codeGen.isCheckCanDelete?? 'false')"
+				 data-name="codeGen.isCheckCanDelete"
+				 data-default="false">
+				<label class="col-sm-3 col-form-label is_required" >检测能否删除</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isCheckCanDelete_true" type="radio" name="codeGen.isCheckCanDelete"   value="true"/>
+						<label for="r_isCheckCanDelete_true">检测</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isCheckCanDelete_false" type="radio" name="codeGen.isCheckCanDelete"   value="false"/>
+						<label for="r_isCheckCanDelete_false">不检测</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group row"
+				 data-radio
+				 data-rule="radio"
+				 data-value="#(codeGen.isCheckCanToggle?? 'false')"
+				 data-name="codeGen.isCheckCanToggle"
+				 data-default="false">
+				<label class="col-sm-3 col-form-label is_required" >检测能否切换Boolean属性</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isCheckCanToggle_true" type="radio" name="codeGen.isCheckCanToggle"   value="true"/>
+						<label for="r_isCheckCanToggle_true">检测</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isCheckCanToggle_false" type="radio" name="codeGen.isCheckCanToggle"   value="false"/>
+						<label for="r_isCheckCanToggle_false">不检测</label>
+					</div>
+				</div>
+			</div>
+
+			#if(hasIsDeletedColumn??)
+			<div class="form-group row"
+				 data-radio
+				 data-rule="radio"
+				 data-value="#(codeGen.isCheckCanRecover?? 'false')"
+				 data-name="codeGen.isCheckCanRecover"
+				 data-default="false">
+				<label class="col-sm-3 col-form-label is_required">检测能否恢复假删数据</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isCheckCanRecover_true" type="radio" name="codeGen.isCheckCanRecover"   value="true"/>
+						<label for="r_isCheckCanRecover_true">检测</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isCheckCanRecover_false" type="radio" name="codeGen.isCheckCanRecover"   value="false"/>
+						<label for="r_isCheckCanRecover_false">不检测</label>
+					</div>
+				</div>
+			</div>
+			#end
+		 	<fieldset class="mt-5 gen_model_box d-none">
+				<hr/>
+				<div class="form-group row">
+					<label class="col-6 col-form-label font-weight-bold text-center" style="font-size: 20px;">Model生成配置</label>
+				</div>
+			    	<div class="form-group row">
+				 		<label class="col-sm-3 col-form-label">Model Package</label>
+				 		<div class="col-sm-4">
+				 			<input type="text" id="codeGenModelPackage_#(pageId)" data-autocomplete data-mustmatch="false" data-url="admin/codegen/javaPackageAutocomplete" data-rule="required" data-notnull="false" data-tips="请输入Model生成到哪个package" class="form-control" name="codeGen.modelPackage" value="#(codeGen.modelPackage??)" autocomplete="off" />
+				 		</div>
+				 	</div>
+				 	<div class="form-group row">
+				 		<label class="col-sm-3 col-form-label">Model Name</label>
+				 		<div class="col-sm-4">
+				 			<input type="text" data-rule="required" readonly="readonly" data-tips="请输入表对应的Model Name" class="form-control"  value="#(codeGen.modelName??)" autocomplete="off" />
+				 		</div>
+				 	</div>
+				 	
+				 	<div class="form-group row">
+				 		<label class="col-sm-3 col-form-label">BaseModel Name</label>
+				 		<div class="col-sm-4">
+				 			<input type="text" data-rule="required" readonly="readonly" data-tips="请输入表对应的BaseModel Name" class="form-control"  value="#(codeGen.baseModelName??)" autocomplete="off" />
+				 		</div>
+				 	</div>
+					<fieldset class="mt-5">
+						<hr/>
+						<div class="form-group row">
+							<label class="col-6 col-form-label font-weight-bold text-center" style="font-size: 20px;">在baseModel中生成字段静态常量</label>
+						</div>
+						<div class="form-group row"
+							 data-radio
+							 data-rule="radio"
+							 data-value="#(codeGen.isBaseModelGenColConstant?? 'true')"
+							 data-name="codeGen.isBaseModelGenColConstant"
+							 data-default="true">
+							<label class="col-sm-3 col-form-label is_required">是否生成常量</label>
+							<div class="col"  style="padding-top: 1px;">
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isBaseModelGenColConstant_true" type="radio" name="codeGen.isBaseModelGenColConstant"   value="true"/>
+									<label for="r_isBaseModelGenColConstant_true">生成</label>
+								</div>
+
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isBaseModelGenColConstant_false" type="radio" name="codeGen.isBaseModelGenColConstant"   value="false"/>
+									<label for="r_isBaseModelGenColConstant_false">不生成</label>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group row"
+							 data-radio
+							 data-rule="radio"
+							 data-value="#(codeGen.isBaseModelGenColConstantToUppercase?? 'true')"
+							 data-name="codeGen.isBaseModelGenColConstantToUppercase"
+							 data-default="true">
+							<label class="col-sm-3 col-form-label is_required">名称转大写</label>
+							<div class="col"  style="padding-top: 1px;">
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isBaseModelGenColConstantTouppercase_true" type="radio" name="codeGen.isBaseModelGenColConstantToUppercase"   value="true"/>
+									<label for="r_isBaseModelGenColConstantTouppercase_true">转</label>
+								</div>
+
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isBaseModelGenColConstantTouppercase_false" type="radio" name="codeGen.isBaseModelGenColConstantToUppercase"   value="false"/>
+									<label for="r_isBaseModelGenColConstantTouppercase_false">不转</label>
+								</div>
+							</div>
+						</div>
+					</fieldset>
+			</fieldset>
+		 	<fieldset class="table_record_config_box mt-5">
+			    <hr/>
+				<div class="form-group row">
+					<label class="col-6 col-form-label font-weight-bold text-center" style="font-size: 20px;">表格中使用Record的配置</label>
+				</div>
+				 	<div class="form-group row" 
+							data-radio 
+							disabled
+							data-rule="radio"  
+							data-value="#(codeGen.isTableUseRecord?? 'false')" 
+							data-name="codeGen.isTableUseRecord" 
+							data-default="false">
+							<label class="col-sm-3 col-form-label is_required" >是否使用Record</label>
+							<div class="col"  style="padding-top: 1px;">
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isTableUseRecord_true" type="radio" name="codeGen.isTableUseRecord"   value="true"/>
+									<label for="r_isTableUseRecord_true">使用</label>
+								</div>
+								
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isTableUseRecord_false" type="radio" name="codeGen.isTableUseRecord"   value="false"/>
+									<label for="r_isTableUseRecord_false">不用</label>
+								</div>
+							</div>
+				 	</div>
+				 	
+				 	<div class="form-group row" 
+							data-radio 
+							data-rule="radio"  
+							data-value="#(codeGen.isTableRecordCamelCase?? 'false')" 
+							data-name="codeGen.isTableRecordCamelCase" 
+							data-default="false">
+							<label class="col-sm-3 col-form-label is_required" >Record属性转驼峰</label>
+							<div class="col"  style="padding-top: 1px;">
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isTableRecordCamelcase_true" type="radio" name="codeGen.isTableRecordCamelCase"   value="true"/>
+									<label for="r_isTableRecordCamelcase_true">属性名转驼峰</label>
+								</div>
+								
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isTableRecordCamelcase_false" type="radio" name="codeGen.isTableRecordCamelCase"   value="false"/>
+									<label for="r_isTableRecordCamelcase_false">保持与数据库列名一致</label>
+								</div>
+							</div>
+				 	</div>
+			</fieldset>
+			
+		</form>
+	</div>
+</div>

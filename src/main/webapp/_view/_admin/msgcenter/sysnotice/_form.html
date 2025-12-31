@@ -1,0 +1,161 @@
+<form onsubmit="return false;" id="sysNoticeForm_#(pageId)" action="#(action)" method="post">
+#if(sysNotice.id??)
+	<input type="hidden" name="sysNotice.id" value="#(sysNotice.id)" />
+#end
+<fieldset>
+<legend>基本信息</legend>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">标题</label>
+		<div class="col">
+			<input type="text" autocomplete="off"  class="form-control" data-with-clearbtn="true"  data-rule="required" placeholder="请输入标题" maxlength="60" name="sysNotice.title" value="#(sysNotice.title??)">
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 col-12">
+		<div class="form-group row" data-radio data-value-attr="sn" data-rule="radio" data-value="#(sysNotice.type??)" data-name="sysNotice.type" data-default="1" data-url="admin/dictionary/options?key=sys_notice_type" data-label="通知类型" data-width="col-sm-4,col" data-inline="true"></div>
+		</div>
+		<div class="col-md-6 col-12">
+		<div class="form-group row" data-radio data-value-attr="sn" data-rule="radio" data-value="#(sysNotice.priorityLevel??)" data-name="sysNotice.priorityLevel" data-default="1" data-url="admin/dictionary/options?key=sys_notice_priority_level" data-label="优先级" data-width="col-sm-4,col" data-inline="true"></div>
+		</div>
+	</div>
+	<div class="form-group row">
+	<label class="col-sm-3 col-form-label is_required">内容</label>
+	<div class="col">
+	<div data-editor="summernote" data-emoji="true" data-height="350" data-hiddeninput="sysNoticeContent_#(pageId)" id="sysNoticeContentEditor_#(pageId)" >#(sysNotice.content??)</div>
+	</div>
+	</div>
+	<textarea id="sysNoticeContent_#(pageId)" autocomplete="off"  class="form-control d-none" data-rule="required" placeholder="请输入消息内容" data-tips="请输入消息内容" maxlength="10000" name="sysNotice.content" >#(sysNotice.content??)</textarea>
+	<div class="form-group d-none">
+		<input id="sysNotice_files_#(pageId)" type="text" autocomplete="off"  class="form-control" data-with-clearbtn="true" placeholder="请输入附件" maxlength="255" name="sysNotice.files" value="#(sysNotice.files??)">
+	</div>
+	</fieldset>
+	<fieldset>
+    <legend>附件上传</legend>
+    <div class="form-group row">
+    <div class="col offset-sm-2">
+		<div class="j_upload_file_box"
+		data-name="file"
+		data-multi="true"
+		data-value-attr="id"
+		data-filebox="filebox_#(pageId)"
+		data-btn-class="btn btn-primary"
+		data-maxsize="20480"
+		data-handler="uploadMultipleFile"
+		data-placeholder="选择附件上传"
+		data-url="admin/sysnotice/uploadFiles"
+		data-hiddeninput="sysNotice_files_#(pageId)"
+		></div>
+		<div class="j_upload_filebox_multi  mt-3">
+			<ul class="j_filebox" id="filebox_#(pageId)"
+				data-remove-confirm="true"
+				data-path-attr="id" ### 指定使用id字段 从json中获取path属性
+				data-url-attr="localUrl"  ### 指定使用localUrl字段 作为url属性
+				data-filename-attr="fileName" ### 指定使用fileName字段作为fileName属性
+				data-files='#json(files,"id,localUrl,fileName")' ### json数据源
+				data-tpl="jbolt_filelist_tpl_#(pageId)" ### 指定使用模板
+			></ul>
+		</div>
+	</div>
+	</div>
+
+<textarea class="jb_tpl_box" id="jbolt_filelist_tpl_#(pageId)">
+{@each datas as data,index}
+{@if data.isImg}
+<li class="file"><a data-imgviewer data-album="${fileboxId}"  data-path="${data.path}" href="${data.url}">${data.fileName}</a><a href="admin/sysnotice/download/${data.path}" target="_blank"><i class="fa fa-download ml-3 text-primary" title="下载"></i></a> <i tooltip title="删除" onclick="removeUploadFileBoxLi(this)" class="fa fa-trash text-danger ml-3"></i>  </li>
+{@else if data.fileSuffix=="pdf"}
+<li class="file"><a data-openpage="dialog" data-area="80%,80%" data-btn="close" href="admin/sysnotice/pdfViewer?file=${data.url}">${data.fileName}</a><a href="admin/sysnotice/download/${data.path}" target="_blank"><i class="fa fa-download ml-3 text-primary" title="下载"></i></a> <i title="删除" onclick="removeUploadFileBoxLi(this)" class="fa fa-trash text-danger ml-3"></i></li>
+{@else}
+<li class="file"><span>${data.fileName}</span><a href="admin/sysnotice/download/${data.path}" target="_blank"><i class="fa fa-download ml-3 text-primary" title="下载"></i></a> <i title="删除" onclick="removeUploadFileBoxLi(this)" class="fa fa-trash text-danger ml-3"></i></li>
+{@/if}
+{@/each}
+</textarea>
+</fieldset>
+	<fieldset>
+    <legend>接收者信息</legend>
+
+	<div class="form-group row" id="receiver_type_#(pageId)" data-handler="changeChooseDialogArea_#(pageId)" data-radio data-value-attr="sn" data-rule="radio" data-value="#(sysNotice.receiverType??)" data-name="sysNotice.receiverType" data-default="1" data-url="admin/dictionary/options?key=sys_notice_receiver_type" data-label="接收人" data-width="col-sm-3,col" data-inline="true"></div>
+	<div class="form-group row" id="choose_type_inputbox_#(pageId)" style="display:none;">
+		<label class="col-sm-3 col-form-label"></label>
+		<div class="col">
+			<div class="input-group ">
+			<input type="text" readonly="readonly" id="choose_type_names_#(pageId)" onclick="g('choose_btn_#(pageId)').click()" autocomplete="off" class="form-control bg-white hand" placeholder="接收人信息" maxlength="1000"  value="#(sysNotice.receiverValues??)">
+			<div class="input-group-append">
+			<a class="input-group-text hand" onclick="clearChooseReceiverType_#(pageId)()" data-title="清空" ><i class="fa fa-trash text-danger"></i></a>
+			<a class="input-group-text hand" data-link-para-ele="#receiver_type_#(pageId),#choose_type_ids_#(pageId)" id="choose_btn_#(pageId)" data-openpage="dialog" data-area="400,600" data-title="选择接收人" href="admin/sysnotice/chooseReceiver"><i class="fa fa-search"></i></a>
+			</div>
+			</div>
+			<input type="hidden" readonly="readonly" id="choose_type_ids_#(pageId)" data-para-name="ids"   name="sysNotice.receiverValue" autocomplete="off"  maxlength="1000"  value="#(sysNotice.receiverValue??)">
+		</div>
+	</div>
+</fieldset>
+
+</form>
+
+#define js()
+<script>
+var choose_type_inputbox_#(pageId) = $("#choose_type_inputbox_#(pageId)");
+var chooseTypeInput_#(pageId) = $("#choose_type_names_#(pageId)");
+var chooseTypeInputHidden_#(pageId) = $("#choose_type_ids_#(pageId)");
+var chooseBtn_#(pageId) = $("#choose_btn_#(pageId)");
+function changeChooseDialogArea_#(pageId)(radio,value){
+	if(value>1){
+		choose_type_inputbox_#(pageId).show();
+	}else{
+		choose_type_inputbox_#(pageId).hide();
+		}
+	switch(value){
+    case '1':
+    	chooseTypeInput_#(pageId).val("");
+    	chooseTypeInputHidden_#(pageId).val("");
+        break;
+    case '2':
+    	chooseBtn_#(pageId).data("area","400,600").attr("data-area","400,600").data("title","请选择角色");
+    	chooseTypeInput_#(pageId).attr("placeholder","请选择角色");
+        break;
+    case '3':
+    	chooseBtn_#(pageId).data("area","900,600").attr("data-area","800,600").data("title","请选择部门");
+    	chooseTypeInput_#(pageId).attr("placeholder","请选择部门");
+        break;
+    case '4':
+    	chooseBtn_#(pageId).data("area","500,600").attr("data-area","400,600").data("title","请选择岗位");
+    	chooseTypeInput_#(pageId).attr("placeholder","请选择岗位");
+        break;
+    case '5':
+    	chooseBtn_#(pageId).data("area","1360,800").attr("data-area","800,600").data("title","请选择用户");
+    	chooseTypeInput_#(pageId).attr("placeholder","请选择用户");
+        break;
+	}
+}
+/**
+ * 清空选择
+ */
+function clearChooseReceiverType_#(pageId)(){
+	chooseTypeInput_#(pageId).val("");
+	chooseTypeInputHidden_#(pageId).val("");
+}
+/**
+ * 提交Form
+ */
+function submitSysNoticeForm_#(pageId)(){
+	LayerMsgBox.confirm("确定提交？",function(){
+		submitThisForm(function(){
+			pageBack("admin/sysnotice");
+		});
+	});
+}
+
+/**
+ * 设置选中的值
+ */
+function setChooseReceiverDatas(ids,names){
+	chooseTypeInputHidden_#(pageId).val(ids);
+	chooseTypeInput_#(pageId).val(names);
+}
+
+$(function(){
+	openLeftNav("admin/sysnotice");
+});
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="sysNoticeForm_"+pageId)
+#end
+

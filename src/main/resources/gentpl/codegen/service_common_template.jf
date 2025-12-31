@@ -1,0 +1,609 @@
+#define s_getAdminDatas()
+#set(cons = "")
+#if(codeGen.isPaginate)
+    #set(cons = "int pageNumber, int pageSize")
+#end
+#if(hasIsKeywordsColumn)
+    #if(cons!="")
+        #set(cons = cons + ", String keywords")
+    #else
+        #set(cons = "String keywords")
+    #end
+#end
+#if(sortableColumns)
+    #if(cons!="")
+         #set(cons = cons + ", String sortColumn, String sortType")
+    #else
+        #set(cons = "String sortColumn, String sortType")
+    #end
+#end
+#if(conditions!=null&&conditions.size()>0)
+     #if(cons!="")
+        #set(cons = cons + ", ")
+     #end
+     #for(con:conditions)
+        #if(con.colName.toLowerCase() !=  "is_deleted")
+        #if(con.searchUiType && con.searchUiType.startsWith("laydate_range_"))
+            #set(cons = cons + "JBoltDateRange " + con.attrName +"Range" + (for.last?"":", "))
+        #else
+            #set(cons = cons + con.javaTypeName + " " + con.attrName + (for.last?"":", "))
+        #end
+        #end
+     #end
+#end
+#if(hasIsDeletedColumn)
+#set(cons = cons + ", Boolean isDeleted")
+#end
+	/**
+	 * 后台管理数据查询
+	 #if(codeGen.isPaginate)
+	 * @param pageNumber 第几页
+	 * @param pageSize   每页几条数据
+     #end
+	 #if(hasIsKeywordsColumn)
+	 * @param keywords   关键词
+	 #end
+	 #if(sortableColumns)
+	 * @param sortColumn  排序列名
+	 * @param sortType  排序方式 asc desc
+	 #end
+	 #if(conditions!=null&&conditions.size()>0)
+     #for(con:conditions)
+     #if(con.colName.toLowerCase() !=  "is_deleted")
+     #if(con.searchUiType && con.searchUiType.startsWith("laydate_range_"))
+     * @param #(con.attrName??)Range #(con.tableLabel?? (con.formLabel?? (con.remark??))) 区间
+     #else
+     * @param #(con.attrName??) #(con.tableLabel?? (con.formLabel?? (con.remark??)))
+     #end
+     #end
+     #end
+     #end
+     #if(hasIsDeletedColumn)
+     * @param isDeleted 是否删除
+     #end
+	 * @return
+	 */
+	public #if(codeGen.isPaginate)Page#else List#end<#(codeGen.modelName)> getAdminDatas(#(cons??)) {
+	    //创建sql对象
+	    Sql sql = selectSql()#if(codeGen.isPaginate).page(pageNumber,pageSize)#end;
+	    #if(conditions!=null&&conditions.size()>0)
+	    //sql条件处理
+        #for(con:conditions)
+        #if(con.colName.toLowerCase() !=  "is_deleted")
+        #if(con.javaType=="java.lang.Boolean" && con.attrLength==1)
+        sql.eqBooleanToChar(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+        #else if(con.searchUiType && con.searchUiType.startsWith("laydate_range_"))
+        sql.betweenDateRange(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName+"Range"));
+        #else if(con.searchUiType && con.searchUiType=="laydate_date")
+        sql.eqDate(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+        #else if(con.searchUiType && con.searchUiType=="laydate_datetime")
+        sql.eqDateTime(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+        #else
+#if(con.isFuzzyQuery??)
+#if(con.fuzzyQueryType??)
+#switch(con.fuzzyQueryType)
+#case("default")
+        sql.like(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+#case("left")
+        sql.leftLike(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+#case("right")
+        sql.rightLike(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+#end
+#else
+        sql.like(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+#end
+#else
+        sql.eq(#(codeGen.modelName).#(con.colName.toUpperCase()),#(con.attrName));
+#end
+        #end
+        #end
+        #end
+        #end
+        #if(hasIsDeletedColumn)
+        sql.eqBooleanToChar(#(codeGen.modelName).IS_DELETED, isDeleted);
+        #end
+        #if(hasIsKeywordsColumn)
+        //关键词模糊查询
+        #if(keywordsSearchColumns.size()>1)
+        #set(likes = "")
+        #for(col:keywordsSearchColumns)
+        #set(likes = likes+codeGen.modelName +"."+ col.colName.toUpperCase() + (for.last?"":", "))
+        #end
+        sql.likeMulti(keywords,#(likes?? '\"\"'));
+        #else
+        sql.like(#(codeGen.modelName).#(keywordsSearchColumns[0].colName.toUpperCase()),keywords);
+        #end
+        #end
+        #if(sortableColumns)
+        //排序
+        sql.orderBy(sortColumn,sortType);
+        #else
+            #if(codeGen.tableDefaultSortColumn && codeGen.tableDefaultSortType)
+        //排序
+        sql.#(codeGen.tableDefaultSortType?? 'desc')(#(codeGen.modelName).#((codeGen.tableDefaultSortColumn?? (codeGen.mainTablePkey?? 'id')).toUpperCase()));
+            #end
+        #end
+		return #if(codeGen.isPaginate)paginate(sql)#else find(sql)#end;
+	}
+#end
+
+#define s_save()
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 保存
+	 * @param #(fctucName)
+	 * @return
+	 */
+	public Ret save(#(codeGen.modelName) #(fctucName)) {
+		if(#(fctucName)==null || isOk(#(fctucName).#(getIdMethodName?? 'getId')())) {
+			return fail(JBoltMsg.PARAM_ERROR);
+		}
+		#if(checkExistsColumns??)
+		#for(cec:checkExistsColumns)
+		#if(cec.colName=="name")
+		if(existsName(#(fctucName).getName())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+		#else if(cec.colName=="sn")
+		if(existsSn(#(fctucName).getSn())) {return fail(JBoltMsg.DATA_SAME_SN_EXIST);}
+		#else
+		if(exists(#(codeGen.modelName).#(cec.colName.toUpperCase()),#(fctucName).get#(firstCharToUpperCase(cec.attrName??))())) {return fail("存在#(cec.formLabel?? (cec.attrName?? cec.colName??))重复数据数据，请更换");}
+		#end
+		#end
+		#else
+		//if(existsName(#(fctucName).getName())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+		#end
+		#if(needSort)
+#if(codeGen.tableOptSortColumn == null || codeGen.tableOptSortColumn=="sort_rank")
+		#(fctucName).setSortRank(getNextSortRank());
+#else
+		#(fctucName).set(#(codeGen.modelName).#(codeGen.tableOptSortColumn.toUpperCase()),getNextSortRank());
+#end
+		#end
+		boolean success=#(fctucName).save();
+		if(success) {
+			//添加日志
+			#if(codeGen.isProjectSystemLog && codeGen.projectSystemLogTargetTypeKeyName!="NONE")
+			addSaveSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(), #(fctucName).getName());
+			#else
+			//addSaveSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(), #(fctucName).getName());
+			#end
+		}
+		return ret(success);
+	}
+#end
+
+#define s_update()
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+#setLocal(dbModelName="db"+codeGen.modelName)
+	/**
+	 * 更新
+	 * @param #(fctucName)
+	 * @return
+	 */
+	public Ret update(#(codeGen.modelName) #(fctucName)) {
+		if(#(fctucName)==null || notOk(#(fctucName).#(getIdMethodName?? 'getId')())) {
+			return fail(JBoltMsg.PARAM_ERROR);
+		}
+		//更新时需要判断数据存在
+		#(codeGen.modelName) #(dbModelName)=findById(#(fctucName).#(getIdMethodName?? 'getId')());
+		if(#(dbModelName)==null) {return fail(JBoltMsg.DATA_NOT_EXIST);}
+		#if(checkExistsColumns??)
+        #for(cec:checkExistsColumns)
+        #if(cec.colName=="name")
+        if(existsName(#(fctucName).getName(), #(fctucName).#(getIdMethodName?? 'getId')())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+        #else if(cec.colName=="sn")
+        if(existsSn(#(fctucName).getSn(), #(fctucName).#(getIdMethodName?? 'getId')())) {return fail(JBoltMsg.DATA_SAME_SN_EXIST);}
+        #else
+        if(exists(#(codeGen.modelName).#(cec.colName.toUpperCase()),#(fctucName).get#(firstCharToUpperCase(cec.attrName??))(), #(fctucName).#(getIdMethodName?? 'getId')())) {return fail("存在#(cec.formLabel?? (cec.attrName?? cec.colName??))重复数据数据，请更换");}
+        #end
+        #end
+        #else
+        //if(existsName(#(fctucName).getName(), #(fctucName).#(getIdMethodName?? 'getId')())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+        #end
+		boolean success=#(fctucName).update();
+		if(success) {
+			//添加日志
+			#if(codeGen.isProjectSystemLog && codeGen.projectSystemLogTargetTypeKeyName!="NONE")
+			addUpdateSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(), #(fctucName).getName());
+			#else
+			//addUpdateSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(), #(fctucName).getName());
+			#end
+		}
+		return ret(success);
+	}
+#end
+
+
+#define s_up()
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 上移
+	 * @param id
+	 * @return
+	 */
+	public Ret up(#(paramIdType?? 'Long') id) {
+		#(codeGen.modelName) #(fctucName)=findById(id);
+		if(#(fctucName)==null){
+			return fail("数据不存在或已被删除");
+		}
+		Integer rank=#(fctucName).getSortRank();
+		if(rank==null||rank<=0){
+			return fail("顺序需要初始化");
+		}
+		if(rank==1){
+			return fail("已经是第一个");
+		}
+		#(codeGen.modelName) up#(codeGen.modelName)=findFirst(Okv.by("sort_rank", rank-1));
+		if(up#(codeGen.modelName)==null){
+			return fail("顺序需要初始化");
+		}
+		#if(codeGen.tableOptSortColumn == null || codeGen.tableOptSortColumn=="sort_rank")
+		up#(codeGen.modelName).setSortRank(rank);
+		#(fctucName).setSortRank(rank-1);
+		#else
+		up#(codeGen.modelName).set(#(codeGen.modelName).#(codeGen.tableOptSortColumn.toUpperCase()),rank);
+		#(fctucName).set(#(codeGen.modelName).#(codeGen.tableOptSortColumn.toUpperCase()),rank-1);
+		#end
+
+		up#(codeGen.modelName).update();
+		#(fctucName).update();
+		return SUCCESS;
+	}
+#end
+
+#define s_down()
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 下移
+	 * @param id
+	 * @return
+	 */
+	public Ret down(#(paramIdType?? 'Long') id) {
+		#(codeGen.modelName) #(fctucName)=findById(id);
+		if(#(fctucName)==null){
+			return fail("数据不存在或已被删除");
+		}
+		Integer rank=#(fctucName).getSortRank();
+		if(rank==null||rank<=0){
+			return fail("顺序需要初始化");
+		}
+		int max=getCount();
+		if(rank==max){
+			return fail("已经是最后一个");
+		}
+		#(codeGen.modelName) up#(codeGen.modelName)=findFirst(Okv.by("sort_rank", rank+1));
+		if(up#(codeGen.modelName)==null){
+			return fail("顺序需要初始化");
+		}
+		#if(codeGen.tableOptSortColumn == null || codeGen.tableOptSortColumn=="sort_rank")
+		up#(codeGen.modelName).setSortRank(rank);
+		#(fctucName).setSortRank(rank+1);
+		#else
+		up#(codeGen.modelName).set(#(codeGen.modelName).#(codeGen.tableOptSortColumn.toUpperCase()),rank);
+		#(fctucName).set(#(codeGen.modelName).#(codeGen.tableOptSortColumn.toUpperCase()),rank+1);
+		#end
+
+		up#(codeGen.modelName).update();
+		#(fctucName).update();
+		return SUCCESS;
+	}
+#end
+
+
+#define s_tree()
+	public List<#(codeGen.modelName)> getTreeDatas(){
+		List<#(codeGen.modelName)> datas=find(selectSql());
+		return convertToModelTree(datas, "#(codeGen.mainTablePkey?? 'id')", "pid", (p)->notOk(p.getPid()));
+	}
+#end
+
+#define s_exportExcel(headers)
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+    /**
+	 * 生成要导出的Excel
+	 * @return
+	 */
+	public JBoltExcel exportExcel(List<#(codeGen.modelName)> datas) {
+	    return JBoltExcel
+			    //创建
+			    .create()
+    		    //设置工作表
+    		    .setSheets(
+    				//设置工作表 列映射 顺序 标题名称
+    				JBoltExcelSheet
+    				.create()
+    				//表头映射关系
+    				 #if(headers??)
+                    .setHeaders(1,
+                            #for(header:headers)
+                            #if(for.last)
+                            JBoltExcelHeader.create("#(header.colName??)","#(header.tableLabel?? (header.remark?? (header.attrName?? (header.colName??))))",15)
+                            #else
+                            JBoltExcelHeader.create("#(header.colName??)","#(header.tableLabel?? (header.remark?? (header.attrName?? (header.colName??))))",15),
+                            #end
+                            #end
+                            )
+                    #end
+    		    	//设置导出的数据源 来自于数据库查询出来的Model List
+    		    	.setModelDatas(2,datas)
+    		    );
+	}
+#end
+
+
+#define s_importExcel(headers)
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+    /**
+	 * 读取excel文件
+	 * @param file
+	 * @return
+	 */
+	public Ret importExcel(File file) {
+		StringBuilder errorMsg=new StringBuilder();
+		JBoltExcel jBoltExcel=JBoltExcel
+		//从excel文件创建JBoltExcel实例
+		.from(file)
+		//设置工作表信息
+		.setSheets(
+				JBoltExcelSheet.create()
+				//设置列映射 顺序 标题名称
+				 #if(headers??)
+                .setHeaders(1,
+                        #for(header:headers)
+                        #if(for.last)
+                        JBoltExcelHeader.create("#(header.colName??)","#(header.tableLabel?? (header.remark?? (header.attrName?? (header.colName??))))")
+                        #else
+                        JBoltExcelHeader.create("#(header.colName??)","#(header.tableLabel?? (header.remark?? (header.attrName?? (header.colName??))))"),
+                        #end
+                        #end
+                        )
+                #end
+				//从第三行开始读取
+				.setDataStartRow(2)
+				);
+		//从指定的sheet工作表里读取数据
+		List<#(codeGen.modelName)> #(fctucName)s=JBoltExcelUtil.readModels(jBoltExcel,1, #(codeGen.modelName).class,errorMsg);
+		if(notOk(#(fctucName)s)) {
+			if(errorMsg.length()>0) {
+				return fail(errorMsg.toString());
+			}else {
+				return fail(JBoltMsg.DATA_IMPORT_FAIL_EMPTY);
+			}
+		}
+		//执行批量操作
+		boolean success=tx(new IAtom() {
+			@Override
+			public boolean run() throws SQLException {
+				batchSave(#(fctucName)s);
+				return true;
+			}
+		});
+
+		if(!success) {
+			return fail(JBoltMsg.DATA_IMPORT_FAIL);
+		}
+		return SUCCESS;
+	}
+#end
+
+#define s_getImportExcelTpl(headers)
+	/**
+     * 生成excel导入使用的模板
+     * @return
+     */
+    public JBoltExcel getImportExcelTpl() {
+        return JBoltExcel
+                //创建
+                .create()
+                .setSheets(
+                        JBoltExcelSheet.create()
+                        //设置列映射 顺序 标题名称 不处理别名
+                        #if(headers??)
+                        .setHeaders(1,false,
+                                #for(header:headers)
+                                #if(for.last)
+                                JBoltExcelHeader.create("#(header.tableLabel?? (header.remark?? (header.attrName?? (header.colName??))))",15)
+                                #else
+                                JBoltExcelHeader.create("#(header.tableLabel?? (header.remark?? (header.attrName?? (header.colName??))))",15),
+                                #end
+                                #end
+                                )
+                        #end
+                    );
+    }
+#end
+
+
+#define s_initSortRank()
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 初始化排序
+	 */
+	public Ret initSortRank(){
+		List<#(codeGen.modelName)> allList=findAll();
+		if(allList.size()>0){
+			for(int i=0;i<allList.size();i++){
+#if(codeGen.tableOptSortColumn == null || codeGen.tableOptSortColumn=="sort_rank")
+				allList.get(i).setSortRank(i+1);
+#else
+				allList.get(i).set(#(codeGen.modelName).#(codeGen.tableOptSortColumn.toUpperCase()),i+1);
+#end
+			}
+			batchUpdate(allList);
+		}
+		//添加日志
+		#if(codeGen.isProjectSystemLog && codeGen.projectSystemLogTargetTypeKeyName!="NONE")
+		addUpdateSystemLog(null, JBoltUserKit.getUserId(), "所有数据", "的顺序:初始化所有");
+		#else
+		//addUpdateSystemLog(null, JBoltUserKit.getUserId(), "所有数据", "的顺序:初始化所有");
+		#end
+		return SUCCESS;
+	}
+#end
+
+#define s_afterToggleBoolean(toggleColumns)
+#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * toggle操作执行后的回调处理
+	 */
+	@Override
+	protected String afterToggleBoolean(#(codeGen.modelName) #(fctucName), String column, Kv kv) {
+		#if(codeGen.isProjectSystemLog && codeGen.projectSystemLogTargetTypeKeyName!="NONE")
+		addUpdateSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(), #(fctucName).getName(),"的字段["+column+"]值:"+#(fctucName).get(column));
+		#else
+		//addUpdateSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(), #(fctucName).getName(),"的字段["+column+"]值:"+#(fctucName).get(column));
+		#end
+		#if(toggleColumns)
+		/**
+		switch(column){
+            #for(col:toggleColumns)
+		    case "#(col??)":
+		        break;
+		    #end
+		}
+		*/
+		#end
+		return null;
+	}
+#end
+#define s_afterDelete()
+  #setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 删除数据后执行的回调
+	 * @param #(fctucName) 要删除的model
+	 * @param kv 携带额外参数一般用不上
+	 * @return
+	 */
+	@Override
+	protected String afterDelete(#(codeGen.modelName) #(fctucName), Kv kv) {
+		#if(codeGen.isProjectSystemLog && codeGen.projectSystemLogTargetTypeKeyName!="NONE")
+		addDeleteSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(),#(fctucName).getName());
+		#else
+		//addDeleteSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(),#(fctucName).getName());
+		#end
+		return null;
+	}
+#end
+
+#define s_afterRecover()
+  #setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 恢复假删数据后执行的回调
+	 * @param #(fctucName) 要恢复的model
+	 * @return
+	 */
+	@Override
+	protected String afterRecover(#(codeGen.modelName) #(fctucName)) {
+		#if(codeGen.isProjectSystemLog && codeGen.projectSystemLogTargetTypeKeyName!="NONE")
+		addRecoverSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(),#(fctucName).getName());
+		#else
+		//addRecoverSystemLog(#(fctucName).#(getIdMethodName?? 'getId')(), JBoltUserKit.getUserId(),#(fctucName).getName());
+		#end
+		return null;
+	}
+#end
+#define s_checkCanToggle()
+  #setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 检测是否可以toggle操作指定列
+	 * @param #(fctucName) 要toggle的model
+	 * @param column 操作的哪一列
+	 * @param kv 携带额外参数一般用不上
+	 * @return
+	 */
+	@Override
+	public String checkCanToggle(#(codeGen.modelName) #(fctucName),String column, Kv kv) {
+		//没有问题就返回null  有问题就返回提示string 字符串
+		return null;
+	}
+#end
+
+#define s_checkCanRecover()
+  #setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 检测是否可以恢复假删数据
+	 * @param #(fctucName) 要恢复的model
+	 * @return
+	 */
+	@Override
+	public String checkCanRecover(#(codeGen.modelName) #(fctucName)) {
+		//没有问题就返回null  有问题就返回提示string 字符串
+		return null;
+	}
+#end
+
+#define s_checkCanDelete()
+  #setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 检测是否可以删除
+	 * @param #(fctucName) 要删除的model
+	 * @param kv 携带额外参数一般用不上
+	 * @return
+	 */
+	@Override
+	public String checkCanDelete(#(codeGen.modelName) #(fctucName), Kv kv) {
+		//如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
+		return checkInUse(#(fctucName), kv);
+	}
+#end
+
+#define s_checkInUse()
+  #setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+	/**
+	 * 检测是否可以删除
+	 * @param #(fctucName) model
+	 * @param kv 携带额外参数一般用不上
+	 * @return
+	 */
+	@Override
+	public String checkInUse(#(codeGen.modelName) #(fctucName), Kv kv) {
+		//这里用来覆盖 检测#(modelName)是否被其它表引用
+		return null;
+	}
+#end
+
+#define s_genOtherMethod(method)
+    public Ret #(method.name)(){
+		//TODO 请实现业务逻辑代码
+		return SUCCESS;
+	}
+#end
+#define genServiceMethod(method)
+	#switch(method.name)
+		#case("getAdminDatas")
+           #@s_getAdminDatas()
+		#case("save")
+			#@s_save()
+		#case("update")
+			#@s_update()
+		#case("checkCanDelete")
+			#@s_checkCanDelete()
+		#case("checkCanToggle")
+			#@s_checkCanToggle()
+		#case("checkCanRecover")
+        	#@s_checkCanRecover()
+		#case("checkInUse")
+			#@s_checkInUse()
+		#case("afterToggleBoolean")
+			#@s_afterToggleBoolean(method.toggleColumns)
+		#case("afterDelete")
+			#@s_afterDelete()
+		#case("afterRecover")
+        	#@s_afterRecover()
+		#case("up")
+			#@s_up()
+		#case("down")
+			#@s_down()
+		#case("initSortRank")
+			#@s_initSortRank()
+        #case("getImportExcelTpl")
+            #@s_getImportExcelTpl(method.headers)
+        #case("importExcel")
+            #@s_importExcel(method.headers)
+        #case("exportExcel")
+            #@s_exportExcel(method.headers)
+		#case("tree")
+			#@s_tree()
+		#default
+			#@s_genOtherMethod(method)
+	#end
+#end

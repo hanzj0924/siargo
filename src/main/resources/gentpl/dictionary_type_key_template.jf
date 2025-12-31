@@ -1,0 +1,13 @@
+package cn.jbolt._admin.dictionary;
+/**
+ * 基于生成器生成
+ * 系统字典类型typeKey
+ **/
+public enum DictionaryTypeKey {
+#for(type:types)
+    /**
+     * #(type.name)
+     */
+    #(type.typeKey)#if((for.first&&for.last) || for.last);#else ,#end
+#end
+}

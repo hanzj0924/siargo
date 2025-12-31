@@ -1,0 +1,146 @@
+<script>
+needPjax=false;
+var _submit_ing=false;
+function submitThisForm#(randomFunctionName??)(successCallback){
+	if(_submit_ing){
+		return false;
+	}
+	var formId="#(formId)";
+	var form=$("#"+formId);
+	if(notOk(form)){
+		LayerMsgBox.alert("指定的formId无效，找不到对应表单",2);
+		return false;
+	}
+	if(form.data("submiting")){
+		return false;
+	}
+	changeParentLayerDialogOkBtnStateToSubmiting();
+	changeParentLayerAllDialogBtnStateToDisabled();
+	_submit_ing=true;
+	changeLayerDialogFormSubmiting(form);
+	if(FormChecker.check(form)){
+		if(window.beforeFormSubmit#(randomFunctionName??)){
+			var ret=beforeFormSubmit#(randomFunctionName??)();
+			if(ret==false){
+				_submit_ing=false;
+				cancelLayerDialogFormSubmiting(form);
+				cancelParentLayerDialogOkBtnStateToSubmiting();
+				cancelParentLayerAllDialogBtnStateToDisabled();
+				return false;
+			}
+		}
+		var url = actionUrl(form.attr("action"));
+		LayerMsgBox.loading("正在提交...",10000);
+		form.ajaxSubmit({
+			type:"post",
+			url:url,
+			success:function(ret){
+				if(ret.state==="ok" || ret.state==="warn"){
+					if(window.afterFormSubmit#(randomFunctionName??)){
+						afterFormSubmit#(randomFunctionName??)(ret,function(){
+                            if(ret.state==="warn"){
+                                LayerMsgBox.warning(ret.msg || "服务端Warning!",function (){
+                                    _submit_ing=false;
+                                    cancelLayerDialogFormSubmiting(form);
+                                    cancelParentLayerDialogOkBtnStateToSubmiting();
+                                    cancelParentLayerAllDialogBtnStateToDisabled();
+                                    if(successCallback){
+                                        successCallback();
+                                    }
+                                });
+                            }else{
+                                LayerMsgBox.success(ret.msg,500,function(){
+                                    _submit_ing=false;
+                                    cancelLayerDialogFormSubmiting(form);
+                                    cancelParentLayerDialogOkBtnStateToSubmiting();
+                                    cancelParentLayerAllDialogBtnStateToDisabled();
+                                    if(successCallback){
+                                        successCallback();
+                                    }
+                                });
+                            }
+
+						});
+					}else{
+                        if(ret.state==="warn") {
+                            LayerMsgBox.warning(ret.msg || "服务端Warning!",function(){
+                                _submit_ing = false;
+                                cancelLayerDialogFormSubmiting(form);
+                                cancelParentLayerDialogOkBtnStateToSubmiting();
+                                cancelParentLayerAllDialogBtnStateToDisabled();
+                                if(warningCallback){
+                                    warningCallback();
+                                }else{
+                                    if(successCallback){
+                                        successCallback();
+                                    }
+                                }
+                            });
+
+                        }else {
+                            LayerMsgBox.success(ret.msg, 500, function () {
+                                _submit_ing = false;
+                                cancelLayerDialogFormSubmiting(form);
+                                cancelParentLayerDialogOkBtnStateToSubmiting();
+                                cancelParentLayerAllDialogBtnStateToDisabled();
+                                if (successCallback) {
+                                    successCallback();
+                                }
+                            });
+                        }
+					}
+
+				}else{
+					_submit_ing=false;
+					cancelLayerDialogFormSubmiting(form);
+                    cancelParentLayerDialogOkBtnStateToSubmiting();
+                    cancelParentLayerAllDialogBtnStateToDisabled();
+					if(ret.msg){
+						if(ret.msg==="jbolt_system_locked"){
+							showJboltLockSystem();
+						}else if(ret.msg==="jbolt_nologin"){
+							showReloginDialog(true,true,function(){});
+						}else{
+                            LayerMsgBox.alert(ret.msg,2);
+                        }
+                        return false;
+                    }
+					if(window.afterFormSubmit#(randomFunctionName??)){
+						afterFormSubmit#(randomFunctionName??)(ret,function(){
+							cancelParentLayerDialogOkBtnStateToSubmiting();
+							cancelParentLayerAllDialogBtnStateToDisabled();
+							if(ret.msg){
+								LayerMsgBox.alert(ret.msg,2);
+							}else{
+								LayerMsgBox.error("操作异常",1500);
+							}
+						});
+					}else{
+						cancelParentLayerDialogOkBtnStateToSubmiting();
+						cancelParentLayerAllDialogBtnStateToDisabled();
+						if(ret.msg){
+							LayerMsgBox.alert(ret.msg,2);
+						}else{
+							LayerMsgBox.error("操作异常",1500);
+						}
+					}
+
+				}
+			},
+			error:function(){
+				LayerMsgBox.error("发生异常",1500,function(){
+					_submit_ing=false;
+					cancelLayerDialogFormSubmiting(form);
+					cancelParentLayerDialogOkBtnStateToSubmiting();
+					cancelParentLayerAllDialogBtnStateToDisabled();
+					});
+				}
+		});
+	}else{
+		_submit_ing=false;
+		cancelLayerDialogFormSubmiting(form);
+		cancelParentLayerDialogAllBtnStateToSubmiting();
+        cancelParentLayerAllDialogBtnStateToDisabled();
+	}
+}
+</script>

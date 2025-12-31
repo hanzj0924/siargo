@@ -1,0 +1,43 @@
+package #(targetPackageName);
+
+#if(mainLogicBean.needPaginate)
+import com.jfinal.plugin.activerecord.Page;
+#if(mainLogicBean.needSort || mainLogicBean.hasPid)
+import java.util.List;
+#end
+#else
+import java.util.List;
+#end
+import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
+import cn.jbolt.core.service.base.JBoltBaseService;
+#if(mainLogicBean.projectSystemLogTargetType && mainLogicBean.projectSystemLogTargetType!="ProjectSystemLogTargetType.NONE")
+import cn.jbolt.core.kit.JBoltUserKit;
+#end
+#if(mainLogicBean.isCRUD)
+import com.jfinal.kit.Kv;
+import com.jfinal.kit.Okv;
+import com.jfinal.kit.Ret;
+import com.jfinal.plugin.activerecord.Db;
+import cn.jbolt.core.base.JBoltMsg;
+#end
+import #(modelImport);
+/**
+ * #(mainLogicBean.pageTitle??) Service
+ * @ClassName: #(serviceName??)   
+ * @author: #(author?? 'JBolt-Generator')
+ * @date: #date()  
+ */
+public class #(serviceName) extends JBoltBaseService<#(modelName)> {
+	private final #(modelName) dao=new #(modelName)().dao();
+	@Override
+	protected #(modelName) dao() {
+		return dao;
+	}
+		
+#if(methods!=null&&methods.size()>0)
+	#for(method:methods)
+	#@genServiceMethod(method,modelName,mainLogicBean)
+	
+	#end
+#end
+}

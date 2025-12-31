@@ -1,0 +1,74 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="jbicon2 jbi-solution"></i> 用户管理</h1>
+	<span> #(pageData.totalRow?? 0) 条记录</span>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="adminUserForm" action="admin/user" data-pjaxsubmit  method="get">
+		<input type="text" autocomplete="off"  class="form-control" placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+		<button type="submit" class="btn btn-outline-secondary catdata_table_searchbtn" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+		<button data-area="980,600" data-scroll="yes" data-handler="refreshPjaxContainer" data-title="新增内部人员账户" data-url="admin/user/add" class="jbolt_table_addbtn btn btn-outline-secondary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<table class="table-center thead_font_normal"
+data-jbolttable
+data-width="fill"
+data-height="fill"
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="9,10"
+ data-page="adminUserPage"
+>
+<thead>
+<tr><th data-width="60" data-column="index">序号</th><th data-width="150"  data-nochange>姓名</th><th data-width="120"  data-nochange>头像</th><th data-width="80"  data-nochange>性别</th><th data-width="150"  data-nochange>角色</th><th >用户名</th><th >手机号</th><th data-width="120"  data-nochange>是否为超管</th><th data-width="120"  data-nochange>是否启用</th><th data-width="120" data-nochange>操作</th></tr>
+</thead>
+<tbody>
+#for(data:pageData.list??)
+<tr>
+<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+<td>#(data.name??)</td>
+<td><img  data-photobtn tooltip data-title="点击查看大图" style="width: 60px;height: 60px;border-radius:50%;" src="#realImage(data.avatar??,'assets/img/avatar.jpg')" onerror="this.src='assets/img/avatar.jpg'"/></td>
+<td>#sex(data.sex??,2)</td>
+<td>
+#setLocal(userRoles=JBoltRoleCache.getRoles(data.roles))
+#for(role:userRoles)
+<span class="badge badge-info d-block my-1">#(role.name??)</span>
+#else
+<span class="badge badge-default">未设置</span>
+#end
+
+</td>
+<td>#(data.username??)</td>
+<td>#(data.phone??)</td>
+<td>#(data.isSystemAdmin?'<span class="badge badge-primary">超级管理员</span>':'<span class="badge badge-dark">一般用户</span>')</td>
+<td>
+<img data-switchbtn data-value="#(data.enable?? false)"  data-url="admin/user/toggleEnable/#(data.id)"/></td>
+<td>
+<a  tooltip  title="编辑"  href="admin/user/edit/#(data.id)" data-scroll="yes" data-handler="refreshPjaxContainer" data-title="编辑" data-area="980,600" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="重置密码"  href="admin/user/editpwd/#(data.id)" data-scroll="yes" data-handler="LayerMsgBox.success('重置成功',1000)" data-title="重置[#(data.name)]密码" data-area="700,300" class="jbolt_table_editbtn"><i class="fa fa-key c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/user/delete/#(data.id)" data-handler="removeTr" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+#end
+</tbody>
+</table>	
+#include("/_view/_admin/common/_jbolt_table_page.html",pageEleId="adminUserPage")
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+	initPage("adminUserPage",#(pageData.totalPage??),#(pageData.pageNumber??),"adminUserForm");
+});
+</script>
+#end
+

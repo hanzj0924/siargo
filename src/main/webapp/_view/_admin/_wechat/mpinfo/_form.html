@@ -1,0 +1,107 @@
+<div class="row">
+<div class="col">
+<form onsubmit="return false;" id="wechatMpinfoForm" action="#(action)" method="post">
+	#if(wechatMpinfo.id??)
+		<input type="hidden" name="wechatMpinfo.id" value="#(wechatMpinfo.id)" />
+	#end
+	<input type="hidden" name="wechatMpinfo.logo" id="mpLogoInput" value="#(wechatMpinfo.logo??)" class="form-control"/>
+	<input type="hidden" name="wechatMpinfo.qrcode" id="mpQrcodeInput" value="#(wechatMpinfo.qrcode??)" class="form-control"/>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">名称</label>
+		<div class="col">
+			<input type="text" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入公众平台名称" data-tips="请输入公众平台名称" maxlength="20" name="wechatMpinfo.name" value="#(wechatMpinfo.name??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">微信号</label>
+		<div class="col">
+			<input type="text" autocomplete="off"  class="form-control"  placeholder="请输入公众平台微信号"   maxlength="40" name="wechatMpinfo.wechatId" value="#(wechatMpinfo.wechatId??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">简介</label>
+		<div class="col">
+			<textarea   class="form-control"  placeholder="请输入公众平台简介"   maxlength="255" name="wechatMpinfo.briefInfo" style="height:80px">#(wechatMpinfo.briefInfo??)</textarea>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">备注</label>
+		<div class="col">
+			<textarea   class="form-control"  placeholder="请输入备注信息  200字内"  maxlength="200" name="wechatMpinfo.remark" style="height:60px">#(wechatMpinfo.remark??)</textarea>
+		</div>
+	</div>
+		<div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(wechatMpinfo.type??)" 
+		data-name="wechatMpinfo.type" 
+		data-default="options_first"
+		data-url="admin/wechat/mpinfo/typeOptions"
+		data-label="平台类型"
+		data-width="col-sm-3,col"
+		data-inline="true"
+		>
+		</div>
+		<div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(wechatMpinfo.subjectType??)" 
+		data-name="wechatMpinfo.subjectType" 
+		data-default="options_first"
+		data-url="admin/wechat/mpinfo/subjectTypeOptions"
+		data-label="主体类型"
+		data-width="col-sm-3,col"
+		data-inline="true"
+		>
+		</div>
+		
+	
+	<div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(wechatMpinfo.isAuthenticated??)" 
+		data-name="wechatMpinfo.isAuthenticated" 
+		data-default="false"
+		data-url="admin/wechat/mpinfo/isAuthenticatedOptions"
+		data-label="是否认证"
+		data-width="col-sm-3,col"
+		data-inline="true"
+		>
+		</div>
+	<!-- <div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(wechatMpinfo.enable??)" 
+		data-name="wechatMpinfo.enable" 
+		data-default="true"
+		data-url="admin/wechat/mpinfo/enableOptions"
+		data-label="是否启用："
+		data-width="col-sm-3,col"
+		data-inline="true"
+		>
+		</div> -->
+	</form>
+	</div>
+	<div class="col-sm-auto col-md-4">
+	<fieldset class="form-page-fieldset">
+	<legend>头像LOGO</legend>
+	<div class="form-group text-center">
+			<div class="j_img_uploder" data-url="admin/wechat/mpinfo/uploadImage" data-value="#realImage(wechatMpinfo.logo??)"  data-handler="uploadFile"  data-hiddeninput="mpLogoInput"  data-area="150,150" data-maxsize="200"></div>
+	</div>
+	</fieldset>
+	<fieldset class="form-page-fieldset">
+	<legend>二维码</legend>
+	<div class="form-group text-center">
+			<div class="j_img_uploder" data-url="admin/wechat/mpinfo/uploadImage" data-value="#realImage(wechatMpinfo.qrcode??)"  data-handler="uploadFile"  data-hiddeninput="mpQrcodeInput"  data-area="150,150" data-maxsize="200"></div>
+	</div>
+	</fieldset>
+	</div>
+</div>
+	
+
+
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="wechatMpinfoForm")
+#end

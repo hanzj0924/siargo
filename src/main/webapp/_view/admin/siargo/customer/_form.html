@@ -1,0 +1,20 @@
+<form onsubmit="return false;" id="customerForm" action="#(action)" method="post">
+<input type="hidden" name="customer.id" value="#(customer.id??)" />
+<div class="row">
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">客户名称</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入客户名称" maxlength="50" name="customer.name" value="#(customer.name??)"/>
+		</div>
+	</div>
+	</div>
+</div>
+
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="customerForm")
+#end
+

@@ -1,0 +1,67 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="role_rowtpl_tr_#(pageId)">
+<tr data-id="${id}"  data-pid="${pid}" data-text="${name}">
+<td>${name}</td>
+</tr>
+{@if items&&items.length>0}
+{@each items as son}
+{@include "#role_rowtpl_tr_#(pageId)",son}
+{@/each}
+{@/if}
+</script>
+<script type="text/template" id="role_rowtpl_#(pageId)">
+{@each datas as data,index}
+{# 先循环第一级}
+{@include "#role_rowtpl_tr_#(pageId)",data}
+{@/each}
+</script>
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+data-jbolttable 
+id="choose_roles_table_#(pageId)"
+data-column-prepend="1:checkbox:true"
+data-ajax="true"
+data-url="admin/role/datas"
+data-treetable="all:2"
+data-rowtpl="role_rowtpl_#(pageId)"
+data-ajax-success-handler="ajaxSuccessHandler_#(pageId)"
+>
+<thead class="fw-normal">
+<tr><th data-min-width="300">角色</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+#end
+#define js()
+<script type="text/javascript">
+var _submit_ing=false;
+function submitThisForm(){
+	if(_submit_ing){
+		return false;
+	}
+	_submit_ing=true;
+	var checkedIds   = getJboltTableCheckedIds("choose_roles_table_#(pageId)");
+	var checkedNames = getJboltTableCheckedTexts("choose_roles_table_#(pageId)");
+	if(isOk(checkedIds)&&isOk(checkedNames)){
+		 parent.setChooseReceiverDatas(checkedIds,checkedNames);
+		 parent.layer.closeAll();
+	}
+	_submit_ing=false;
+}
+
+function ajaxSuccessHandler_#(pageId)(table){
+    var ids = "#(ids??)";
+    if(ids){
+        table.me.setCheckedIds(table,ids.split(","));
+    }
+}
+</script>
+#end

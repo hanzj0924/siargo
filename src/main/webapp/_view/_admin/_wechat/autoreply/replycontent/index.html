@@ -1,0 +1,107 @@
+#@adminDialogLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-sm-auto">
+	<h1>回复内容管理</h1>
+	<span> #(datas.size()) 条记录</span>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="wechatReplyContentForm" action="admin/wechat/replycontent/#(autoReplyId?? 0)"   method="post"></form>
+	</div>
+	<div class="col-sm-auto">
+	<div class="btn btn-group">
+	<button data-dialogbtn data-area="90%,90%" data-scroll="yes" data-handler="reloadCurrentPage" data-title="新增回复内容" data-url="admin/wechat/replycontent/add/#(autoReplyId?? 0)" class="btn btn-outline-success btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+	<button data-ajaxbtn data-confirm="确认初始化本页所有回复内容的顺序吗？" data-handler="optSuccess" data-title="初始化排序" data-url="admin/wechat/replycontent/initRank/#(autoReplyId?? 0)" class="btn btn-outline-primary btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+	</div>
+	</div>
+	</div>
+ 
+
+</div>
+<div class="jbolt_page_content">
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-striped table-center">
+<thead>
+<tr><th style="width: 60px">序号</th><th>类型</th><th>内容</th><th>是否启用</th><th>创建时间</th><th  style="width: 160px">操作</th></tr>
+</thead>
+<tbody>
+#for(data:datas??)
+<tr>
+<td>#(for.count)</td>
+<td>
+#switch (data.type)
+#case (WechatReplyContentType.TEXT.value)
+<label class="badge badge-warning">文本</label>
+#case (WechatReplyContentType.IMG.value)
+<label class="badge badge-primary">图片</label>
+#case (WechatReplyContentType.VIDEO.value)
+<label class="badge badge-light">视频</label>
+#case (WechatReplyContentType.VOICE.value)
+<label class="badge badge-info">语音</label>
+#case (WechatReplyContentType.MUSIC.value)
+<label class="badge badge-success">音乐</label>
+#case (WechatReplyContentType.NEWS.value)
+<label class="badge badge-danger">图文</label>
+#default
+未设置
+#end
+</td>
+<td>
+#switch (data.type)
+#case (WechatReplyContentType.TEXT.value)
+#(data.content??)
+#case (WechatReplyContentType.IMG.value)
+<img src="#realImage(data.url??,'/assets/img/uploadimg.png')" data-title="点击看大图" tooltip  data-photobtn style="max-height: 200px;"/>
+#case (WechatReplyContentType.VIDEO.value)
+<a target="_blank" href="#(data.url??)">#(data.title)</a>
+#case (WechatReplyContentType.VOICE.value)
+<audio src="#realUrl(data.url??)" controls="controls">您的浏览器不支持 audio 标签</audio>
+<p class="text-primary text-center">#(data.title)</p>
+#case (WechatReplyContentType.MUSIC.value)
+#(data.title)<br/>
+<audio src="#(data.url??)" controls="controls">您的浏览器不支持 audio 标签</audio>
+#case (WechatReplyContentType.NEWS.value)
+<a class="card col-8 offset-2 py-2 hand" tooltip data-title="预览文章详情" target="_blank"  href="#(data.url??)">
+    <img src="#realImage(data.poster??, '/assets/img/uploadimg.png')" style="max-height:190px;" class="card-img-top">
+    <div class="card-body">
+      <h5 class="card-title">#(data.title??)</h5>
+      <p class="card-text">#(data.content??)</p>
+    </div>
+  </a>
+#default
+无
+#end
+ 
+</td>
+<td style="width: 100px"><img data-switchbtn data-value="#(data.enable?? false)" data-url="admin/wechat/replycontent/toggleEnable/#(autoReplyId?? 0)-#(data.id)"  /></td>
+<td style="width: 160px">#date(data.createTime,"yyyy-MM-dd HH:mm:ss")</td>
+<td style="width: 100px">
+<a  tooltip  title="编辑"  href="admin/wechat/replycontent/edit/#(autoReplyId?? 0)-#(data.id)" data-scroll="yes" data-handler="reloadCurrentPage" data-title="编辑" data-area="90%,90%" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/wechat/replycontent/delete/#(autoReplyId?? 0)-#(data.id)" data-handler="removeTr" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+
+ <a href="admin/wechat/replycontent/up/#(autoReplyId?? 0)-#(data.id)" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+ <a href="admin/wechat/replycontent/down/#(autoReplyId?? 0)-#(data.id)" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+                    
+</td>
+</tr>
+#end
+</tbody>
+</table>
+</div>
+</div>
+</div>
+#end
+#define js()
+<script>
+function optSuccess(){
+	LayerMsgBox.success("操作成功",500,function(){
+		reloadCurrentPage();
+		});
+}
+$(function(){
+});
+</script>
+#end
+

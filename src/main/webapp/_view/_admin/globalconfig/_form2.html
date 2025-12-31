@@ -1,0 +1,68 @@
+<form onsubmit="return false;" id="globalConfigForm" action="#(action)" method="post">
+	#if(globalConfig.id??)
+		<input type="hidden" name="globalConfig.id" value="#(globalConfig.id)" />
+		<input type="hidden" name="globalConfig.builtIn" value="false" />
+	#end
+	<div class="form-group row">
+	<label class="col-sm-3 col-form-label">所属类型</label>
+	<div class="col-9">
+		<select class="form-control"
+		name="globalConfig.typeId" 
+		data-autoload  
+		data-rule="required"  
+		data-tips="请选择所属类型" 
+		data-url="admin/globalconfig/type/options"  
+		data-text="=请选择=" 
+		data-value="" 
+		data-select="#(typeId?? (globalConfig.typeId??))">
+	</select>
+	</div>
+	</div>
+	<div class="form-group row">
+	<label class="col-sm-3 col-form-label">参数名称</label>
+	<div class="col-9">
+		<input type="text" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入名称" data-tips="请输入名称" maxlength="40" name="globalConfig.name" value="#(globalConfig.name??)">
+	</div>
+	</div>
+	<div class="form-group row">
+	<label class="col-sm-3 col-form-label">参数KEY</label>
+	<div class="col-9">
+		<input type="text" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入KEY" data-tips="请输入KEY" maxlength="250" name="globalConfig.configKey" value="#(globalConfig.configKey??)">
+	</div>
+	</div>
+	<div class="form-group row">
+	<label class="col-sm-3 col-form-label">值类型</label>
+	<div class="col-9">
+		<select class="form-control"
+		name="globalConfig.valueType" 
+		data-autoload  
+		data-rule="required"  
+		data-tips="请选择值类型" 
+		data-text="=请选择=" 
+		data-value="" 
+		data-options="string,int,decimal,boolean"
+		data-select="#(globalConfig.valueType?? 'string')">
+		</select>
+	</div>
+	</div>
+	<div class="form-group row">
+	<label class="col-sm-3 col-form-label">参数值</label>
+	<div class="col-9">
+		<input type="text" autocomplete="off"  class="form-control"   placeholder="请输入参数值"  data-tips="请输入参数值"  maxlength="250" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	</div>
+	
+	
+	
+	
+	
+	
+</form>
+
+
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="globalConfigForm")
+<script type="text/javascript">
+ 
+</script>
+#end

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base href="#(basepath??)" />
+<meta charset="UTF-8">
+<title>授权登录成功页面</title>
+#if(need_always_https)
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+#end
+<meta name="renderer" content="webkit">
+<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<link rel="stylesheet" href="assets/plugins/colorui/ColorUi-H5.css">
+<link rel="stylesheet" href="assets/plugins/colorui/animation.css">
+<link rel="stylesheet" href="assets/plugins/colorui/icon.css">
+<link rel="stylesheet" href="assets/plugins/colorui/jbolth5.css">
+<link rel="stylesheet" href="_view/_test/wechat/test.css">
+</head>
+<body>
+<div class="main">
+	<div class="wrap">
+		 看到这个界面，说明授权成功了，可以自定跳转到其他页面，已经将用户信息和JWT信息保存本地了
+		 <div class="bg-black text-white padding-sm">
+		 #(userInfo??)
+		 </div>
+	</div>
+</div>
+</body>
+</html>

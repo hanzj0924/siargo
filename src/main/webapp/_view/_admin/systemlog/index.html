@@ -1,0 +1,91 @@
+#@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<div class="row">
+			<div class="col-md-auto">
+				<h1>
+					<i class="jbicon2 jbi-Field-time"></i>系统操作日志
+				</h1>
+			</div>
+			<div class="col">
+				<form class="form-inline" id="systemlogForm_#(pageId)"
+					action="admin/systemlog" method="get" data-pjaxsubmit>
+					<input type="text" autocomplete="off" class="form-control"
+						placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+					<div class="input-group d-inline-block text-nowrap">
+						<div class="input-group-prepend">
+							<input type="text" data-date class="form-control"
+								placeholder="开始日期" maxlength="20" name="startTime"
+								value="#date((startTime?? DateUtil.getNow()),'yyyy-MM-dd')">
+						</div>
+						<div class="input-group-append">
+							<span class="input-group-text">至</span>
+						</div>
+						<div class="input-group-append">
+							<input type="text" data-date class="form-control rounded-left-0"
+								placeholder="截止日期" maxlength="20" name="endTime"
+								value="#date((endTime?? DateUtil.getNow()),'yyyy-MM-dd')">
+						</div>
+					</div>
+					<button type="submit" class="btn btn-outline-secondary">
+						<i class="fa fa-search"></i> 查询
+					</button>
+				</form>
+			</div>
+			<div class="col-md-auto">
+				<button onclick="refreshPjaxContainer()"
+					class="btn btn-outline-secondary btn-sm">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+		<table class="table_striped thead_font_normal table-center"
+			data-jbolttable data-column-resize="true"
+			data-fixed-columns-left="1,2,3" data-page="systemlogPage_#(pageId)">
+			<thead>
+				<tr>
+					<th data-width="70" data-column="index">序号</th>
+					<th data-width="200" data-nochange>数据类型</th>
+					<th data-width="90" data-nochange>操作类型</th>
+					<th data-width="auto" data-min-width="400">日志</th>
+					<th data-width="110" data-nochange>操作人</th>
+					<th data-width="180" data-nochange>记录时间</th>
+				</tr>
+			</thead>
+			<tbody>
+				#for(data:pageData.list??)
+				<tr>
+					<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+					<td><span class="text-info">#(data.targetTypeName??)</span></td>
+					<td>#if(data.type&&data.type==1) <span class="text-primary">#(data.typeName??)</span>
+						#else if(data.type&&data.type==2) <span class="text-success">#(data.typeName??)</span>
+						#else if(data.type&&data.type==3) <span class="text-danger">#(data.typeName??)</span>
+						#else if(data.type&&data.type==4) <span class="text-danger">#(data.typeName??)</span>
+						#else if(data.type&&data.type==5) <span class="text-success">#(data.typeName??)</span>
+						#else if(data.type&&data.type==6) <span class="text-primary">#(data.typeName??)</span>
+						#else <span class="text-default">#(data.typeName??)</span> #end
+					</td>
+					<td class="text-left"><a href="javascript:void(0)"
+						data-dialogbtn data-area="600,400" data-btn="close"
+						data-title="查看日志描述" data-content="this">#(data.title??)</a></td>
+
+					<td>#(data.userName??)</td>
+					<td>#date(data.createTime??,"yyyy-MM-dd HH:mm:ss")</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+		#include("/_view/_admin/common/_jbolt_table_page.html",pageEleId="systemlogPage_"+pageId)
+	</div>
+</div>
+#end #define js()
+<script>
+$(function(){
+	//初始化page
+	initPage("systemlogPage_#(pageId)",#(pageData.totalPage??),#(pageData.pageNumber??),"systemlogForm_#(pageId)");
+});
+</script>
+#end
+

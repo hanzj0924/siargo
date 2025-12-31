@@ -1,0 +1,69 @@
+package #(codeGen.servicePackage??);
+
+#if(codeGen.isPaginate)
+import com.jfinal.plugin.activerecord.Page;
+#if(needSort || codeGen.isExportExcel)
+import java.util.List;
+#end
+#else
+import java.util.List;
+#end
+#if(hasDateColumn)
+import java.util.Date;
+#end
+#if(hasTimeColumn)
+import java.sql.Time;
+#end
+#if(hasDateRangeColumn)
+import cn.jbolt.core.bean.JBoltDateRange;
+#end
+import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
+import cn.jbolt.core.service.base.JBoltBaseService;
+#if(codeGen.isProjectSystemLog && codeGen.projectSystemLogTargetTypeKeyName!="NONE")
+import cn.jbolt.core.kit.JBoltUserKit;
+#end
+import com.jfinal.kit.Kv;
+#if(codeGen.isCrud??)
+import com.jfinal.kit.Okv;
+import com.jfinal.kit.Ret;
+import cn.jbolt.core.base.JBoltMsg;
+#end
+#if(codeGen.isCrud && codeGen.isImportExcel??)
+import java.io.File;
+import com.jfinal.plugin.activerecord.IAtom;
+import java.sql.SQLException;
+#end
+#if(codeGen.isImportExcel || codeGen.isExportExcel)
+import cn.jbolt.core.poi.excel.*;
+#end
+import cn.jbolt.core.db.sql.Sql;
+import #(codeGen.modelPackage+"."+codeGen.modelName??);
+/**
+ * #(codeGen.indexHtmlPageTitle?? (codeGen.mainTableRemark?? (codeGen.serviceName??)))
+ * @ClassName: #(codeGen.serviceName??)
+ * @author: #(codeGen.author?? 'JBolt-Generator')
+ * @date: #date()  
+ */
+public class #(codeGen.serviceName) extends JBoltBaseService<#(codeGen.modelName)> {
+	private final #(codeGen.modelName) dao=new #(codeGen.modelName)().dao();
+	@Override
+	protected #(codeGen.modelName) dao() {
+		return dao;
+	}
+
+	@Override
+    protected int systemLogTargetType() {
+    #if(codeGen.isProjectSystemLog)
+        return ProjectSystemLogTargetType.#(codeGen.projectSystemLogTargetTypeKeyName?? 'NONE').getValue();
+     #else
+        return ProjectSystemLogTargetType.NONE.getValue();
+     #end
+    }
+		
+#if(methods!=null&&methods.size()>0)
+	#for(method:methods)
+	#@genServiceMethod(method)
+	
+	#end
+#end
+}

@@ -1,0 +1,25 @@
+<form onsubmit="return false;" id="topnavForm" action="#(action)" method="post">
+#if(topnav.id??)
+	<input type="hidden" name="topnav.id" value="#(topnav.id)" />
+#end
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">名称</label>
+		<div class="col-9">
+			<input type="text" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入名称" data-tips="请输入名称" maxlength="40" name="topnav.name" value="#(topnav.name??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">图标</label>
+		<div class="col-9">
+			<input type="text" autocomplete="off"  class="form-control"  placeholder="请输入图标"  maxlength="40" name="topnav.icon" value="#(topnav.icon??)">
+			<small class="form-text text-danger">提示：icon哪里找？<a class="btn btn-link text-primary" href="https://fontawesome.com.cn/v4/icons" target="_blank">点击查看fontawesome</a> <a class="btn btn-link text-success" href="assets/plugins/font/alifont/icons.html" target="_blank">点击查看jbicon</a></small>
+			<small class="form-text text-danger">如果选fontawesome 格式: fa fa-home</small>
+			<small class="form-text text-danger">如果选jbicon 格式: jbicon jb-home 或者 jbicon2 jbi-home</small>
+		</div>
+	</div>
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="topnavForm")
+#end

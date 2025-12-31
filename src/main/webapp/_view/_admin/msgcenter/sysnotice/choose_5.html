@@ -1,0 +1,228 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+#set(deptEnable=JBoltGlobalConfigCache.deptEnable())
+#set(postEnable=JBoltGlobalConfigCache.postEnable())
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="jbicon2 jbi-solution"></i> 选择用户</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" onsubmit="return false;" id="adminUserForm_#(pageId)" action="admin/sysnotice/users" data-pjaxsubmit  method="get">
+		#if(deptEnable)
+		<input type="hidden" name="deptId"/>
+		<input type="hidden" id="assignDept_#(pageId)" name="assignDept" value="true"/>
+		#end
+		<input type="text" autocomplete="off"  class="form-control" placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+		<select class="form-control" name="sex" data-autoload data-url="admin/user/sexOptions" data-text="=性别=" ></select>
+		<select class="form-control" name="postId" data-autoload data-url="admin/post/enableOptions" data-text="=岗位=" ></select>
+		<select class="form-control" name="roleId" data-autoload data-url="admin/role/options" data-text="=角色=" ></select>
+		<button type="submit" class="btn btn-outline-secondary catdata_table_searchbtn" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="user_table_rowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" data-text="${data.name}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.name}</td>
+<td><img data-photobtn tooltip data-title="点击查看大图"  style="width: 60px;height: 60px;border-radius:50%;" src="${data.avatar|real_image}" onerror="this.src='assets/img/avatar.jpg'"/></td>
+<td>${data.sex|sex}</td>
+<td>
+{@if data.userRoles}
+{@each data.userRoles as role,index}
+<span class="badge badge-${(+index+1)|colorClassByLevel} d-block my-1">${role.name}</span>
+{@/each}
+{@else}
+<span class="badge badge-default">未设置</span>
+{@/if}
+</td>
+#if(deptEnable)
+<td>${data.deptSnAndName}</td>
+#end
+#if(postEnable)
+<td>
+{@if data.userPosts}
+{@each data.userPosts as post,index}
+<span class="badge badge-${(+index+1)|colorClassByLevel} d-block my-1">${post.name}</span>
+{@/each}
+{@else}
+<span class="badge badge-default">未设置</span>
+{@/if}
+</td>
+#end
+<td>${data.username}</td>
+</tr>
+{@/each}
+</script>
+#if(deptEnable)
+<div class="jbolt_table_leftbox" style="width:240px;" id="admin_user_leftbox_#(pageId)">
+<div class="jb_header"><i class="fa fa-cubes"></i> <span>部门</span>
+	<a class="btn btn-sm btn-outline-secondary mx-1" id="notAssignDeptBtn_#(pageId)" href="javascript:void(0)" tooltip data-title="查询未分配部门的员工"  onclick="notAssignDeptSearch_#(pageId)()">无部门用户查询</a>
+		<div class="pull-right">
+			<a href="javascript:void(0)" tooltip data-title="刷新" onclick="refreshDeptJsTree_#(pageId)()"><i class="fa fa-refresh mr-2"></i></a>
+			<a href="javascript:void(0)"  id="deptJsTreeClearbtn_#(pageId)" class="d-none" tooltip data-title="清空选择" onclick="clearDeptJsTreeSelected_#(pageId)()"><i class="fa fa-remove text-danger"></i></a>
+		</div>
+	</div>
+	<div class="jb_body">
+	<div class="form-group">
+		    <input type="text" class="form-control" id="deptJsTreeSearchInput_#(pageId)"  aria-describedby="smallId" placeholder="关键字搜索" />
+		</div>
+		<div id="deptTree_#(pageId)"
+			data-jstree
+			data-search-input="deptJsTreeSearchInput_#(pageId)"
+			data-open-level="-1"
+			data-read-url="admin/dept/enableJsTreeDatas/"
+			data-change-handler="changeDept_#(pageId)"
+			></div>
+	</div>
+</div>
+#end
+<div class="jbolt_table_rightbox" style="width:240px;" id="admin_user_rightbox_#(pageId)">
+	<div class="jb_header"><i class="fa fa-cubes"></i> <span>已选用户：</span><span class="text-danger" id="selected_items_total_#(pageId)">0</span>个</div>
+	<div class="jb_body">
+		<script type="text/template" id="item_tpl_#(pageId)">
+			{@each datas as data,index}
+			<li data-json='${data|toJsonStr}' class="item d-inline-block border border-primary rounded m-1 px-2 py-1 text-nowrap text-center" data-id="${data.id}"><span>${data.name}</span><a onclick="jboltTableRemoveKeepSelectedItem(this,'${data.id}')" tooltip data-title="移除" class="hand float-right text-danger ml-2"><i class="fa fa-remove"></i></a></li>
+			{@/each}
+		</script>
+		<!-- 定义选中内容渲染和盛放容器-->
+		<ul class="m-0 p-0" id="selected_items_box_#(pageId)">
+			#for(data:selectedUsers)
+			<li  data-json='#json(data)' class="item d-inline-block border border-primary rounded m-1 px-2 py-1 text-nowrap text-center" data-id="#(data.id??)"><span>#(data.name??)</span><a onclick="jboltTableRemoveKeepSelectedItem(this,'#(data.id??)')" tooltip data-title="移除" class="hand float-right text-danger ml-2"><i class="fa fa-remove"></i></a></li>
+			#end
+		</ul>
+	</div>
+</div>
+<table class="table-center thead_font_normal"
+data-jbolttable
+id="choose_users_table_#(pageId)"
+data-ajax="true"
+data-column-prepend="1:checkbox:true"
+data-url="admin/user/sysnoticeUsers"
+data-page="user_table_page_#(pageId)"
+data-fixed-columns-left="1,2,3"
+data-rowtpl="user_table_rowtpl_#(pageId)"
+data-conditions-form="adminUserForm_#(pageId)"
+data-column-resize="true"
+#if(deptEnable)
+data-leftbox="admin_user_leftbox_#(pageId)"
+#end
+data-rightbox="admin_user_rightbox_#(pageId)"
+#保留选中数据 功能开启
+data-keep-selected-items = "true"
+#选中数据放哪里
+data-selected-items-box="selected_items_box_#(pageId)"
+#选中数据 渲染模板
+data-selected-items-tpl="item_tpl_#(pageId)"
+#选中数据统计个数
+data-selected-items-total="selected_items_total_#(pageId)"
+data-ajax-success-handler="ajaxSuccessHandler_#(pageId)"
+>
+<thead>
+<tr>
+<th data-width="60">序号</th>
+<th data-width="150">姓名</th>
+<th data-width="120">头像</th>
+<th data-width="80">性别</th>
+<th data-width="100">角色</th>
+	#if(deptEnable)
+<th data-min-width="200">部门</th>
+	#end
+	#if(postEnable)
+<th data-width="100">岗位</th>
+	#end
+<th >用户名</th>
+</thead>
+<tbody></tbody>
+</table>	
+</div>
+</div>
+#end
+#define js()
+<script>
+var deptTree_#(pageId)=$("#deptTree_#(pageId)");
+var adminUserForm_#(pageId)=$("#adminUserForm_#(pageId)");
+var deptClearBtn_#(pageId)=$("#deptJsTreeClearbtn_#(pageId)");
+var notAssignDeptBtn_#(pageId) = $("#notAssignDeptBtn_#(pageId)");
+/**
+ * 按分类查询
+ */
+function changeDept_#(pageId)(tree,treeNode){
+	deptClearBtn_#(pageId).removeClass("d-none");
+	adminUserForm_#(pageId).find("[name='deptId']").val(treeNode.id);
+	adminUserForm_#(pageId).find("[name='assignDept']").val("true");
+	notAssignDeptBtn_#(pageId).removeClass("btn-primary").addClass("btn-outline-secondary");
+	refreshJBoltTable(deptTree_#(pageId));
+}
+
+function clearDeptJsTreeSelected_#(pageId)(){
+	JSTreeUtil.clearSelected(deptTree_#(pageId));
+	adminUserForm_#(pageId).find("[name='deptId']").val("");
+	deptClearBtn_#(pageId).addClass("d-none");
+	adminUserForm_#(pageId).find("[name='assignDept']").val("true");
+	notAssignDeptBtn_#(pageId).removeClass("btn-primary").addClass("btn-outline-secondary");
+	refreshJBoltTable(deptTree_#(pageId));
+}
+
+function notAssignDeptSearch_#(pageId)(){
+	JSTreeUtil.clearSelected(deptTree_#(pageId));
+	adminUserForm_#(pageId).find("[name='assignDept']").val("false");
+	deptClearBtn_#(pageId).removeClass("d-none");
+	notAssignDeptBtn_#(pageId).addClass("btn-primary").removeClass("btn-outline-secondary");
+	jboltTablePageToFirst(deptTree_#(pageId));
+}
+
+function refreshDeptJsTree_#(pageId)(){
+	var deptId=adminUserForm_#(pageId).find("input[name='deptId']").val();
+	JSTreeUtil.refresh(deptTree_#(pageId),deptId?deptId:0);
+}
+$(function(){
+});
+</script>
+
+<script type="text/javascript">
+var _submit_ing=false;
+function submitThisForm(){
+	if(_submit_ing){
+		return false;
+	}
+	_submit_ing=true;
+	var checkedIds   = jboltTableGetKeepSelectedIds("choose_users_table_#(pageId)");
+	var checkedNames = jboltTableGetKeepSelectedTexts("choose_users_table_#(pageId)");
+	if(isOk(checkedIds)&&isOk(checkedNames)){
+		 parent.setChooseReceiverDatas(checkedIds,checkedNames);
+		 parent.layer.closeAll();
+	}
+	_submit_ing=false;
+}
+var first_time_ajax_handler_#(pageId) = 0;
+function ajaxSuccessHandler_#(pageId)(table){
+	if (first_time_ajax_handler_#(pageId) ==0){
+		first_time_ajax_handler_#(pageId) == 1;
+
+		var ids = "#(ids??)";
+		if(ids){
+			var arr = ids.split(",");
+			table.me.setCheckedIds(table,arr);
+			$("#selected_items_total_#(pageId)").text(arr.length);
+		}
+
+	}else if (first_time_ajax_handler_#(pageId) ==1){
+		var ids = table.me.getKeepSelectedIds(table);
+		if(ids){
+			table.me.setCheckedIds(table,ids);
+		}
+	}
+
+}
+</script>
+#end
+

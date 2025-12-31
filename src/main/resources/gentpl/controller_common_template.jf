@@ -1,0 +1,231 @@
+#define c_index(modelName,needPaginate)
+   /**
+	* 首页
+	*/
+	public void index() {
+		render("index.html");
+	}
+  	
+  	/**
+	* 数据源
+	*/
+	public void datas() {
+		#if(needPaginate)
+		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords()));
+		#else
+		renderJsonData(service.getAdminDatas(getKeywords()));
+		#end
+	}
+#end
+
+#define c_add(modelName)
+   /**
+	* 新增
+	*/
+	public void add() {
+		render("add.html");
+	}
+#end
+
+#define c_edit(modelName)
+   /**
+	* 编辑
+	*/
+	public void edit() {#setLocal(fctucName=firstCharToLowerCase(modelName))
+		#(modelName) #(fctucName)=service.findById(get#(getIdType?? 'Int')(0)); 
+		if(#(fctucName) == null){
+			renderFail(JBoltMsg.DATA_NOT_EXIST);
+			return;
+		}
+		set("#(fctucName)",#(fctucName));
+		render("edit.html");
+	}
+#end
+
+
+#define c_save(modelName,isMainDataSource)
+  /**
+	* 保存
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void save() {
+		renderJson(service.save(getModel(#(modelName).class, "#(firstCharToLowerCase(modelName))")));
+	}
+#end
+
+#define c_update(modelName,isMainDataSource)
+   /**
+	* 更新
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void update() {
+		renderJson(service.update(getModel(#(modelName).class, "#(firstCharToLowerCase(modelName))")));
+	}
+#end
+
+#define c_delete(modelName,isMainDataSource)
+   /**
+	* 删除
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void delete() {
+		renderJson(service.delete(get#(getIdType?? 'Int')(0)));
+	}
+#end
+
+#define c_deleteByIds(modelName,isMainDataSource)
+   /**
+	* 批量删除
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void deleteByIds() {
+		renderJson(service.deleteByBatchIds(get("ids")));
+	}
+#end
+
+#define c_up(modelName,isMainDataSource)
+  /**
+	* 排序 上移
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void up() {
+		renderJson(service.up(get#(getIdType?? 'Int')(0)));
+	}
+#end
+
+#define c_move(modelName,isMainDataSource)
+  /**
+	*  灵活移动排序
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void move() {
+		renderJson(service.move(get#(getIdType?? 'Int')("id"),get#(getIdType?? 'Int')("otherId")));
+	}
+#end
+
+#define c_down(modelName,isMainDataSource)
+  /**
+	* 排序 下移
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void down() {
+		renderJson(service.down(get#(getIdType?? 'Int')(0)));
+	}
+#end
+
+
+#define c_initRank(modelName,isMainDataSource)
+  /**
+	* 排序 初始化
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void initRank() {
+		renderJson(service.initRank());
+	}
+#end
+
+#define c_toggleEnable(modelName,isMainDataSource)
+  /**
+	* 切换启用状态
+	*/
+	#if(isMainDataSource??)
+    @Before(Tx.class)
+    #end
+	public void toggleEnable() {
+		renderJson(service.toggleEnable(get#(getIdType?? 'Int')(0)));
+	}
+#end
+
+
+#define c_tree(modelName)
+  /**
+	* 得到树形结构数据
+	*/
+	public void tree() {
+		renderJsonData(service.getTreeDatas());
+	}
+#end
+
+
+#define c_options(modelName)
+  /**
+	* 得到树形结构数据
+	*/
+	public void options() {
+		renderJson(service.getOptionList());
+	}
+#end
+
+#define c_genToggleMethod(name,modelName,isMainDataSource)
+  /**
+	* 切换#(name)
+	*/
+	#if(isMainDataSource??)
+	@Before(Tx.class)
+	#end
+	public void #(name)() {
+		renderJson(service.#(name)(get#(getIdType?? 'Int')(0)));
+	}
+#end
+
+#define c_genOtherMethod(name,modelName,isMainDataSource)
+#if(name.indexOf("toggle")!=-1)
+#@c_genToggleMethod(name,modelName,isMainDataSource)
+#else
+	public void #(name)(){
+		//TODO 请实现业务逻辑代码	
+		renderJsonSuccess();
+	}
+#end
+#end
+
+#define genControllerMethod(name,modelName,needPaginate,isMainDataSource)
+	#switch(name)
+		#case("index")
+			#@c_index(modelName,needPaginate)
+		#case("add")
+			#@c_add(modelName)	
+		#case("edit")
+			#@c_edit(modelName)
+		#case("save")
+			#@c_save(modelName,isMainDataSource)
+		#case("update")
+			#@c_update(modelName,isMainDataSource)
+		#case("delete")
+			#@c_delete(modelName,isMainDataSource)
+		#case("deleteByIds")
+			#@c_deleteByIds(modelName,isMainDataSource)
+		#case("toggleEnable")
+			#@c_toggleEnable(modelName,isMainDataSource)
+		#case("up")
+			#@c_up(modelName,isMainDataSource)
+		#case("move")
+			#@c_move(modelName,isMainDataSource)
+		#case("down")
+			#@c_down(modelName,isMainDataSource)
+		#case("initRank")
+			#@c_initRank(modelName,isMainDataSource)
+		#case("tree")
+			#@c_tree(modelName)
+		#case("options")
+			#@c_options(modelName)
+		#default
+			#@c_genOtherMethod(name,modelName,isMainDataSource)
+	#end
+#end

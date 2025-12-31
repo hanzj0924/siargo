@@ -1,0 +1,27 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey??)" data-dontchangeleftnav="true">
+<div class="jbolt_page_content">
+ 	<div style="margin: 20px auto;max-width: 500px">
+ 	#if(msg&&msg=="jbolt_system_locked")
+	#else
+	<div class="alert alert-danger">#(msg??)</div>
+	#end
+	#if(backUrl??)
+	<a class="btn btn-primary" href="#(backUrl??)">#(backText?? '← 返回')</a>
+	#end
+</div>
+</div>
+</div>
+#end
+#define js()
+<script type="text/javascript">
+$(function(){
+	openLeftNav("#(pmkey)");
+	#if(msg&&msg=="jbolt_system_locked")
+		showJboltLockSystem();
+	#end
+})
+</script>
+#end
+

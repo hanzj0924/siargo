@@ -1,0 +1,20 @@
+<table class="table-center jbolt_table thead_font_normal dictionaryTypes"
+data-jbolttable
+data-column-resize="true"
+data-height="fill_box"
+>
+<thead><tr><th data-min-width="120">名称</th><th style="width:100px" data-nochange>模式层级</th><th data-min-width="120">标识KEY</th><th data-width="100" data-nochange>操作</th></tr></thead>
+<tbody>
+#for(data:dictionaryTypes)
+<tr class="hand" onclick="readDictionarys(this,'#(data.id)','#(data.name)')">
+ <td title="#(data.name??)">#if(data.isBuildIn??)<span class="text-danger">(内置)</span>#end #(data.name??)</td>
+<td>#(data.modeLevel==1?"一级":"多级")</td>
+<td title="#(data.typeKey??)">#(data.typeKey??)</td>
+<td>
+ <a tooltip data-title="编辑" class=" d-inline-block jbolt_table_editbtn"  data-area="500,400" data-handler="refreshAllPortal"   href="admin/dictionarytype/edit/#(data.id)"><i class="fa fa-edit text-warning"></i></a>
+ <a tooltip data-title="删除" class="ml-2 d-inline-block jbolt_table_delbtn" data-confirm="确认删除此分类？" data-handler="refreshPortal" data-portal="dictionaryTypePortal" href="admin/dictionarytype/delete/#(data.id)"><i class="fa fa-remove text-danger"></i></a>
+</td>
+</tr>
+#end
+</tbody>
+</table>

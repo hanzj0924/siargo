@@ -1,0 +1,74 @@
+#@jboltLayout()
+#define main()
+#setLocal(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="text-center">
+		<h1 style="font-size: 25px;"><i class="jbicon jb-wendang mr-1"  style="font-size: 25px;"></i> 项目数据库文档<span class="text-danger" style="font-size: 20px;">（开发人员专用）</span></h1>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- 数据源渲染模板定义-->
+<script type="text/template" id="datasource_tpl_#(pageId)">
+{@each res.data as data,index}
+	<div class="card ${index>0?'mt-3':''}">
+		<div class="card-header">
+			<div class="row">
+				<div class="col-12 col-md-3 text-left">
+					<span style="font-size: 20px;"><i class="fa fa-database mr-1"></i>数据源:<span class="text-primary font-weight-bold">${data.name}</span></span>
+				</div>
+				<div class="col-12 col-md-3 text-left">
+					<span style="font-size: 20px;">类型:<strong class="text-primary">[${data.dbType}]</strong></span>
+				</div>
+				<div class="col-12 col-md-3 text-left">
+					<span  style="font-size: 20px;" class="${data.isMainDatasource?'text-primary font-weight-bold':''}">${data.isMainDatasource?"⭐ 主数据源 ⭐":"扩展数据源"}</span>
+				</div>
+				<div class="col-12 col-md-2 text-right">
+					<a class="btn btn-outline-primary btn-sm" data-openpage="jboltlayer" data-confirm="确定关闭文档窗口" data-width="1280" data-dir="left" data-resize="true" data-url="admin/devdoc/database/tableLayer?datasource=${data.name}"><i class="jbicon jb-liebiao"></i>查看表结构</a>
+				</div>
+				<div class="col-12 col-md-1 text-right">
+					<a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a>
+				</div>
+			</div>
+			</div>
+
+		<div class="card-body">
+			<table class="table" data-jbolttable data-ajax="false" data-height="420">
+				<thead>
+				<tr><th class="text-center" data-width="200">配置项</th><th>配置值</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="text-center">db_name</td><td>${data.dbName}</td></tr>
+					<tr><td class="text-center">db_schema</td><td>${data.dbSchema}</td></tr>
+					<tr><td class="text-center">jdbc_url</td><td class="text-wrap">${data.jdbcUrl}</td></tr>
+					<tr><td class="text-center">user</td><td class="text-wrap">${data.user}</td></tr>
+					<tr><td class="text-center">is_encrypted</td><td class="text-wrap">${data.isEncrypted?data.isEncrypted:"false"}</td></tr>
+					<tr><td class="text-center">id_gen_mode</td><td class="text-wrap">${data.idGenMode}</td></tr>
+					<tr><td class="text-center">model_package</td><td class="text-wrap">${data.modelPackages}</td></tr>
+					<tr><td class="text-center">remark</td><td>${data.remark}</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+{@/each}
+</script>
+
+	<div class="container">
+		<div class="card">
+			<div class="card-header" style="font-size: 20px;"><i class="jbicon jb-datasource mr-1"></i>项目数据源配置 		<span style="font-size:14px;" class="pull-right">查看更详细的配置请点<a target="_blank" class="mx-1 text-decoration-underline text-danger" href="admin/druid/monitor/datasource.html">这里&gt;</a></span></div>
+			<div class="card-body">
+				<div class="jb_datasources_box" data-ajaxportal data-url="admin/devdoc/database/datasources" data-type="json" data-tpl="datasource_tpl_#(pageId)"></div>
+			</div>
+		</div>
+	</div>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end
+

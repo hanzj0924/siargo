@@ -1,0 +1,540 @@
+### 根据UIType字符串 生成input类型html
+#define genFormHtmlEditorTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#if(isFormGroupRow)
+<div class="col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+#end
+<div data-editor="summernote" data-height="350" #if(col.formUiType=="summernote_simple") data-toolbar="simple" #end  data-hidden-input="#(modelName)_#(col.attrName)_hidden">#if(codeGenServiceMode??)#[[#]]#(#(modelName).#(col.attrName)?? '#(col.formDefaultValue??)')#else #(col.formDefaultValue??)#end</div>
+#@genSmallFormTipsInfo(modelName,col,false)
+#if(isFormGroupRow)
+</div>
+#end
+<textarea id="#(modelName)_#(col.attrName)_hidden" #if(col.dataRule || col.isRequired) data-rule="#(col.dataRule?? (col.isRequired?'required':''))"  data-notnull="#(col.isRequired)" data-tips="#(col.dataTips?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end data-with-clearbtn="true" autocomplete="off"  class="form-control d-none"  placeholder="#(col.placeholder?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" maxlength="#(col.attrLength?? '200')" name="#(modelName).#(col.attrName)">#if(codeGenServiceMode??)#[[#]]#(#(modelName).#(col.attrName)?? '#(col.formDefaultValue??)')#else #(col.formDefaultValue??)#end</textarea>
+#end
+### 根据UIType字符串 生成input类型html
+#define genFormInputTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#switch (col.formUiType)
+#case ("input")
+#setLocal(type = "text")
+#case ("password")
+#setLocal(type = "password")
+#case ("number")
+#setLocal(type = "number")
+#case ("rangeslider")
+#setLocal(type = "text")
+#default
+#setLocal(type = "text")
+#end
+#setLocal(isInputGroup = col.igPrependHtml||col.igAppendHtml)
+#if(isFormGroupRow)
+<div class="#if(isInputGroup)input-group #end  col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+    #end
+    #if(col.formUiType == "textarea")
+    <textarea style="height:100px;" #if(col.dataRule || col.isRequired) data-rule="#(col.dataRule?? (col.isRequired?'required':''))"  data-notnull="#(col.isRequired)" data-tips="#(col.dataTips?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="#(col.placeholder?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" maxlength="#(col.attrLength?? '200')" name="#(modelName).#(col.attrName)">#if(codeGenServiceMode??)#[[#]]#(#(modelName).#(col.attrName)?? '#(col.formDefaultValue??)')#else #(col.formDefaultValue??)#end</textarea>
+    #else
+    #(col.igPrependHtml??)
+    <input #if(col.formUiType == "rangerSlider" || col.formUiType == "rangerSlider_double") #if(col.formUiType == "rangerSlider_double")data-type="double"#end  data-grid="true" data-min="0" data-max="100" data-step="1" data-rangeslider #end  data-default="#(col.attrDefaultValue??)" type="#(type?? 'text')"  #if(col.formUiType == "calculator")data-with-calculator#end  #if(col.dataRule || col.isRequired) data-rule="#(col.dataRule?? (col.isRequired?'required':''))" data-notnull="#(col.isRequired)" data-tips="#(col.dataTips?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"  #end data-with-clearbtn="true" autocomplete="off"  class="form-control" placeholder="#(col.placeholder?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" maxlength="#(col.attrLength?? '40')" name="#(modelName).#(col.attrName)" #if(codeGenServiceMode??)value="#[[#]]#(#(modelName).#(col.attrName)?? '#(col.formDefaultValue??)')"#else  value="#(col.formDefaultValue??)"#end/>
+    #(col.igAppendHtml??)
+    #end
+    #if(!isInputGroup)
+    #@genSmallFormTipsInfo(modelName,col,false)
+    #end
+    #if(isFormGroupRow)
+</div>
+#end
+#if(isInputGroup)
+#@genSmallFormTipsInfo(modelName,col,true)
+#end
+#end
+
+#define genSmallFormTipsInfo(modelName,col,isInputGroup)
+#if(col.formTips)
+<small #if(isInputGroup)style="padding-left:15px;" #end  class="#if(isInputGroup)offset-sm-2 #end form_tips d-block text-#(col.formTipsColor?? 'secondary') mt-1">#(col.formTips)</small>
+#end
+#end
+
+
+### 根据UIType字符串 生成imgupload类型html
+#define genFormImguploaderTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#if(isFormGroupRow)
+<div class="col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+#end
+    <input id="#(modelName)_#(col.attrName)" type="hidden" #if(col.dataRule || col.isRequired) data-rule="#(col.dataRule?? (col.isRequired?'required':''))" data-notnull="#(col.isRequired)" data-tips="#(col.dataTips?? ('请上传'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end  name="#(modelName).#(col.attrName)" value="#[[#]]#(#(modelName).#(col.attrName)??)"/>
+    <div data-imguploader
+         #if(!col.isUploadToQiniu)
+         #if(codeGenServiceMode)
+         data-url="#(codeGen.controllerPath??)/#(col.formUploadUrl??)"
+         #else
+         data-url="admin/codegen/uploadImg"
+         #end
+         #end
+         data-area="#(col.formImgUploaderArea?? '200,200')"
+         data-maxsize="#(col.formMaxsize?? '200')"
+         #if(col.isUploadToQiniu??)
+         data-handler="uploadFileToQiniu"
+         data-file-key="#(col.qiniuFileKey?? '[dateTime]/[randomId]/[filename]')"
+         data-bucket-sn="#(col.qiniuBucketSn??)"
+         #else
+         data-handler="uploadFile"
+         #end
+         data-hidden-input="#(modelName)_#(col.attrName)"
+         data-remove-confirm="true"
+         #if(col.dataRule || col.isRequired)
+         data-rule="required"
+         #end
+         data-value="#[[#]]#(#(modelName).#(col.attrName)??)"
+    ></div>
+    <br/>
+    <small class="text-danger">注:上传图片尺寸比例#(col.formImgUploaderArea?? '1:1'),最大#(col.formMaxsize?? '200')KB</small>
+    #@genSmallFormTipsInfo(modelName,col,false)
+#if(isFormGroupRow)
+</div>
+#end
+#end
+
+
+
+### 根据UIType字符串 生成fileupload类型html
+#define genFormFileuploaderTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#if(isFormGroupRow)
+<div class="col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+    #end
+    <input id="#(modelName)_#(col.attrName)" type="hidden" #if(col.dataRule || col.isRequired) data-rule="#(col.dataRule?? (col.isRequired?'required':''))" data-notnull="#(col.isRequired)" data-tips="#(col.dataTips?? ('请上传'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end  name="#(modelName).#(col.attrName)" value="#[[#]]#(#(modelName).#(col.attrName)??)"/>
+    <div data-fileuploader class="j_upload_file_box"  data-name="file"
+         #if(!col.isUploadToQiniu)
+         #if(codeGenServiceMode)
+         data-url="#(codeGen.controllerPath??)/#(col.formUploadUrl??)"
+         #else
+         data-url="admin/codegen/uploadFile"
+         #end
+         #end
+         data-maxsize="#(col.formMaxsize?? '200')"
+         #if(col.isUploadToQiniu??)
+         data-handler="uploadFileToQiniu"
+         data-file-key="#(col.qiniuFileKey?? '[dateTime]/[randomId]/[filename]')"
+         data-bucket-sn="#(col.qiniuBucketSn??)"
+         #else
+         data-handler="uploadFile"
+         #end
+         data-hidden-input="#(modelName)_#(col.attrName)"
+         data-remove-confirm="true"
+         #if(col.dataRule || col.isRequired)
+         data-rule="required"
+         #end
+         #if(codeGenServiceMode)
+         data-value="#[[#]]#(#(modelName).#(col.attrName)??)"
+         #end
+    ></div>
+    <br/>
+    <small class="text-danger">注:上传文件最大#(col.formMaxsize?? '200')KB</small>
+    #@genSmallFormTipsInfo(modelName,col,false)
+    #if(isFormGroupRow)
+</div>
+#end
+#end
+
+### 根据UIType字符串 生成form-group div 开始的html
+#define genFormGroupDivStart(isFormGroupRow,formControlWidth,col,hasTagEnd)
+<div class="form-group #(isFormGroupRow?'row':'')" #if(!codeGenServiceMode) data-form-ele-width="#(col.formEleWidth?? (formControlWidth?? 10))" data-form-control-width="#(formControlWidth?? 10)" draggable="true" data-id="#(col.id)" data-col-name="#(col.colName)" #if(col.formUploadUrl??)data-form-upload-url="#(col.formUploadUrl??)" #end #end #if(hasTagEnd)>#end
+#end
+
+### 根据UIType字符串 生成html5 date input类型html
+#define genHtml5DateInputByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+    #setLocal(type = "date")
+    #switch (col.formUiType)
+    #case ("input_date")
+    #setLocal(type = "date")
+    #case ("input_time")
+    #setLocal(type = "time")
+    #case ("input_datetime")
+    #setLocal(type = "datetime-local")
+    #case ("input_month")
+    #setLocal(type = "month")
+    #case ("input_week")
+    #setLocal(type = "week")
+    #default
+    #setLocal(type = "date")
+    #end
+    #setLocal(isInputGroup = col.igPrependHtml||col.igAppendHtml)
+    #if(isFormGroupRow)
+    <div class="#if(isInputGroup)input-group #end  col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+        #end
+        <input data-xxx-attr="#(col.formDefaultValue??)" type="#(type?? 'date')" #if(col.dataRule || col.isRequired) data-rule="#(col.dataRule?? (col.isRequired?'required':''))" data-notnull="#(col.isRequired)" data-tips="#(col.dataTips?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end data-with-clearbtn="true" autocomplete="off"  class="form-control" placeholder="#(col.placeholder?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" maxlength="#(col.attrLength?? '40')" name="#(modelName).#(col.attrName)"
+               #if(codeGenServiceMode??)value="#[[#]]#(#(modelName).#(col.attrName)?? '#(col.formDefaultValue??)')"#end
+               #if(!codeGenServiceMode??) value="#(col.formDefaultValue??)" #end
+        />
+        #if(!isInputGroup)
+        #@genSmallFormTipsInfo(modelName,col,false)
+        #end
+        #if(isFormGroupRow)
+    </div>
+    #end
+    #if(isInputGroup)
+    #@genSmallFormTipsInfo(modelName,col,true)
+    #end
+#end
+
+### 根据UIType字符串 生成Autocomplete类型html
+#define genFormAutocompleteByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#if(isFormGroupRow)
+<div class="col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+    #end
+    <input type="text" class="form-control" data-autocomplete autocomplete="off" maxlength="#(col.attrLength?? 200)" placeholder="#(col.placeholder?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+           data-url="#(col.formDataValue??)"
+           #if(col.formDataValueAttr)
+           data-value-attr="#(col.formDataValueAttr)"
+           #end
+           #if(col.formDataTextAttr)
+           data-text-attr="#(col.formDataTextAttr)"
+           #end
+           #if(col.formDataColumnAttr)
+           data-column-attr="#(col.formDataColumnAttr)"
+           #end
+           data-hidden-input="#(col.attrName)_hidden"
+           #if(col.dataRule || col.isRequired)
+           data-rule="#(col.dataRule?? (col.isRequired?'required':''))"
+           data-notnull="#(col.isRequired)"
+           data-tips="#(col.dataTips?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+           #end
+           #if(codeGenServiceMode?? && col.translateColName??)value="#[[#]]#(#(modelName).#(col.translateColName)??)"#end
+           />
+    <input type="hidden" autocomplete="off" id="#(col.attrName)_hidden" maxLength="#(col.attrLength?? '20')"  name="#(modelName).#(col.attrName)"
+           #if(col.dataRule || col.isRequired)
+           data-rule="#(col.dataRule?? (col.isRequired?'required':''))"
+           data-notnull="#(col.isRequired)"
+           data-tips="#(col.dataTips?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+           #end
+           #if(codeGenServiceMode??)value="#[[#]]#(#(modelName).#(col.attrName)??)"#end
+           />
+    #@genSmallFormTipsInfo(modelName,col,false)
+#if(isFormGroupRow)
+</div>
+#end
+#end
+
+### 根据UIType字符串 生成JBoltInput类型html
+#define genFormJBoltInputByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#switch (col.formUiType)
+#case ("jboltinput")
+#setLocal(type = "ajaxportal")
+#case ("jboltinput_jstree")
+#setLocal(type = "jstree")
+#case ("jboltinput_table")
+#setLocal(type = "table")
+#default
+#setLocal(type = "ajaxportal")
+#end
+#if(isFormGroupRow)
+<div class="col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+    #end
+    <input type="text" class="form-control" data-jboltinput autocomplete="off" maxlength="#(col.attrLength?? 200)"
+           data-load-type="#(type?? 'ajaxportal')"
+           data-url="#(col.formDataValue??)"
+           data-hidden-input="#(col.attrName)_hidden"
+           data-height="300"
+           placeholder="#(col.placeholder?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+           #if(col.formJboltinputFilterHandler??)
+           data-filter-handler="#(col.formJboltinputFilterHandler)"
+           #end
+           #if(col.isFormJboltinputJstreeCheckbox??)
+           data-jstree-checkbox="true"
+           #end
+           #if(col.isFormJboltinputJstreeOnlyLeaf??)
+           data-onlyleaf="true"
+           #end
+           #if(col.dataRule || col.isRequired)
+           data-rule="#(col.dataRule?? (col.isRequired?'required':''))"
+           data-notnull="#(col.isRequired)"
+           data-tips="#(col.dataTips?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+           #end
+
+    />
+    <input type="hidden" autocomplete="off" id="#(col.attrName)_hidden" name="#(modelName).#(col.attrName)" maxLength="#(col.attrLength?? '20')"
+           #if(col.dataRule || col.isRequired)
+           data-rule="#(col.dataRule?? (col.isRequired?'required':''))"
+           data-notnull="#(col.isRequired)"
+           data-tips="#(col.dataTips?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+           #if(codeGenServiceMode??)value="#[[#]]#(#(modelName).#(col.attrName)??)"#end
+           #end
+           />
+    #@genSmallFormTipsInfo(modelName,col,false)
+#if(isFormGroupRow)
+</div>
+#end
+#end
+
+
+### 根据UIType字符串 生成select类型html
+#define genFormSelectByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#switch (col.formUiType)
+#case ("select")
+#setLocal(type = "select")
+#setLocal(multi = false)
+#case ("select_multi")
+#setLocal(type = "select")
+#setLocal(multi = true)
+#case ("select2")
+#setLocal(type = "select2")
+#setLocal(multi = false)
+#case ("select2_multi")
+#setLocal(type = "select2")
+#setLocal(multi = true)
+#default
+#setLocal(type = "select")
+#setLocal(multi = false)
+#end
+
+#if(col.formDataType=="sys_dictionary")
+#setLocal(selectUrl = "admin/dictionary/options?key="+(col.formDataValue??))
+#else
+#setLocal(selectUrl = (col.formDataValue??))
+#end
+#if(isFormGroupRow)
+<div class="col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+    #end
+    <select class="form-control"
+            data-autoload
+            #if(col.formDataType=="enum")
+            data-options="#enumToOptions(selectUrl??)"
+            #elseif(col.formDataType=="option")
+            data-options="#(selectUrl??)"
+            #else
+            data-url="#(selectUrl??)"
+            #end
+            data-select-type="#(type)"
+            #if(multi)
+            multiple="multiple"
+            #end
+            #if(type != "select2")
+            name="#(modelName).#(col.attrName)"
+            #end
+            #if(type == "select2")
+            data-sync-ele="##(modelName)_#(col.attrName)_hidden"
+            #end
+            data-refresh="true"
+            #if(col.dataRule || col.isRequired)
+            data-rule="#(col.dataRule?? (col.isRequired?'select':''))"
+            data-notnull="#(col.isRequired)"
+            data-tips="#(col.dataTips?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+            #end
+            data-text="=请选择="
+            data-value=""
+            #if(col.formDataValueAttr)
+            data-value-attr="#(col.formDataValueAttr)"
+            #end
+            #if(col.formDataTextAttr)
+            data-text-attr="#(col.formDataTextAttr)"
+            #end
+            #if(col.formDataColumnAttr)
+            data-column-attr="#(col.formDataColumnAttr)"
+            #end
+            #if(codeGenServiceMode??)data-select="#[[#]]#(#(modelName).#(col.attrName)?? '#(col.formDefaultValue??)')"#end
+            #if(!codeGenServiceMode??)data-select="#(col.formDefaultValue??)"#end
+    ></select>
+    #if(type == "select2")
+    <input type="hidden" name="#(modelName).#(col.attrName)" data-sync-attr="#(col.formDataValueAttr?? 'value')"  id="#(modelName)_#(col.attrName)_hidden" value="#[[#]]#(#(modelName).#(col.attrName)??)"/>
+    #end
+    #@genSmallFormTipsInfo(modelName,col,false)
+#if(isFormGroupRow)
+</div>
+#end
+#end
+
+
+### 根据UIType字符串 生成laydate input类型html
+#define genFormLaydateInputByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#setLocal(type = "date")
+#setLocal(fmt = "yyyy-MM-dd")
+#switch (col.formUiType)
+#case ("laydate_date")
+#setLocal(type = "date")
+#setLocal(fmt = "yyyy-MM-dd")
+#case ("laydate_time")
+#setLocal(type = "time")
+#setLocal(fmt = "HH:mm")
+#case ("laydate_datetime")
+#setLocal(type = "datetime")
+#setLocal(fmt = "yyyy-MM-dd HH:mm")
+#case ("laydate_month")
+#setLocal(type = "month")
+#setLocal(fmt = "yyyy-MM")
+#case ("laydate_year")
+#setLocal(type = "year")
+#setLocal(fmt = "yyyy")
+#default
+#setLocal(type = "date")
+#setLocal(fmt = "yyyy-MM-dd")
+#end
+#setLocal(isInputGroup = col.igPrependHtml||col.igAppendHtml)
+#if(isFormGroupRow)
+<div class="#if(isInputGroup)input-group #end  col-#((col.formEleWidth!=null && col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))">
+    #end
+    <input type="text" data-date data-type="#(type?? 'date')" data-with-clearbtn="true" data-fmt="#(fmt?? 'yyyy-MM-dd')" readonly="readonly" #if(col.dataRule || col.isRequired) data-rule="#(col.dataRule?? (col.isRequired?'required':''))"  data-notnull="#(col.isRequired)" data-tips="#(col.dataTips?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="#(col.placeholder?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" maxlength="#(col.attrLength?? '20')" name="#(modelName).#(col.attrName)"
+           #if(codeGenServiceMode??) value="#[[#]]#datetime((#(modelName).#(col.attrName)?? '#(col.formDefaultValue??)'),'#(fmt??)')" #end
+           #if(!codeGenServiceMode??) value="#(col.formDefaultValue??)" #end
+    />
+    #if(!isInputGroup)
+    #@genSmallFormTipsInfo(modelName,col,false)
+    #end
+#if(isFormGroupRow)
+</div>
+#end
+    #if(isInputGroup)
+    #@genSmallFormTipsInfo(modelName,col,true)
+    #end
+#end
+
+#define genFormGroupLabel(isFormGroupRow,labelWidth,col)
+<label #if(isFormGroupRow)class="col-sm-#(labelWidth?? 2) col-form-label"#end>#(col.formLabel)</label>
+#end
+
+#define formDivEnd()
+</div>
+#end
+#define formTagEnd()
+>
+#end
+
+#define switchFormColType(isFormGroupRow,modelName,labelWidth,formControlWidth,col,codeGenServiceMode)
+#switch(col.formUiType)
+#case("summernote","summernote_simple")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormHtmlEditorTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("input","password","number","textarea","calculator","rangerSlider")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormInputTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("input_date","input_datetime","input_time","input_month","input_week")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genHtml5DateInputByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("laydate_date","laydate_datetime","laydate_time","laydate_year","laydate_month")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormLaydateInputByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("select","select_multi","select2","select2_multi")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormSelectByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("autocomplete")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormAutocompleteByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("jboltinput","jboltinput_jstree","jboltinput_table")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormJBoltInputByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("radio")
+#if(col.formDataType=="sys_dictionary")
+#setLocal(radioUrl = "admin/dictionary/options?key="+col.formDataValue)
+#else
+#setLocal(radioUrl = col.formDataValue)
+#end
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,false)
+data-radio
+data-name="#(modelName).#(col.attrName)"
+#if(!codeGenServiceMode)
+data-stop-propagation="#(editMode?? false)"
+#end
+#if(col.formTips??)
+data-form-tips="#(col.formTips)"
+data-form-tips-color="#(col.formTipsColor?? 'secondary')"
+#end
+#if(col.formDataValueAttr)
+data-value-attr="#(col.formDataValueAttr)"
+#end
+#if(col.formDataTextAttr)
+data-text-attr="#(col.formDataTextAttr)"
+#end
+data-default="#(col.formDefaultValue?? 'options_first')"
+#if(col.formDataType=="enum")
+data-options="#enumToOptions(radioUrl??)"
+#elseif(col.formDataType=="option")
+data-options="#(radioUrl??)"
+#else
+data-url="#(radioUrl??)"
+#end
+data-label="#(col.formLabel)"
+#if(isFormGroupRow)
+data-width="col-sm-#(labelWidth?? 2),col-#((col.formEleWidth!=null&&col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))"
+#end
+#if(codeGenServiceMode??)
+data-value="#[[#]]#(#(modelName).#(col.attrName)??)"
+#end
+#if(col.dataRule || col.isRequired)
+data-rule="#(col.dataRule?? (col.isRequired?'radio':''))"
+data-notnull="#(col.isRequired)"
+data-tips="#(col.dataTips?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+#end
+data-inline="#(col.isItemInline?? true)"
+#@formTagEnd()
+#@formDivEnd()
+#case("checkbox")
+#if(col.formDataType=="sys_dictionary")
+#setLocal(checkboxUrl = "admin/dictionary/options?key="+(col.formDataValue??))
+#else
+#setLocal(checkboxUrl = (col.formDataValue??))
+#end
+<input id="#(modelName)_#(col.attrName)_hidden" type="hidden" name="#(modelName).#(col.attrName)" value="#[[#]]#(#(modelName).#(col.attrName)??)" />
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,false)
+data-checkbox
+data-name="#(modelName).#(col.attrName)"
+#if(codeGenServiceMode??)
+data-value="#[[#]]#(#(modelName).#(col.attrName)??)"
+#end
+#if(col.formDataValueAttr)
+data-value-attr="#(col.formDataValueAttr)"
+#end
+#if(col.formDataTextAttr)
+data-text-attr="#(col.formDataTextAttr)"
+#end
+data-default="#(col.formDefaultValue??)"
+#if(col.formDataType=="enum")
+data-options="#enumToOptions(checkboxUrl??)"
+#elseif(col.formDataType=="option")
+data-options="#(checkboxUrl??)"
+#else
+data-url="#(checkboxUrl??)"
+#end
+data-label="#(col.formLabel)"
+#if(col.formTips??)
+data-form-tips="#(col.formTips)"
+data-form-tips-color="#(col.formTipsColor?? 'secondary')"
+#end
+#if(isFormGroupRow)
+data-width="col-sm-#(labelWidth?? 2),col-#((col.formEleWidth!=null&&col.formEleWidth>0)?col.formEleWidth:(formControlWidth?? 10))"
+#end
+#if(col.dataRule || col.isRequired)
+data-rule="#(col.dataRule?? (col.isRequired?'radio':''))"
+data-notnull="#(col.isRequired)"
+data-tips="#(col.dataTips?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+#end
+data-inline="#(col.isItemInline?? true)"
+data-item-min-width="auto"
+data-hidden-input="#(modelName)_#(col.attrName)_hidden"
+#@formTagEnd()
+#@formDivEnd()
+#case("imguploader")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormImguploaderTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#case("fileuploader")
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormFileuploaderTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#default
+#@genFormGroupDivStart(isFormGroupRow,formControlWidth,col,true)
+#@genFormGroupLabel(isFormGroupRow,labelWidth,col)
+#@genFormInputTypeByUiTypeStr(isFormGroupRow,modelName,formControlWidth,col)
+#@formDivEnd()
+#end
+#end

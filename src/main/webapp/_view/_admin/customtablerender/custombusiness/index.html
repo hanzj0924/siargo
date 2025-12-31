@@ -1,0 +1,85 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey??)">
+<div class="jbolt_page_title">
+<div class="row">
+	<div class="col-sm-auto"><h1><i class="jbicon2 jbi-appstore"></i>系统业务定义</h1></div>
+	<div class="col">
+	<form class="form-inline" id="CustomBusiness_form_#(pageId)">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+
+<select class="form-control" name="enable"
+	data-autoload
+	data-url="admin/dictionary/options?key=options_enable"
+	data-select-type="select"
+	data-text="=是否启用="
+	data-value=""
+	data-value-attr="sn"
+	></select>
+		<div class="btn-group text-center mx-1">
+			<button type="submit" class="btn btn-outline-primary" ><i class="fa fa-search"></i> 查询</button>
+			<button type="button" onclick="form.reset();refreshJBoltTable(this);" class="btn btn-outline-secondary" ><i class="fa fa-reply-all"></i> 重置</button>
+		</div>
+	</form>
+	</div>
+	<div class="col-sm-auto text-right">
+	
+	<button data-dialogbtn class="btn btn-outline-primary btn-sm" data-url="admin/customBusiness/add" data-handler="jboltTablePageToFirst" data-area="800,600" tooltip data-title="新增系统业务定义"><i class="fa fa-plus"></i></button>
+	<button class="btn btn-outline-info btn-sm" onclick="refreshJBoltTable(this)" tooltip data-title="刷新数据"><i class="fa fa-refresh"></i></button>
+	
+	
+	</div>
+</div>
+</div>
+<div class="jbolt_page_content">
+<!-- 定义JBoltTable使用的数据渲染模板 -->
+<textarea class="jb_tpl_box" id="CustomBusiness_tpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.name}</td>
+<td>${data.remark}</td>
+<td>$${data.createTime|date_ymdhms}</td>
+<td>$${data.updateTime|date_ymdhms}</td>
+<td><img data-switchbtn data-confirm="确定切换是否启用？" data-value="${data.enable}"  data-handler="refreshJBoltTable"  data-url="admin/customBusiness/toggleEnable/${data.id}"/></td>
+<td>
+	<a class="jbolt_table_editbtn" href="admin/customBusiness/edit/${data.id}" data-handler="refreshJBoltTable" data-area="800,600" data-title="编辑系统业务定义"><i class="fa fa-edit"></i></a>
+	<a class="jbolt_table_delbtn" href="admin/customBusiness/delete/${data.id}" data-handler="refreshJBoltTable" ><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+{@/each}
+</textarea>
+<table class="jbolt_table jbolt_main_table  table-center "
+	   data-jbolttable
+	   data-width="auto"
+	   data-height="fill"
+	   data-ajax="true"
+	   data-conditions-form="CustomBusiness_form_#(pageId)"
+	   data-url="admin/customBusiness/datas"
+	   data-rowtpl="CustomBusiness_tpl_#(pageId)"
+	   data-copy-to-excel="false"
+	   data-page="CustomBusiness_page"
+	   data-column-resize="true"
+>
+<thead class="fw-normal" >
+<tr>
+<th data-width="60" data-column="index">序号</th>
+	<th  data-width="250" data-column="name">业务名称</th>
+	<th  data-width="300" data-column="remark">备注信息</th>
+	<th  data-min-width="160" data-column="create_time">创建时间</th>
+	<th  data-min-width="160" data-column="update_time">更新时间</th>
+	<th  data-width="100" data-column="enable">是否启用</th>
+<th data-width="80">操作</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+</script>
+#end

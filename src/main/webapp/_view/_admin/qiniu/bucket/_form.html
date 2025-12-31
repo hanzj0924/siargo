@@ -1,0 +1,124 @@
+<form onsubmit="return false;" id="qiniuBucketForm" action="#(action)" method="post">
+#if(qiniuBucket.id??)
+	<input type="hidden" name="qiniuBucket.id" value="#(qiniuBucket.id)" />
+#end
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">所属七牛账号</label>
+		<div class="col-6">
+			<select class="form-control"
+				data-autoload
+				data-rule="select"
+				data-text="=请选择="
+				data-value=""
+				data-url="admin/qiniu/options"
+				name="qiniuBucket.qiniuId"
+				data-select="#(qiniuBucket.qiniuId?? (qiniuId)?? '')"
+				>
+				</select>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">所属地区</label>
+		<div class="col-6">
+			<select class="form-control"
+				data-autoload
+				data-rule="select"
+				data-text="=请选择="
+				data-value=""
+				data-text-attr="name,sn"
+				data-value-attr="sn"
+				data-url="admin/dictionary/options?key=qiniu_region"
+				name="qiniuBucket.region"
+				data-select="#(qiniuBucket.region??)"
+				>
+				</select>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">bucket名称</label>
+		<div class="col">
+			<input type="text" readonly="readonly" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入bucket名称" maxlength="64" name="qiniuBucket.name" value="#(qiniuBucket.name??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">编码(SN)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入编码SN" maxlength="40" name="qiniuBucket.sn" value="#(qiniuBucket.sn??)">
+		</div>
+	</div>
+
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">有效期(秒)</label>
+		<div class="col-3 input-group">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="pint"  placeholder="请输入有效期(秒)"  maxlength="6" name="qiniuBucket.expires" value="#(qiniuBucket.expires?? 3600)">
+			<div class="input-group-append">
+		      <span class="input-group-text">秒</span>
+		    </div>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">绑定域名</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" data-rule="required" data-tips="请输入域名网址"  autocomplete="off"  class="form-control"  placeholder="请输入绑定域名地址" maxlength="255" name="qiniuBucket.domainUrl" value="#(qiniuBucket.domainUrl??)">
+		</div>
+	</div>
+
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">回调地址</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入回调地址" maxlength="255" name="qiniuBucket.callbackUrl" value="#(qiniuBucket.callbackUrl??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">回调body定义</label>
+		<div class="col">
+			<input type="text" id="callbackBody" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入回调body定义" maxlength="255" name="qiniuBucket.callbackBody" value='#(qiniuBucket.callbackBody??)'>
+			<a href="javscript:void(0)" onclick='g("callbackBody").value="{\"key\":\"$(key)\",\"hash\":\"$(etag)\",\"bucket\":\"$(bucket)\",\"fsize\":$(fsize)}"'>点击使用默认值</a>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">回调Body类型</label>
+		<div class="col-4">
+			<select class="form-control"
+				name="qiniuBucket.callbackBodyType"
+				data-autoload
+				data-options="application/json,application/x-www-form-urlencoded"
+				data-select="#(qiniuBucket.callbackBodyType?? 'application/json')">
+			</select>
+		</div>
+	</div>
+
+    <div class="form-group row"
+    	data-radio
+    	data-rule="radio"
+    	data-value="#(qiniuBucket.isDefault??)"
+    	data-name="qiniuBucket.isDefault"
+    	data-default="options_first"
+    	data-width="col-sm-3,col"
+		>
+			<label class="col-sm-3 col-form-label" >是否默认</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="r_isDefault_true" type="radio" name="qiniuBucket.isDefault" value="true"/>
+					<label for="r_isDefault_true">是</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="r_isDefault_false" type="radio" name="qiniuBucket.isDefault" value="false"/>
+					<label for="r_isDefault_false">否</label>
+				</div>
+			</div>
+		</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">备注</label>
+		<div class="col">
+			<textarea style="height:100px" autocomplete="off"  class="form-control"  placeholder="请输入备注" maxlength="255" name="qiniuBucket.remark">#(qiniuBucket.remark??)</textarea>
+		</div>
+	</div>
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="qiniuBucketForm")
+#end
+

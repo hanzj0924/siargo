@@ -1,0 +1,116 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page jbolt_layer_page h-100">
+<div class="jbolt_page_content p-0 h-100">
+<div class="jbolt_tab_view  jbolt_tab_border_none h-100 jb_vflex"  data-handler="changeMsgCenterTabHandler">
+	<div class="jbolt_tab_links jb_vheader">
+		<a class="jbolt_tab_link active"  href="#sys_notice_tabcontent_inlayer"><i class="jbicon jb-tongzhi"></i> 通知(<span id="sys_notice_count_box">0</span>)</a>
+		<!-- <a class="jbolt_tab_link"  href="#private_msg_tabcontent_inlayer"><i class="jbicon jb-msg1"></i> 消息(<span id="private_msg_count_box">0</span>)</a> -->
+		<a class="jbolt_tab_link"  href="#todolist_tabcontent_inlayer"><i class="jbicon jb-shijian"></i> 待办(<span id="todo_count_box">0</span>)</a>
+	</div>
+	<div class="jbolt_tab_contents jb_vbody" >
+		<div class="jbolt_tab_content px-0 active"  id="sys_notice_tabcontent_inlayer">
+			<div id="sys_notice_portal" data-ajaxportal data-url="admin/msgcenter/sysnotice/portalDatas" data-type='json' data-handler="changeMsgCenterSysNoticeCountHandler" data-tpl="sysnotice_tpl" class="list-group list-group-flush"></div>
+		</div>
+		<!-- <div class="jbolt_tab_content px-0" id="private_msg_tabcontent_inlayer">
+			<div id="private_msg_portal" data-ajaxportal data-url="admin/msgcenter/privateMessage/portalDatas" data-type='json' data-handler="changeMsgCenterPrivateMessageCountHandler" data-tpl="sysnotice_tpl" class="list-group list-group-flush"></div>
+		</div> -->
+		<div class="jbolt_tab_content px-0" id="todolist_tabcontent_inlayer">
+			<div id="todolist_portal" data-ajaxportal data-url="admin/msgcenter/todo/portalDatas" data-type='json' data-handler="changeMsgCenterTodoCountHandler" data-tpl="todo_tpl" class="list-group list-group-flush"></div>
+		</div>
+	</div>
+	<div class="jb_vfooter px-3 text-center">
+		<div class="btn btn-group" id="sys_notice_footer_btnbox_inlayer">
+			<a href="admin/msgcenter/0" data-openpage  class="btn btn-outline-secondary btn-sm">查看更多通知<i class="fa fa-arrow-right ml-1"></i></a>
+		</div>
+	<!-- 	<div class="btn btn-group d-none" id="private_msg_footer_btnbox_inlayer">
+			<a href="admin/msgcenter/1" data-openpage  class="btn btn-outline-secondary btn-sm">查看更多消息<i class="fa fa-arrow-right ml-1"></i></a>
+		</div> -->
+		<div class="btn btn-group d-none" id="todolist_footer_btnbox_inlayer">
+			<a href="admin/msgcenter/1" data-openpage  class="btn btn-outline-secondary btn-sm">查看更多待办<i class="fa fa-arrow-right ml-1"></i></a>
+		</div>
+	</div>
+</div>
+ 
+</div>
+</div>
+#end
+#define js()
+<!-- 数据模板定义-->
+<script type="text/template" id="sysnotice_tpl">
+{@if res.data&&res.data.length>0}
+{@each res.data as data,index}
+  <a href="admin/msgcenter/sysnotice/detail/${data.id}" data-openpage="dialog" data-keep-open="true" data-dialog-key="user_msgcenter_sysnotice_dialog" data-shade="false" data-area="500,90%"  data-title="${data.title}" class="list-group-item list-group-item-action py-3">
+    <div class="d-flex w-100 justify-content-between">
+      <span class="mb-1"><span class="text-${data.type|colorClassByLevel}">[${data.typeName}] </span>${data.title}</span>
+      <small><span class="text-nowrap rounded-pill px-2 border priorityLevel4_${data.priorityLevel}">${data.priorityLevelName}</span></small>
+    </div>
+    <small>${data.updateTime|pretty_time}</small>
+  </a>
+{@/each}
+{@else}
+<div class="text-muted text-center mt-5" style="font-size:18px;">暂无数据</div>
+{@/if}
+</script>
+<script type="text/template" id="todo_tpl">
+{@if res.data&&res.data.length>0}
+{@each res.data as data,index}
+  <a href="admin/msgcenter/todo/detail/${data.id}" data-openpage="dialog" data-keep-open="true" data-btn="close" data-dialog-key="user_msgcenter_todo_dialog" data-shade="false" data-area="800,700"  data-title="${data.title}" class="list-group-item list-group-item-action py-3">
+    <div class="d-flex w-100 justify-content-between">
+      <span class="mb-1"><span class="text-${data.state|colorClassByLevel}">[${data.stateName}] </span>${data.title}</span>
+      <small><span class="text-nowrap rounded-pill px-2 border priorityLevel4_${data.priorityLevel}">${data.priorityLevelName}</span></small>
+    </div>
+    <small>截止时间：${data.specifiedFinishTime|date_ymdhm}</small>
+  </a>
+{@/each}
+{@else}
+<div class="text-muted text-center mt-5" style="font-size:18px;">暂无数据</div>
+{@/if}
+</script>
+<script>
+/**
+ * 处理选项卡change后的回调
+ */
+function changeMsgCenterTabHandler(contentId,index){
+	var portal=$(contentId).find("[data-ajaxportal]");
+	if(isOk(portal)){
+		AjaxPortalUtil.refresh(portal);
+		switch(index){
+		    case 0:
+			    $("#sys_notice_footer_btnbox_inlayer").removeClass("d-none");
+			   // $("#private_msg_footer_btnbox_inlayer").addClass("d-none");
+			    $("#todolist_footer_btnbox_inlayer").addClass("d-none");
+		        break;
+		   //case 1:
+		    	  //$("#sys_notice_footer_btnbox_inlayer").addClass("d-none");
+				//  $("#private_msg_footer_btnbox_inlayer").removeClass("d-none");
+				 // $("#todolist_footer_btnbox_inlayer").addClass("d-none");
+		       // break;
+		    case 1:
+		    	  $("#sys_notice_footer_btnbox_inlayer").addClass("d-none");
+				// $("#private_msg_footer_btnbox_inlayer").addClass("d-none");
+				  $("#todolist_footer_btnbox_inlayer").removeClass("d-none");
+		        break;
+		}
+	}
+}
+
+function markAllAsReadHandler(btn,res){
+	AjaxPortalUtil.refresh($("#markAllAsReadBtn").data("portalid"));
+}
+function changeMsgCenterSysNoticeCountHandler(portal,htmlObj,json){
+	$("#sys_notice_count_box").text(json.data.length);
+}
+function changeMsgCenterPrivateMessageCountHandler(portal,htmlObj,json){
+	$("#private_msg_count_box").text(json.data.length);
+}
+function changeMsgCenterTodoCountHandler(portal,htmlObj,json){
+	$("#todo_count_box").text(json.data.length);
+}
+$(function(){
+	if(JBoltWS){
+		JBoltWS.sendCommand({command:"msgcenter_check_unread"});
+	}
+});
+</script>
+#end

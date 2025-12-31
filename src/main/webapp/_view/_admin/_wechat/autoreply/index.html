@@ -1,0 +1,81 @@
+#@adminDialogLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-sm-auto">
+	<h1>#(title??)</h1>
+	<span> #(pageData.totalRow?? 0) 条记录</span>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="wechatAutoreplyForm" action="#(action?? '#')"   method="post">
+		<input type="text" autocomplete="off"  class="form-control" placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+			<button  type="submit" class="btn btn-outline-secondary catdata_table_searchbtn" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-sm-auto">
+	<button data-area="700,400" data-scroll="yes" data-handler="reloadCurrentPage" data-title="新增回复规则" data-url="admin/wechat/autoreply/add/#(mpId?? 0)-#(type?? 0)" class="jbolt_table_addbtn btn btn-outline-success" ><i class="fa fa-plus"></i> 新增</button>
+	</div>
+	</div>
+	#switch (type)
+    #case (1)
+	<div class="text-danger text-right my-1">在这里配置关注公众平台后返回的消息，可以配置多个规则，但是同时只能启用一个规则，每个规则可以配置多个可返回消息</div>
+    #case (2)
+	<div class="text-danger text-right my-1">在这里配置公众平台中的关键词回复消息，可以配置多个规则，可以同时启用多个规则，每个规则可以配置多个关键词和多个可返回消息</div>
+    #case (3)
+	<div class="text-danger text-right my-1">在这里配置无消息返回时默认返回的消息，可以配置多个规则，但是同时只能启用一个规则，每个规则可以配置多个可返回消息</div>
+	#end
+
+</div>
+<div class="jbolt_page_content">
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-striped table-center">
+<thead>
+<tr><th style="width: 60px">序号</th><th>名称</th><th>回复类型</th>
+#if(type==WechatAutoreplyType.KEYWORDS.value)
+<th>关键词</th>
+#end
+<th>回复内容</th>
+<th>是否启用</th>
+<th>创建时间</th>
+<th  style="width: 120px">操作</th></tr>
+</thead>
+<tbody>
+#for(data:pageData.list??)
+<tr>
+<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+<td>#(data.name??)</td>
+<td>
+#if(data.replyType==WechatAutoreplyReplyType.RANDOMONE.value)随机一条#end
+#if(data.replyType==WechatAutoreplyReplyType.ALL.value)全部#end
+</td>
+  
+#if(type==WechatAutoreplyType.KEYWORDS.value)
+<td><a href="admin/wechat/keywords/#(data.id)" data-btn="no" data-dialogbtn data-area="850,90%" data-btn="no" data-target="parent"  data-title="关键词管理">管理</a></td>
+#end
+<td>
+<a href="admin/wechat/replycontent/#(data.id)" data-btn="no" data-dialogbtn data-area="90%,90%" data-scroll="yes" data-target="parent" data-title="回复内容管理">管理</a>
+</td>
+<td style="width: 100px"><img data-switchbtn data-value="#(data.enable?? false)" data-url="admin/wechat/autoreply/toggleEnable/#(mpId?? 0)-#(type?? 0)-#(data.id)" #if(type!=2)data-handler="reloadCurrentPage" #end/></td>
+<td style="width: 160px">#date(data.createTime,"yyyy-MM-dd HH:mm:ss")</td>
+<td style="width: 100px">
+<a  tooltip  title="编辑"  href="admin/wechat/autoreply/edit/#(mpId?? 0)-#(type?? 0)-#(data.id)" data-scroll="yes" data-handler="reloadCurrentPage" data-title="编辑" data-area="700,400" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/wechat/autoreply/delete/#(mpId?? 0)-#(type?? 0)-#(data.id)" data-handler="removeTr" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+#end
+</tbody>
+</table>
+</div>
+#include("/_view/_admin/common/_page.html",pageEleId="wechatAutoreplyPage")
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+	initPage("wechatAutoreplyPage",#(pageData.totalPage??),#(pageData.pageNumber??),"wechatAutoreplyForm");
+});
+</script>
+#end
+

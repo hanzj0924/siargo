@@ -1,0 +1,141 @@
+<div class="position-absolute bg-light" style="z-index:999999;margin-top:2px;margin-left:2px;" id="code_gen_model_attr_toolbar_#(pageId)">
+	<div class="btn-group btn-group-sm" role="group" aria-label="btn-group">
+		<button onclick="jboltTableRefresh(this)" class="btn btn-outline-success btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+		<button data-ajaxbtn data-confirm="确认同步表[#(codeGen.mainTableName)]的所有字段和顺序？" data-handler="refreshJBoltTable" data-url="admin/codegen/modelattr/sync/#(codeGenId?? 0)" class="btn btn-outline-primary btn-sm"><i class="fa fa-refresh"></i> 同步字段</button>
+		<button data-ajaxbtn data-confirm="确认刷新枚举类缓存吗？" data-url="admin/codegen/refreshEnumsCache" class="btn btn-outline-success btn-sm"><i class="fa fa-refresh"></i> 枚举</button>
+		<button data-ajaxbtn data-confirm="确认刷新缓存类缓存吗？" data-url="admin/codegen/refreshCachesCache" class="btn btn-outline-success btn-sm"><i class="fa fa-refresh"></i> 缓存</button>
+		<button data-ajaxbtn data-confirm="确认刷新Service缓存吗？" data-url="admin/codegen/refreshServicesCache" class="btn btn-outline-success btn-sm"><i class="fa fa-refresh"></i> Service</button>
+	</div>
+</div>
+<!-- codeGen model attr 的数据模板定义-->
+<textarea class="jb_tpl_box" id="code_gen_model_attr_tpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.colName}</td>
+<td>${data.remark}</td>
+<td>${data.attrName}</td>
+<td><span tooltip data-title="${data.javaType}">${data.javaTypeName}</span></td>
+<td>${data.attrLength}</td>
+<td>${data.attrFixed}</td>
+<td><img data-switchbtn data-handler="refreshJBoltTable" data-value="${data.isPkey}" data-url="admin/codegen/modelattr/toggleIsPkey/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img {@if data.isPkey}class="d-none"{@/if} tooltip data-title="开启后 在save和update时 检测此表中其它数据此列是否存在相同值" data-switchbtn data-value="${data.isNeedCheckExists}" data-url="admin/codegen/modelattr/toggleIsNeedCheckExists/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isTableCol}" data-url="admin/codegen/modelattr/toggleIsTableCol/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isSortable}" data-url="admin/codegen/modelattr/toggleIsSortable/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isImportCol}" data-url="admin/codegen/modelattr/toggleIsImportCol/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isExportCol}" data-url="admin/codegen/modelattr/toggleIsExportCol/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isTableSwitchbtn}" data-url="admin/codegen/modelattr/toggleIsTableSwitchbtn/${data.id}-#(codeGenId?? 0)"/></td>
+<td>${data.tableLabel}</td>
+<td data-value="${data.colFormat}">${data.colFormatName}</td>
+<td><img data-handler="switchEditableTd" data-switchbtn data-value="${data.isNeedTranslate}"/></td>
+<td data-value="${data.translateType}"><span class="badge badge-info badge-pill px-2 py-1">${data.translateTypeName}</span></td>
+<td data-value="${data.translateUseValue}">${data.translateUseValueName}</td>
+<td>${data.translateColName}</td>
+<td><img data-switchbtn data-value="${data.isSearchEle}" data-handler="refreshJBoltTable" data-url="admin/codegen/modelattr/toggleIsSearchEle/${data.id}-#(codeGenId?? 0)"/></td>
+<td>{@if data.isSearchEle}<img data-switchbtn data-value="${data.isFuzzyQuery}" data-handler="refreshJBoltTable" data-url="admin/codegen/modelattr/toggleIsFuzzyQuery/${data.id}-#(codeGenId?? 0)"/>{@/if}</td>
+<td data-value="${data.fuzzyQueryType}">{@if data.isSearchEle && data.isFuzzyQuery}${data.fuzzyQueryTypeName}{@/if}</td>
+<td><img data-switchbtn data-value="${data.isKeywordsColumn}" data-url="admin/codegen/modelattr/toggleIsKeywordsColumn/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isSearchRequired}" data-url="admin/codegen/modelattr/toggleIsSearchRequired/${data.id}-#(codeGenId?? 0)"/></td>
+<td data-value="${data.searchUiType}">${data.searchUITypeName}</td>
+<td data-value="${data.searchDataType}"><span class="badge badge-info  badge-pill px-2 py-1">${data.searchDataTypeName}</span></td>
+<td data-value="${data.searchDataValue}">${data.searchDataValueName}</td>
+<td data-value="${data.searchDefaultValue}">${data.searchDefaultValueName}</td>
+<td>${data.searchDataTextAttr}</td>
+<td>${data.searchDataValueAttr}</td>
+<td>${data.searchDataColumnAttr}</td>
+<td data-value="${data.dataRuleForSearch}">${data.dataRuleForSearchName}</td>
+<td>${data.dataTipsForSearch}</td>
+#if(codeGen.isCrud)
+<td><img data-switchbtn data-value="${data.isFormEle}" data-url="admin/codegen/modelattr/toggleIsFormEle/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isRequired}" data-url="admin/codegen/modelattr/toggleIsRequired/${data.id}-#(codeGenId?? 0)"/></td>
+<td><img data-switchbtn data-value="${data.isSingleLine}" data-url="admin/codegen/modelattr/toggleIsSingleLine/${data.id}-#(codeGenId?? 0)"/></td>
+<td>${data.formLabel}</td>
+<td data-value="${data.formUiType}">${data.formUITypeName}</td>
+<td data-value="${data.formDataType}"><span class="badge badge-info  badge-pill px-2 py-1">${data.formDataTypeName}</span></td>
+<td data-value="${data.formDataValue}">${data.formDataValueName}</td>
+<td data-value="${data.formDefaultValue}">${data.formDefaultValueName}</td>
+<td>${data.formDataTextAttr}</td>
+<td>${data.formDataValueAttr}</td>
+<td>${data.formDataColumnAttr}</td>
+<td data-value="${data.dataRule}">${data.dataRuleName}</td>
+<td>${data.dataTips}</td>
+#end
+</tr>
+{@/each}
+</textarea>
+<table class="table-center" id="code_gen_model_attr_table_#(pageId)"
+  data-jbolttable
+  data-ajax="true"
+  data-fixed-columns-left="1,2,3"
+	   data-row-click-active="true"
+  data-height="fill_box"
+  data-bind-elements="#code_gen_model_attr_toolbar_#(pageId)"
+  data-column-resize="true"
+  data-url="admin/codegen/modelattr/datas/#(codeGenId?? 0)"
+  data-rowtpl="code_gen_model_attr_tpl_#(pageId)"
+  data-editable="true"
+  data-copy-to-excel="false"
+  data-editable-option="getModelAttrEditableTableOptions_#(pageId)"
+  >
+<thead class="fw_normal">
+<tr>
+<th rowspan="2" data-width="50" data-column="index">序号</th>
+<th rowspan="2" data-width="120" data-column="col_name">列名</th>
+<th rowspan="2" data-width="150" data-column="remark">数据库备注</th>
+<th rowspan="2" data-width="120" data-column="attr_name">驼峰格式</th>
+<th rowspan="2" data-width="100" data-column="java_type">Java类型</th>
+<th rowspan="2" data-width="60" data-column="attr_length">长度</th>
+<th rowspan="2" data-width="70" data-column="attr_fixed">小数点</th>
+<th rowspan="2" data-width="80" data-column="is_pkey">主键</th>
+<th rowspan="2" data-width="110" data-column="is_need_check_exists">唯一性检测</th>
+<th colspan="7" class="bg-primary text-white">列表页基础配置</th>
+<th colspan="4" class="bg-info text-white">列翻译配置</th>
+<th colspan="14" class="bg-success text-white">查询条件配置</th>
+#if(codeGen.isCrud)
+<th colspan="13" class="bg-info text-white">表单内配置</th>
+#end
+</tr>
+<tr>
+<th data-width="80" data-column="is_table_col">显示</th>
+<th data-width="80" data-column="is_sortable">排序</th>
+<th data-width="80" data-column="is_import_col">导入</th>
+<th data-width="80" data-column="is_export_col">导出</th>
+<th data-width="80" data-column="is_table_switchbtn">切换</th>
+<th data-width="120" data-column="table_label">名称</th>
+<th data-width="250" data-column="col_format">格式化</th>
+<th data-width="80" data-column="is_need_translate">翻译</th>
+<th data-width="200" data-column="translate_type">类型</th>
+<th data-width="600" data-column="translate_use_value">用值</th>
+<th data-width="200" data-column="translate_col_name">新列名</th>
+<th data-width="100" data-column="is_search_ele">查询条件</th>
+<th data-width="100" data-column="is_fuzzy_query">模糊查询</th>
+<th data-width="120" data-column="fuzzy_query_type">模糊查询类型</th>
+<th data-min-width="120" data-column="is_keywords_column">关键词检索字段</th>
+<th data-width="80" data-column="is_search_required">必填</th>
+<th data-min-width="200" data-column="search_ui_type">UI组件</th>
+<th data-width="120" data-column="search_data_type">数据源类型</th>
+<th data-width="150" data-column="search_data_value">数据源值</th>
+<th data-width="120" data-column="search_default_value">默认值</th>
+<th data-width="120" data-column="search_data_text_attr">data-text-attr</th>
+<th data-width="150" data-column="search_data_value_attr">data-value-attr</th>
+<th data-width="150" data-column="search_data_column_attr">data-column-attr</th>
+<th data-width="150" data-column="data_rule_for_search">校验规则</th>
+<th data-width="300" data-column="data_tips_for_search">校验提示</th>
+#if(codeGen.isCrud)
+<th data-width="80" data-column="is_form_ele">编辑</th>
+<th data-width="80" data-column="is_required">必填</th>
+<th data-width="80" data-column="is_single_line">新行</th>
+<th data-width="120" data-column="form_label">名称</th>
+<th data-width="200" data-column="form_ui_type">UI组件</th>
+<th data-width="120" data-column="form_data_type">数据源类型</th>
+<th data-width="150" data-column="form_data_value">数据源值</th>
+<th data-width="120" data-column="form_default_value">默认值</th>
+<th data-width="120" data-column="form_data_text_attr">data-text-attr</th>
+<th data-width="150" data-column="form_data_value_attr">data-value-attr</th>
+<th data-width="150" data-column="form_data_column_attr">data-column-attr</th>
+<th data-width="150" data-column="data_rule">校验规则</th>
+<th data-width="300" data-column="data_tips">校验提示</th>
+#end
+</thead>
+<tbody></tbody>
+</table>

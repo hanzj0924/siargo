@@ -1,0 +1,29 @@
+<form onsubmit="return false;" id="dictionaryTypeForm" action="#(action)" method="post">
+	#if(dictionaryType.id??)
+		<input type="hidden" name="dictionaryType.id" value="#(dictionaryType.id)" />
+	#end
+	<div class="form-group">
+		<label>请输入名称</label>
+		<input type="text" autocomplete="off" autofocus="autofocus"  class="form-control" data-rule="required" data-tips="请输入名称" maxlength="20" name="dictionaryType.name" value="#(dictionaryType.name??)">
+	</div>
+	<div class="form-group">
+		<label>标识Key</label>
+		<input type="text" autocomplete="off"  class="form-control" data-rule="required" data-tips="请输入Key" maxlength="40" name="dictionaryType.typeKey" value="#(dictionaryType.typeKey??)">
+	</div>
+	<div class="form-group" data-radio data-rule="radio"  data-value="#(dictionaryType.modeLevel??)" data-name="dictionaryType.modeLevel" data-default="1">
+	<label>模式层级</label>
+		<div >
+				<div class="radio radio-primary  radio-inline">
+				<input id="r1" type="radio" name="dictionaryType.modeLevel"   value="#(DictionaryTypeMode.LEVEL_ONE.value)"/>
+				<label for="r1">一级</label>
+				</div>
+				<div class="radio radio-primary  radio-inline">
+				<input id="r2" type="radio" name="dictionaryType.modeLevel"   value="#(DictionaryTypeMode.LEVEL_MULTI.value)"/>
+				<label for="r2">多级</label>
+				</div>
+		</div>
+	</div>
+</form>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="dictionaryTypeForm")
+#end

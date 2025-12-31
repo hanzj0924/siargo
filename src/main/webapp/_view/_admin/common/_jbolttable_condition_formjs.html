@@ -1,0 +1,34 @@
+<script>
+needPjax=false;
+//改变原有确定按钮的title为-查询
+changeParentLayerDialogBtnTitle(0,"查询");
+var _submit_ing=false;
+function submitThisForm(successCallback){
+	if(_submit_ing){
+		return false;
+	}
+	_submit_ing=true;
+	var formId="#(formId)";
+	var form=$("#"+formId);
+	if(FormChecker.check(form)){
+		if(window.beforeFormSubmit){
+			var ret=beforeFormSubmit();
+			if(ret==false){
+				_submit_ing=false;
+				return false;
+			}
+		}
+		LayerMsgBox.loading("正在查询...",5000);
+		var success=jboltTableLoadByDialogForm("conditionForm");
+		LayerMsgBox.closeLoadingNow();
+		#if(!keepAfterSubmit)
+		if(success&&successCallback){
+			successCallback();
+		}
+		#end
+		_submit_ing=false;
+	}else{
+		_submit_ing=false;
+		}
+}
+</script>

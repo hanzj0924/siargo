@@ -1,0 +1,125 @@
+<form onsubmit="return false;" id="wechatconfigForm" action="#(action)" method="post">
+	<input type="hidden" name="configCount" value="#(configCount?? 0)" />
+	<input type="hidden" name="mpId" value="#(mpId)" />
+	#for(data:configList)
+	#if(data.configKey==WechatConfigKey.SERVER_MSG_ENCRYPT_TYPE)
+ 	<div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(data.configValue??)" 
+		data-name="config[#(for.index)].configValue" 
+		data-default="3">
+		<label class="col-3 col-form-label" >#(data.name??)：</label>
+			<div class="col-8"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline" tooltip data-title="明文模式下，不使用消息体加解密功能，安全系数较低">
+					<input  id="config_#(for.index)_1" type="radio" name="config[#(for.index)].configValue"   value="1"/>
+					<label for="config_#(for.index)_1">明文模式</label>
+				</div>
+				<div class="radio radio-primary  radio-inline" tooltip data-title="兼容模式下，明文、密文将共存，方便开发者调试和维护">
+					<input  id="config_#(for.index)_2" type="radio" name="config[#(for.index)].configValue"   value="2"/>
+					<label for="config_#(for.index)_2">兼容模式</label>
+				</div>
+				<div class="radio radio-primary  radio-inline" tooltip data-title="安全模式下，消息包为纯密文，需要开发者加密和解密，安全系数高">
+					<input  id="config_#(for.index)_3" type="radio" name="config[#(for.index)].configValue"   value="3"/>
+					<label for="config_#(for.index)_3">安全模式(推荐)</label>
+				</div>
+			</div>
+		</div>
+	#elseif(data.configKey==WechatConfigKey.LIMIT_PAY)
+	<div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(data.configValue??)" 
+		data-name="config[#(for.index)].configValue" 
+		data-default="options_first">
+		<label class="col-3 col-form-label" >#(data.name??)：</label>
+			<div class="col-8"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="config_#(for.index)_no" type="radio" name="config[#(for.index)].configValue"   value=""/>
+					<label for="config_#(for.index)_no">无限制</label>
+				</div>
+				<div class="radio radio-primary  radio-inline">
+					<input  id="config_#(for.index)_no_credit" type="radio" name="config[#(for.index)].configValue"   value="no_credit"/>
+					<label for="config_#(for.index)_no_credit">不能使用信用卡</label>
+				</div>
+			</div>
+		</div>
+	#elseif(data.configKey==WechatConfigKey.RECEIPT)
+	<div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(data.configValue??)" 
+		data-name="config[#(for.index)].configValue" 
+		data-default="options_last">
+		<label class="col-3 col-form-label" >#(data.name??)：</label>
+			<div class="col-8"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="config_#(for.index)_y" type="radio" name="config[#(for.index)].configValue"   value="Y"/>
+					<label for="config_#(for.index)_y">开放</label>
+				</div>
+				<div class="radio radio-primary  radio-inline">
+					<input  id="config_#(for.index)_no" type="radio" name="config[#(for.index)].configValue"   value=""/>
+					<label for="config_#(for.index)_no">不开放</label>
+				</div>
+			</div>
+		</div>
+	#elseif(data.configKey==WechatConfigKey.SERVER_DATA_FORMAT)
+	<div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(data.configValue??)" 
+		data-name="config[#(for.index)].configValue" 
+		data-default="XML">
+		<label class="col-3 col-form-label" >#(data.name??)：</label>
+			<div class="col-8"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="config_#(for.index)_xml" type="radio" name="config[#(for.index)].configValue"   value="XML"/>
+					<label for="config_#(for.index)_xml">XML</label>
+				</div>
+				<div class="radio radio-primary  radio-inline">
+					<input  id="config_#(for.index)_json" type="radio" name="config[#(for.index)].configValue"   value="JSON"/>
+					<label for="config_#(for.index)_json">JSON</label>
+				</div>
+			</div>
+		</div>
+	#elseif(data.configKey==WechatConfigKey.SERVER_DOMAIN_URL)
+	<div class="form-group row">
+		<label class="col-3 col-form-label">#(data.name??):</label>
+		<div class="col-8">
+		<input type="text" readonly="readonly" autocomplete="off"  class="form-control"  maxlength="255"   value="#(data.configValue??)">
+		</div>
+	</div>
+	#elseif(data.configKey==WechatConfigKey.MUSIC_POST_MEDIAID)
+	<div class="form-group row">
+		<label class="col-3 col-form-label">#(data.name??):</label>
+		<div class="col-8">
+		<input type="text" id="mediaId" readonly="readonly"  name="config[#(for.index)].configValue"  autocomplete="off"  class="form-control"  maxlength="255"   value="#(data.configValue??)">
+		</div>
+	</div>
+	#else
+ 	<div class="form-group row">
+		<label class="col-3 col-form-label">#(data.name??):</label>
+		<div class="col-8">
+		<input type="text" autocomplete="off" #if(for.index==0) autofocus="autofocus" #end  class="form-control" placeholder="请输入#(data.name??)的值"   maxlength="255" name="config[#(for.index)].configValue" value="#(data.configValue??)">
+		</div>
+	</div>
+	#end
+	<input type="hidden" class="form-control" data-rule="required;len<=200;" data-tips="#(data.name??)配置ID有误" maxlength="200" name="config[#(for.index)].id" value="#(data.id??)">
+	<input type="hidden" class="form-control" data-rule="required;len<=200;" data-tips="请输入#(data.name??)的值" maxlength="200" name="config[#(for.index)].configKey" value="#(data.configKey??)">
+ 	#end
+  
+ 
+</form>
+#for(data:configList)
+#if(data.configKey==WechatConfigKey.MUSIC_POST_MEDIAID)
+	<fieldset class="form-page-fieldset">
+	<legend>上传素材到微信服务器，获取MediaId</legend>
+	<div class="form-group text-center">
+			<div class="j_img_uploder" data-value="#(data.imgUrl??)" data-url="admin/wechat/config/uploadWechatMusicImgMedia/#(mpId?? 0)"  data-handler="uploadFile"  data-hiddeninput="mediaId"  data-area="200,200" data-maxsize="100" style="width: 128px; height: 128px;"></div>
+	</div>
+	</fieldset>
+	#end
+	#end
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="wechatconfigForm")
+#end

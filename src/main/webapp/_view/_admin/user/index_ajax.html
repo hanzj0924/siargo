@@ -1,0 +1,198 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+#set(deptEnable=JBoltGlobalConfigCache.deptEnable())
+#set(postEnable=JBoltGlobalConfigCache.postEnable())
+#set(userExtendEnable=JBoltGlobalConfigCache.userExtendEnable())
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="jbicon2 jbi-solution"></i> 系统用户管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" onsubmit="return false;" id="adminUserForm_#(pageId)" action="admin/user/datas" data-pjaxsubmit  method="get">
+		#if(deptEnable)
+		<input type="hidden" name="deptId"/>
+		<input type="hidden" id="assignDept_#(pageId)" name="assignDept" value="true"/>
+		#end
+		<input type="text" autocomplete="off"  class="form-control" placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+		<select class="form-control" name="ofModule" data-autoload data-url="admin/user/modules" data-text="=所属模块=" ></select>
+		<select class="form-control" name="sex" data-autoload data-url="admin/user/sexOptions" data-text="=性别=" ></select>
+		#if(postEnable)
+		<select class="form-control" name="postId" data-autoload data-url="admin/post/enableOptions" data-text="=岗位=" ></select>
+		#end
+		<select class="form-control" name="roleId" data-autoload data-url="admin/role/options" data-text="=角色=" ></select>
+		<select class="form-control" name="enable" data-autoload data-options="启用:true,禁用:false" data-text="=状态=" ></select>
+		<button type="submit" class="btn btn-outline-secondary catdata_table_searchbtn" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+		<button data-area="#(userExtendEnable?'80%':1080),700" data-handler="refreshJBoltTable" data-title="新增内部人员账户" data-url="admin/user/add" class="jbolt_table_addbtn btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="user_table_rowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.name}</td>
+<td><img data-photobtn tooltip data-title="点击查看大图"  style="width: 60px;height: 60px;border-radius:50%;" src="${data.avatar|real_image}" onerror="this.src='assets/img/avatar.jpg'"/></td>
+<td>${data.sn}</td>
+<td>${data.sex|sex}</td>
+<td>${data.age}</td>
+<td>
+{@if data.userRoles}
+{@each data.userRoles as role,index}
+<span class="badge badge-${(+index+1)|colorClassByLevel} d-block my-1">${role.name}</span>
+{@/each}
+{@else}
+<span class="badge badge-default">未设置</span>
+{@/if}
+</td>
+#if(deptEnable)
+<td>${data.deptSnAndName}</td>
+#end
+#if(postEnable)
+<td>
+{@if data.userPosts}
+{@each data.userPosts as post,index}
+<span class="badge badge-${(+index+1)|colorClassByLevel} d-block my-1">${post.name}</span>
+{@/each}
+{@else}
+<span class="badge badge-default">未设置</span>
+{@/if}
+</td>
+#end
+<td>${data.username}</td>
+<td>${data.phone?data.phone:"未设置"}</td>
+<td>${data.email?data.email:"未设置"}</td>
+<td>$${data.isSystemAdmin?'<span class="badge badge-primary">超级管理员</span>':'<span class="badge badge-dark">一般用户</span>'}</td>
+#if(userExtendEnable)
+<td>
+	<a class="btn btn-outline-primary btn-sm" data-dialogbtn href="admin/user/extendDetail/${data.id}" data-area="600,700" data-btn="close" data-dialog-title="查看[${data.username}]扩展信息"><i class="fa fa-credit-card mr-1"></i></a>
+</td>
+#end
+<td>
+<img data-switchbtn data-value="${data.enable!=null?data.enable:false}"  data-url="admin/user/toggleEnable/${data.id}"/></td>
+<td>
+<a  tooltip  title="编辑"  href="admin/user/edit/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="编辑" data-area="#(userExtendEnable?'80%':1080),700" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="重置密码"  href="admin/user/editpwd/${data.id}" data-handler="LayerMsgBox.success('重置成功',1000)" data-title="重置[${data.name}]密码" data-area="700,300" class="jbolt_table_editbtn"><i class="fa fa-key c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/user/delete/${data.id}" data-handler="refreshJBoltTable" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+{@/each}
+</script>
+#if(deptEnable)
+<div class="jbolt_table_leftbox" style="width:240px;" id="admin_user_leftbox_#(pageId)">
+<div class="jb_header"><i class="fa fa-cubes"></i> <span>部门</span>
+	<a class="btn btn-sm btn-outline-secondary mx-1" id="notAssignDeptBtn_#(pageId)" href="javascript:void(0)" tooltip data-title="查询未分配部门的员工"  onclick="notAssignDeptSearch_#(pageId)()">无部门用户查询</a>
+	<div class="pull-right">
+			<a href="javascript:void(0)" tooltip data-title="刷新" onclick="refreshDeptJsTree_#(pageId)()"><i class="fa fa-refresh mr-2"></i></a>
+			<a href="javascript:void(0)"  id="deptJsTreeClearbtn_#(pageId)" class="d-none" tooltip data-title="清空选择" onclick="clearDeptJsTreeSelected_#(pageId)()"><i class="fa fa-remove text-danger"></i></a>
+		</div>
+	</div>
+	<div class="jb_body">
+	<div class="form-group">
+		    <input type="text"  data-with-clearbtn class="form-control" id="deptJsTreeSearchInput_#(pageId)"  aria-describedby="smallId" placeholder="关键字搜索" />
+		</div>
+		<div id="deptTree_#(pageId)"
+			data-jstree
+			data-search-input="deptJsTreeSearchInput_#(pageId)"
+			data-open-level="1"
+			data-read-url="admin/dept/enableJsTreeDatas/"
+			data-change-handler="changeDept_#(pageId)"
+			></div>
+	</div>
+</div>
+#end
+<table class="table-center thead_font_normal"
+data-jbolttable
+data-width="auto"
+data-ajax="true"
+data-url="admin/user/datas"
+data-page="user_table_page_#(pageId)"
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="#(userExtendEnable?'-3,':'')-2,-1"
+data-rowtpl="user_table_rowtpl_#(pageId)"
+data-conditions-form="adminUserForm_#(pageId)"
+data-column-resize="true"
+#if(deptEnable)
+data-leftbox="admin_user_leftbox_#(pageId)"
+#end
+>
+<thead>
+<tr>
+<th data-width="60">序号</th>
+<th data-width="150">姓名</th>
+<th data-width="120">头像</th>
+<th data-width="80">编号</th>
+<th data-width="80">性别</th>
+<th data-width="80">年龄</th>
+<th data-width="100">角色</th>
+#if(deptEnable)
+<th data-min-width="200">部门</th>
+#end
+#if(postEnable)
+<th data-width="150">岗位</th>
+#end
+<th data-width="150">用户名</th>
+<th data-width="120">手机号</th>
+<th data-width="250">E-Mail</th>
+<th data-width="100">是否为超管</th>
+#if(userExtendEnable)
+<th data-width="80">扩展信息</th>
+#end
+<th data-width="80">是否启用</th>
+<th data-width="120">操作</th></tr>
+</thead>
+<tbody></tbody>
+</table>	
+</div>
+</div>
+#end
+#define js()
+<script>
+var deptTree_#(pageId)=$("#deptTree_#(pageId)");
+var adminUserForm_#(pageId)=$("#adminUserForm_#(pageId)");
+var deptClearBtn_#(pageId)=$("#deptJsTreeClearbtn_#(pageId)");
+var notAssignDeptBtn_#(pageId) = $("#notAssignDeptBtn_#(pageId)");
+/**
+ * 按分类查询
+ */
+function changeDept_#(pageId)(tree,treeNode){
+	deptClearBtn_#(pageId).removeClass("d-none");
+	adminUserForm_#(pageId).find("[name='deptId']").val(treeNode.id);
+	adminUserForm_#(pageId).find("[name='assignDept']").val("true");
+	notAssignDeptBtn_#(pageId).removeClass("btn-primary").addClass("btn-outline-secondary");
+	jboltTablePageToFirst(deptTree_#(pageId));
+}
+
+function clearDeptJsTreeSelected_#(pageId)(){
+	JSTreeUtil.clearSelected(deptTree_#(pageId));
+	adminUserForm_#(pageId).find("[name='deptId']").val("");
+	deptClearBtn_#(pageId).addClass("d-none");
+	adminUserForm_#(pageId).find("[name='assignDept']").val("true");
+	notAssignDeptBtn_#(pageId).removeClass("btn-primary").addClass("btn-outline-secondary");
+	jboltTablePageToFirst(deptTree_#(pageId));
+}
+
+function notAssignDeptSearch_#(pageId)(){
+	JSTreeUtil.clearSelected(deptTree_#(pageId));
+	adminUserForm_#(pageId).find("[name='assignDept']").val("false");
+	deptClearBtn_#(pageId).removeClass("d-none");
+	notAssignDeptBtn_#(pageId).addClass("btn-primary").removeClass("btn-outline-secondary");
+	jboltTablePageToFirst(deptTree_#(pageId));
+}
+
+function refreshDeptJsTree_#(pageId)(){
+	var deptId=adminUserForm_#(pageId).find("input[name='deptId']").val();
+	JSTreeUtil.refresh(deptTree_#(pageId),deptId?deptId:0);
+}
+$(function(){
+});
+</script>
+#end
+

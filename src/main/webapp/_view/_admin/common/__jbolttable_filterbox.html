@@ -1,0 +1,43 @@
+<script type="text/template" id="filterbox_tpl">
+<fieldset>
+<legend class="p-0 m-0"><span class="text-dark px-2" style="font-size:16px;"><i class="fa fa-filter mx-1"></i>筛选条件：</span><a tooltip title="添加筛选条件" class="text-primary hand" href="javascript:void(0)" onclick="jboltTableMenuAddFilterItem(this)" style="font-size:14px;"><i class="fa fa-plus"></i></a><a tooltip title="清空筛选条件" class="text-danger ml-3 hand" href="javascript:void(0)" onclick="jboltTableMenuClearFilter(this)" style="font-size:14px;"><i class="fa fa-trash"></i></a><button onclick="jboltTableMenuFilter(this)" class="btn btn-light text-primary btn-sm pull-right mt-1 mr-2"><i class="fa fa-check"></i> OK</button></legend>
+<div class="jbolttable_filters p-2 d-none">
+<div class="jbolttable_filter_item d-flex mb-1 jbolttable_filter_item_tpl">
+<select class="form-control d-inline-block" name="column" style="width:120px;">
+<option>=列=</option>
+{@each columns as column}
+<option data-type="${column.type?column.type:1}" data-comparison="${column.comparison?column.comparison:'like'}" value="${column.column}">${column.text}</option>
+{@/each}
+</select>
+<select class="form-control mx-1" name="comparison" style="width:100px;">
+<option> = 条件 = </option>
+<option value="like">包含</option>
+<option value="notLike">不包含</option>
+<option value="startWith">开头是</option>
+<option value="notStartWith">开头不是</option>
+<option value="endWith">结尾是</option>
+<option value="notEndWith">结尾不是</option>
+<option value="eq">等于</option>
+<option value="ge">大于等于</option>
+<option value="gt">大于</option>
+<option value="le">小于等于</option>
+<option value="lt">小于</option>
+<option value="noteq">不等于</option>
+<option value="empty">为空</option>
+<option value="notEmpty">不为空</option>
+</select>
+<input class="form-control" type="text" name="value" data-rule="required" data-notnull="false" autocomplete="off" placeholder="值"/>
+<img src="assets/img/on.png" name="value" data-text="true:false" data-switchbtn data-value="true" class="ml-3 mr-1 mt-2 is_current"/>
+<a href="javascript:void(0)" onclick="$(this).closest('.jbolttable_filter_item').remove()" class="text-danger hand mt-2 mx-2"><i class="fa fa-trash"></i></a>
+</div>
+</div>
+<div class="jbolttable_filter_items p-2">
+
+</div>
+</fieldset>
+</script>
+<script type="text/template" id="filterbox_page_tpl">
+<div class="jbolttable_custom_page d-flex p-2">
+<div class="ml-2"><label class="col-form-label">每页显示:</label></div><div class="mx-1" style="width:100px"><input class="form-control" type="number" data-rule="pint" name="pageSize" value="${pageSize?pageSize:10}" placeholder="每页数量" /></div><div><label class="col-form-label">条数据</label></div><div class="col text-right pr-0"><button onclick="jboltTableMenuFilter(this)" class="btn btn-light text-primary btn-sm"><i class="fa fa-check"></i> OK</button></div>
+</div>
+</script>

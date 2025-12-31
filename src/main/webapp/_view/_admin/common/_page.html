@@ -1,0 +1,22 @@
+<!--分页-->
+<div class="pages text-right noselect">
+<div class="mainPagination  mb-1 mb-sm-0  d-block d-sm-inline-block text-center" id="#(pageEleId??)"></div>
+<div class="searchPage d-none d-sm-inline-block">
+<span class="page-go pl-3">到<input style="width:50px;" id="gonu" data-rule="pint;<=#((pageData.totalPage??&&pageData.totalPage==0)?1:pageData.totalPage??)" data-tips="请输入正整数 并且小于等于#((pageData.totalPage??&&pageData.totalPage==0)?1:pageData.totalPage??)" type="text"  oninput="return FormChecker.checkIt(this)" min="1" maxlength="6" max="#(pageData.totalPage?? 1)"  pattern="[0-9]*" class="current_page" value="#(pageData.pageNumber?? 1)">页</span>
+<a href="javascript:;" class="page-btn">GO</a>
+<span class="page-sum">共&nbsp;<strong id="totalRow" class="allPage">#(pageData.totalRow?? 0)</strong>&nbsp;条&nbsp;<strong  id="totalPage" class="allPage">#((pageData.totalPage??&&pageData.totalPage==0)?1:pageData.totalPage??)</strong>&nbsp;页</span>
+<select id="pageSize" data-autoload data-select="#(pageData.pageSize?? 10)" class="mx-2" style="width:80px;height: 32px;margin-top:-1px;border-color:#e6e6e6;">
+<option value="5">5条/页</option>
+<option value="10">10条/页</option>
+<option value="15">15条/页</option>
+<option value="20">20条/页</option>
+<option value="25">25条/页</option>
+<option value="30">30条/页</option>
+<option value="35">35条/页</option>
+<option value="40">40条/页</option>
+<option value="45">45条/页</option>
+<option value="50">50条/页</option>
+</select>
+</div>
+</div>
+<div class="clearfix"></div>

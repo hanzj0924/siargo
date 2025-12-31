@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+    <appenders>
+ 		<Console name="DruidSqlConsole" target="SYSTEM_OUT">
+            <!--只接受程序中DEBUG级别的日志进行处理-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="[JBolt Sql Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx"/>
+        </Console>
+        <Console name="JBoltConsole" target="SYSTEM_OUT">
+            <!--只接受程序中DEBUG级别的日志进行处理-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="[JBolt System Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--只接受程序中DEBUG级别的日志进行处理-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="[JBolt Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+
+        <!-- JBolt中的action Report 控制台输出LGO -->
+         <Console name="JBoltActionReportConsole" target="SYSTEM_OUT">
+            <!--只接受程序中DEBUG级别的日志进行处理-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="[JBolt Action Report:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+        <!--处理actionreport日志，并把该日志放到logs/jfinal_action_report.log文件中-->
+        <RollingFile name="RollingFileJBoltActionReport" fileName="./logs/jfinal_action_report.log"
+                     filePattern="logs/$${date:yyyy-MM}/jfinal_action_report-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="DEBUG"/>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] %-5level %class{36} %L %M - %msg%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <!-- JBolt中的JBoltAutoCache自动化缓存 CacheKey Debug 控制台输出LOG -->
+         <Console name="JBoltAutoCacheConsole" target="SYSTEM_OUT">
+            <!--只接受程序中DEBUG级别的日志进行处理-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="[JBolt Auto Cache Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+        <!-- JBolt中的JBoltWebSocket 控制台输出LOG -->
+         <Console name="JBoltWebSocketConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="[JBolt WebSocket Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+        <!-- JBolt中的JBoltCron4j 控制台输出LOG -->
+        <Console name="JBoltCron4jConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="[JBolt Cron4j task Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+        <!-- JBolt中的JBoltApiConsole Debug 控制台输出LOG -->
+         <Console name="JBoltApiConsole" target="SYSTEM_OUT">
+            <!--只接受程序中DEBUG级别的日志进行处理-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="[JBolt Api Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+        <!-- JBolt中的JBoltControllerConsole Debug 控制台输出LOG -->
+         <Console name="JBoltControllerConsole" target="SYSTEM_OUT">
+            <!--只接受程序中DEBUG级别的日志进行处理-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="[JBolt Controller Log:[%level]:%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg%n%xEx%C.%M(%F:%L) %n"/>
+        </Console>
+
+        <!--处理jboltAutoCache日志，并把该日志放到logs/jbolt_auto_cache_debug.log文件中-->
+        <RollingFile name="RollingFileJBoltAutoCache" fileName="./logs/jbolt_auto_cache_debug.log"
+                     filePattern="logs/$${date:yyyy-MM}/jbolt_auto_cache_debug-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="DEBUG"/>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+        <!--处理jboltwebsocket日志，并把该日志放到logs/jbolt_websocket.log文件中-->
+        <RollingFile name="RollingFileJBoltWebsocketLog" fileName="./logs/jboltwebsocket/jbolt_websocket.log"
+                     filePattern="logs/jboltwebsocket/$${date:yyyy-MM}/jbolt_websocket-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+        <!--处理jbolt定时任务 cron4j 日志，并把该日志放到logs/jbolt_cron4j.log文件中-->
+        <RollingFile name="RollingFileJBoltCron4jLog" fileName="./logs/jboltcron4j/jbolt_cron4j.log"
+                     filePattern="logs/jboltcron4j/$${date:yyyy-MM}/jbolt_cron4j-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+        <!--处理jboltApi日志，并把该日志放到logs/jbolt_api_debug.log文件中-->
+        <RollingFile name="RollingFileJBoltApiDebugLog" fileName="./logs/jbolt_api_debug.log"
+                     filePattern="logs/$${date:yyyy-MM}/jbolt_api_debug-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="DEBUG"/>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+        <!--处理jboltApi日志，并把该日志放到logs/jbolt_api_error.log文件中-->
+        <RollingFile name="RollingFileJBoltApiErrorLog" fileName="./logs/jbolt_api_error.log"
+                     filePattern="logs/$${date:yyyy-MM}/jbolt_api_error-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="ERROR"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <!--处理jboltController日志，并把该日志放到logs/jbolt_controller_debug.log文件中-->
+        <RollingFile name="RollingFileJBoltControllerDebugLog" fileName="./logs/jbolt_controller_debug.log"
+                     filePattern="logs/$${date:yyyy-MM}/jbolt_controller_debug-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="DEBUG"/>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+        <!--处理jboltController日志，并把该日志放到logs/jbolt_controller_error.log文件中-->
+        <RollingFile name="RollingFileJBoltControllerErrorLog" fileName="./logs/jbolt_controller_error.log"
+                     filePattern="logs/$${date:yyyy-MM}/jbolt_controller_error-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="ERROR"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <!--处理DEBUG级别的日志，并把该日志放到logs/debug.log文件中-->
+        <!--打印出DEBUG级别日志，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFileDebug" fileName="./logs/debug.log"
+                     filePattern="logs/$${date:yyyy-MM}/debug-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="DEBUG"/>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <!--处理INFO级别的日志，并把该日志放到logs/info.log文件中-->
+        <RollingFile name="RollingFileInfo" fileName="./logs/info.log"
+                     filePattern="logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <!--只接受INFO级别的日志，其余的全部拒绝处理-->
+                <ThresholdFilter level="INFO"/>
+                <ThresholdFilter level="WARN" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <!--处理WARN级别的日志，并把该日志放到logs/warn.log文件中-->
+        <RollingFile name="RollingFileWarn" fileName="./logs/warn.log"
+                     filePattern="logs/$${date:yyyy-MM}/warn-%d{yyyy-MM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="WARN"/>
+                <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <!--处理error级别的日志，并把该日志放到logs/error.log文件中-->
+        <RollingFile name="RollingFileError" fileName="./logs/error.log"
+                     filePattern="logs/$${date:yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log.gz">
+            <ThresholdFilter level="ERROR"/>
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] (%class{36}.java:%L) %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+
+        <!--druid的日志记录追加器-->
+        <RollingFile name="druidSqlRollingFile" fileName="./logs/druid-sql.log"
+                     filePattern="logs/$${date:yyyy-MM}/api-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] %-5level %L %M - %msg%n%xEx"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+    </appenders>
+
+    <loggers>
+        <root level="DEBUG">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="RollingFileInfo"/>
+            <appender-ref ref="RollingFileWarn"/>
+            <appender-ref ref="RollingFileError"/>
+            <appender-ref ref="RollingFileDebug"/>
+        </root>
+
+        <!--记录druid-sql的记录-->
+        <logger name="druid.sql.Statement" level="DEBUG" additivity="false">
+            <appender-ref ref="DruidSqlConsole"/>
+            <appender-ref ref="druidSqlRollingFile"/>
+            <Filters>
+                <StringMatchFilter text="from jb_online_user" onMatch="DENY" onMismatch="ACCEPT"/>
+            </Filters>
+        </logger>
+        <logger name="cn.jbolt" level="DEBUG" additivity="false">
+            <appender-ref ref="JBoltConsole"/>
+            <appender-ref ref="RollingFileInfo"/>
+            <appender-ref ref="RollingFileWarn"/>
+            <appender-ref ref="RollingFileError"/>
+            <appender-ref ref="RollingFileDebug"/>
+        </logger>
+
+        <!-- 配置jfinal action report -->
+        <logger name="JBoltActionReportLog" level="DEBUG" additivity="false">
+            <appender-ref ref="JBoltActionReportConsole"/>
+            <appender-ref ref="RollingFileJBoltActionReport"/>
+        </logger>
+          <!-- 配置JboltAutoCache debug -->
+        <logger name="JBoltAutoCacheLog" level="DEBUG" additivity="false">
+            <appender-ref ref="JBoltAutoCacheConsole"/>
+            <appender-ref ref="RollingFileJBoltAutoCache"/>
+        </logger>
+         <!-- 配置JBoltApiLog debug error-->
+        <logger name="JBoltApiLog" level="DEBUG" additivity="false">
+            <appender-ref ref="JBoltApiConsole"/>
+            <appender-ref ref="RollingFileJBoltApiDebugLog"/>
+            <appender-ref ref="RollingFileJBoltApiErrorLog"/>
+        </logger>
+          <!-- 配置JBoltControllerLog debug error-->
+        <logger name="JBoltControllerLog" level="DEBUG" additivity="false">
+            <appender-ref ref="JBoltControllerConsole"/>
+            <appender-ref ref="RollingFileJBoltControllerDebugLog"/>
+            <appender-ref ref="RollingFileJBoltControllerErrorLog"/>
+        </logger>
+
+        <!-- 配置JBoltWebsocketLog debug error-->
+        <logger name="JBoltWebsocketLog" level="DEBUG" additivity="false">
+            <appender-ref ref="JBoltWebSocketConsole"/>
+            <appender-ref ref="RollingFileJBoltWebsocketLog"/>
+        </logger>
+
+        <!-- 配置cron4j log-->
+        <logger name="JBoltCron4jLog" level="INFO" additivity="false">
+            <appender-ref ref="JBoltCron4jConsole"/>
+            <appender-ref ref="RollingFileJBoltCron4jLog"/>
+        </logger>
+
+
+        <!-- 配置ProxyGenerator 关闭输出-->
+        <logger name="com.jfinal.proxy.ProxyGenerator" level="OFF"/>
+        <!-- 配置ApiConfigKit 关闭输出-->
+        <logger name="com.jfinal.weixin.sdk.api.ApiConfigKit" level="OFF"/>
+        <!--log4j2 自带过滤日志-->
+        <Logger name="io.fury" level="error" />
+        <Logger name="org.jboss" level="error" />
+        <Logger name="net.dreamlu.event" level="error" />
+        <Logger name="net.sf.ehcache" level="error" />
+        <Logger name="cn.hutool" level="error" />
+        <Logger name="org.xnio" level="error" />
+        <Logger name="io.undertow" level="error" />
+        <Logger name="org.apache.catalina.startup.DigesterFactory" level="error" />
+        <Logger name="org.apache.catalina.util.LifecycleBase" level="error" />
+        <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />
+        <logger name="org.apache.sshd.common.util.SecurityUtils" level="warn"/>
+        <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" />
+        <Logger name="org.crsh.plugin" level="warn" />
+        <logger name="org.crsh.ssh" level="warn"/>
+        <Logger name="org.eclipse.jetty.util.component.AbstractLifeCycle" level="error" />
+        <logger name="org.apache.http" level="error"/>
+    </loggers>
+</configuration>

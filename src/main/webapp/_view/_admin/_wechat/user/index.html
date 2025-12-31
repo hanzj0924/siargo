@@ -1,0 +1,70 @@
+#@adminDialogLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1>微信用户管理</h1>
+	<span> #(pageData.totalRow?? 0) 条记录</span>
+	</div>
+	<div class="col">
+	<form class="form-inline" id="wechatUserForm" action="admin/wechat/user/#(mpId?? 0)"  method="post">
+			<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+			<select class="form-control"
+	name="sex" 
+	data-autoload  
+	data-url="admin/wechat/user/sexOptions"  
+	data-text="=性别=" 
+	data-value="" 
+	data-select="#(sex??)">
+</select>
+
+			<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	#if(isNotWxa)
+		<button data-ajaxbtn data-handler="reloadCurrentPage" data-timeout="600000" data-loadiing="同步中，请耐心等待" data-title="同步拉取微信平台用户列表" data-handler="LayerMsgBox.success('同步完成',1000,reloadCurrentPage)"  data-confirm="确认同步拉取微信用户列表？" data-url="admin/wechat/user/sync/#(mpId?? 0)" class="btn btn-outline-success btn-sm" ><i class="fa fa-refresh"></i> 同步拉取</button>
+	#end
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-striped table-center">
+<thead>
+<tr><th style="width: 60px">序号</th><th style="width:80px;">头像</th><th>昵称</th><th>真实姓名</th><th style="width: 60px">性别</th><th >手机号</th><th>微信号</th><th style="width: 100px">是否启用</th>	#if(isNotWxa)<th  style="width: 100px">操作</th>#end</tr>
+</thead>
+<tbody>
+#for(data:pageData.list??)
+<tr>
+<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+<td><img  data-photobtn tooltip data-title="点击看图" style="width: 60px;height: 60px;border-radius:50%;" src="#(data.head_img_url?? 'assets/img/avatar.jpg')" onerror="this.src='assets/img/avatar.jpg'"/></td>
+<td>#(data.nickname??)</td>
+<td>#(data.realname??)</td>
+<td>#sex(data.sex??)</td>
+<td>#(data.phone??)</td>
+<td>#(data.weixin??)</td>
+<td><img data-switchbtn data-value="#(data.enable?? false)" data-url="admin/wechat/user/toggleEnable/#(mpId?? 0)-#(data.id)"/></td>
+#if(isNotWxa)
+<td>
+<a  tooltip  title="同步单用户信息"  href="admin/wechat/user/syncUser/#(mpId?? 0)-#(data.id)" data-handler="LayerMsgBox.success('同步完成',500,reloadCurrentPage)" data-confirm="确认同步此用户？" data-ajaxbtn><i class="fa fa-refresh c-info"></i></a>
+</td>
+#end
+</tr>
+#end
+</tbody>
+</table>	
+</div>
+#include("/_view/_admin/common/_page.html",pageEleId="wechatUserPage")
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+	initPage("wechatUserPage",#(pageData.totalPage??),#(pageData.pageNumber??),"wechatUserForm");
+});
+</script>
+#end
+

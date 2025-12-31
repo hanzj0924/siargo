@@ -1,0 +1,110 @@
+#@adminDialogLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-sm-auto">
+	<h1>
+#switch (type)
+#case (WechatMediaType.NEWS.value)
+选择图文
+#case (WechatMediaType.IMG.value)
+选择图片
+#case (WechatMediaType.VOICE.value)
+选择语音
+#case (WechatMediaType.VIDEO.value)
+选择视频
+#end
+
+	</h1>
+	<span> #(pageData.totalRow?? 0) 条记录</span>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="wechatMediaForm" action="admin/wechat/media/choose/#(mpId?? 0)-#(type??)"   method="post">
+			<input type="text" autocomplete="off"  class="form-control" placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+			<button  type="submit" class="btn btn-light catdata_table_searchbtn ml-2" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col">
+	<div style="margin-top:-20px;">
+	#include("/_view/_admin/common/_page.html",pageEleId="wechatMediaPage")
+	</div>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+
+#if(type==WechatMediaType.NEWS.value)
+<div class="card-columns" style=" column-count:5;">
+#for(data:pageData.list??)
+  <div class="card m-2">
+    <img src="#realImage(data.serverUrl??, '/assets/img/uploadimg.png')" style="max-height:190px;" class="card-img-top">
+    <div class="card-body">
+      <h5 class="card-title"><a href="#(data.url??)" target="_blank">#(data.title??)</a></h5>
+      <p class="card-text">#(data.digest??)</p>
+    </div>
+    <div class="card-footer text-center">
+    <button onclick="chooseIt(#(data.id))" type="button" class='btn btn-primary'>就选它</button>
+    </div>
+     
+  </div>
+#end
+</div>
+#else if(type==WechatMediaType.IMG.value)
+<div class="card-columns" style=" column-count:6;">
+#for(data:pageData.list??)
+  <div class="card m-2">
+    <img src="#realImage(data.serverUrl??, '/assets/img/uploadimg.png')" data-photobtn class="card-img-top">
+    <div class="card-body">
+      <h5  class="card-title text-primary">#(data.title??)</h5>
+    </div>
+     <div class="card-footer text-center">
+    <button onclick="chooseIt(#(data.id))" type="button" class='btn btn-primary'>就选它</button>
+    </div>
+  </div>
+#end
+</div>
+#else if(type==WechatMediaType.VOICE.value)
+<table class="table table-bordered">
+<thead><tr><th style="width: 60px">序号</th><th>名称</th><th>播放</th><th>就选它</th></tr></thead>
+<tbody>
+#for(data:pageData.list??)
+   <tr>
+<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+<td>#(data.title??)</td>
+<td><audio src="#(data.serverUrl??)" controls="controls">您的浏览器不支持 audio 标签</audio></td>
+<td><button onclick="chooseIt(#(data.id))" type="button" class='btn btn-primary'>就选它</button></td>
+</tr>
+#end
+  
+</tbody></table>
+#else if(type==WechatMediaType.VIDEO.value)
+<table class="table table-bordered table-hover table-striped">
+<thead><tr><th style="width: 60px">序号</th><th>名称</th><th>就选它</th></tr></thead>
+<tbody>
+#for(data:pageData.list??)
+<tr>
+<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+<td><a target="_blank" href="#(data.serverUrl??)">#(data.title??)</a></td>
+<td><button onclick="chooseIt(#(data.id))" type="button" class='btn btn-primary'>就选它</button></td>
+</tr>
+#end
+  </tbody>
+</table>
+#end
+
+</div>
+</div>
+#end
+#define js()
+<script>
+function chooseIt(id){
+	parent.chooseTheWechatMedia(id);
+}
+
+$(function(){
+	initPage("wechatMediaPage",#(pageData.totalPage??),#(pageData.pageNumber??),"wechatMediaForm");
+});
+</script>
+#end
+

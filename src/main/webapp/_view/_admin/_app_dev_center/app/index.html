@@ -1,0 +1,100 @@
+#@jboltLayout()
+#define main()
+#setLocal(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="jbicon2 jbi-appstore"></i> 应用开发中心</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="applicationForm_#(pageId)" action="admin/app" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="#(keywords)" />
+		<select class="form-control"
+		name="type"
+		data-autoload
+		data-url="admin/app/types"
+		data-text="=应用类型="
+		data-value=""
+		data-select="#(type?? '')">
+		</select>
+		<select class="form-control"  data-url="admin/app/enableOptions"  name="enable" data-autoload data-text="=状态=" data-value="" data-select="#(enable)"></select>
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	<button data-area="980,650" data-handler="refreshJBoltTable" data-title="创建新应用" data-url="admin/app/add" class="jbolt_table_addbtn btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 创建新应用</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="applicationRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr>
+{@if pageSize&&pageSize>0}
+<td>${((pageNumber-1)*pageSize)+(+index+1)}</td>
+{@else}
+<td>${+index+1}</td>
+{@/if}
+<td>
+<span>${data.name}</span>
+</td>
+<td>${data.typeName}</td>
+<td>
+<a data-dialogbtn href="admin/app/appinfo/${data.id}" data-btn="close" data-title="查看【${data.name}】的开发配置" class="btn btn-outline-danger btn-sm"><i class="fa fa-eye"></i>查看</a>
+</td>
+<td>
+{@if data.briefInfo}
+<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="${data.name}简介"  class="btn btn-outline-info btn-sm" data-content="${data.briefInfo}"><i class="fa fa-eye"></i> 查看</button>
+{@/if}
+</td>
+<td>${data.createTime|date_ymdhm}</td>
+<td>${data.updateTime|date_ymdhm}</td>
+<td>{@if data.isInner}-{@else}<img data-switchbtn data-confirm="确定切换此应用启用状态？确认执行后，将影响现在正在访问接口的应用。" data-value="${data.enable}"  data-handler="refreshJBoltTable"  data-url="admin/app/toggleEnable/${data.id}"/>{@/if}</td>
+<td>{@if data.isInner}-{@else}<img data-switchbtn data-confirm="确定切换[是否开启接口校验Signature]？<br/>注：开启-提高安全性 关闭-对接口测试更友好"  data-value="${data.needCheckSign}" data-handler="refreshJBoltTable"  data-url="admin/app/toggleNeedCheckSign/${data.id}"/>{@/if}</td>
+<td>
+{@if data.isInner}
+-
+{@else}
+<a data-area="900,600" href="admin/app/linkTarget/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="应用开发中心关联对象"  data-dialogbtn data-btn="close" class="text-wrap text-${data.linkTargetId?'primary':'danger'}"><i class="fa fa-link"></i> ${data.linkTargetId?'点击查看':"暂无关联"}</a>
+{@/if}
+</td>
+<td>
+{@if data.isInner}
+-
+{@else}
+<a  tooltip  title="编辑"  href="admin/app/edit/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="编辑应用基本信息" data-area="980,650" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/app/delete/${data.id}" data-handler="removeTr" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+{@/if}
+</td>
+</tr>
+{@/each}
+</script>
+
+<table class="table_striped jbolt_table jbolt_main_table thead_font_normal table-center"
+data-jbolttable
+data-ajax="true"
+data-url="admin/app/datas"
+data-conditions-form="applicationForm_#(pageId)"
+data-page="applicationPage_#(pageId)"
+data-rowtpl="applicationRowtpl_#(pageId)"
+>
+<thead>
+<tr><th data-width="60" data-column="index">序号</th><th data-width="200">应用名称</th><th data-width="160" data-nochange>类型</th><th data-width="160" data-nochange>AppId/AppSecret</th><th  data-width="100" data-nochange>简介</th><th data-width="150">创建时间</th><th style="width: 150px">更新时间</th><th data-width="100" data-nochange>是否启用</th><th data-width="160" data-nochange>接口校验Signature</th><th data-width="110" data-nochange>关联对象</th><th data-width="120" data-nochange>操作</th></tr>
+</thead>
+<tbody>
+
+</tbody>
+</table>
+	
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end
+

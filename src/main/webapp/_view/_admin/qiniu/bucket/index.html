@@ -1,0 +1,121 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)" >
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="fa fa-database"></i>七牛Bucket管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="qiniuBucketForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<select class="form-control"
+		name="qiniuId"
+		data-autoload
+		data-url="admin/qiniu/options"
+		data-text="=所属账号="
+		data-value=""
+		data-select="#(qiniuId??)">
+		</select>
+		<select class="form-control"
+		name="zone"
+		data-autoload
+		data-url="admin/dictionary/options?key=qiniu_region"
+		data-text="=地区="
+		data-text-attr="name,sn"
+		data-value-attr="sn"
+		data-value="">
+		</select>
+
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	<button data-ajaxbtn  data-confirm="确认同步线上七牛Bucket" data-handler="refreshJBoltTable"  data-url="admin/qiniu/bucket/syncAllQiniuBuckets" class="btn btn-outline-danger btn-sm" ><i class="fa fa-refresh"></i> 同步所有Bucket</button>
+	<!-- <button data-dialogbtn data-area="980,700" data-handler="refreshJBoltTable" data-title="新增七牛Bucket"  data-url="admin/qiniu/bucket/add?qiniuId=#(qiniuId??)" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button> -->
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<textarea class="d-none" id="qiniuBucketRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.name}</td>
+<td>${data.sn}</td>
+<td>${data.qiniuName}</td>
+<td>${data.regionName}</td>
+<td>${data.domainUrl?data.domainUrl:'-'}</td>
+<td>${data.callbackUrl?data.callbackUrl:'-'}</td>
+<td>${data.callbackBody?data.callbackBody:'-'}</td>
+<td>${data.callbackBodyType?data.callbackBodyType:'-'}</td>
+<td>${data.expires?data.expires:'-'}</td>
+<td><img data-switchbtn data-confirm="确定切换是否默认？" data-value="${data.isDefault}"  data-handler="refreshJBoltTable"  data-url="admin/qiniu/bucket/toggleIsDefault/${data.id}"/></td>
+<td><img data-switchbtn data-confirm="确定切换是否启用？" data-value="${data.enable}"  data-handler="refreshJBoltTable"  data-url="admin/qiniu/bucket/toggleEnable/${data.id}"/></td>
+<td>{@if data.remark}<a class="hand" data-dialogbtn data-area="500,300" data-content="${data.remark}" data-btn="close" tooltip data-title="查看备注"><i class="fa fa-eye"></i></a>{@else}-{@/if}</td>
+<td>${data.createTime}</td>
+<td>${data.updateTime}</td>
+<td>${data.createUserName}</td>
+<td>${data.updateUserName}</td>
+<td>
+	<a href="admin/qiniu/bucket/edit/${data.id}" data-area="980,800"  tooltip data-title="修改"  data-handler="refreshJBoltTable" data-dialog-title="修改七牛Bucket" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+    <a href="admin/qiniu/bucket/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="removeTr" data-confirm="确定删除此数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+</td>
+</tr>
+{@/each}
+</textarea>
+
+
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+data-jbolttable
+data-height="fill"
+data-ajax="true"
+data-url="admin/qiniu/bucket/datas"
+data-column-resize="true"
+data-conditions-form="qiniuBucketForm_#(pageId)"
+data-rowtpl="qiniuBucketRowtpl_#(pageId)"
+data-page="qiniuBucketPage_#(pageId)"
+
+
+
+
+
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="-1"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	<th data-min-width="150" data-column="bucket">bucket名称</th>
+	<th data-width="150" data-column="sn">编码(SN)</th>
+	<th data-width="150" data-column="qiniu_id">所属七牛账号</th>
+	<th data-width="100" data-column="region">所属地区</th>
+	<th data-min-width="150" data-column="domain_url">绑定域名</th>
+	<th data-min-width="150" data-column="callback_url">回调地址</th>
+	<th data-min-width="150" data-column="callback_body">回调body定义</th>
+	<th data-min-width="150" data-column="callback_body_type">回调Body类型</th>
+	<th data-width="100" data-column="expires">有效期(秒)</th>
+	<th data-width="100" data-column="is_default">是否默认</th>
+	<th data-width="100" data-column="enable">是否启用</th>
+	<th data-width="100" data-column="remark">备注</th>
+	<th data-width="150" data-column="create_time">创建时间</th>
+	<th data-width="150" data-column="update_time">更新时间</th>
+	<th data-width="100" data-column="create_user_id">创建人</th>
+	<th data-width="100" data-column="update_user_id">更新人</th>
+	<th data-width="100">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+	
+</div>
+</div>
+#end

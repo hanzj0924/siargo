@@ -1,0 +1,29 @@
+<form onsubmit="return false;" id="wechatKeywordsForm" action="#(action)" method="post">
+	#if(wechatKeywords.id??)
+		<input type="hidden" name="wechatKeywords.id" value="#(wechatKeywords.id)" />
+	#end
+	<input type="hidden" name="wechatKeywords.mpId" value="#(mpId?? 0)" />
+	<input type="hidden" name="wechatKeywords.autoReplyId" value="#(autoReplyId?? 0)" />
+	<div class="form-group row">
+		<label  for="name" class="col-sm-3 col-form-label">请输入关键词</label>
+		<div class="col">
+		<input id="name" type="text" autocomplete="off" autofocus="autofocus"  class="form-control" data-rule="required;len<=40;" data-tips="请输入名称" maxlength="40" name="wechatKeywords.name" value="#(wechatKeywords.name??)" />
+		</div>
+	</div>
+	<div class="form-group row" 
+	data-radio 
+	data-rule="radio"  
+	data-value="#(wechatKeywords.type??)" 
+	data-name="wechatKeywords.type" 
+	data-default="options_first"
+	data-url="admin/wechat/keywords/types"
+	data-label="匹配类型："
+	data-width="col-sm-3,col"
+	data-inline="true"></div>
+
+
+
+</form>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="wechatKeywordsForm")
+#end

@@ -1,0 +1,107 @@
+#@jboltLayout()
+#set(pageId=RandomUtil.random(6))
+#define main()
+<div class="jbolt_page h-100 jb_vflex" data-key="#(pmkey)" id="datasource_tables_page_#(pageId)">
+<div class="jbolt_page_title jb_vheader">
+	<div class="text-center">
+		<h1 style="font-size: 25px;"><i class="jbicon jb-wendang mr-1"  style="font-size: 25px;"></i> 数据源:[#(datasource)]数据表文档<span class="text-danger" style="font-size: 20px;">（开发人员专用）</span></h1>
+	</div>
+</div>
+<div class="jbolt_page_content jb_vbody">
+<!-- 数据源渲染模板定义-->
+<script type="text/template" id="table_tpl_#(pageId)">
+	<div id="table_accordion_#(datasource)">
+{@each res.data as data,index}
+	<div class="card jb_datasource_table_card ${index>0?'mt-2':''}">
+		<div class="card-header hand">
+			<div class="row">
+				<div class="col-12 col-md-4"  onclick="$('#table_card_collapse_${data.name}').toggleClass('d-none')">Table:<span class="text-primary font-weight-bold">${data.name}</span></div>
+				<div class="col-12 col-md"  onclick="$('#table_card_collapse_${data.name}').toggleClass('d-none')">[${data.remark}]</div>
+				<div class="col-12 col-md-auto">
+					<a tabindex="-1" data-handler="toggleTableBoxFs_#(datasource)" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a>
+				</div>
+			</div>
+		</div>
+		<div class="card-body card_body_toggle_box mh600 d-none overflow-auto" id="table_card_collapse_${data.name}">
+			{@if data.isMappingModel}
+			<table class="table table-bordered">
+				<tbody class="font-weight-bold">
+					<tr><td style="width: 180px;">Model</td><td>${data.javaPackage+"."+data.modelName}</td></tr>
+					<tr><td style="width: 180px;">BaseModel</td><td>${data.javaPackage+".base."+data.baseModelName}</td></tr>
+				</tbody>
+			</table>
+			{@/if}
+			<table class="table table-bordered table-striped table-hover text-center">
+				<thead>
+					<tr>
+						<th style="width: 60px;">序号</th>
+						<th style="width: 160px;">名称</th>
+						<th style="width: 160px;">Java属性名</th>
+						<th style="width: 100px;">类型</th>
+						<th style="width: 120px;">Java类型</th>
+						<th style="width: 80px;">长度</th>
+						<th style="width: 80px;">小数位</th>
+						<th style="width: 100px;">默认值</th>
+						<th style="width: 60px;">主键</th>
+						<th style="width: 60px;">必填</th>
+						<th style="width: 200px;">备注</th>
+					</tr>
+				</thead>
+				<tbody>
+					{@each data.columns as col,index}
+						<tr>
+							<td>${+index+1}</td>
+							<td class="font-weight-bold">${col.name}</td>
+							<td class="font-weight-bold">${col.attrName}</td>
+							<td>${col.type}</td>
+							<td>${col.javaType}</td>
+							<td>${col.length}</td>
+							<td>${col.fixed}</td>
+							<td>${col.defaultValue}</td>
+							<td class="text-success font-weight-bold">${col.isPrimaryKey?"√":""}</td>
+							<td class="text-success font-weight-bold">${col.isRequired?"√":""}</td>
+							<td>${col.remark}</td>
+						</tr>
+					{@/each}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{@/each}
+</script>
+<div class="card jb_vflex">
+	<div class="card-header jb_vheader_card" style="font-size: 20px;">
+		<span><i class="jbicon jb-datasource mr-1"></i>共【<span id="table_size_text_#(datasource??)">0</span>】个表</span>
+		<div class="btn-group pull-right">
+		<a class="btn btn-outline-primary btn-sm" data-ajaxbtn data-confirm="确认刷新此数据源下数据表和表结构缓存吗？" data-handler="refreshPortal" data-portal="tables_portal_#(datasource??)" data-url="admin/devdoc/database/refreshTables?datasource=#(datasource??)"><i class="fa fa-recycle mr-1"></i>刷新表缓存</a>
+		<a class="btn btn-outline-info  btn-sm" onclick="AjaxPortalUtil.refresh('#tables_portal_#(datasource??)')"><i class="fa fa-refresh mr-1"></i>刷新区域</a>
+		</div>
+		<div class="btn-group pull-right mx-2">
+			<a class="btn btn-outline-primary btn-sm" onclick="$('#tables_portal_#(datasource??) .card_body_toggle_box').removeClass('d-none')">展开</a>
+			<a class="btn btn-outline-secondary btn-sm" onclick="$('#tables_portal_#(datasource??) .card_body_toggle_box').addClass('d-none')">收缩</a>
+		</div>
+	</div>
+	<div class="card-body jb_vbody">
+		<div id="tables_portal_#(datasource??)" data-handler="processTotalTableSize_#(pageId)" data-ajaxportal data-url="admin/devdoc/database/tables?datasource=#(datasource??)" data-type="json" data-tpl="table_tpl_#(pageId)"></div>
+	</div>
+</div>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+	function toggleTableBoxFs_#(datasource)(btn,fs){
+		if (fs){
+			btn.closest(".jb_datasource_table_card").find(".card_body_toggle_box").removeClass("d-none");
+		}
+	}
+	function processTotalTableSize_#(pageId)(portal,htmlObj,json){
+		$("#table_size_text_#(datasource??)").text(json.data.length);
+	}
+$(function(){
+	$('#datasource_tables_page_#(pageId) .collapse').collapse();
+});
+</script>
+#end
+

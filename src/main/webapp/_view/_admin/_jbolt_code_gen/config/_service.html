@@ -1,0 +1,67 @@
+<div class="card jb_vflex">
+	<div class="card-header jb_vheader_card">
+		<button onclick="ajaxSubmitForm('codeGenServiceForm')" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> 保存配置</button>
+	</div>
+	<div class="card-body jb_vbody">
+		<form class="form" onsubmit="return false;" id="codeGenServiceForm" action="admin/codegen/updateBase" method="post">
+			<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+			<div class="form-group row">
+		 		<label class="col-sm-3 col-form-label">生成到哪个Package</label>
+		 		<div class="col-sm-4">
+		 			<input type="text" data-autocomplete data-mustmatch="false" data-url="admin/codegen/javaPackageAutocomplete" data-rule="required" placeholder="请指定Service生成到哪个Package" data-tips="请输入Service生成到哪个Package" class="form-control" name="codeGen.servicePackage" value="#(codeGen.servicePackage??)" autocomplete="off" />
+		 		</div>
+			</div>
+		 	<div class="form-group row">
+		 		<label class="col-sm-3 col-form-label">Service Name</label>
+		 		<div class="col-sm-4">
+		 			<input type="text" data-rule="required"  data-tips="请输入Service Name" class="form-control" name="codeGen.serviceName" value="#(codeGen.serviceName??)" autocomplete="off" />
+		 		</div>
+		 	</div>
+			<fieldset>
+				<hr/>
+				<div class="form-group row">
+					<label class="col-6 col-form-label font-weight-bold text-center" style="font-size: 20px;">日志相关</label>
+				</div>
+				<div class="form-group row"
+					 data-radio
+					 data-rule="radio"
+					 data-value="#(codeGen.isProjectSystemLog?? 'false')"
+					 data-name="codeGen.isProjectSystemLog"
+					 data-default="false"
+					 data-handler="changeIsProjectSystemLogEnable_#(pageId)"
+				>
+					<label class="col-sm-3 col-form-label is_required" >是否启用</label>
+					<div class="col"  style="padding-top: 1px;">
+						<div class="radio radio-primary  radio-inline">
+							<input  id="r_isProjectSystemLog_true" type="radio" name="codeGen.isProjectSystemLog"   value="true"/>
+							<label for="r_isProjectSystemLog_true">启用</label>
+						</div>
+
+						<div class="radio radio-primary  radio-inline">
+							<input  id="r_isProjectSystemLog_false" type="radio" name="codeGen.isProjectSystemLog"   value="false"/>
+							<label for="r_isProjectSystemLog_false">关闭</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-3 col-form-label">Key Name</label>
+					<div class="col-sm-4">
+						<input id="projectSystemLogTargetTypeKeyName" type="text" maxlength="40" placeholder="例如 SCHOOL 全大写" class="form-control" name="codeGen.projectSystemLogTargetTypeKeyName" value="#(codeGen.projectSystemLogTargetTypeKeyName??)" autocomplete="off" />
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-3 col-form-label">名称Text</label>
+					<div class="col-sm-4">
+						<input id="projectSystemLogTargetTypeText" type="text" maxlength="10" placeholder="例如 客户" class="form-control" name="codeGen.projectSystemLogTargetTypeText" value="#(codeGen.projectSystemLogTargetTypeText??)" autocomplete="off" />
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-3 col-form-label">值Value</label>
+					<div class="col-sm-4">
+						<input id="projectSystemLogTargetTypeValue" placeholder="例如 20006 在 20000基础上往后加"  type="number" data-rule="pint" data-notnull="false" maxlength="10" data-rule="required"  class="form-control" name="codeGen.projectSystemLogTargetTypeValue" value="#(codeGen.projectSystemLogTargetTypeValue??)" autocomplete="off" />
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>

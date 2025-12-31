@@ -1,0 +1,112 @@
+#@jboltLayout()
+#define main()
+#setLocal(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="jbicon jb-weixin"></i> 微信公众平台管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="wechatMpinfoForm_#(pageId)" action="admin/wechat/mpinfo" data-pjaxsubmit  method="get">
+		<input type="text" autocomplete="off"  class="form-control" placeholder="输入关键字搜索" name="keywords" value="#(keywords)" />
+		<select class="form-control"  data-url="admin/wechat/mpinfo/typeOptions"  name="type" data-autoload data-text="=类型=" data-value="" data-select="#(type)"></select>
+		<select class="form-control"  data-url="admin/wechat/mpinfo/subjectTypeOptions"  name="subjectType" data-autoload data-text="=主体类型=" data-value="" data-select="#(subjectType)"></select>
+		<select class="form-control"  data-url="admin/wechat/mpinfo/isAuthenticatedOptions"  name="isAuthenticated" data-autoload data-text="=认证=" data-value="" data-select="#(isAuthenticated)"></select>
+		<select class="form-control"  data-url="admin/wechat/mpinfo/enableOptions"  name="enable" data-autoload data-text="=状态=" data-value="" data-select="#(enable)"></select>
+		<button  type="submit" class="btn btn-outline-secondary catdata_table_searchbtn" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	<button data-area="980,600" data-handler="refreshJBoltTable" data-title="新增公众平台" data-url="admin/wechat/mpinfo/add" class="jbolt_table_addbtn btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="wechatMpinfoRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr>
+{@if pageSize&&pageSize>0}
+<td>${((pageNumber-1)*pageSize)+(+index+1)}</td>
+{@else}
+<td>${+index+1}</td>
+{@/if}
+<td><img class="j_tablelist_logo" data-photobtn tooltip data-title="点击查看大图" src="${data.logo|real_image}" onerror="this.src='assets/img/uploadimg.png'"/></td>
+<td><strong>${data.name}</strong><br/><span class="text-danger">[${data.wechatId}]</span></td>
+<td><a href="${data.qrcode|real_image}" data-photobtn tooltip data-title="点击查看二维码"><i style="font-size:20px;" class="fa fa-qrcode"></i></a></td>
+<td>${data.typeName}:${data.subjectTypeName}</td>
+<td>
+{@if data.briefInfo}
+<button  data-tipsbtn data-trigger="click" class="btn btn-light btn-sm" data-content="${data.briefInfo}"><i class="fa fa-eye"></i> 查看</button>
+{@/if}
+</td>
+<td>
+{@if data.remark}
+<button  data-tipsbtn data-trigger="click" class="btn btn-light btn-sm" data-content="${data.remark}"><i class="fa fa-eye"></i> 查看</button>
+{@/if}
+</td>
+<td><img data-switchbtn data-handler="refreshJBoltTable"  data-value="${data.enable}" data-url="admin/wechat/mpinfo/toggleEnable/${data.id}" /></td>
+<td><img data-switchbtn data-handler="refreshJBoltTable" data-value="${data.isAuthenticated}"   data-url="admin/wechat/mpinfo/toggleAuthenticated/${data.id}"/></td>
+<td class="text-left">
+<a data-dialogbtn {@if data.enable} data-btn="no" {@/if} data-area="800,550" data-scroll="yes" data-title="公众平台基础配置" href="admin/wechat/config/baseMgr/${data.id}" class="text-primary">基础配置</a>
+{@if data.isAuthenticated}
+<a data-dialogbtn {@if data.enable} data-btn="no" {@/if} data-area="800,550" data-title="公众平台微信支付配置"  href="admin/wechat/config/payMgr/${data.id}" class="text-primary ml-1">支付配置</a>
+{@/if}
+{@if data.enable}
+<a data-dialogbtn   data-area="800,550" data-scroll="yes" data-title="公众平台其它配置" href="admin/wechat/config/extraMgr/${data.id}" class="text-primary ml-1">其它配置</a>
+{@/if}
+<br/>
+{@if data.type!=#(WechatMpinfoType.XCX.value)}
+<a data-dialogbtn  data-btn="no" data-area="90%,90%" data-scroll="yes" data-title="公众平台自定义菜单配置" href="admin/wechat/menu/mgr/${data.id}" class="text-success">自定义菜单配置</a>
+{@if data.isAuthenticated}
+<a data-dialogbtn  data-btn="no" data-area="90%,90%" data-scroll="yes" data-title="公众平台素材库管理" href="admin/wechat/media/${data.id}" class="text-success ml-1">素材库</a><br/>
+{@else}
+<br/>
+{@/if}
+<a data-dialogbtn  data-btn="no" data-area="90%,90%" data-scroll="yes" data-title="公众平台关注时回复内容配置" href="admin/wechat/autoreply/subscribeReplyMgr/${data.id}" class="text-info">关注回复</a>
+<a data-dialogbtn  data-btn="no" data-area="90%,90%" data-scroll="yes" data-title="公众平台自定义关键词回复配置"  href="admin/wechat/autoreply/keywordsReplyMgr/${data.id}"  class="text-info ml-1">关键词回复</a>
+<a data-dialogbtn  data-btn="no" data-area="90%,90%" data-scroll="yes" data-title="公众平台默认消息回复配置"  href="admin/wechat/autoreply/defaultReplyMgr/${data.id}"  class="text-info ml-1">默认回复</a>
+{@/if}
+<br/><a data-dialogbtn  data-btn="no" data-area="90%,90%" data-scroll="yes" data-title="公众平台用户管理" href="admin/wechat/user/${data.id}" class="text-success">用户管理</a>
+{@if !data.enable}
+<br/><a data-ajaxbtn  href="admin/wechat/mpinfo/clearAllConfigs/${data.id}" data-confirm="确定清空所有配置?" data-handler="LayerMsgBox.success('已全部清空',1000)" class="text-danger">清空</a>
+{@/if}
+</td>
+<td>
+<a data-area="900,600" href="admin/wechat/mpinfo/editLinkApp/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="公众平台-应用开发中心关联设置"  class="jbolt_table_editbtn text-wrap"><i class="fa fa-link"></i>${data.linkAppName?data.linkAppName:"无"}</a>
+</td>
+<td>
+{@if !data.enable}
+<a  tooltip  title="编辑"  href="admin/wechat/mpinfo/edit/${data.id}" data-scroll="yes" data-handler="refreshPjaxContainer" data-title="编辑公众平台信息" data-area="980,600" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/wechat/mpinfo/delete/${data.id}" data-handler="removeTr" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+{@/if}
+</td>
+</tr>
+{@/each}
+</script>
+<table class="table_striped jbolt_table jbolt_main_table thead_font_normal table-center tbody_lh20"
+data-jbolttable
+data-ajax="true"
+data-url="admin/wechat/mpinfo/datas"
+data-conditions-form="wechatMpinfoForm_#(pageId)"
+data-page="wechatMpinfoPage_#(pageId)"
+data-rowtpl="wechatMpinfoRowtpl_#(pageId)"
+>
+<thead>
+<tr><th data-width="60">序号</th><th data-width="120">头像</th><th data-min-width="200">名称</th><th data-width="90">二维码</th><th data-width="160" >类型|主体</th><th data-width="100" >简介</th><th data-width="100" >备注</th><th data-width="80">启用</th><th data-width="80">认证</th><th  data-width="230">核心配置</th><th data-width="150">关联应用</th><th data-width="80">操作</th></tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end
+

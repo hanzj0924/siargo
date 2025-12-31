@@ -1,0 +1,23 @@
+#if(codeGenServiceMode??)
+#[[#@jboltLayout()]]#
+#[[#define main()]]#
+#end
+<div class="jbolt_page">
+  <div class="jbolt_page_content">
+    <div class="alert alert-info">请点击<button  data-downloadbtn data-url="#(codeGenServiceMode?((codeGen.controllerPathWithoutFirstSlash?? '')+'/downloadTpl'):('admin/codegen/downloadTpl/'+ (codeGenId?? 0)))" class="btn btn-success btn-sm"><i class="fa fa-download"></i>下载</button>按钮，下载Excel导入模板，填写数据后，上传并导入。</div>
+    <div class="text-center">
+      <div class="j_upload_file_box"
+           data-name="file"
+           data-btn-class="btn btn-success"
+           data-placeholder="上传 & 导入"
+           data-confirm="确认导入数据？"
+           data-accept="excel"
+           data-maxsize="20480"
+           data-handler="uploadFile"
+           data-url="#(codeGenServiceMode?((codeGen.controllerPathWithoutFirstSlash?? '')+'/importExcel'):('admin/codegen/importExcel/'))"
+           data-upload-success-handler="setTimeout(function(){parent.refreshPjaxContainer();parent.layer.closeAll();},1000)"
+      ></div>
+    </div>
+  </div>
+</div>
+#[[#end]]#

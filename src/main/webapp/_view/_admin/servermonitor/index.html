@@ -1,0 +1,105 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-sm-auto">
+	<h1><i class="jbicon jb-ITjiankong mr-1 font-weight-bolder text-primary" style="font-size:18px;"></i>服务器运行监控</h1>
+	</div>
+	<div class="col"></div>
+	<div class="col-sm-auto">
+		<button onclick="refreshPjaxContainer()"  class="btn btn-outline-secondary btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<div class="row">
+	<div class="col-12 col-xl-6">
+		<div class="card my-2">
+			<div class="card-header"><span><i class="jbicon jb-fuwuqi mr-1 text-info" style="font-size:18px;"></i>服务器主机</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a><a tabindex="-1" data-portalbtn data-portalid="server_portal_#(pageId)" class="pull-right text-black-50 card-optbtn"><i class="jbicon2 jbi-reload"></i></a></div>
+			<div class="card-body" style="min-height:350px;">
+				<div class="table-responsive">
+					#ajaxPortal("admin/servermonitor/server", "server_portal_"+pageId, true)
+				</div>
+			</div>
+		</div>
+	</div>
+
+<div class="col-12 col-xl-6">
+	<div class="card my-2">
+	<div class="card-header"><span><i class="jbicon jb-cpu mr-1  text-info" style="font-size:18px;"></i>CPU</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a><a tabindex="-1" data-portalbtn data-portalid="cpu_portal_#(pageId)" class="pull-right text-black-50 card-optbtn"><i class="jbicon2 jbi-reload"></i></a></div>
+		<div class="card-body" style="min-height:350px;">
+		<div class="table-responsive">
+		#ajaxPortal("admin/servermonitor/cpu", "cpu_portal_"+pageId, true)
+		</div>
+		</div>
+	</div>
+</div>
+
+<div class="col-12 col-xl-6">
+	<div class="card my-2">
+	<div class="card-header"><span><i class="jbicon jb-neicuntiao mr-1  text-info" style="font-size:18px;"></i>内存</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a><a tabindex="-1" data-portalbtn data-portalid="memory_portal_#(pageId)" class="pull-right text-black-50 card-optbtn"><i class="jbicon2 jbi-reload"></i></a></div>
+		<div class="card-body" style="min-height:250px;">
+		<div class="table-responsive">
+		#ajaxPortal("admin/servermonitor/memory", "memory_portal_"+pageId, true)
+		</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="col-12 col-xl-6">
+	<div class="card my-2">
+	<div class="card-header"><span><i class="jbicon jb-jvm mr-1  text-info" style="font-size:18px;"></i>JVM</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a><a tabindex="-1" data-portalbtn data-portalid="jvm_portal_#(pageId)" class="pull-right text-black-50 card-optbtn"><i class="jbicon2 jbi-reload"></i></a></div>
+		<div class="card-body" style="min-height:250px;">
+		<div class="table-responsive">
+		#ajaxPortal("admin/servermonitor/jvm", "jvm_portal_"+pageId, true)
+		</div>
+		</div>
+	</div>
+</div>
+
+
+
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card my-2">
+            <div class="card-header"><span><i class="jbicon jb-disk mr-1  text-info" style="font-size:18px;"></i>磁盘</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a><a tabindex="-1" data-portalbtn data-portalid="disk_portal_#(pageId)" class="pull-right text-black-50 card-optbtn"><i class="jbicon2 jbi-reload"></i></a></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    #ajaxPortal("admin/servermonitor/disk", "disk_portal_"+pageId, true)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+	<div class="col-12 col-xl-6" data-ajaxportal data-url="admin/servermonitor/cache?pageId=#(pageId)" id="cache_portal_#(pageId)">
+
+	</div>
+	<!--<div class="col-12 col-xl-6">
+		<div class="card my-2">
+			<div class="card-header"><span><i class="jbicon jb-ziyuanguanli mr-1 text-info" style="font-size:18px;"></i>ElasticSearch服务</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a><a tabindex="-1" data-portalbtn data-portalid="server_portal_#(pageId)" class="pull-right text-black-50 card-optbtn"><i class="jbicon2 jbi-reload"></i></a></div>
+			<div class="card-body">
+				<div class="table-responsive">
+					#ajaxPortal("admin/servermonitor/elasticsearch", "elasticsearch_portal_"+pageId, true)
+				</div>
+			</div>
+		</div>
+	</div>-->
+</div>
+
+
+
+</div>
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end

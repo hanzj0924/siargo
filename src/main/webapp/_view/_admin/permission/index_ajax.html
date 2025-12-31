@@ -1,0 +1,127 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+		<div class="col-md-auto">
+		<h1><i class="jbicon2 jbi-safetycertificate"></i> 系统资源权限管理</h1>
+		<a href="javascript:void(0)" onclick="jboltTableExpandAll(this)" class="text-primary">展开</a>|<a href="javascript:void(0)" onclick="jboltTableCollapseAll(this)"  class="text-secondary">闭合</a>
+		</div>
+		<div class="col">
+			<form onkeydown="if(event.which==13){return false;}" onsubmit="return false;" class="form-inline" id="permissionForm_#(pageId)" action="admin/permission" method="post">
+			<label class="d-inline-block">筛选:</label>
+			<select class="form-control" name="ofModule" data-autoload data-url="admin/permission/modules" data-text="=所属模块=" ></select>
+			<select class="form-control" name="topnavId"  data-autoload data-url="admin/topnav/options" data-text="=顶部导航=" data-value=""></select>
+			<button type="submit" class="btn btn-light"><i class="fa fa-search"></i> 查询</button>
+			<input data-clear-handler="onkeyup" onkeyup="jboltTableFilterByKeywords('permission_table_#(pageId)',this.value,[1,6,7])" data-with-clearbtn="true" autocomplete="off"  class="form-control d-inline-block"  placeholder="输入关键字 进行过滤"/>
+			</form>
+		</div>
+		<div class="col-md-auto">
+			<div class="btn-group" role="group" aria-label="btn-group">
+			<button data-area="1280,750" data-dialogbtn data-handler="refreshJBoltTable" data-title="新增权限资源" data-url="admin/permission/add/0-1" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+			<button data-ajaxbtn data-confirm="确认初始化权限资源的顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="admin/permission/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+			<button onclick="jboltTableRefresh(this)" class="btn btn-outline-secondary btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="permission_rowtpl_tr_#(pageId)">
+<tr data-id="${id}" data-pid="${pid}" data-level="${eachLevel}" data-hasitems="${items&&items.length>0}">
+<td><i class="${icons}"></i> ${title}</td>
+<td>${permissionLevel}级</td>
+	<td>${sortRank}</td>
+	<td class="text-primary">${ofModuleName}</td>
+<td  class="text-center">
+{@if url}${isTargetBlank?"浏览器新窗口":"浏览器当前窗口"}{@/if}
+</td>
+<td class="text-center">
+	{@if openType===1}
+		系统默认
+	{@else if openType === 2}
+		IFrame
+	{@else if openType === 3}
+		Dialog
+	{@else if openType === 4}
+		JBoltLayer
+	{@/if}
+</td>
+<td>
+{@if isMenu}
+<span class="badge badge-primary">菜单</span>
+{@else}
+<span class="badge badge-info">非菜单</span>
+{@/if}
+</td>
+<td  class="text-left">${url}</td>
+<td  class="text-left">${permissionKey}</td>
+<td>
+<img data-switchbtn data-confirm="确定切换此权限是否是超管默认使用权限？" data-value="${isSystemAdminDefault}"  data-handler="refreshJBoltTable"  data-url="admin/permission/toggleSystemAdminDefault/${id}"/>
+</td>
+<td class="text-right">
+<a href="admin/permission/add/${id}-${permissionLevel+1}" data-area="1280,750"  tooltip data-title="添加下级资源"   data-handler="refreshJBoltTable"  dialog-title="添加下级资源" class="jbolt_table_editbtn"><i class="fa fa-plus"></i></a>
+<a href="admin/permission/insert/${id}" data-area="1280,800"  tooltip data-title="插入同级资源"   data-handler="refreshJBoltTable"  dialog-title="插入同级资源，相对于资源【${title}】" class="jbolt_table_editbtn"><i class="text-info fa fa-plug"></i></a>
+<a href="admin/permission/edit/${id}" data-area="1280,800"  tooltip data-title="编辑"  data-handler="refreshJBoltTable" dialog-title="编辑资源" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+<a href="admin/permission/delete/${id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="removeTrCascade" data-confirm="确定删除这条数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+<a href="admin/permission/up/${id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+<a href="admin/permission/down/${id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+</td>
+</tr>
+{@if items&&items.length>0}
+{@each items as son}
+{@include "#permission_rowtpl_tr_#(pageId)",son}
+{@/each}
+{@/if}
+</script>
+<script type="text/template" id="permission_rowtpl_#(pageId)">
+{@each datas as data,index}
+{# 先循环第一级}
+{@include "#permission_rowtpl_tr_#(pageId)",data}
+{@/each}
+</script>
+
+<table class="table table-bordered table-hover table-center text-nowrap thead_font_normal"
+id="permission_table_#(pageId)"
+data-jbolttable
+###设置是treetable 默认显示到第一级 操作列在第一列
+data-treetable="all:1"
+data-fixed-columns-left="1"
+data-fixed-columns-right="-1"
+data-column-resize="true"
+data-ajax="true"
+data-url="admin/permission/datas"
+data-rowtpl="permission_rowtpl_#(pageId)"
+data-conditions-form="permissionForm_#(pageId)"
+	   data-row-click-active="true"
+	   data-row-click-active-bgcolor="#f8ff94"
+	   data-row-click-active-frcolor="#007bff"
+>
+<thead>
+<tr>
+	<th data-width="260">资源</th>
+	<th data-width="60">级别</th>
+	<th data-width="60">顺序</th>
+	<th data-width="150">模块</th>
+	<th data-width="130">加载方式</th>
+	<th data-width="130">打开类型</th>
+	<th data-width="100">资源类型</th>
+	<th data-min-width="200">URL</th>
+	<th data-min-width="200">KEY</th>
+	<th data-width="100">超管默认</th>
+	<th data-width="160">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end

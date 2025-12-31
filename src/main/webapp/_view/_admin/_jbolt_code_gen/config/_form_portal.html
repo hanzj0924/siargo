@@ -1,0 +1,375 @@
+#if(colDatas==null || (colDatas.size()==1 && colDatas[0].datas.size()==0))
+	<div class="alert alert-danger m-auto">未设置任何属性用表单编辑</div>
+#else
+#if(codeGenServiceModeTest)
+#@jboltLayout()
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+	<form onsubmit="return false;" id="#(codeGen.modelName)_Form" method="post">
+#end
+#if(codeGenServiceMode??)
+<form onsubmit="return false;" id="#(codeGen.modelName)_Form" action="#[[#(action)]]#" method="post">
+	#[[#]]#if(#(firstCharToLowerCase(codeGen.modelName)).#(primaryKey?? 'id')??)
+	<input type="hidden" name="#(firstCharToLowerCase(codeGen.modelName)).#(primaryKey?? 'id')" value="#[[#]]#(#(firstCharToLowerCase(codeGen.modelName)).#(primaryKey?? 'id')??)" />
+	#[[#]]#end
+#end
+<div class="row">
+#for(colData:colDatas)
+<div class="col#((colData.col!=null && colData.col>0)?('-md-'+colData.col):'')#(codeGenServiceMode?'':' form_control_box')" >
+### 挨个判断组件类型生成对应组件
+#for(col:colData.datas)
+	#@switchFormColType?(colData.isFormGroupRow,colData.modelName,colData.labelWidth,colData.formControlWidth,col,codeGenServiceMode)
+#end
+</div>
+#end
+</div>
+#if(codeGenServiceMode)
+</form>
+#end
+#if(codeGenServiceModeTest)
+</form>
+</div>
+</div>
+#end
+#if(codeGenServiceMode)
+#[[#define js()]]#
+<script>
+</script>
+#[[#]]#include("/_view/_admin/common/_formjs.html",formId="#(codeGen.modelName)_Form")
+#[[#end]]#
+#end
+#if(codeGenServiceModeTest)
+<script>
+function submitThisForm(callback){
+	if(FormChecker.check("#(codeGen.modelName)_Form")){
+		callback();
+	}
+}
+</script>
+#end
+
+#end
+#if(editMode)
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="JBoltFormEleEditor_tpl">
+<div class="card text-left text-primary border border-primary p-3 my-3 JBoltFormEleEditor" id="JBoltFormEleEditor">
+<form onsubmit="return false;" action="#(action??)" method="post" id="JBoltFormEleEditorForm">
+ <div class="form-group row"
+		id="formEleWidthRadio"
+		data-radio
+		data-rule="radio"
+		data-value="${formEleWidth?formEleWidth:10}"
+		data-name="formEleWidth"
+		data-default="${formEleWidth?formEleWidth:10}"
+		data-handler="changeFormControlEleWidth"
+		>
+		<label class="col-sm-3 col-form-label" >横向占比</label>
+			<div class="col"  style="padding-top: 1px;">
+				{@each widths as width}
+				<div class="radio radio-primary radio-inline">
+					<input  id="r_formelewidth_${width}" type="radio" name="formEleWidth" value="${width}"/>
+					<label for="r_formelewidth_${width}">${width}</label>
+				</div>
+				{@/each}
+			</div>
+</div>
+<div class="form-group row">
+	<label class="col-sm-3 col-form-label" >标题</label>
+	<div class="col">
+	<input type="text" oninput="changeFormControlEleFormLabel(this.value)" class="form-control text-info" placeholder="请输入标题" id="formLabel" name="formLabel" value="${formLabel}"/>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-3 col-form-label" >提示信息</label>
+	<div class="col">
+	<input type="text" oninput="changeFormControlEleFormTips(this.value)" class="form-control text-info" placeholder="请输入帮助提示信息" id="formTips" name="formTips" value="${formTips}"/>
+	</div>
+	<div class="col-auto">
+	<input type="hidden" name="formTipsColor" id="formTipsColorHidden" value="${formTipsColor?formTipsColor:'secondary'}"/>
+		<button type="button" onclick="changeFormControlEleFormTipsColor('secondary')" class="btn bg-secondary d-inline-block mr-1" style="width:30px;height:30px;content:'';"></button>
+		<button type="button" onclick="changeFormControlEleFormTipsColor('primary')" class="btn bg-primary d-inline-block mr-1" style="width:30px;height:30px;content:'';"></button>
+		<button type="button" onclick="changeFormControlEleFormTipsColor('success')" class="btn bg-success d-inline-block mr-1" style="width:30px;height:30px;content:'';"></button>
+		<button type="button" onclick="changeFormControlEleFormTipsColor('info')" class="btn bg-info d-inline-block mr-1" style="width:30px;height:30px;content:'';"></button>
+		<button type="button" onclick="changeFormControlEleFormTipsColor('danger')" class="btn bg-danger d-inline-block mr-1" style="width:30px;height:30px;content:'';"></button>
+		<button type="button" onclick="changeFormControlEleFormTipsColor('warning')" class="btn bg-warning d-inline-block ml-1" style="width:30px;height:30px;content:'';"></button>
+	</div>
+</div>
+
+{@if hasPlaceholder}
+<div class="form-group row">
+	<label class="col-sm-3 col-form-label" >placeholder</label>
+	<div class="col">
+	<input type="text" oninput="changeFormControlElePlaceholder(this.value)" class="form-control text-info" placeholder="请输入placeholder" id="placeholder" name="placeholder" value="${placeholder}"/>
+	</div>
+</div>
+{@/if}
+
+
+{@if needInputGroupAppend}
+<fieldset class="my-3">
+	<legend>Input Group 配置</legend>
+	<div class="form-group row">
+	<label class="col-sm-3 col-form-label">Prepend Html</label>
+	<div class="col">
+	<textarea oninput="previewInputGroupPrepend(this)" maxlength="1000" style="height: 100px;"  class="form-control text-info" placeholder="请输入Input Group Prepend Html  1000字符限制" id="igPrependHtml" name="igPrependHtml">${igPrependHtml}</textarea>
+		<button class="btn btn-sm btn-outline-danger mr-2 mt-2 float-left" onclick="removeInputGroupPrepend(this)" type="button" tooltip data-title="移除"><i class="fa fa-remove"></i></button>
+		<div class="btn-group btn-group-sm mt-2">
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'text')" class="btn btn-outline-primary">纯文本</button>
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'icon')" class="btn btn-outline-primary">Icon图标</button>
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'link')" class="btn btn-outline-primary">超链接</button>
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'icon_link')" class="btn btn-outline-primary">Icon图标超链接</button>
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'dialog')" class="btn btn-outline-primary">打开Dialog按钮</button>
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'jbolt_layer')" class="btn btn-outline-primary">打开抽屉按钮</button>
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'tab')" class="btn btn-outline-primary">打开新内部选项卡</button>
+		<button type="button" onclick="insertInputGroupHtmlCode('igPrependHtml',false,'blank')" class="btn btn-outline-primary">打开浏览器新页面按钮</button>
+	</div>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-3 col-form-label">Append Html</label>
+	<div class="col">
+		<textarea oninput="previewInputGroupAppend(this)" maxlength="1000" style="height: 100px;" class="form-control text-info" placeholder="请输入Input Group Append Html 1000字符限制" id="igAppendHtml" name="igAppendHtml">${igAppendHtml}</textarea>
+		<button class="btn btn-sm btn-outline-danger mr-2 mt-2 float-left" onclick="removeInputGroupAppend(this)" type="button" tooltip data-title="移除"><i class="fa fa-remove"></i></button>
+		<div class="btn-group btn-group-sm mt-2">
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'text')" class="btn btn-outline-primary">纯文本</button>
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'icon')" class="btn btn-outline-primary">Icon图标</button>
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'link')" class="btn btn-outline-primary">超链接</button>
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'icon_link')" class="btn btn-outline-primary">Icon图标超链接</button>
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'dialog')" class="btn btn-outline-primary">打开Dialog按钮</button>
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'jbolt_layer')" class="btn btn-outline-primary">打开抽屉按钮</button>
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'tab')" class="btn btn-outline-primary">打开新内部选项卡</button>
+			<button type="button" onclick="insertInputGroupHtmlCode('igAppendHtml',true,'blank')" class="btn btn-outline-primary">打开浏览器新页面按钮</button>
+		</div>
+	</div>
+</div>
+</fieldset>
+{@/if}
+
+{@if isRangSlider}
+<div class="form-group row">
+	<label class="col-sm-3 col-form-label" >最小值:min</label>
+	<div class="col-3">
+	<input type="number" oninput="changeFormControlEleRangSliderOption('min',this.value)" class="form-control text-info" placeholder="请输入最小值" id="dataMin" name="dataMin" value="${randSliderOption.min}"/>
+	</div>
+</div>
+<div class="form-group row">
+<label class="col-sm-3 col-form-label" >最大值:max</label>
+<div class="col-3">
+<input type="number" oninput="changeFormControlEleRangSliderOption('max',this.value)" class="form-control text-info" placeholder="请输入最大值" id="dataMax" name="dataMax" value="${randSliderOption.max}"/>
+</div>
+</div>
+<div class="form-group row">
+<label class="col-sm-3 col-form-label" >步长:step</label>
+<div class="col-3">
+<input type="number" oninput="changeFormControlEleRangSliderOption('step',this.value)" class="form-control text-info" placeholder="请输入步长值" id="dataStep" name="dataStep" value="${randSliderOption.step}"/>
+</div>
+</div>
+{@/if}
+{@if isUploader}
+	<input type="hidden" name="isUploader" value="${isUploader}"/>
+	<input type="hidden" name="isImgUploader" value="${isImgUploader}"/>
+	<input type="hidden" name="isFileUploader" value="${isFileUploader}"/>
+	<input type="hidden" name="isUploadMulti" value="${isUploadMulti}"/>
+<div class="form-group row"
+		id="isUploadToQiniuRadio"
+		data-radio
+		data-rule="radio"
+		data-value="${isUploadToQiniu}"
+		data-name="isUploadToQiniu"
+		data-default="false"
+		data-handler="changeIsUploadToQiniu"
+		>
+		<label class="col-sm-3 col-form-label" >是否上传七牛</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary radio-inline">
+					<input  id="r_uploadtoqiniu_true" type="radio" name="isUploadToQiniu" value="true"/>
+					<label for="r_uploadtoqiniu_true">是</label>
+				</div>
+				<div class="radio radio-primary radio-inline">
+					<input  id="r_uploadtoqiniu_false" type="radio" name="isUploadToQiniu" value="false"/>
+					<label for="r_uploadtoqiniu_false">否</label>
+				</div>
+			</div>
+</div>
+<div class="d-none" id="qiniuBucketSnBox">
+<div class="form-group row">
+<label class="col-sm-3 col-form-label" >七牛BucketSn</label>
+<div class="col">
+<input type="text" maxlength="60" data-with-clearbtn id="qiniuBucketSn" class="form-control text-info" placeholder="请输入七牛指定的七牛Bucket SN 不输入则使用系统默认"  name="qiniuBucketSn" value="${qiniuBucketSn?qiniuBucketSn:''}"/>
+</div>
+</div>
+<div class="form-group row text-right">
+	<div class="col-sm-3"></div>
+	<div class="col-4">
+		<div class="input-group">
+		<div class="input-group-prepend"><span class="input-group-text">账号</span></div>
+		<select class="form-control" data-autoload data-url="admin/qiniu/options" data-linkage="true" data-sonid="qiniubucketsnselect" data-text="=请选择=" data-value=""></select>
+		</div>
+	</div>
+	<div class="col-4">
+		<div class="input-group">
+		<div class="input-group-prepend"><span class="input-group-text">Bucket</span></div>
+		<select class="form-control" data-text-attr="text,value" data-value-attr="sn" data-url="admin/qiniu/bucket/options/" data-linkage="true" id="qiniubucketsnselect" data-text="=请选择=" data-value=""></select>
+		</div>
+	</div>
+	<div class="col-2 text-left">
+	<button class="btn btn-primary btn-sm" type="button" onclick="setBucketSn()"><i class="fa fa-check"></i> 使用</button>
+	</div>
+</div>
+</div>
+
+<div class="form-group row d-none" id="formUploadUrlBox">
+<label class="col-sm-3 col-form-label" >接收文件Action名称</label>
+<div class="col-6">
+<input type="text" maxlength="60" id="formUploadUrl" class="form-control text-info" placeholder="请输入接收文件额action名称"  name="formUploadUrl" value="${formUploadUrl?formUploadUrl:''}"/>
+</div>
+</div>
+
+
+<div class="form-group row d-none" id="qiniuFileKeyBox">
+<label class="col-sm-3 col-form-label" >七牛FileKey</label>
+<div class="col">
+<input type="text" maxlength="100" class="form-control text-info" placeholder="请输入七牛的filekey" id="qiniuFileKey"  name="qiniuFileKey" value="${qiniuFileKey?qiniuFileKey:''}"/>
+</div>
+</div>
+
+<div class="form-group row">
+<label class="col-sm-3 col-form-label" >上传数据大小限制</label>
+<div class="col-6">
+	<div class="input-group">
+		<input type="number" maxlength="10" min="1"  class="form-control text-info" placeholder="请输入上传数据大小限制 例如 200 单位KB" id="formMaxsize"  name="formMaxsize" value="${formMaxsize}"/>
+		<div class="input-group-append"><span class="input-group-text">KB</span></div>
+	</div>
+</div>
+</div>
+{@if isImgUploader}
+<div class="form-group row">
+<label class="col-sm-3 col-form-label" >上传区域尺寸</label>
+<div class="col-6">
+<input type="text" oninput="changeImgUploaderArea(this.value)" onchange="changeImgUploaderArea(this.value)" class="form-control text-info" placeholder="请输入区域尺寸" id="formImgUploaderArea" name="formImgUploaderArea" value="${formImgUploaderArea}"/>
+</div>
+</div>
+{@/if}
+{@/if}
+{@if isCanChangeInlineEle}
+<div class="form-group row"
+		id="isItemInlineRadio"
+		data-radio
+		data-rule="radio"
+		data-value="${formControlIsInline}"
+		data-name="isItemInline"
+		data-default="true"
+		data-handler="changeFormControlEleIsInline"
+		>
+		<label class="col-sm-3 col-form-label" >是否inline</label>
+		<div class="col"  style="padding-top: 1px;">
+			<div class="radio radio-primary  radio-inline">
+				<input  id="risItemInlinetrue" type="radio" name="isItemInline"   value="true"/>
+				<label for="risItemInlinetrue">是</label>
+			</div>
+			<div class="radio radio-primary  radio-inline">
+				<input  id="risItemInlinefalse" type="radio" name="isItemInline"   value="false"/>
+				<label for="risItemInlinefalse">否</label>
+			</div>
+		</div>
+</div>
+{@/if}
+
+{@if isJBoltInput && jboltInputType && jboltInputType == "jstree"}
+<div class="form-group row"
+		id="isJBoltInputFilterTree"
+		data-radio
+		data-rule="radio"
+		data-value="${isJBoltInputFilterTree}"
+		data-name="isJBoltInputFilterTree"
+		data-default="false"
+		data-handler="changeFormControlEleisJBoltInputFiltertree"
+		>
+		<label class="col-sm-3 col-form-label" >filterTree</label>
+		<div class="col"  style="padding-top: 1px;">
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputFilterTreetrue" type="radio" name="isJBoltInputFilterTree"   value="true"/>
+				<label for="risJBoltInputFilterTreetrue">启用</label>
+			</div>
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputFilterTreefalse" type="radio" name="isFormJBoltInputJstreeOnlyLeaf"   value="false"/>
+				<label for="risJBoltInputFilterTreefalse">不启用</label>
+			</div>
+		</div>
+</div>
+<div class="form-group row"
+		id="isJBoltInputJsTreeCheckbox"
+		data-radio
+		data-rule="radio"
+		data-value="${isJBoltInputJsTreeCheckbox}"
+		data-name="isFormJBoltInputJsTreeCheckbox"
+		data-default="false"
+		data-handler="changeFormControlEleisJBoltInputJsTreeCheckbox"
+		>
+		<label class="col-sm-3 col-form-label" >checkbox</label>
+		<div class="col"  style="padding-top: 1px;">
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputJsTreeCheckboxtrue" type="radio" name="isFormJBoltInputJsTreeCheckbox"   value="true"/>
+				<label for="risJBoltInputJsTreeCheckboxtrue">启用</label>
+			</div>
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputJsTreeCheckboxfalse" type="radio" name="isFormJBoltInputJsTreeCheckbox"   value="false"/>
+				<label for="risJBoltInputJsTreeCheckboxfalse">不启用</label>
+			</div>
+		</div>
+</div>
+<div class="form-group row d-none"
+		id="isJBoltInputJsTreeOnlyLeaf"
+		data-radio
+		data-rule="radio"
+		data-value="${isJBoltInputJsTreeOnlyLeaf}"
+		data-name="isFormJBoltInputJstreeOnlyLeaf"
+		data-default="false"
+		data-handler="changeFormControlEleisJBoltInputJsTreeOnlyLeaf"
+		>
+		<label class="col-sm-3 col-form-label" >选择类型</label>
+		<div class="col"  style="padding-top: 1px;">
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputJsTreeOnlyLeaftrue" type="radio" name="isFormJBoltInputJstreeOnlyLeaf"   value="true"/>
+				<label for="risJBoltInputJsTreeOnlyLeaftrue">只选叶子节点</label>
+			</div>
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputJsTreeOnlyLeaffalse" type="radio" name="isFormJBoltInputJstreeOnlyLeaf"   value="false"/>
+				<label for="risJBoltInputJsTreeOnlyLeaffalse">所有节点可选</label>
+			</div>
+		</div>
+</div>
+{@/if}
+
+{@if isJBoltInput && jboltInputType && jboltInputType == "table"}
+<div class="form-group row"
+		id="isJBoltInputFilterTable"
+		data-radio
+		data-rule="radio"
+		data-value="${isJBoltInputFilterTable}"
+		data-name="isJBoltInputFilterTable"
+		data-default="false"
+		data-handler="changeFormControlEleisJBoltInputFilterTable"
+		>
+		<label class="col-sm-3 col-form-label" >filterTable</label>
+		<div class="col"  style="padding-top: 1px;">
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputFilterTabletrue" type="radio" name="isJBoltInputFilterTable"   value="true"/>
+				<label for="risJBoltInputFilterTabletrue">启用</label>
+			</div>
+			<div class="radio radio-primary  radio-inline">
+				<input id="risJBoltInputFilterTablefalse" type="radio" name="isJBoltInputFilterTable"   value="false"/>
+				<label for="risJBoltInputFilterTablefalse">不启用</label>
+			</div>
+		</div>
+</div>
+{@/if}
+<div class="text-center my-1">
+<button type="button" class="btn btn-primary d-inline-block" style="width:120px;" type="button" onclick="submitFormEleEditor()">提交修改</button>
+</div>
+</form>
+</div>
+</script>
+#end

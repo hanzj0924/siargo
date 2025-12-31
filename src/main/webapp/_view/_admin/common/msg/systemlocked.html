@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="#(basepath??)" />
+		<meta charset="utf-8" />
+		<title>#globalConfig(GlobalConfigKey.SYSTEM_NAME,"JBolt极速开发平台")</title>
+		 #if(need_always_https)
+	    	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+		 #end
+		<meta name="renderer" content="webkit">
+		<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+		#@maincss?()
+		<script type="text/javascript">var needPjax=true;var autoShowRequiredLabelStar=false;</script>
+		#@jqueryjs?()
+		#@layerjs?()
+		<!-- 系统后台核心JS封装库 -->
+		#@jboltmaindialogjslib?()
+		#@mainjs?()
+
+	</head>
+	<body>
+		<div oncontextmenu="doNothing()" class="j_locksystem noselect" id="j_locksystem">
+			<div class="j_lockmain">
+			<h1>屏幕已锁</h1>
+			<div class="j_lockpassword">
+			<input onkeyup="unlockSystem(event)" maxlength="40" type="password" id="unlockpwd" placeholder="输入密码 回车解锁" name="password"  autocomplete="off" />
+			<div class="j_reloginbtn"><a href="admin/login">切换用户</a></div>
+			</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			showJboltLockSystem();
+			</script>
+	</body>
+</html>

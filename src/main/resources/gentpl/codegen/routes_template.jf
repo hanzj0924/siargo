@@ -1,0 +1,25 @@
+package cn.jbolt.index;
+
+#if(codeGen.isNeedAdminInterceptor??)
+import cn.jbolt.core.permission.JBoltAdminAuthInterceptor;
+#end
+import com.jfinal.config.Routes;
+
+/**
+ * #(codeGen.indexHtmlPageTitle?? (codeGen.mainTableRemark?? (codeGen.serviceName??)))路由配置
+ * @ClassName:  #(routesName??)
+ * @author: #(codeGen.author?? 'JBolt-Generator')
+ * @date:   #date()
+ */
+public class JBoltCodeGenRoutes extends Routes {
+
+	@Override
+	public void config() {
+		this.setBaseViewPath("/_view/_admin/_jbolt_code_gen");
+		#if(codeGen.isNeedAdminInterceptor??)
+		this.addInterceptor(new JBoltAdminAuthInterceptor());
+		#end
+		#(code??)
+	}
+
+}

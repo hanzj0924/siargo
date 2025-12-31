@@ -1,0 +1,73 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-sm-auto">
+	<h1><i class="jbicon2 jbi-team"></i> 岗位管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="postForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords"/>
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-sm-auto">
+	<div class="btn-group" role="group" aria-label="btn-group">
+		<button data-dialogbtn data-area="600,400" data-handler="refreshJBoltTable" data-title="新增岗位"  data-url="admin/post/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+		<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="admin/post/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+	</div>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="postRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr>
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.name}</td>
+<td>${data.typeName}</td>
+<td>${data.sn}</td>
+<td>${data.remark}</td>
+<td><img data-switchbtn data-confirm="确定切换启用/禁用？" data-value="${data.enable}"  data-handler="refreshJBoltTable"  data-url="admin/post/toggleEnable/${data.id}"/></td>
+<td>
+	<a href="admin/post/edit/${data.id}" data-area="600,400"  tooltip data-title="编辑"  data-handler="refreshJBoltTable" dialog-title="编辑资源" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+    <a href="admin/post/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="refreshJBoltTable" data-confirm="确定删除这条数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+    <a href="admin/post/up/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+    <a href="admin/post/down/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+</td>
+</tr>
+{@/each}
+</script>
+
+<table class="jbolt_table jbolt_main_table table_striped table-center"
+data-jbolttable
+data-ajax="true"
+data-column-resize="true"
+data-bind-elements="#postAddBtn_#(pageId)"
+data-url="admin/post/datas"
+data-conditions-form="postForm_#(pageId)"
+data-rowtpl="postRowtpl_#(pageId)"
+data-page="postPage_#(pageId)"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	<th data-width="150">岗位名称</th>
+	<th data-width="150">岗位类型</th>
+	<th data-width="150">编码</th>
+	<th data-min-width="150">备注信息</th>
+	<th data-width="150">启用/禁用</th>
+	<th data-width="170">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+	
+</div>
+</div>
+#end

@@ -1,0 +1,77 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="dept_rowtpl_tr_#(pageId)">
+<tr data-id="${id}" data-pid="${pid}" data-text="(${sn})${name}" data-level="${eachLevel}" data-hasitems="${items&&items.length>0}">
+<td class="text-left"><span>(${sn})${name}</span></td>
+<td>${fullName}</td>
+<td><span class="text-white badge bg-${eachLevel|colorClassByLevel}">${typeName}</span></td>
+</tr>
+{@if items&&items.length>0}
+{@each items as son}
+{@include "#dept_rowtpl_tr_#(pageId)",son}
+{@/each}
+{@/if}
+</script>
+
+<script type="text/template" id="deptRowtpl_#(pageId)">
+{@each datas as data,index}
+{# 先循环第一级}
+{@include "#dept_rowtpl_tr_#(pageId)",data}
+{@/each}
+</script>
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+id="choose_depts_table_#(pageId)"
+data-jbolttable
+data-ajax="true"
+data-column-prepend="1:checkbox:true"
+data-column-resize="true"
+data-url="admin/dept/datas"
+data-rowtpl="deptRowtpl_#(pageId)"
+###设置是treetable 默认显示到第一级 操作列在第一列
+data-treetable="all:2"
+data-ajax-success-handler="ajaxSuccessHandler_#(pageId)"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="300">部门名称</th>
+	<th data-min-width="300">部门全称</th>
+	<th data-width="150">部门类型</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>	
+</div>
+</div>
+#end
+#define js()
+<script type="text/javascript">
+var _submit_ing=false;
+function submitThisForm(){
+	if(_submit_ing){
+		return false;
+	}
+	_submit_ing=true;
+	var checkedIds   = getJboltTableCheckedIds("choose_depts_table_#(pageId)");
+	var checkedNames = getJboltTableCheckedTexts("choose_depts_table_#(pageId)");
+	if(isOk(checkedIds)&&isOk(checkedNames)){
+		 parent.setChooseReceiverDatas(checkedIds,checkedNames);
+		 parent.layer.closeAll();
+	}
+	_submit_ing=false;
+}
+
+function ajaxSuccessHandler_#(pageId)(table){
+	var ids = "#(ids??)";
+	if(ids){
+		table.me.setCheckedIds(table,ids.split(","));
+	}
+}
+</script>
+#end

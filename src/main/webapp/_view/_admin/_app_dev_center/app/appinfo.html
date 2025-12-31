@@ -1,0 +1,38 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+ <form id="appinfoDialogForm" method="get" action="admin/app/appinfo/#(application.id??)"></form>
+ <table class="table table-bordered">
+ <tbody>
+ <tr>
+ <td style="min-width:150px">应用名称</td>
+ <td>#(application.name??)</td>
+ </tr>
+ <tr>
+ <td>应用类型</td>
+ <td>#(application.typeName??)</td>
+ </tr>
+ <tr>
+ <td>应用AppId</td>
+ <td>#(application.appId??)</td>
+ </tr>
+ <tr>
+ <td>应用AppSecret</td>
+ <td>
+ <span class="text-danger">#(application.appSecret??)</span>
+ <a class="btn btn-sm btn-danger pull-right" href="admin/app/changeAppSecret/#(application.id)" tooltip data-title="变更应用AppSecret"  data-ajaxbtn data-confirm="变更后正在使用的应用需要更换新的AppSecret配置，确认执行变更?" data-handler="(LayerMsgBox.success('操作成功',500,refreshPjaxContainer))"  ><i class="fa fa-exchange"></i> 变更</a>
+ </td>
+ </tr>
+ </tbody>
+ </table>
+</div>
+</div>
+#end
+
+#define js()
+<script>
+$(function(){
+})
+</script>
+#end

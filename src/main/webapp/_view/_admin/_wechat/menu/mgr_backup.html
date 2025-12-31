@@ -1,0 +1,42 @@
+#@jboltLayout()
+#define css()
+<link rel="stylesheet" type="text/css" href="assets/css/jbolt-wechat-menu.min.css"/>
+#end
+ 
+#define main()
+<div class="jbolt_page">
+	<div class="jbolt_page_content">
+		<div class="row">
+			<div id="menu">
+				<div class="wxtitle">#(mpName??)</div>
+				<div class="menus">
+					<ul class="level1" id="level1Box">
+
+					</ul>
+				</div>
+			</div>
+			<div class="col">
+				<div class="card">
+					<div class="card-header ">
+						<i class="fa fa-edit mr-1"></i>菜单编辑
+					</div>
+					<div class="card-body">
+						<section id="menuPortal" data-ajaxportal
+							data-url="weixin/menu/edit/#(mpId?? 0)-0" data-autoload="false"></section>
+					</div>
+				</div>
+				<div class="text-center mt-4">
+				<button class="btn btn-primary" onclick="publishToWeixin()"><i class="fa fa-plus mr-1"></i>发布到公众号</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+#end 
+#define js()
+<script>
+var mpId="#(mpId??)";
+</script>
+<script src="assets/js/jbolt-wechat-menu.min.js" type="text/javascript"></script>
+#end
+

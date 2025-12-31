@@ -1,0 +1,198 @@
+### 根据UIType字符串 生成input类型html
+#define genIndexInputTypeByUiTypeStr(col)
+#switch (col.searchUiType)
+#case ("input")
+#setLocal(type = "text")
+#case ("number")
+#setLocal(type = "number")
+#default
+#setLocal(type = "text")
+#end
+<input type="#(type?? 'text')"  #if(col.searchUiType == "calculator")data-with-calculator#end  #if(col.dataRuleForSearch || col.isSearchRequired) data-rule="#(col.dataRuleForSearch?? (col.isSearchRequired?'required':''))" data-notnull="#(col.isSearchRequired)" data-tips="#(col.dataTipsForSearch?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end  data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入#(col.formLabel?? (col.tableLabel?? (col.remark?? '')))" maxlength="#(col.maxLength?? '40')" name="#(col.attrName)" value="#(col.searchDefaultValue??)"/>
+#end
+
+### 根据UIType字符串 生成html5 date input类型html
+#define genIndexHtml5DateInputByUiTypeStr(col)
+#switch (col.searchUiType)
+#case ("input_date")
+#setLocal(type = "date")
+#case ("input_time")
+#setLocal(type = "time")
+#case ("input_datetime")
+#setLocal(type = "datetime-local")
+#case ("input_month")
+#setLocal(type = "month")
+#case ("input_week")
+#setLocal(type = "week")
+#default
+#setLocal(type = "date")
+#end
+<input type="#(type?? 'date')" #if(col.dataRuleForSearch || col.isSearchRequired) data-rule="#(col.dataRuleForSearch?? (col.isSearchRequired?'required':''))" data-notnull="#(col.isSearchRequired)" data-tips="#(col.dataTipsForSearch?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入#(col.formLabel?? (col.tableLabel?? (col.remark?? '')))" maxlength="#(col.maxLength?? '40')" name="#(col.attrName)"  value="#(col.searchDefaultValue??)"/>
+#end
+
+
+### 根据UIType字符串 生成Autocomplete类型html
+#define genIndexAutocompleteByUiTypeStr(col)
+<input type="text" class="form-control" maxlength="#(col.attrLength?? 200)" data-autocomplete autocomplete="off" placeholder="请选择#(col.formLabel?? (col.tableLabel?? (col.remark?? '')))"
+	data-url="#(col.searchDataValue)"
+    #if(col.searchDataValueAttr)
+    data-value-attr="#(col.searchDataValueAttr)"
+    #end
+    #if(col.searchDataTextAttr)
+    data-text-attr="#(col.searchDataTextAttr)"
+    #end
+    #if(col.searchDataColumnAttr)
+    data-column-attr="#(col.searchDataColumnAttr)"
+    #end
+	data-hiddeninput="#(col.attrName)_hidden"
+	#if(col.dataRuleForSearch || col.isSearchRequired)
+	   data-rule="#(col.dataRuleForSearch?? (col.isSearchRequired?'required':''))"
+	   data-notnull="#(col.isSearchRequired)"
+	   data-tips="#(col.dataTipsForSearch?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+	#end
+/>
+<input type="hidden" autocomplete="off" id="#(col.attrName)_hidden" name="#(col.attrName)"  maxLength="#(col.attrLength?? '20')"/>
+#end
+
+
+### 根据UIType字符串 生成select类型html
+#define genIndexSelectByUiTypeStr(col)
+#switch (col.searchUiType)
+#case ("select")
+#setLocal(type = "select")
+#setLocal(multi = false)
+#case ("select_multi")
+#setLocal(type = "select")
+#setLocal(multi = true)
+#case ("select2")
+#setLocal(type = "select2")
+#setLocal(multi = false)
+#case ("select2_multi")
+#setLocal(type = "select2")
+#setLocal(multi = true)
+#default
+#setLocal(type = "select")
+#setLocal(multi = false)
+#end
+
+#if(col.searchDataType=="sys_dictionary")
+#setLocal(selectUrl = "admin/dictionary/options?key="+col.searchDataValue)
+#else
+#setLocal(selectUrl = col.searchDataValue)
+#end
+<select class="form-control"
+	#if(type != "select2")
+	name="#(col.attrName)"
+	#end
+	data-autoload
+	#if(col.searchDataType=="enum")
+	data-options="#enumToOptions(selectUrl??)"
+	#elseif(col.searchDataType=="option")
+	data-options="#(selectUrl??)"
+	#else
+	data-url="#(selectUrl??)"
+	#end
+	data-select-type="#(type)"
+	#if(multi)
+	multiple="multiple"
+	#end
+	data-text="=#(col.tableLabel?? '请选择')="
+	data-value=""
+	#if(col.searchDataValueAttr)
+	data-value-attr="#(col.searchDataValueAttr)"
+	#end
+	#if(col.searchDataTextAttr)
+	data-text-attr="#(col.searchDataTextAttr)"
+	#end
+	#if(col.searchDataColumnAttr)
+	data-column-attr="#(col.searchDataColumnAttr)"
+	#end
+	#if(col.dataRuleForSearch || col.isSearchRequired)
+	data-rule="#(col.dataRuleForSearch?? (col.isSearchRequired?'select':''))"
+	data-notnull="#(col.isSearchRequired)"
+	data-tips="#(col.dataTipsForSearch?? ('请选择'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))"
+	#end
+	#if(type == "select2")
+	data-sync-ele="##(col.attrName)_hidden"
+	#end
+	data-refresh="true"
+	#if(col.searchDefaultValue??)data-select="#(col.searchDefaultValue??)"#end
+	></select>
+#if(type == "select2")
+<input type="hidden" name="#(col.attrName)" data-sync-attr="#(col.formDataValueAttr?? 'value')"  id="#(col.attrName)_hidden"/>
+#end
+#end
+
+
+### 根据UIType字符串 生成laydate input类型html
+#define genIndexLaydateInputByUiTypeStr(col)
+#switch (col.searchUiType)
+#case ("laydate_date")
+#setLocal(type = "date")
+#setLocal(fmt = "yyyy-MM-dd")
+#case ("laydate_range_date")
+#setLocal(type = "date")
+#setLocal(range = "~")
+#setLocal(fmt = "yyyy-MM-dd")
+#case ("laydate_time")
+#setLocal(type = "time")
+#setLocal(fmt = "HH:mm")
+#case ("laydate_range_time")
+#setLocal(range = "~")
+#setLocal(type = "time")
+#setLocal(fmt = "HH:mm:ss")
+#case ("laydate_range_time_hm")
+#setLocal(range = "~")
+#setLocal(type = "time")
+#setLocal(fmt = "HH:mm")
+#case ("laydate_datetime")
+#setLocal(type = "datetime")
+#setLocal(fmt = "yyyy-MM-dd HH:mm:ss")
+#case ("laydate_datetime_hm")
+#setLocal(type = "datetime")
+#setLocal(fmt = "yyyy-MM-dd HH:mm")
+#case ("laydate_month")
+#setLocal(type = "month")
+#setLocal(fmt = "yyyy-MM")
+#case ("laydate_range_month")
+#setLocal(range = "~")
+#setLocal(type = "month")
+#setLocal(fmt = "yyyy-MM")
+#case ("laydate_year")
+#setLocal(type = "year")
+#setLocal(fmt = "yyyy")
+#case ("laydate_range_year")
+#setLocal(type = "year")
+#setLocal(range = "~")
+#setLocal(fmt = "yyyy")
+#case ("laydate_range_datetime")
+#setLocal(type = "datetime")
+#setLocal(range = "~")
+#setLocal(fmt = "yyyy-MM-dd HH:mm:ss")
+#case ("laydate_range_datetime_hm")
+#setLocal(type = "datetime")
+#setLocal(range = "~")
+#setLocal(fmt = "yyyy-MM-dd HH:mm")
+#default
+#setLocal(type = "date")
+#setLocal(fmt = "yyyy-MM-dd")
+#end
+<input type="text" data-date #if(range)data-range="#(range)"#end data-type="#(type?? 'date')" data-with-clearbtn="true" data-fmt="#(fmt?? 'yyyy-MM-dd')" readonly="readonly" #if(col.dataRuleForSearch || col.isSearchRequired) data-rule="#(col.dataRuleForSearch?? (col.isSearchRequired?'required':''))" data-notnull="#(col.isSearchRequired)" data-tips="#(col.dataTipsForSearch?? ('请输入'+(col.formLabel?? (col.tableLabel?? (col.remark?? '')))))" #end data-with-clearbtn="true" autocomplete="off"  class="form-control" placeholder="#(col.formLabel?? (col.tableLabel?? (col.remark?? '')))" maxlength="#(col.maxLength?? '20')" name="#(col.attrName)" value="#(col.searchDefaultValue??)"/>
+#end
+
+#define switchIndexColType(col)
+#switch(col.searchUiType)
+#case("input","number")
+	#@genIndexInputTypeByUiTypeStr(col)
+#case("input_date","input_datetime","input_time","input_month","input_week")
+	#@genIndexHtml5DateInputByUiTypeStr(col)
+#case("laydate_date","laydate_datetime","laydate_datetime_hm","laydate_time","laydate_time_hm","laydate_year","laydate_month","laydate_range_year","laydate_range_month","laydate_range_date","laydate_range_datetime","laydate_range_datetime_hm","laydate_range_time","laydate_range_time_hm")
+	#@genIndexLaydateInputByUiTypeStr(col)
+#case("select","select_multi","select2","select2_multi")
+	#@genIndexSelectByUiTypeStr(col)
+#case("autocomplete")
+	#@genIndexAutocompleteByUiTypeStr(col)
+#default
+	#@genIndexInputTypeByUiTypeStr(col)
+#end
+#end

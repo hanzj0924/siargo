@@ -1,0 +1,48 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<!-- 页头区域 -->
+		<div class="row">
+			<div class="col-sm-auto">
+				<h1><i class="jbicon2 jbi-menu"></i> 页面左上角标题</h1>
+			</div>
+			<div class="col">
+			<!-- 页头表单区 -->
+				<form class="form-inline" id="jboltTopForm_#(pageId)"   onsubmit="return false;" method="post">
+					<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+					<button  type="submit" class="btn btn-light" ><i class="fa fa-search"></i> 查询</button>
+				</form>
+			</div>
+			<div class="col-sm-auto">
+			<!-- 页头右侧操作区 -->
+				<div class="btn-group" role="group" aria-label="btn-group">
+					<button data-area="600,400" data-dialogbtn data-handler="refreshJBoltTable" data-title="新增顶部导航"  data-url="admin/topnav/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+					<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="admin/topnav/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+		<!-- 内容核心区 -->
+		
+	</div>
+</div>
+#end
+
+### 如果需要额外写css 就留着 不需要就删掉css区
+#define css()
+<style type="text/css">
+
+</style>
+#end
+
+### 如果需要额外写js 就留着 不需要就删掉js区
+#define js()
+<script>
+$(function(){
+	//页面加载后调用
+});
+</script>
+#end

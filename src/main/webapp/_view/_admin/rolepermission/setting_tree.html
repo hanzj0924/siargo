@@ -1,0 +1,195 @@
+#@adminDialogLayout()
+
+#define items(datas)
+	#for(data:datas)
+		<tr onclick="toogleMyCheckbox(this)" data-id="#(data.id)" data-level="#(data.permissionLevel)" data-son="#(data.id)" data-pid="#(data.pid)">
+		    <td class="text-left" style="padding-left:#((data.permissionLevel-1)*15+15)px;">#if(data.pid!=null&&data.pid>0)<span class="text-danger mr-1">├</span>#end<i class="#(data.icons??)"></i> #(data.title)</td>
+		    <td >
+		    	<span class="badge badge-#((data.isMenu??)?'success':'secondary')">#((data.isMenu??)?"菜单":"非菜单")</span>
+		    </td>
+		    <td class="text-center">
+		    	<button class="checkboxBtn"  data-value="#(data.id)"><i class="fa fa-check"></i></button>
+		    </td>
+		</tr>
+		#@items(data.items)
+	#end
+#end
+
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<div class="text-center mb-2">
+<div class="btn-group" role="group" aria-label="btn-group">
+<a class="btn btn-primary"  href="admin/rolepermission/settingTree/#(roleId)">整体树形表格</a>
+<a class="btn btn-secondary" href="admin/rolepermission/setting/#(roleId)">拆分树形表格</a>
+</div>
+</div>
+<table class="table table-bordered table-hover table-striped table-center">
+       		<thead>
+       			<tr>
+				<th>资源</th>
+				<th  style="width:100px;">资源类型</th>
+				<th  style="width: 80px;">选择</th>
+			</tr>
+		</thead>
+        <tbody >
+        #@items?(dataList)
+        </tbody>
+     </table>
+</div>
+</div>
+#end
+#define js()
+<script>
+needPjax=false;
+function checkedSons(son,level){
+	var sonTr=$("tr[data-pid='"+son+"'][data-level='"+level+"']");
+	if(sonTr&&sonTr.length>0){
+		sonTr.each(function(){
+			var tr=$(this);
+			tr.find("button.checkboxBtn").addClass("checked");
+			var son=tr.data("son");
+			var level=tr.data("level");
+				checkedSons(son,level+1);
+			
+		})
+	}
+	
+}
+function removeCheckedSons(pid,level){
+	var sonTr=$("tr[data-pid='"+pid+"'][data-level='"+level+"']");
+	if(sonTr&&sonTr.length>0){
+		sonTr.each(function(){
+			var tr=$(this);
+			tr.find("button.checkboxBtn.checked").removeClass("checked");
+			var son=tr.data("son");
+			var level=tr.data("level");
+			removeCheckedSons(son,level+1);
+			
+		})
+	}
+	
+}
+
+function removeCheckedParent(pid,selfLevel,plevel){
+	var sameBtn=$("tr[data-pid='"+pid+"'][data-level='"+selfLevel+"']").find("button.checkboxBtn.checked");
+	if(!sameBtn||sameBtn.length==0){
+		var ptr=$("tr[data-son='"+pid+"'][data-level='"+plevel+"']");
+		ptr.find("button.checkboxBtn").removeClass("checked");
+		var ppid=ptr.data("pid");
+		var level=ptr.data("level");
+		removeCheckedParent(ppid,level,level-1);
+		
+	}
+	
+}
+function checkedParent(pid,level){
+	var ptr=$("tr[data-son='"+pid+"'][data-level='"+level+"']");
+	if(ptr&&ptr.length>0){
+		ptr.find("button.checkboxBtn").addClass("checked");
+		var ppid=ptr.data("pid");
+		var level=ptr.data("level");
+			checkedParent(ppid,level-1);
+		
+	}
+	
+}
+function toogleMyCheckbox(ele){
+	var my=$(ele);
+	var checkbox=my.find(".checkboxBtn");
+	if(checkbox&&checkbox.length>0){
+		checkbox.toggleClass("checked");
+		var checked=checkbox.hasClass("checked");
+		var level=my.data("level");
+		var son=my.data("son");
+		var pid=my.data("pid");
+		if(checked){
+				checkedSons(son,level+1);
+				checkedParent(pid,level-1);
+			/* switch (level) {
+			case 1:
+				checkedSons(son,2);
+				break;
+			case 2:
+				checkedSons(son,3);
+				checkedParent(pid,1);
+				break;
+			case 3:
+				checkedParent(pid,2);
+				break;
+			} */
+		}else{
+			removeCheckedSons(son,level+1);
+		/* 	switch (level) {
+			case 1:
+				removeCheckedSons(son,2);
+				break;
+			case 2:
+				removeCheckedSons(son,3);
+				//removeCheckedParent(pid,2,1);
+				break;
+			case 3:
+				//removeCheckedParent(pid,3,2);
+				break;
+			} */
+		}
+	 
+		
+	}
+}
+function getPermissions(){
+	var checkboxs=$("button.checkboxBtn.checked");
+	if(checkboxs&&checkboxs.length>0){
+		var array=new Array();
+		checkboxs.each(function(){
+			array.push($(this).data("value"));
+		});
+		return array.join(",");
+	}
+	return "";
+}
+function submitThisForm(successCallback){
+	var permissions=getPermissions();
+	if(permissions&&permissions.length>0){
+		Ajax.post("admin/rolepermission/submit",{"roleId":"#(roleId)","permissions":permissions},function(ret){
+			LayerMsgBox.success(ret.msg,500,successCallback);
+		});
+	}else{
+		LayerMsgBox.alert("请为角色设置权限后提交",2);
+	}
+	
+}
+function checkIds(funs){
+	for(var i =0;i<funs.length;i++){
+		var fun=funs[i];
+		$("tr[data-id='"+fun.permissionId+"']").find("button").addClass("checked");
+		}
+
+
+	
+}
+function readCheckeds(){
+	Ajax.get("admin/rolepermission/getCheckeds/#(roleId)",function(ret){
+		var datas=ret.data;
+		if(datas&&datas.length>0){
+			checkIds(datas);	
+		}
+	});
+}
+$(function(){
+	changeParentLayerDialogBtnTitle(0,"保存设置");
+	//增加一个按钮-清空配置
+	addParentLayerDialogBtn("全部清空","lay_danger",function(){
+		LayerMsgBox.confirm("确认清空此角色绑定的权限吗?",function(){
+			LayerMsgBox.loading("执行中...",10000);
+			Ajax.get("admin/rolepermission/clear/#(roleId)",function(res){
+					LayerMsgBox.success("操作成功",500,function(){
+						parent.LayerMsgBox.closeAll();
+					});
+				});
+			})
+	});
+	readCheckeds();
+});
+</script>
+#end

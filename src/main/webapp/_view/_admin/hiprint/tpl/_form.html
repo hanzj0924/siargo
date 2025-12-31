@@ -1,0 +1,28 @@
+<form onsubmit="return false;" id="tplForm" action="#(action)" method="post">
+	#if(tpl.id??)
+		<input type="hidden" name="tpl.id" value="#(tpl.id)" />
+	#end
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">模板名称</label>
+		<div class="col">
+		<input type="text" autocomplete="off" placeholder="请输入名称 "  class="form-control" data-rule="required" data-tips="请输入名称"  maxlength="40" name="tpl.name" value="#(tpl.name??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">模板编码<br/>如不填系统自动生成</label>
+		<div class="col">
+		<input type="text" autocomplete="off" placeholder="请输入编码 "  class="form-control"  maxlength="40" name="tpl.sn" value="#(tpl.sn??)">
+		</div>
+	</div>
+ 
+	 <div class="form-group row">
+		<label class="col-sm-3 col-form-label">备注信息<br/>(200字内)</label>
+		<div class="col">
+		<textarea class="form-control"  placeholder="请输入备注信息 200字以内 "  name="tpl.remark" style="height:200px;" maxlength="200">#(tpl.remark??)</textarea>
+		</div>
+	</div>
+	  
+</form>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="tplForm")
+#end

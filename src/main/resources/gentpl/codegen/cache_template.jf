@@ -1,0 +1,59 @@
+package #(codeGen.cacheClassPackage??);
+import cn.jbolt.core.cache.JBoltCache;
+import com.jfinal.aop.Aop;
+import #(codeGen.modelPackage+"."+codeGen.modelName??);
+import #(codeGen.servicePackage+"."+codeGen.serviceName??);
+
+public class #(codeGen.cacheClassName) extends JBoltCache {
+    public static final #(codeGen.cacheClassName) me = new #(codeGen.cacheClassName)();
+    #(codeGen.serviceName) service = Aop.get(#(codeGen.serviceName).class);
+    private static final String TYPE_NAME = "#(codeGen.mainTableName)";
+    public String getCacheTypeName() {
+        return TYPE_NAME;
+    }
+
+    /**
+     * 通过ID 获取
+     * @param id
+     * @return
+     */
+    public #(codeGen.modelName) get(#(paramIdType?? 'Long') id) {
+        return service.findById(id);
+    }
+#if(codeGen.isCacheGetBySn??)
+    /**
+     * 通过SN 获取
+     * @param sn
+     * @return
+     */
+    public #(codeGen.modelName) getBySn(String sn) {
+        return service.getCacheByKey(sn);
+    }
+#end
+
+#if(codeGen.isCacheGetName??)
+    /**
+     * 通过ID 获取Name
+     * @param id
+     * @return
+     */
+    public String getName(#(paramIdType?? 'Long') id) {
+        #(codeGen.modelName) obj = get(id);
+        return obj == null ? null : obj.getName();
+    }
+#end
+
+#if(codeGen.isCacheGetNameBySn??)
+    /**
+     * 通过SN 获取Name
+     * @param sn
+     * @return
+     */
+    public String getNameBySn(String sn) {
+        #(codeGen.modelName) obj = getBySn(sn);
+        return obj == null ? null : obj.getName();
+    }
+#end
+
+}
+

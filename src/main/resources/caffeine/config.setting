@@ -1,0 +1,15 @@
+[jbolt_cache]
+enable                      = true
+initialCapacity             = 1000
+maximumSize                 = 10000
+#maximumWeight              = -1
+#expireAfterWrite           = 30
+#expireAfterWriteTimeUnit   = MINUTES
+expireAfterAccess           = 30
+expireAfterAccessTimeUnit   = MINUTES
+#refreshAfterWrite          = 30
+#refreshAfterWriteTimeUnit  = MINUTES
+weakKeys                    = false
+weakValues                  = false
+softValues                  = false
+recordStats                 = false

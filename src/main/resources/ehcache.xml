@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd"
+         updateCheck="true" monitoring="autodetect"
+         dynamicConfig="true">
+
+    <diskStore path="java.io.tmpdir"/>
+    <!--
+    Default Cache configuration. These settings will be applied to caches
+    created programmatically using CacheManager.add(String cacheName).
+    This element is optional, and using CacheManager.add(String cacheName) when
+    its not present will throw CacheException
+
+    The defaultCache has an implicit name "default" which is a reserved cache name.
+    -->
+    <defaultCache
+            maxEntriesLocalHeap="10000"
+            eternal="false"
+            timeToIdleSeconds="120"
+            timeToLiveSeconds="120"
+            diskSpoolBufferSizeMB="30"
+            maxEntriesLocalDisk="10000000"
+            diskExpiryThreadIntervalSeconds="120"
+            memoryStoreEvictionPolicy="LRU"
+            statistics="false">
+        <persistence strategy="localTempSwap"/>
+    </defaultCache>
+     <cache name="jbolt_cache"
+           maxEntriesLocalHeap="90000"
+           eternal="false"
+           timeToIdleSeconds="3600"
+           timeToLiveSeconds="0"
+           overflowToDisk="false"
+           transactionalMode="off">
+    </cache>
+     <cache name="jbolt_cache_wechat_keywords"
+           maxElementsInMemory="10000"
+           maxElementsOnDisk="100000"
+           eternal="false"
+           timeToIdleSeconds="43200"
+           timeToLiveSeconds="43200"
+           overflowToDisk="true"
+           diskPersistent="true">
+    </cache>
+</ehcache>

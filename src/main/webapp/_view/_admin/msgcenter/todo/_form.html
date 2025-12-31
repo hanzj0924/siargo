@@ -1,0 +1,96 @@
+<form onsubmit="return false;" id="todoForm" action="#(action)" method="post">
+#if(todo.id??)
+	<input type="hidden" name="todo.id" value="#(todo.id)" />
+#end
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">标题</label>
+		<div class="col">
+			<input type="text" autocomplete="off"  class="form-control" data-with-clearbtn="true"  data-rule="required" placeholder="请输入标题" maxlength="255" name="todo.title" value="#(todo.title??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">规定完成时间</label>
+		<div class="col-12 col-sm-6">
+			<input type="text" data-date data-type="datetime" data-fmt="yyyy-MM-dd HH:mm" readonly="readonly" autocomplete="off" class="form-control"  data-rule="required" placeholder="请设置规定完成时间" data-tips="请设置规定完成时间" maxlength="19" name="todo.specifiedFinishTime" value="#datetime((todo.specifiedFinishTime?? DateUtil.getHourAfter(DateUtil.getNow(),1)),'yyyy-MM-dd HH:mm')">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">优先级</label>
+		<div class="col-12 col-sm-6 input-group">
+			<select class="form-control"  data-autoload data-url="admin/dictionary/options?key=todo_priority_level"  name="todo.priorityLevel" data-refresh="true"  data-rule="select"  data-tips="请选择优先级" data-text="=请选择="  data-value=""  data-value-attr="sn" data-select="#(todo.priorityLevel?? 1)"></select>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">当前状态</label>
+		<div class="col-12 col-sm-6 input-group">
+			<select class="form-control"  data-autoload data-url="admin/dictionary/options?key=todo_state"  name="todo.state" data-refresh="true"  data-rule="select"  data-tips="请选择状态" data-text="=请选择="  data-value=""  data-value-attr="sn" data-select="#(todo.state?? 1)"></select>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">类型</label>
+		<div class="col-12 col-sm-6 input-group">
+			<select class="form-control" data-handler="changeTodoType_#(pageId)" data-autoload data-url="admin/dictionary/options?key=todo_type"  name="todo.type" data-refresh="true"  data-rule="select"  data-tips="请选择状态" data-text="=请选择="  data-value=""  data-value-attr="sn" data-select="#(todo.type?? 1)"></select>
+		</div>
+	</div>
+	<div id="todoUrl_#(pageId)" class="form-group row">
+		<label id="todoUrl_label_#(pageId)" class="col-sm-3 col-form-label">URL</label>
+		<div class="col">
+			<input id="todoUrl_input_#(pageId)"  #if(todo==null||todo.type==1||todo.type==2) readonly="readonly" disabled="disabled" #end type="text" autocomplete="off"  class="form-control" data-with-clearbtn="true"  data-rule="required" data-notnull="#(todo!=null&&(todo.type==3||todo.type==4))" placeholder="请输入URL" maxlength="255" name="todo.url" value="#(todo.url??)">
+		</div>
+	</div>
+	<textarea id="todoContent_hidden_#(pageId)" #if(todo==null||todo.type==1||todo.type==3) readonly="readonly" disabled="disabled" #end  data-rule="required"  data-notnull="#(todo!=null&&(todo.type==2||todo.type==4))" maxlength="4000" name="todo.content" class="d-none">#(todo.content??)</textarea>
+</form>
+
+	<div id="todoContnet_#(pageId)" class="form-group row">
+	<label class="col-sm-3 col-form-label" id="todoContent_label_#(pageId)">内容</label>
+	<div class="col">
+		<div data-editor="summernote" #if(todo==null||todo.type==1||todo.type==3) data-disabled="true" #end data-rule="required" data-notnull="#(todo!=null&&(todo.type==2||todo.type==4))" data-height="200" data-hiddeninput="todoContent_hidden_#(pageId)" id="todoContentEditor_#(pageId)" >#(todo.content??)</div>
+	</div>
+	</div>
+#define js()
+<script>
+function changeTodoType_#(pageId)(select){
+	var type=select.val();
+	if(type){
+		switch(type){
+			case '1'://都无
+				changeFormControlDisabled("#todoUrl_input_#(pageId)");
+				changeFormControlDisabled("#todoContent_hidden_#(pageId)");
+				$("#todoContentEditor_#(pageId)").summernote("disable");
+				$("#todoContentEditor_#(pageId)").summernote("code",'');
+				changeFormControlNotRequired("#todoUrl_input_#(pageId)");
+				changeFormControlNotRequired("#todoContent_hidden_#(pageId)");
+				changeFormControlNotRequired("#todoContentEditor_#(pageId)");
+				break;
+			case '2'://只有内容
+				changeFormControlDisabled("#todoUrl_input_#(pageId)");
+				changeFormControlEnable("#todoContent_hidden_#(pageId)");
+				$("#todoContentEditor_#(pageId)").summernote("enable");
+				changeFormControlNotRequired("#todoUrl_input_#(pageId)");
+				changeFormControlRequired("#todoContent_hidden_#(pageId)");
+				changeFormControlRequired("#todoContentEditor_#(pageId)");
+				break;
+			case '3'://有URL无内容
+				changeFormControlEnable("#todoUrl_input_#(pageId)");
+				changeFormControlDisabled("#todoContent_hidden_#(pageId)");
+				$("#todoContentEditor_#(pageId)").summernote("disable");
+				$("#todoContentEditor_#(pageId)").summernote("code",'');
+				changeFormControlRequired("#todoUrl_input_#(pageId)");
+				changeFormControlNotRequired("#todoContent_hidden_#(pageId)");
+				changeFormControlNotRequired("#todoContentEditor_#(pageId)");
+				break;
+			case '4'://有URL 有内容
+				changeFormControlEnable("#todoUrl_input_#(pageId)");
+				changeFormControlEnable("#todoContent_hidden_#(pageId)");
+				$("#todoContentEditor_#(pageId)").summernote("enable");
+				changeFormControlRequired("#todoUrl_input_#(pageId)");
+				changeFormControlRequired("#todoContent_hidden_#(pageId)");
+				changeFormControlRequired("#todoContentEditor_#(pageId)");
+				break;
+		}
+	}
+}
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="todoForm")
+#end
+

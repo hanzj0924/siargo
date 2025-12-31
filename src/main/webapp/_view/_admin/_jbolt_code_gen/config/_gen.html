@@ -1,0 +1,79 @@
+<div class="card jb_vflex">
+	<div class="card-header" style="height: 50px;">
+		<form id="projectGenPathForm" method="post" action="admin/codegen/updateProjectPath" onsubmit="return false;" >
+			<input type="hidden" name="codeGenId" value="#(codeGen.id??)"/>
+			<div class="form-group row">
+				<label class="col-sm-3 col-form-label font-weight-bold">项目当前生成根路径</label>
+				<div class="col-sm-6">
+					<div class="input-group">
+						<input class="form-control" id="gen_projectPath" type="text" name="projectPath" value="#(codeGen.projectPath??)" />
+						<div class="input-group-append">
+							<a tooltip data-title="点击获取当前运行项目的根路径" class="input-group-text" data-success-time="200" data-ajaxbtn data-handler="syncProjectPath" data-confirm="确定同步并使用本项目路径？" href="admin/codegen/syncProjectPath">
+								<i class="fa fa-refresh mr-1"></i> 同步
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="col-auto">
+					<button class="btn btn-primary" type="button" onclick="updateProjectPath()"><i class="fa fa-save"></i> 保存此路径</button>
+				</div>
+
+			</div>
+		</form>
+	</div>
+	<div class="card-body jb_vbody">
+		 <div class="row">
+			 <div class="col">
+				 <div class="card my-5">
+					 <div class="card-header">全部生成</div>
+					 <div class="card-body">
+						 <div class="alert alert-info">
+							 <div><strong>执行全部生成</strong>：一次性生成model/baseModel、controller、service、html、权限菜单、日志类型等</div>
+							 <button data-ajaxbtn data-loaded="执行代码生成中..." data-confirm="此操作为忽略已存在内容模式,确认执行全部生成？"  data-url="admin/codegen/genAll?id=#(codeGen.id)" class="btn btn-primary my-3">执行全部生成</button>
+							 <div class="text-danger">注意:这里全部生成只有baseModel会覆盖，其它内容都会检测是否已经存在</div>
+						 </div>
+						 <div class="alert alert-danger mt-5">
+							 <div>强制覆盖生成：一次性生成model/baseModel、controller、service、html、权限菜单、日志类型等</div>
+							 <button data-ajaxbtn data-loaded="执行代码生成中..." data-confirm="此操作为忽略已存在内容模式,确认执行全部生成？"  data-url="admin/codegen/genAll?id=#(codeGen.id)&cover=true" class="btn btn-danger my-3">执行生成-(强制覆盖-慎用)</button>
+							 <div class="text-danger">注意:这里只强制覆盖model、baseModel、controller、service、html内容</div>
+						 </div>
+					 </div>
+				 </div>
+			 </div>
+			 <div class="col">
+				 <div class="card my-5">
+					 <div class="card-header">独立生成</div>
+					 <div class="card-body">
+						 <div class="card">
+							 <div class="card-header">Model和BaseModel</div>
+							 <div class="card-body">
+								 <div class="alert alert-info">
+									 <button data-ajaxbtn data-loaded="执行代码生成中..." data-confirm="确认执行Model与BaseModel生成？"  data-url="admin/codegen/genModel?id=#(codeGen.id)" class="btn btn-primary my-3">独立生成Model和BaseModel</button>
+									 <div class="text-danger">注意:这里只有baseModel覆盖生成</div>
+								 </div>
+								 <div class="alert alert-danger mt-5">
+									 <button data-ajaxbtn data-loaded="执行代码生成中..." data-confirm="此操作将Model与BaseModel全部覆盖生成,确认执行覆盖生成？"  data-url="admin/codegen/genModel?id=#(codeGen.id)&cover=true" class="btn btn-primary my-3">独立生成Model和BaseModel(全覆盖)</button>
+									 <div class="text-danger">注意:此操作将Model与BaseModel全部覆盖生成</div>
+								 </div>
+							 </div>
+						 </div>
+
+						 <div class="card mt-3">
+							 <div class="card-header">Controller、Service、Html等</div>
+							 <div class="card-body">
+								 <div class="alert alert-info">
+									 <button data-ajaxbtn data-loaded="执行代码生成中..." data-confirm="确认执行主逻辑生成？"  data-url="admin/codegen/genMainLogic?id=#(codeGen.id)" class="btn btn-primary my-3">独立生成</button>
+								 </div>
+								 <div class="alert alert-danger mt-5">
+									 <button data-ajaxbtn data-loaded="执行代码生成中..." data-confirm="此操作将主逻辑代码全部覆盖生成,确认执行覆盖生成？"  data-url="admin/codegen/genMainLogic?id=#(codeGen.id)&cover=true" class="btn btn-primary my-3">独立生成(全覆盖)</button>
+									 <div class="text-danger">注意:此操作将主逻辑代码部覆盖生成</div>
+								 </div>
+							 </div>
+						 </div>
+
+					 </div>
+				 </div>
+			 </div>
+		 </div>
+	</div>
+</div>

@@ -1,0 +1,90 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<!-- 页头区域 -->
+		<div class="row">
+			<div class="col-sm-auto">
+				<h1><i class="jbicon2 jbi-menu"></i> 页面左上角标题</h1>
+			</div>
+			<div class="col">
+			<!-- 页头表单区 -->
+				<form class="form-inline" id="jboltTopForm_#(pageId)"   onsubmit="return false;" method="post">
+					<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+					<button  type="submit" class="btn btn-light" ><i class="fa fa-search"></i> 查询</button>
+				</form>
+			</div>
+			<div class="col-sm-auto">
+			<!-- 页头右侧操作区 -->
+				<div class="btn-group" role="group" aria-label="btn-group">
+					<button data-area="600,400" data-dialogbtn data-handler="refreshJBoltTable" data-title="新增顶部导航"  data-url="admin/topnav/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+					<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="admin/topnav/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+		<!-- 内容核心区 -->
+		
+<!-- JBoltTable的数据模板定义-->
+<textarea class="jb_tpl_box" id="jb_table_tpl_#(pageId)">
+{@each datas as data,index}
+<tr>
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.version}</td>
+<td>${data.publishTime|date_ymdhm}</td>
+<td>${data.createTime|date_ymdhm}</td>
+<td><a  tooltip  title="更新文件管理"  href="demo/jbolttable/files/${data.id}" data-scroll="yes"  data-btn="no" data-title="更新文件管理" data-area="980,600" class="jbolt_table_editbtn"><i class="fa fa-files-o c-primary"></i></a></td>
+<td><img data-switchbtn data-value="${data.isNew}" data-handler="refreshJBoltTable"  data-url="/demo/jbolttable/toggleIsNew/${data.id}"/></td>
+<td>
+<a tooltip  title="编辑"  href="demo/jbolttable/edit/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="编辑" data-area="600,400" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a tooltip  title="删除"  href="demo/jbolttable/delete/${data.id}" data-handler="refreshJBoltTable" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+{@/each}
+</textarea>
+
+<!-- 表格定义 -->
+<table class="thead_font_normal"
+  data-jbolttable
+  data-column-resize="true"
+  data-ajax="true"
+  data-conditions-form="jboltTopForm_#(pageId)"
+  data-page="jb_table_page_#(pageId)"
+  data-pagesize="10"
+  data-url="demo/jbolttable/ajaxDatas"
+  data-rowtpl="jb_table_tpl_#(pageId)">
+<thead>
+<tr>
+<th data-width="60">序号</th>
+<th data-width="150" data-column="version">版本号</th>
+<th data-min-width="160" data-column="publish_time">发布时间</th>
+<th data-min-width="160" data-column="create_time">创建时间</th>
+<th data-width="120" >更新文件管理</th>
+<th data-width="110">是否最新版</th>
+<th data-width="80">操作</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+
+
+</div>
+</div>
+#end
+
+### 如果需要额外写css 就留着 不需要就删掉css区
+#define css()
+<style type="text/css">
+
+</style>
+#end
+
+### 如果需要额外写js 就留着 不需要就删掉js区
+#define js()
+<script>
+$(function(){
+	//页面加载后调用
+});
+</script>
+#end

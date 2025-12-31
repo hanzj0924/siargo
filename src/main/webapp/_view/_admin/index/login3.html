@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="#(basepath??)" />
+  <meta charset="utf-8" />
+  <title>#(JBoltGlobalConfigCache.getSystemName("JBolt极速开发平台"))</title>
+  #if(need_always_https)
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  #end
+  <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico" />
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  #@fontcss?()
+  #@bootstrapcss?()
+  #@logincss?()
+  #@animatecss?()
+</head>
+<body id="renderbox">
+### 登录表单透明玻璃风格
+### setLocal(glassStyle=JBoltGlobalConfigCache.getJBoltLoginFormStyleGlass())
+### 登录页面背景图模糊
+#setLocal(bgimgBlur=JBoltGlobalConfigCache.getJBoltLoginBgimgBlur())
+#setLocal(bgtype=JBoltGlobalConfigCache.getJboltLoginBgType())
+#setLocal(bgimg=JBoltGlobalConfigCache.getJboltLoginBgimg())
+#if(bgtype=="img")
+<div class="bodybgmask #(bgimgBlur?'blur':'')" style="background-image: url('#(bgimg)');"></div>
+#else
+<video loop="loop" muted="muted" autoplay="autoplay" oncanplay="$('#bgmask').css({'background-image':'none'})">
+  <source src="#(bgimg)" type="video/mp4" ></source>
+</video>
+<div class="bodybgmask #(bgimgBlur?'blur':'')" id="bgmask" style="background-image: url('#(bgimg).jpg')"></div>
+#end
+<div class="d-block">
+  <div class="jbolt_loginform" >
+    <div class="jbolt_title animate__animated animate__fadeInDown jb_animate__faster" style="color:#(JBoltGlobalConfigCache.getSystemNameColor('#FFFFFF'));">#(JBoltGlobalConfigCache.getSystemName("JBolt极速开发平台"))</div>
+    <div class="jbolt_formbox animate__animated animate__zoomIn jb_animate__faster">
+      <form id="loginForm" method="post" onsubmit="return submitForm(this);">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text bg-transparent"><i class="jbicon jb-yonghuicon"></i></span>
+            </div>
+            <input type="text" autocomplete="off"  class="form-control" autocomplete="off" maxlength="20" autofocus="autofocus"  name="username" placeholder="请输入用户名"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text bg-transparent"><i class="jbicon jb-mima"></i></span>
+            </div>
+            <input type="password" class="form-control" autocomplete="off" maxlength="20"  name="password" placeholder="请输入密码"/>
+          </div>
+        </div>
+        #setLocal(needCapture=JBoltGlobalConfigCache.isJBoltLoginUseCapture())
+        #if(needCapture)
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text bg-transparent"><i class="jbicon jb-yanzhengma"></i></span>
+            </div>
+            <input type="text" autocomplete="off"  class="form-control" maxlength="10" id="captcha" autocomplete="off" data-rule="required"  data-tips="请输入验证码" name="captcha" placeholder="请输入验证码"/>
+            <div class="input-group-append" style="padding: 0px 0px;">
+              <img id="captchaimg" src="admin/captcha" onclick="changeCaptcha()"/>
+            </div>
+          </div>
+        </div>
+        #end
+
+        <div class="form-group form-check">
+          <input style="width:18px;height:18px;" name="keepLogin" type="checkbox" class="form-check-input" id="keepLogin">
+          <label class="form-check-label ml-1 form-text text-muted" style="font-size:16px;padding-top:2px" for="keepLogin">保持登录 </label>
+        </div>
+
+        <div>
+          <button class="btn btn-primary" href="admin" type="submit"  style="margin: 10px auto 0px auto;">登  录  系  统</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="copyright eidchide">#setLocal(recordInfo = JBoltGlobalConfigCache.getSystemDomainPutOnRecordInfo()) #if(recordInfo!=null)<a target="_blank" style="margin-right:6px;color:#(JBoltGlobalConfigCache.getSystemCopyrightColor('#FFFFFF'));" href="#(JBoltGlobalConfigCache.getSystemDomainPutOnRecordLink())">#(recordInfo??)</a>#end<a target="_blank" style="color:#(JBoltGlobalConfigCache.getSystemCopyrightColor('#FFFFFF'));" href="#globalConfig(GlobalConfigKey.SYSTEM_COPYRIGHT_LINK,'http://jbolt.cn')">#(JBoltGlobalConfigCache.getSystemCopyrightCompany("©JBolt(JBOLT.CN)"))</a></div>
+<script type="text/javascript">
+  var systemLoginNest="#(JBoltGlobalConfigCache.getJboltLoginNest())";
+</script>
+
+#@jqueryjs?()
+#@jquerycookiejs?()
+#@layerjs?()
+#@loginjs?()
+</body>
+</html>

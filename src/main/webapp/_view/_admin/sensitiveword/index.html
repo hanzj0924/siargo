@@ -1,0 +1,167 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
+  <div class="jbolt_page_title jb_vheader" id="jbolt_page_title_#(pageId)">
+    <div class="row">
+      <div class="col-sm-auto">
+        <h1><i class="jbicon jb-ciyun"></i> 敏感词词库管理</h1>
+        <small class="text-danger">注意:词库维护变更后，系统敏感词词库将自动执行重新加载！</small>
+      </div>
+      <div class="col">
+
+
+      </div>
+
+    </div>
+  </div>
+  <div class="jbolt_page_content jb_vbody">
+    <div class="row m-0 p-0" style="height:calc(100% - 2px);">
+      <div class="col-12 col-md-6 col-lg-5">
+        <div class="card">
+          <div class="card-header"><h4 class="d-inline-block"><i class="jbicon jb-shujuhuizong mr-1"></i>词库统计</h4><button class="btn btn-outline-primary btn-sm float-right" data-ajaxbtn data-confirm="确定重新加载敏感词词库有效数据？" data-success-time="200" data-url="admin/sensitiveword/reload" data-handler="readSensitiveWordCount_#(pageId)"><i class="fa fa-refresh"></i> 重新加载</button></div>
+          <div class="card-body">
+            <table class="table table-center table-bordered table-hover">
+              <thead><tr><th>总量</th><th>启用/禁用</th><th>已加载</th></tr></thead>
+              <tbody>
+              <tr>
+                <td id="sensitive_total_count_#(pageId)" class="text-primary font-weight-bold">0</td>
+                <td><span id="sensitive_enable_count_#(pageId)" class="text-success font-weight-bold">0</span>/<span id="sensitive_disabled_count_#(pageId)" class="text-danger font-weight-bold">0</span></td>
+                <td id="sensitive_word_count_#(pageId)" class="text-info font-weight-bold">0</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card my-3">
+          <div class="card-header"><h4><i class="jbicon jb-ceshilianjie mr-1"></i>词库测试</h4></div>
+          <div class="card-body">
+            <div class="form-group">
+              <textarea class="form-control" id="needCheckWords_#(pageId)"  style="height: 200px;" placeholder="输入需要检测的文本"></textarea>
+             <div class="text-right">
+               <button style="width:150px;" type="button" onclick="checkWords_#(pageId)()" class="btn btn-primary my-4"><i class="fa fa-search"></i> 执行检测</button>
+             </div>
+              <div id="checkResult_#(pageId)" class="alert alert-warning text-left" style="display: none;">
+                <div class="row">
+                  <div class="col-2 text-right">检测结果:</div>
+                  <div class="col-10 text-left" id="checkResultWords_#(pageId)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="col-12 col-md-6 col-lg-7">
+        <div class="card jb_vflex">
+          <div class="card-header jb_vheader_card">
+            <div class="row">
+              <div class="col-sm-auto">
+                <h4><i class="jbicon2 jbi-database mr-1"></i>词库维护</h4>
+              </div>
+              <div class="col text-center">
+                <form class="form-inline" id="sensitiveword_form_#(pageId)" action="admin/sensitiveword/datas" data-pjaxsubmit  method="get">
+                  <input type="text" autocomplete="off"  class="form-control" placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+                  <select data-autoload
+                          class="form-control mx-1"
+                          name="enable"
+                          data-url="admin/dictionary/options?key=options_enable"
+                          data-value-attr="sn"
+                          data-text="=是否启用="
+                          data-value=""></select>
+                  <button type="submit" class="btn btn-outline-secondary catdata_table_searchbtn" ><i class="fa fa-search"></i> 查询</button>
+                </form>
+              </div>
+
+            </div>
+
+
+          </div>
+          <div class="card-body jb_vbody">
+            <script type="text/template" id="sensitivewrd_tpl_#(pageId)">
+              {@each datas as data,index}
+              <tr data-id="${data.id}">
+                <td>${pageNumber,pageSize,index | rownum}</td>
+                <td>${data.content}</td>
+                <td><img data-switchbtn data-confirm="确定切换启用/禁用？" data-value="${data.enable}"  data-handler="tableReloadAndRefreshSummaryDatas_#(pageId)"  data-url="admin/sensitiveword/toggleEnable/${data.id}"/></td>
+                <td>
+                  <a href="admin/sensitiveword/edit/${data.id}" data-area="600,300"  tooltip data-title="编辑"  data-handler="refreshJBoltTable" dialog-title="编辑资源" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+                  <a href="admin/sensitiveword/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="tableReloadAndRefreshSummaryDatas_#(pageId)" data-confirm="确定删除这条数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+                </td>
+              </tr>
+              {@/each}
+            </script>
+            <!-- sysNotice工具条 toolbar -->
+            <div class="jbolt_table_toolbar" id="sensitiveword_toolbar_#(pageId)">
+               <div class="row">
+                 <div class="col">
+                   <button data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds"  data-url="admin/sensitiveword/deleteByIds?ids="  data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm"><i class="fa fa-remove"></i> 删除</button>
+                   <button onclick="refreshJBoltTable(this)" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+                 </div>
+                 <div class="col-sm-auto text-right">
+                   <button class="btn btn-sm btn-primary" data-dialogbtn data-dialog-title="新增敏感词" data-area="600,300" data-url="admin/sensitiveword/add" data-handler="tableReloadAndRefreshSummaryDatas_#(pageId)" ><i class="fa fa-plus"></i> 新增</button>
+                 </div>
+               </div>
+            </div>
+            <table class="jbolt_table table-center" data-column-prepend="1:checkbox" data-toolbar="sensitiveword_toolbar_#(pageId)" id="sensitiveWordTable_#(pageId)" data-page="sensitiveword_page_#(pageId)" data-rowtpl="sensitivewrd_tpl_#(pageId)" data-height="fill_box" data-fixed-columns-right="-1,-2" data-conditions-form="sensitiveword_form_#(pageId)" data-jbolttable data-ajax="true" data-url="admin/sensitiveword/datas">
+              <thead>
+              <tr>
+                <th data-width="60">序号</th>
+                <th>敏感词</th>
+                <th data-width="100">启用/禁用</th>
+                <th data-width="100">操作</th>
+              </tr>
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+#end
+#define js()
+<script>
+  function tableReloadAndRefreshSummaryDatas_#(pageId)(){
+    refreshJBoltTable("sensitiveWordTable_#(pageId)");
+    readSensitiveWordCount_#(pageId)();
+  }
+  $(function(){
+    readSensitiveWordCount_#(pageId)();
+  })
+  function readSensitiveWordCount_#(pageId)(){
+    $("#sensitive_total_count_#(pageId)").text("0");
+    $("#sensitive_enable_count_#(pageId)").text("0");
+    $("#sensitive_disabled_count_#(pageId)").text("0");
+    $("#sensitive_word_count_#(pageId)").text("0");
+    Ajax.get("admin/sensitiveword/counts",function(res){
+      $("#sensitive_total_count_#(pageId)").text(res.data.totalCount);
+      $("#sensitive_enable_count_#(pageId)").text(res.data.enableCount);
+      $("#sensitive_disabled_count_#(pageId)").text(res.data.disabledCount);
+      $("#sensitive_word_count_#(pageId)").text(res.data.loadedCount);
+    });
+
+  }
+  function checkWords_#(pageId)(){
+    var textarea = g("needCheckWords_#(pageId)");
+    var text=textarea.value;
+    if(!text||!(text.trim())){
+      LayerMsgBox.alert("请输入需要检测的内容",2);
+      return;
+    }
+    LayerMsgBox.loading("检测中...",10000);
+    Ajax.post("admin/sensitiveword/test",{"content":text},function(res){
+      LayerMsgBox.closeLoadingNow();
+      $("#checkResult_#(pageId)").show();
+      if(res.data){
+        $("#checkResultWords_#(pageId)").html("<label class='badge badge-danger badge-pill mx-1'>"+res.data.join("</label><label class='badge badge-pill badge-danger mx-1'>")+"</label>");
+      }else{
+        $("#checkResultWords_#(pageId)").html("无匹配敏感词");
+      }
+    });
+  }
+</script>
+#end
+

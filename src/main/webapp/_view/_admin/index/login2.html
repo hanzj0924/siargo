@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="#(basepath??)" />
+		<meta charset="utf-8" />
+		<title>#(JBoltGlobalConfigCache.getSystemName("JBolt极速开发平台"))</title>
+		 #if(need_always_https)
+	    	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+		 #end
+		<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico" />
+		<meta name="renderer" content="webkit">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+		#@fontcss?()
+		#@bootstrapcss?()
+		#@logincss?()
+		#@animatecss?()
+	</head>
+	<body id="renderbox">
+	### 登录表单透明玻璃风格
+	### setLocal(glassStyle=JBoltGlobalConfigCache.getJBoltLoginFormStyleGlass())
+	### 登录页面背景图模糊
+	#setLocal(bgimgBlur=JBoltGlobalConfigCache.getJBoltLoginBgimgBlur())
+	#setLocal(bgtype=JBoltGlobalConfigCache.getJboltLoginBgType())
+	#setLocal(bgimg=JBoltGlobalConfigCache.getJboltLoginBgimg())
+	#if(bgtype=="img")
+	<div class="bodybgmask #(bgimgBlur?'blur':'')" style="background-image: url('#(bgimg)');"></div>
+	#else
+	<video loop="loop" muted="muted" autoplay="autoplay" oncanplay="$('#bgmask').css({'background-image':'none'})">
+	<source src="#(bgimg)" type="video/mp4" ></source>
+	</video>
+	<div class="bodybgmask #(bgimgBlur?'blur':'')" id="bgmask" style="background-image: url('#(bgimg).jpg')"></div>
+	#end
+	<div class="d-block">
+	<div class="jbolt_loginform style2 #(glassStyle?'jbolt_bg_glass':'')" >
+		<div class="row jb_login_box">
+			<div class="col jb_login_leftbox">
+				<div class="jb_left_content">
+					<div class="jb_logo" ><img src="assets/img/login2logo.png"/></div>
+					<div class="jb_login_systitle">省心 · 省事儿 · 极速开发</div>
+					<ul class="jb_left_ul">
+						<li>基于JFinal最佳实践架构</li>
+						<li>前端组件自动化，省心极速开发</li>
+						<li>ORM自动扫描绑定</li>
+						<li>自动缓存机制，无需关心细节</li>
+						<li>多数据源支持，轻松开发多数据源项目</li>
+						<li>支持Mysql、Oracle、Postgresql、SqlServer等主流数据库</li>
+						<li>内置代码生成器，Model、Controller、Service、html都可生成</li>
+					</ul>
+				</div>
+			</div>
+			<div class="col jb_login_rightbox">
+			<div class="jb_right_content">
+			<div class="jb_login_name">登录</div>
+			<form id="loginForm" method="post" onsubmit="return submitForm(this);">
+		<div class="form-group">
+		<div class="input-group">
+		<input type="text" autocomplete="off"  class="form-control" autocomplete="off" maxlength="20" autofocus="autofocus"  name="username" placeholder="请输入用户名"/>
+			<div class="input-group-append">
+		    <span class="input-group-text bg-transparent"><i class="jbicon jb-yonghuicon"></i></span>
+		  </div>
+		</div>
+		</div>
+		<div class="form-group">
+		<div class="input-group">
+		<input type="password" class="form-control" autocomplete="off" maxlength="20"  name="password" placeholder="请输入密码"/>
+		 <div class="input-group-append">
+		    <span class="input-group-text bg-transparent"><i class="jbicon jb-mima"></i></span>
+		  </div>
+		</div>
+		</div>
+		#setLocal(needCapture=JBoltGlobalConfigCache.isJBoltLoginUseCapture())
+		#if(needCapture)
+		<div class="form-group">
+		<div class="input-group">
+		<input type="text" autocomplete="off"  class="form-control" maxlength="10" id="captcha" autocomplete="off" data-rule="required"  data-tips="请输入验证码" name="captcha" placeholder="请输入验证码"/>
+		<div class="input-group-append" style="padding: 0px 0px;">
+		    <img id="captchaimg" src="admin/captcha" onclick="changeCaptcha()"/>
+		  </div>
+		</div>
+		</div>
+		#end
+
+		<div class="form-group form-check">
+		    <input style="width:18px;height:18px;" name="keepLogin" type="checkbox" class="form-check-input" id="keepLogin">
+		    <label class="form-check-label ml-1 form-text text-muted" style="font-size:16px;padding-top:2px" for="keepLogin">保持登录 </label>
+		</div>
+
+		<div>
+		<button class="btn btn-primary" href="admin" type="submit"  style="margin: 10px auto 0px auto;">登  录  系  统</button>
+		</div>
+		</form>
+			</div>
+			</div>
+			</div>
+	</div>
+	</div>
+	<div class="copyright eidchide">#setLocal(recordInfo = JBoltGlobalConfigCache.getSystemDomainPutOnRecordInfo()) #if(recordInfo!=null)<a target="_blank" style="margin-right:6px;color:#(JBoltGlobalConfigCache.getSystemCopyrightColor('#FFFFFF'));" href="#(JBoltGlobalConfigCache.getSystemDomainPutOnRecordLink())">#(recordInfo??)</a>#end<a target="_blank" style="color:#(JBoltGlobalConfigCache.getSystemCopyrightColor('#FFFFFF'));" href="#globalConfig(GlobalConfigKey.SYSTEM_COPYRIGHT_LINK,'http://jbolt.cn')">#(JBoltGlobalConfigCache.getSystemCopyrightCompany("©JBolt(JBOLT.CN)"))</a></div>
+	<script type="text/javascript">
+var systemLoginNest="#(JBoltGlobalConfigCache.getJboltLoginNest())";
+</script>
+
+	#@jqueryjs?()
+	#@jquerycookiejs?()
+	#@layerjs?()
+	#@loginjs?()
+	</body>
+</html>

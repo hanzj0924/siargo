@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="#(basepath??)" />
+		<meta charset="utf-8" />
+		<title>#globalConfig(GlobalConfigKey.SYSTEM_NAME,"JBolt极速开发平台")</title>
+		 #if(need_always_https)
+	    	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+		 #end
+		<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico" />
+		<meta name="renderer" content="webkit">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+		#@fontcss?()
+		#@bootstrapcss?()
+		#@logincss?()
+		<script>
+		var needPjax=false;//默认是否pjax加载
+		var autoShowRequiredLabelStar=true;//默认是否自动处理表单中的必填项的红星样式
+		</script>
+	</head>
+	<body>
+	<div class="d-block p-4 my-4">
+		<form id="loginForm" method="post" action="admin/login">
+		<div class="form-group">
+		<div class="input-group">
+		 <div class="input-group-prepend">
+		    <span class="input-group-text"><i class="fa fa-user"></i></span>
+		  </div>
+		<input type="text" autocomplete="off" data-rule="required"  data-tips="请输入用户名"  class="form-control" autocomplete="off" maxlength="20" autofocus="autofocus"  name="username" placeholder="请输入用户名"/>
+		</div>
+		</div>
+		<div class="form-group">
+		<div class="input-group">
+		 <div class="input-group-prepend">
+		    <span class="input-group-text"><i class="fa fa-lock"></i></span>
+		  </div>
+		<input type="password" class="form-control" data-rule="required" data-tips="请输入密码"  autocomplete="off" maxlength="20"  name="password" placeholder="请输入密码"/>
+		</div>
+		</div>
+		#setLocal(needCapture=JBoltGlobalConfigCache.isJBoltLoginUseCapture())
+		#if(needCapture)
+		<div class="form-group">
+		<div class="input-group">
+		 <div class="input-group-prepend">
+		    <span class="input-group-text"><i class="fa fa-check-square" style="width:10px;"></i></span>
+		  </div>
+		<input type="text" autocomplete="off" data-rule="required" data-tips="请输入验证码"   class="form-control" maxlength="10" id="captcha" autocomplete="off" data-rule="required"  data-tips="请输入验证码" name="captcha" placeholder="请输入验证码"/>
+		<div class="input-group-append" style="padding: 0px 0px;">
+		    <img id="captchaimg" src="admin/captcha" onclick="changeCaptcha()"/>
+		  </div>
+		</div>
+		</div>
+		#end
+		<div class="form-group form-check">
+		    <input style="width:18px;height:18px;" name="keepLogin" type="checkbox" class="form-check-input" id="keepLogin">
+		    <label class="form-check-label ml-1 form-text text-muted" style="font-size:16px;padding-top:2px" for="keepLogin">保持登录 </label>
+		</div>
+		<div>
+		</div>
+		</form>
+	</div>
+	<script>var needPjax=false;</script>
+	#@jqueryjs?()
+	#@bootstrapjs?()
+	#@jboltmaindialogjslib?()
+	#@mainjs?()
+	#@reloginjs?()
+	<script>
+$(function(){
+	bindEnterForDialogOkBtn();
+	bindEscForDialogCloseBtn();
+})
+	</script>
+	</body>
+</html>

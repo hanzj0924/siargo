@@ -1,0 +1,91 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<div class="card">
+<div class="card-header px-3 text-center"><span class="font-weight-bolder">#(sysNotice.title??)</span></div>
+<div class="card-body p-3">
+#(sysNotice.content??)
+</div>
+</div>
+#if(sysNotice.hasFile)
+<div class="card mt-3">
+<div class="card-header px-3"><span class="font-weight-bolder">附件:<small class="text-danger float-right">(提示:可右键另存为方式下载到本地)</small></span></div>
+<div class="card-body p-3">
+<div class="j_upload_filebox_multi">
+	<ul class="j_filebox" id="filebox_#(pageId)" data-remove-confirm="true">
+	#for(data : files)
+	<li data-filebox="filebox_#(pageId)" data-hiddeninput="sysNotice_files_#(pageId)"><a target="_blank" data-path="#(data.id)" href="#realImage(data.localUrl)">#(data.fileName)</a></li>
+	#end
+	</ul>
+</div>
+</div>
+</div>
+#end
+
+<div class="card mt-3">
+<div class="card-body p-3">
+<table class="table table-bordered table-hover">
+<tr><th style="width:100px;">接收者类型</th><td><span class="badge badge-#(ColorUtil.colorClassByLevel(sysNotice.receiverType))">#(sysNotice.receiverTypeName?? '未设置')</span></td></tr>
+<tr><th style="width:100px;">已读数</th><td>#(sysNotice.readCount?? 0)</td></tr>
+<tr><th colspan="2" class="text-center">接收者信息</th></tr>
+<tr><td colspan="2">#(sysNotice.receiverValues?? '未设置')</td></tr>
+</table>
+</div>
+</div>
+
+<div class="card mt-3">
+<div class="card-body p-3">
+<table class="table table-bordered table-hover">
+<tr><th style="width:100px;">状态</th><td><span class="badge badge-#(sysNotice.delFlag?'danger':'primary')">#(sysNotice.delFlag?'回收站':'正常')</span></td></tr>
+<tr><th>类型</th><td><span class="badge badge-#(ColorUtil.colorClassByLevel(sysNotice.type))">#(sysNotice.typeName?? '未设置')</span></td></tr>
+<tr><th>优先级</th><td><span class="badge priorityLevel3_#(sysNotice.priorityLevel)">#(sysNotice.priorityLevelName?? '未设置')</span></td></tr>
+<tr><th>发布用户</th><td>#(sysNotice.createUserName??)</td></tr>
+<tr><th>更新用户</th><td>#(sysNotice.updateUserName??)</td></tr>
+<tr><th>创建时间</th><td>#datetime(sysNotice.createTime)</td></tr>
+<tr><th>更新时间</th><td>#datetime(sysNotice.updateTime)</td></tr>
+</table>
+</div>
+</div>
+
+
+</div>
+</div>
+#end
+
+#define js()
+#if(inDialog??)
+<script type="text/javascript">
+needPjax=false;
+#if(readed??)
+	changeParentLayerDialogBtnTitle(0,"此通知已被标记为【已读】");
+	function submitThisForm(){
+		 
+	}
+#else
+changeParentLayerDialogBtnTitle(0,'标记已读');
+var _submit_ing=false;
+function submitThisForm(){
+	if(_submit_ing){
+		return false;
+	}
+	_submit_ing=true;
+	LayerMsgBox.confirm("确定将通知标记为已读？",function(){
+		Ajax.get("admin/msgcenter/sysnotice/markAsRead/#(sysNotice.id)",function(res){
+			LayerMsgBox.success("操作成功",500,function(){
+					refreshPjaxContainer();
+				});
+			_submit_ing=false;
+		},function(res){
+			LayerMsgBox.alert(res.msg||"操作失败",2)
+			_submit_ing=false;
+		});
+	},function(){
+		_submit_ing=false;
+	});
+}
+#end
+</script>
+#end
+#end

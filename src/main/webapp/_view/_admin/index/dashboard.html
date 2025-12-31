@@ -1,0 +1,297 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<!--主页面内容显示区域 start-->
+<div class="jbolt_page shadow-none bg-transparent" data-key="#(pmkey)" data-require-plugin="morris" data-init-handler="initDashboard_#(pageId)" style="padding:0px 10px;">
+<div class="jbolt_page_content p-0" >
+		<div class="row">
+				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+					<div class="card border-0  mb-2 jb-dashboard-card hand">
+						<div class="card-body p-4 text-nowrap">
+							<span class="float-left"><i class="jbicon jb-kehuzhongxin01 j_font_30 j_left_fa text-primary rounded"></i></span>
+							<div class="text-right ">
+								<span class="d-block  j_font_24">34.1 K</span>
+								<span class="d-block">访问总量</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+					<div class="card border-0  mb-2 jb-dashboard-card hand">
+						<div class="card-body p-4 text-nowrap">
+							<span class="float-left"><i class="jbicon jb-dianjiliang j_font_30 j_left_fa text-success rounded"></i></span>
+							<div class="text-right ">
+								<span class="d-block  j_font_24">11.2 K</span>
+								<span class="d-block">点击量</span>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+					<div class="card border-0  mb-2 jb-dashboard-card hand">
+						<div class="card-body p-4 text-nowrap">
+							<span class="float-left"><i class="jbicon jb-42xiazai1 j_font_30 j_left_fa text-info rounded"></i></span>
+							<div class="text-right ">
+								<span class="d-block  j_font_24">9.9 K</span>
+								<span class="d-block">APP下载量</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+					<div class="card border-0  mb-2 jb-dashboard-card hand">
+						<div class="card-body p-4 text-nowrap">
+							<span class="float-left"><i class="jbicon jb-tongxunlu01 j_font_30 j_left_fa text-danger rounded"></i></span>
+							<div class="text-right ">
+								<span class="d-block  j_font_24">34 个</span>
+								<span class="d-block">签约代理</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			<div class="row mt-2">
+				<div class="col-lg-6 col-sm-12 px-2">
+					<div class="card border-0  mb-2">
+						<div class="card-body" style="height:320px">
+							<h5 class="card-title"><span>用户增长</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+							<div id="morris-line_#(pageId)" style="height:90%;"></div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 col-sm-12 px-2">
+					<div class="card border-0  mb-2">
+						<div class="card-body" style="height:320px">
+							<h5 class="card-title"><span>下载量</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+							<div id="morris-bar_#(pageId)" style="height:90%;"></div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			
+			<div class="row mt-2">
+				<div class="col-lg-6 col-sm-12 px-2">
+					<div class="card border-0  mb-2">
+						<div class="card-body" style="height:400px">
+							<h5 class="card-title"><span>用户留言</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+							<div class="jbolt_table_view">
+							<div class="jbolt_table_box">
+							<div class="jbolt_table_body">
+							<table class="jbolt_table thead_font_normal"
+							  data-jbolttable
+							  data-fixed-columns-left="1"
+							  data-height="fill_box">
+								<thead><tr><th data-width="100" data-nochange>用户</th><th data-min-width="200">留言</th><th data-width="180"  data-nochange>订单号</th><th data-width="120"  data-nochange>时间</th></tr></thead>
+								<tbody>
+									<tr>
+										<td>金毛狮王</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">JFinal极速开发-当然首选JBolt极速开发平台，省心，省事儿，极速开发</a></td>
+										<td>D1874837283745593</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>无忌孩儿</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">现在加入JFinal开发者计划，赠送一年JFinal官网俱乐部续费</a></td>
+										<td>D1874837283741123</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>齐天大圣</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">依托JFinal极速开发框架特性，最佳实践代码，学习JFinal，就加入JFinal开发者计划</a></td>
+										<td>D1874837283744563</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>太上老君</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">自动化前端组件集成，懒加载</a></td>
+										<td>D1874837283740098</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>铁臂阿头目</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">前端节省一半工作量</a></td>
+										<td>D1874837283748599</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>乔布斯</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">代码生成器，可视化</a></td>
+										<td>D1874837283733439</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>马云</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">JBolt Eclipse插件用起来</a></td>
+										<td>D1874837283439282</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>红薯</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">内置公众号多账号管理</a></td>
+										<td>D1874837283200928</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>山东小木</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">微信小程序多账号集成</a></td>
+										<td>D1874837283444933</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>成龙</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">电商模块研发中</a></td>
+										<td>D1874837283555855</td>
+										<td>03/13 12:37</td>
+									</tr>
+									<tr>
+										<td>李连杰</td>
+										<td><a class="text-info" href="javascript:void(0)" data-dialogbtn data-area="400,500" data-title="查看留言内容" data-btn="close" data-content="this">JBoltTable组件精致打造，后面进销存产品就用它</a></td>
+										<td>D1874837283221221</td>
+										<td>03/13 12:37</td>
+									</tr>
+									
+								</tbody>
+							</table>
+							</div>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 col-sm-12">
+					
+							<div class="row">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xl-6 px-2">
+							<div class="card border-0  mb-2">
+								<div class="card-body"  style="height:400px">
+									<h5 class="card-title"><span>订单来源</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+										<div id="morris-donut_#(pageId)" style="height:90%"></div>
+								</div>
+							</div>
+							</div>
+							<div class="col-lg-12 col-md-12  col-sm-12  col-xl-6  px-2">
+							<div class="card border-0  mb-2">
+								<div class="card-body">
+									<h5 class="card-title">销售业绩完成进度：</h5>
+									<div class="progress">
+									  <div tooltip data-title="56% 已达标" class="progress-bar" role="progressbar" style="width: 56%;" aria-valuenow="56" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+								</div>
+							</div>
+							</div>
+							</div>
+				</div>
+			</div>
+			 
+	</div>
+</div>
+<!--主页面内容显示区域 end-->
+#end
+#define js()
+<script type="text/javascript">
+var DashBoardUtil_#(pageId)={
+		init:function(){
+            //creating line chart
+            var $lineData = [
+                {x: '2019-03-01', a:3400},
+                {x: '2019-03-02', a: 3500},
+                {x: '2019-03-03', a:  3460},
+                {x: '2019-03-04', a: 4300},
+                {x: '2019-03-05', a:  5000},
+                {x: '2019-03-06', a:  6400},
+                {x: '2019-03-07', a:  10000}
+            ];
+            this.createLineChart('morris-line_#(pageId)',  $lineData, 'x', ['a'], ['用户量']);
+
+            //creating bar chart
+            var $barData = [
+                { y: '1月', a: 100},
+                { y: '2月', a: 750 },
+                { y: '3月', a: 500},
+                { y: '4月', a: 750},
+                { y: '5月', a: 500 },
+                { y: '6月', a: 750},
+                { y: '7月', a: 1000}
+            ];
+            this.createBarChart('morris-bar_#(pageId)', $barData, 'y', ['a'], ['销售额'], ['#4c84ff']);
+
+            //creating donut chart
+            var $donutData = [
+                {label: "PC网站", value: 11},
+                {label: "安卓手机APP", value: 14},
+                 {label: "苹果手机APP", value: 15},
+                {label: "微信公众号", value: 40},
+                {label: "微信小程序", value: 200}
+            ];
+            this.createDonutChart('morris-donut_#(pageId)', $donutData, ['#00a5a8', "#f43f5d", '#d1d337', '#10c888']);
+
+		},
+		createAreaChart :function (element, pointSize, lineWidth, data, xkey, ykeys, labels, lineColors) {
+		        Morris.Area({
+		            element: element,
+		            pointSize: 0,
+		            lineWidth: 0,
+		            data: data,
+		            xkey: xkey,
+		            ykeys: ykeys,
+		            labels: labels,
+		            resize: true,
+		            gridLineColor: '#eee',
+		            hideHover: 'auto',
+		            lineColors: lineColors,
+		            fillOpacity: .6,
+		            behaveLikeLine: true
+		        });
+		    },
+		      createBarChart :function (element, data, xkey, ykeys, labels, lineColors) {
+		            Morris.Bar({
+		                element: element,
+		                data: data,
+		                xkey: xkey,
+		                ykeys: ykeys,
+		                labels: labels,
+		                gridLineColor: '#eee',
+		                barSizeRatio: 0.4,
+		                resize: true,
+		                hideHover: 'auto',
+		                barColors: lineColors
+		            });
+		        },
+		        
+		         //creates Line chart
+		       createLineChart : function (element, data, xkey, ykeys, labels) {
+		            Morris.Line({
+		                element: element,
+			            data: data,
+			            xkey: xkey,
+			            ykeys: ykeys,
+			            labels: labels,
+			             resize: true,
+		                hideHover: 'auto'
+		            });
+		        },createDonutChart : function (element, data, colors) {
+		            Morris.Donut({
+		                element: element,
+		                data: data,
+		                resize: true,
+		                colors: colors,
+		            });
+		        }
+
+}
+
+function initDashboard_#(pageId)(){
+	$("#morris-line_#(pageId)").empty();
+	$("#morris-bar_#(pageId)").empty();
+	$("#morris-donut_#(pageId)").empty();
+	DashBoardUtil_#(pageId).init();
+}
+
+</script>
+#end
+
+

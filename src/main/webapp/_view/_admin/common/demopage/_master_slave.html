@@ -1,0 +1,27 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)" id="jbolttable_mspage_#(pageId)">
+<div class="jbolt_page_title"></div>
+<div class="jbolt_page_content">
+<!-- 内容区域 使用下方的一个上下结构组件 -->
+<div class="jbolttable_master_slave_box">
+	<div class="split master">
+		<!-- 主表区域 主表上不要写data-jbolttable-->
+	</div>
+	<div class="split slave">
+		<!-- 子表区域  子表上不要写data-jbolttable-->
+	</div>
+</div>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+	//使用JS去初始化这个主从布局 给定所在的jbolt_page的ID
+	MasterSlaveUtil.initJBoltTable("jbolttable_mspage_#(pageId)");
+});
+</script>
+#end

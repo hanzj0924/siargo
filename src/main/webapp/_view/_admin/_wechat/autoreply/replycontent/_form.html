@@ -1,0 +1,554 @@
+<div class="row">
+<div class="col">
+<form onsubmit="return false;" id="replyContentForm" action="#(action)" method="post">
+	#if(wechatReplyContent.id??)
+		<input type="hidden" name="wechatReplyContent.id" value="#(wechatReplyContent.id)" />
+	#end
+		<input type="hidden" name="wechatReplyContent.poster" id="posterHidden"  data-rule="required" data-tips="请上传封面图" value="#(wechatReplyContent.poster??)" />
+	<input type="hidden" name="wechatReplyContent.autoReplyId" value="#(autoReplyId?? 0)" />
+	<input type="hidden" name="wechatReplyContent.mpId" value="#(mpId?? 0)" />
+	<input type="hidden" id="mediaId" name="wechatReplyContent.mediaId" value="#(wechatReplyContent.mediaId??)" />
+	<div class="form-group row" 
+	data-radio 
+	data-rule="radio"  
+	data-value="#(wechatReplyContent.type??)" 
+	data-name="wechatReplyContent.type" 
+	data-default="options_first"
+	data-url="admin/wechat/replycontent/types"
+	data-label="回复类型："
+	data-width="col-sm-3,col"
+	data-handler="changeReplyContentType"
+	data-inline="true"></div>
+
+	<div class="form-group row">
+		<div class="col offset-2">
+		<button  onclick="selectFromWechat(this)" data-scroll="yes" data-title="选择" data-area="95%,95%" data-btn="close"  class="btn btn-primary  news image voice video  hideEle"><i class="fa fa-wechat mr-1"></i>从微信素材库选择</button>
+		<button  onclick="selectFromLocaldb(this)" data-scroll="yes"  data-title="选择" data-area="95%,95%"  data-btn="close" class="btn btn-danger  news image hideEle"><i class="fa fa-server mr-1"></i>从本地选择</button>
+		</div>
+	</div>
+	
+	<div class="form-group row news video music hideEle">
+		<label  for="title" class="col-sm-3 col-form-label">标题</label>
+		<div class="col">
+		<input id="title" type="text" autocomplete="off" autofocus="autofocus"  class="form-control" data-rule="required;len<=64;" data-tips="请输入标题"  maxlength="64" name="wechatReplyContent.title" value="#(wechatReplyContent.title??)" />
+		<small class="form-text text-muted">请输入标题，<em>64</em>个字以内</small>
+		</div>
+	</div>
+	
+	<div class="form-group row news video  music text hideEle">
+		<label  for="content" class="col-sm-3 col-form-label">描述内容</label>
+		<div class="col">
+		<textarea id="content" style="height:200px;" class="form-control" data-rule="required;len<=120;" data-tips="请输入描述内容，长度不要超过120"   maxlength="120" name="wechatReplyContent.content">#(wechatReplyContent.content??)</textarea>
+		 <small class="form-text text-muted">请输入描述内容，<em id="contentCount">600</em>个字以内 可以插入右侧表情字符和超链接</small>
+		</div>
+	</div>
+	
+	<div class="form-group row news  music hideEle">
+		<label  for="url" class="col-sm-3 col-form-label">URL地址</label>
+		<div class="col">
+		<input id="url" type="text" autocomplete="off"   class="form-control" data-rule="required;len<=250;" data-tips="请输入URL地址，长度不要超过250"   maxlength="250" name="wechatReplyContent.url" value="#(wechatReplyContent.url??)" />
+		</div>
+	</div>
+	
+	<div class="form-group row  image hideEle">
+		 <div class="col offset-2"  id="imgBox">
+		 #if(wechatReplyContent!=null&&wechatReplyContent.type==WechatReplyContentType.IMG.value)
+		 <img src="#realImage(wechatReplyContent.url??,'/assets/img/uploadimg.png')" style="max-width:500px" />
+		 #end
+		 </div>
+
+	</div>
+	<div class="form-group row  voice hideEle">
+		 <div class="col offset-2"  id="voiceBox">
+		 #if(wechatReplyContent!=null&&wechatReplyContent.type==WechatReplyContentType.VOICE.value)
+		 	<audio src="#realUrl(wechatReplyContent.url??)" controls="controls">您的浏览器不支持 audio 标签</audio>
+		 #end
+		 </div>
+	</div>
+	
+	<div class="form-group row  music hideEle">
+		 <div class="col offset-2"  id="musicBox">
+		 #if(wechatReplyContent!=null&&wechatReplyContent.type==WechatReplyContentType.MUSIC.value)
+		 	<audio src="#(wechatReplyContent.url??)" controls="controls">您的浏览器不支持 audio 标签</audio>
+		 #end
+		 </div>
+	</div>
+</form>
+
+
+</div>
+<div class="col-lg-auto text-center">
+<fieldset class="form-page-fieldset news hideEle">
+	<legend>封面图</legend>
+	<div class="form-group text-center">
+		<div class="j_img_uploder my-3" id="posterChoose" data-filename="img" data-url="admin/wechat/replycontent/uploadImage/#(autoReplyId?? 0)" data-value="#realImage(wechatReplyContent.poster??)"  data-handler="uploadFile"  data-hiddeninput="posterHidden"  data-area="450,190" data-maxsize="200" style="width: 450px; height: 190px;"></div>
+		<small class="form-text text-danger">建议尺寸 900*383 （像素）小于200K</small>
+	</div>
+</fieldset>
+
+<fieldset class="form-page-fieldset text hideEle">
+<legend>微信可选表情</legend>
+<div class="card">
+<div class="card-body" style="max-height:400px;overflow-y:auto; ">
+
+			<table class="table table-bordered table-hover table-striped table-center table-sm">
+				<thead>
+					<tr>
+						<th>表情图片</th>
+						<th>字符串代码</th>
+						<th>替换关键字</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><img alt="" src="assets/img/em/1.png"></td>
+						<td>/::)</td>
+						<td>[微笑]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/2.png"></td>
+						<td>/::~</td>
+						<td>[撇嘴]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/3.png"></td>
+						<td>/::B</td>
+						<td>[色]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/4.png"></td>
+						<td>/::|</td>
+						<td>[发呆]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/5.png"></td>
+						<td>/:8-)</td>
+						<td>[得意]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/6.png"></td>
+						<td>/::&lt;</td>
+						<td>[流泪]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/7.png"></td>
+						<td>/::$</td>
+						<td>[害羞]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/8.png"></td>
+						<td>/::X</td>
+						<td>[闭嘴]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/9.png"></td>
+						<td>/::Z</td>
+						<td>[睡]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/10.png"></td>
+						<td>/::’(</td>
+						<td>[大哭]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/11.png"></td>
+						<td>/::-|</td>
+						<td>[尴尬]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/12.png"></td>
+						<td>/::@</td>
+						<td>[发怒]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/13.png"></td>
+						<td>/::P</td>
+						<td>[调皮]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/14.png"></td>
+						<td>/::D</td>
+						<td>[呲牙]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/15.png"></td>
+						<td>/::O</td>
+						<td>[惊讶]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/16.png"></td>
+						<td>/::(</td>
+						<td>[难过]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/17.png"></td>
+						<td>/::+</td>
+						<td>[酷]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/18.png"></td>
+						<td>/:–b</td>
+						<td>[冷汗]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/19.png"></td>
+						<td>/::Q</td>
+						<td>[抓狂]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/20.png"></td>
+						<td>/::T</td>
+						<td>[吐]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/21.png"></td>
+						<td>/:,@P</td>
+						<td>[偷笑]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/22.png"></td>
+						<td>/:,@-D</td>
+						<td>[愉快]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/23.png"></td>
+						<td>/::d</td>
+						<td>[白眼]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/24.png"></td>
+						<td>/:,@o</td>
+						<td>[傲慢]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/25.png"></td>
+						<td>/::g</td>
+						<td>[饥饿]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/26.png"></td>
+						<td>/:|-)</td>
+						<td>[困]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/27.png"></td>
+						<td>/::!</td>
+						<td>[惊恐]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/28.png"></td>
+						<td>/::L</td>
+						<td>[流汗]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/29.png"></td>
+						<td>/::&gt;</td>
+						<td>[憨笑]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/30.png"></td>
+						<td>/::,@</td>
+						<td>[悠闲]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/31.png"></td>
+						<td>/:,@f</td>
+						<td>[奋斗]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/32.png"></td>
+						<td>/::-S</td>
+						<td>[咒骂]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/33.png"></td>
+						<td>/:?</td>
+						<td>[疑问]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/34.png"></td>
+						<td>/:,@x</td>
+						<td>[嘘]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/35.png"></td>
+						<td>/:,@@</td>
+						<td>[晕]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/36.png"></td>
+						<td>/::8</td>
+						<td>[疯了]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/37.png"></td>
+						<td>/:,@!</td>
+						<td>[哀]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/38.png"></td>
+						<td>/:!!!</td>
+						<td>[骷髅]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/39.png"></td>
+						<td>/:xx</td>
+						<td>[敲打]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/40.png"></td>
+						<td>/:bye</td>
+						<td>[再见]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/41.png"></td>
+						<td>/:wipe</td>
+						<td>[擦汗]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/42.png"></td>
+						<td>/:dig</td>
+						<td>[抠鼻]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/43.png"></td>
+						<td>/:handclap</td>
+						<td>[鼓掌]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/44.png"></td>
+						<td>/:&amp;-(</td>
+						<td>[糗大了]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/45.png"></td>
+						<td>/:B-)</td>
+						<td>[坏笑]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/46.png"></td>
+						<td>/:&lt;@</td>
+						<td>[左哼哼]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/47.png"></td>
+						<td>/:@&gt;</td>
+						<td>[右哼哼]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/48.png"></td>
+						<td>/::-O</td>
+						<td>[哈欠]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/49.png"></td>
+						<td>/:&gt;-|</td>
+						<td>[鄙视]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/50.png"></td>
+						<td>/:P-(</td>
+						<td>[委屈]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/51.png"></td>
+						<td>/::’|</td>
+						<td>[快哭]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/52.png"></td>
+						<td>/:X-)</td>
+						<td>[阴险]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/53.png"></td>
+						<td>/::*</td>
+						<td>[亲亲]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/54.png"></td>
+						<td>/:@x</td>
+						<td>[吓]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/55.png"></td>
+						<td>/:8*</td>
+						<td>[可怜]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/56.png"></td>
+						<td>/:pd</td>
+						<td>[菜刀]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/57.png"></td>
+						<td>/:&lt;W&gt;</td>
+						<td>[西瓜]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/58.png"></td>
+						<td>/:beer</td>
+						<td>[啤酒]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/59.png"></td>
+						<td>/:basketb</td>
+						<td>[篮球]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/60.png"></td>
+						<td>/:oo</td>
+						<td>[乒乓]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/61.png"></td>
+						<td>/:coffee</td>
+						<td>[咖啡]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/62.png"></td>
+						<td>/:eat</td>
+						<td>[饭]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/63.png"></td>
+						<td>/:pig</td>
+						<td>[猪头]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/64.png"></td>
+						<td>/:rose</td>
+						<td>[玫瑰]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/65.png"></td>
+						<td>/:fade</td>
+						<td>[凋谢]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/66.png"></td>
+						<td>/:showlove</td>
+						<td>[嘴唇]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/67.png"></td>
+						<td>/:heart</td>
+						<td>[爱心]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/68.png"></td>
+						<td>/:break</td>
+						<td>[心碎]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/69.png"></td>
+						<td>/:cake</td>
+						<td>[蛋糕]</td>
+					</tr>
+					<tr>
+						<td><img alt="" src="assets/img/em/70.png"></td>
+						<td>/:li</td>
+						<td>[闪电]</td>
+					</tr>
+				</tbody>
+			</table>
+		
+</div>
+</div>
+</fieldset>
+
+</div>
+</div>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="replyContentForm")
+<script type="text/javascript">
+//页面组件定义
+var content=$("#content");
+var contentCount=$("#contentCount");
+var posterHidden=$("#posterHidden");
+var title=$("#title");
+var url=$("#url");
+var mediaId=$("#mediaId");
+var posterChoose=$("#posterChoose");
+var imgBox=$("#imgBox");
+var voiceBox=$("#voiceBox");
+
+//切换选择的类型
+var contentType="news";
+//弹出从微信素材库选择素材的dialog
+function selectFromWechat(ele){
+	var url="admin/wechat/media/choose/#(mpId?? 0)-"+contentType;
+	$(ele).data("url",url);
+	 DialogUtil.openBy(ele);
+}
+//选中一个微信素材库素材
+function chooseTheWechatMedia(id){
+	
+	Ajax.get("/admin/wechat/media/chooseIt/#(mpId?? 0)-"+id,function(res){
+		var data=res.data;
+		title.val(data.title);
+		
+		if(contentType=="image"){
+			url.val(data.serverUrl);
+			mediaId.val(data.mediaId);
+			if(data.realImgUrl){
+			imgBox.html('<img src="'+data.realImgUrl+'" style="max-width:500px" />');
+			}
+		}else if(contentType=="news"){
+			posterHidden.val(data.serverUrl);
+			url.val(data.url);
+			if(data.realImgUrl){
+				posterChoose.css({"background":"url("+data.realImgUrl+") center center / 100% no-repeat"});
+			}
+		}else if(contentType=="video"){
+			mediaId.val(data.mediaId);
+			url.val(data.serverUrl);
+		}else if(contentType=="voice"){
+			mediaId.val(data.mediaId);
+			url.val(data.serverUrl);
+			if(data.realVoiceUrl){
+				voiceBox.html('<audio src="'+data.realVoiceUrl+'" controls="controls">您的浏览器不支持 audio 标签</audio>');
+			}
+		}
+		
+		layer.closeAll();
+		},function(){
+			layer.closeAll();
+			});
+	
+}
+
+function changeReplyContentType(r,value){
+	
+	$("div.hideEle,fieldset.hideEle,button.hideEle").hide();
+	$("div."+value).show();
+	$("fieldset."+value).show();
+	$("button."+value).show();
+	
+	if(value=="text"){
+		contentCount.text("600");
+		content.attr("maxlength",600);
+	}else if(value=="news"){
+		contentCount.text("120");
+		content.attr("maxlength",120);
+		}
+	
+	if(value=="news"){
+			title.data("notnull",true);
+			url.data("notnull",true);
+			posterHidden.data("notnull",true);
+		}else{
+			title.data("notnull",false);
+			url.data("notnull",false);
+			posterHidden.data("notnull",false);
+		}
+	if(value=="text"||value=="news"){
+		content.data("notnull",true);
+	}else{
+		content.data("notnull",false);
+	}
+	contentType=value;
+}
+</script>
+
+#end

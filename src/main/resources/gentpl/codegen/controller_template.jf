@@ -1,0 +1,88 @@
+package #(codeGen.controllerPackage??);
+
+#if(codeGen.isImportExcel?? && codeGen.isCrud)
+import cn.jbolt.common.config.JBoltUploadFolder;
+import com.jfinal.upload.UploadFile;
+#end
+#if(codeGen.isExportExcel)
+import #(codeGen.modelPackage+"."+codeGen.modelName??);
+#if(codeGen.isExportExcelByForm?? && codeGen.isPaginate??)
+import com.jfinal.plugin.activerecord.Page;
+#end
+#if((codeGen.isExportExcelByForm?? && !codeGen.isPaginate??) || codeGen.isExportExcelAll?? || codeGen.isExportExcelByCheckedIds??)
+import java.util.List;
+#end
+#end
+import com.jfinal.aop.Inject;
+import cn.jbolt.core.controller.base.JBoltBaseController;
+import cn.jbolt.core.permission.CheckPermission;
+import cn.jbolt._admin.permission.PermissionKey;
+#if(permission.isSystemAdminDefault??)
+import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
+#end
+#if(hasDateRangeColumn)
+import cn.jbolt.core.bean.JBoltDateRange;
+#end
+import com.jfinal.core.Path;
+#if(codeGen.servicePackage!=codeGen.controllerPackage)
+import #(codeGen.servicePackage+"."+codeGen.serviceName??);
+#end
+#if(codeGen.isCrud?? || codeGen.isNeedAdminInterceptor??)
+import com.jfinal.aop.Before;
+#end
+#if(codeGen.isNeedAdminInterceptor??)
+import cn.jbolt.core.permission.JBoltAdminAuthInterceptor;
+#end
+#if(hasUploadFile??)
+import cn.jbolt.common.config.JBoltUploadFolder;
+import com.jfinal.upload.UploadFile;
+import cn.jbolt.core.service.JBoltFileService;
+#end
+import com.jfinal.core.paragetter.Para;
+#if(codeGen.isCrud??)
+import com.jfinal.plugin.activerecord.tx.Tx;
+#if(!codeGen.isMainDataSource??)
+import com.jfinal.plugin.activerecord.tx.TxConfig;
+#end
+import cn.jbolt.core.base.JBoltMsg;
+#if(codeGen.isGenModel??)
+import #(codeGen.modelPackage+"."+codeGen.modelName);
+#end
+#end
+#if(needUnCheck??)
+import cn.jbolt.core.permission.UnCheck;
+#end
+/**
+ * #(codeGen.indexHtmlPageTitle?? (codeGen.mainTableRemark?? (codeGen.controllerName??)))
+ * @ClassName: #(codeGen.controllerName??)
+ * @author: #(codeGen.author?? 'JBolt-Generator')
+ * @date: #date()
+ */
+#if(permission)
+@CheckPermission(PermissionKey.#(permission.permissionKey.toUpperCase()))
+#end
+#if(permission.isSystemAdminDefault??)
+@UnCheckIfSystemAdmin
+#end
+#if(codeGen.isNeedAdminInterceptor??)
+@Before(JBoltAdminAuthInterceptor.class)
+#end
+#if(codeGen.isViewUsePath?? && codeGen.controllerPath??)
+@Path(value = "#(codeGen.controllerPath??)", viewPath = "#(codeGen.htmlViewPath??)")
+#end
+public class #(codeGen.controllerName??) extends JBoltBaseController {
+
+	@Inject
+	private #(codeGen.serviceName??) service;
+	#if(hasUploadFile??)
+	@Inject
+    private JBoltFileService jboltFileService;
+	#end
+#if(methods!=null&&methods.size()>0)
+	#for(method:methods)
+	#@genControllerMethod(method)
+	
+	#end
+#end
+	
+}

@@ -1,0 +1,48 @@
+#一个Cache的声明 一个中括号就是定义一个caffeine cache 配置 默认jbolt_cache 不要修改名字
+[jbolt_cache]
+#启用生效
+enable                      = true
+#初始的缓存空间大小
+initialCapacity             = 1000
+#缓存的最大数量  maximumSize和maximumWeight不可以同时使用
+maximumSize                 = 10000
+#缓存的最大权重  maximumSize和maximumWeight不可以同时使用
+#maximumWeight              = -1
+
+#在最后一次写入缓存后开始计时，在指定的时间后过期 单位根据expireAfterWriteTimeUnit配置
+#expireAfterWrite优先级大于expireAfterAccess
+#expireAfterWrite            = 30
+#过期时间单位类型 SECONDS MINUTES HOURS DAYS
+#expireAfterWriteTimeUnit    = MINUTES
+
+#在最后一次访问或者写入后开始计时，在指定的时间后过期。假如一直有请求访问该key，那么这个缓存将一直不会过期
+#expireAfterWrite开启后优先级最大
+expireAfterAccess           = 30
+#过期时间单位类型 SECONDS MINUTES HOURS DAYS
+expireAfterAccessTimeUnit   = MINUTES
+
+#创建缓存或者最近一次更新缓存后经过固定的时间间隔，刷新缓存
+#refreshAfterWrite           = 30
+#过期时间单位类型 SECONDS MINUTES HOURS DAYS
+#refreshAfterWriteTimeUnit   = MINUTES
+
+
+#使用弱引用存储key。
+#如果没有其他地方对该key有强引用，那么该缓存就会被垃圾回收器回收。
+#由于垃圾回收器只依赖于身份(identity)相等，因此这会导致整个缓存使用身份 (==) 相等来比较 key，而不是使用 equals()
+weakKeys                    = false
+
+#使用弱引用存储value。
+#如果没有其他地方对该value有强引用，那么该缓存就会被垃圾回收器回收。
+#由于垃圾回收器只依赖于身份(identity)相等，因此这会导致整个缓存使用身份 (==) 相等来比较 key，而不是使用 equals()。
+#weakValues 与 softValues 不能同时用
+weakValues                  = false
+
+#使用软引用存储value。
+#当内存满了过后，软引用的对象以将使用最近最少使用(least-recently-used ) 的方式进行垃圾回收。
+#由于使用软引用是需要等到内存满了才进行回收，所以我们通常建议给缓存配置一个使用内存的最大值。 softValues() 将使用身份相等(identity) (==) 而不是equals() 来比较值。
+#weakValues 与 softValues 不能同时用
+softValues                 = false
+
+#开启统计
+recordStats                = false

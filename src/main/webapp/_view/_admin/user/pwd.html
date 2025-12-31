@@ -1,0 +1,82 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-auto">
+	<h1><i class="jbicon jb-lock"></i> 密码修改</h1>
+	</div>
+	<div class="col">
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content" style="padding-top: 80px;">
+	<form onsubmit="return false;"  id="userPwdForm" action="admin/user/updatepwd" method="post" style="margin:auto;width:600px">
+	<div class="form-group row">
+		<label class="offset-1 col-sm-3 col-form-label">原密码</label>
+		<div class="col-8">
+			<input type="password" autocomplete="off"  autocomplete="off" class="form-control" data-rule="required"  placeholder="请输入原登录密码"  maxlength="40" name="oldPwd" >
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="offset-1 col-sm-3 col-form-label">新密码</label>
+		<div class="col-8">
+			<input type="password" autocomplete="off"   autocomplete="off" class="form-control" data-rule="required" placeholder="请输入新密码"  maxlength="40" id="newPwd" name="newPwd" >
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="offset-1 col-sm-3 col-form-label">确认新密码</label>
+		<div class="col-8">
+			<input type="password" autocomplete="off"   autocomplete="off" class="form-control" data-rule="==#newPwd" data-tips="两次密码输入不一致"  placeholder="请输入确认新密码"  maxlength="40" name="reNewPwd" >
+		</div>
+	</div>
+	<div class="form-group text-center">
+		<button class="btn btn-outline-primary" type="button" onclick="submitThisForm()"><i class="fa fa-check"></i> 确认修改</button>
+	</div>
+	</form>
+
+</div>
+</div>
+#end
+#define js()
+<script type="text/javascript">
+function submitThisForm(){
+	var form=$("#userPwdForm");
+	LayerMsgBox.loading("提交中...",300000);
+	if(FormChecker.check(form)){
+		var oldPwd = form.find("input[type='password'][name='oldPwd']");
+		var newPwd = form.find("input[type='password'][name='newPwd']");
+		var reNewPwd = form.find("input[type='password'][name='reNewPwd']");
+		var left = randomId(2);
+		var right = randomId(3);
+		oldPwd.val(left+md5(oldPwd.val())+right);
+		newPwd.val(left+md5(newPwd.val())+right);
+		reNewPwd.val(left+md5(reNewPwd.val())+right);
+		var url=form.action;
+		form.ajaxSubmit({
+			type:"post",
+			url:url,
+			success:function(ret){
+				if(ret.state=="ok"){
+					LayerMsgBox.success(ret.msg,1500,function(){
+						refreshPjaxContainer();
+					});
+				}else{
+					oldPwd.val("");
+					newPwd.val("");
+					reNewPwd.val("");
+					LayerMsgBox.error(ret.msg);
+				}
+			},error:function (){
+				oldPwd.val("");
+				newPwd.val("");
+				reNewPwd.val("");
+				LayerMsgBox.alert("网络通信异常",2);
+			}
+		});
+	}
+}
+</script>
+#end
+
+

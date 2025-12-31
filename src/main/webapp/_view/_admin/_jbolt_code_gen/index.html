@@ -1,0 +1,168 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<!-- 页头区域 -->
+		<div class="row">
+			<div class="col-sm-auto">
+				<h1><i class="jbicon2 jbi-codelibrary"></i> JBolt平台代码生成器</h1>
+			</div>
+			<div class="col">
+			<!-- 页头表单区 -->
+				<form class="form-inline text-left" id="jbolt_codegen_form_#(pageId)"   onsubmit="return false;" method="post">
+					<input type="hidden" name="isDeleted" value="false"/>
+					<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+					
+					<select class="form-control" 
+					data-autoload
+					name="type" 
+					data-url="admin/codegen/types"
+					data-text="=构建类型="
+					data-value=""></select>
+					
+					<select class="form-control" 
+					data-autoload
+					name="dataSource" 
+					data-text-attr="optionText"
+					data-value-attr="name"
+					data-url="admin/codegen/datasources"
+					data-text="=数据源="
+					data-value=""></select>
+					
+					<select class="form-control" 
+					data-autoload
+					name="style" 
+					data-url="admin/codegen/styles"
+					data-text="=样式类型="
+					data-value=""></select>
+					
+					<select class="form-control" 
+					data-autoload
+					name="state" 
+					data-url="admin/codegen/states"
+					data-text="=生成状态="
+					data-value=""></select>
+
+					<button onclick="codeGenFormSearch_#(pageId)('jbolt_codegen_form_#(pageId)',false)" id="toolbar_searchBtn_#(pageId)"  type="button" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+					<button onclick="codeGenFormSearch_#(pageId)('jbolt_codegen_form_#(pageId)',true)"  id="toolbar_trashBtn_#(pageId)"  type="button" class="btn btn-outline-danger" ><i class="fa fa-trash"></i> 回收站</button>
+				</form>
+			</div>
+			<div class="col-sm-auto">
+			<!-- 页头右侧操作区 -->
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+		<!-- 内容核心区 -->
+<!-- 数据模板定义-->
+<textarea class="jb_tpl_box" id="jbolt_codegen_tpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.mainTableName}${data.mainTableRemark?("["+data.mainTableRemark+"]"):""}</td>
+<td>${data.datasourceInfo}</td>
+<td><span class="font-weight-bolder text-info">${data.versionSn}</span></td>
+<td>$${data.type=="Admin"?"<span class='badge badge-primary'>后台管理类</span>":"<span class='badge badge-info'>Api接口开发类</span>"}</td>
+<td>$${data.isTreeTable?"<span class='badge badge-primary'>是</span>":"<span class='badge badge-dark'>否</span>"}</td>
+<td>$${data.isCrud?"<span class='badge badge-primary'>是</span>":"<span class='badge badge-dark'>否</span>"}</td>
+<td>$${data.isEditable?"<span class='badge badge-primary'>是</span>":"<span class='badge badge-dark'>否</span>"}</td>
+<td>$${data.tableRemovePrefix?("<span class='text-danger font-weight-bolder'>"+data.tableRemovePrefix+"</span>"):"无"}</td>
+<td>${data.mainJavaPackage?data.mainJavaPackage:'-'}</td>
+<td>${data.author?data.author:'未设置'}</td>
+<td>${data.subTableCount}</td>
+<td><span class="badge badge-${data.style|colorClassByLevel}">${data.styleName}</span></td>
+<td><span class="badge badge-${data.state|colorClassByLevel}">${data.stateName}</span></td>
+<td>${data.createTime|date_ymdhms}</td>
+<td>${data.updateTime|date_ymdhms}</td>
+<td>
+{@if data.isDeleted}
+<a tooltip  data-title="查看基础信息"  href="admin/codegen/edit/${data.id}" data-dialog-title="[${data.mainTableName}${data.mainTableRemark?('('+data.mainTableRemark+')'):''}]基本信息" data-area="1280,950" data-openpage="dialog" data-btn="close" class="text-info mr-1"><i class="fa fa-eye"></i></a>
+{@else}
+<a tooltip  data-title="编辑基础信息"  href="admin/codegen/edit/${data.id}" data-handler="refreshJBoltTable" data-dialog-title="编辑[${data.mainTableName}${data.mainTableRemark?('('+data.mainTableRemark+')'):''}]基本信息" data-area="1280,950" class="jbolt_table_editbtn text-primary"><i class="fa fa-pencil"></i></a>
+{@/if}
+<a tooltip  data-title="设计详细生成配置" target="_blank"  href="admin/codegen/editCodeGenConfig/${data.id}"  class="mr-1 text-success"><i class="fa fa-cogs"></i></a>
+<a tooltip  data-title="删除"  href="admin/codegen/${data.isDeleted?'realDelete':'delete'}/${data.id}" data-handler="refreshJBoltTable" class="jbolt_table_delbtn text-danger"><i class="fa fa-remove"></i></a>
+</td>
+</tr>
+{@/each}
+</textarea>
+<div class="jbolt_table_toolbar" id="codegen_table_toolbar_#(pageId)">
+<div class="btn-group btn-group-sm" role="group" aria-label="btn-group">
+<button data-dialogbtn data-area="1280,950"  data-handler="refreshJBoltTable" data-title="新增代码生成配置-基础" id="toolbar_addBtn_#(pageId)" data-url="admin/codegen/add" class="btn btn-outline-primary" ><i class="fa fa-plus"></i> 新增</button>
+<button data-dialogbtn data-area="1280,950"  data-handler="refreshJBoltTable" data-title="编辑代码生成配置-基础" id="toolbar_editBtn_#(pageId)" data-check-handler="jboltTableGetCheckedId" data-url="admin/codegen/edit/" class="btn btn-outline-primary"><i class="fa fa-edit"></i> 编辑</button>
+<button data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" id="toolbar_deleteBtn_#(pageId)" data-url="admin/codegen/deleteByIds?ids=" data-confirm="确定删除选中数据？" class="btn btn-outline-danger" ><i class="fa fa-trash"></i> 删除</button>
+<button style="display:none;" data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" id="toolbar_recoverBtn_#(pageId)" data-url="admin/codegen/recoverByIds?ids=" data-confirm="确定还原回收站里选中数据？" class="btn btn-outline-info btn-sm" ><i class="fa fa-reply"></i> 还原</button>
+<button onclick="jboltTableRefresh(this)" class="btn btn-outline-secondary" ><i class="fa fa-refresh"></i> 刷新</button>
+</div>
+</div>
+
+ <table class="thead_font_normal table-center"
+  data-jbolttable
+  data-column-prepend="1:checkbox"
+  data-fixed-columns-left="1,2,3"
+  data-fixed-columns-right="-1"
+  data-column-resize="true"
+  data-ajax="true"
+  data-conditions-form="jbolt_codegen_form_#(pageId)"
+  data-page="true"
+  data-pagesize="15"
+  data-url="admin/codegen/datas"
+  data-rowtpl="jbolt_codegen_tpl_#(pageId)"
+  data-toolbar="codegen_table_toolbar_#(pageId)"
+  data-copy-to-excel="false"
+  
+  data-sortable-columns="version_sn,create_time,update_time,sub_table_count,style,state,main_table_name,datasource_name"
+  data-sort="#((sortColumn&&sortType)?(sortColumn+':'+sortType):'')"
+  data-default-sort-column="update_time"
+ >
+<thead>
+<tr>
+<th data-width="60" data-column="index">序号</th>
+<th data-min-width="200" data-column="main_table_name">数据库表</th>
+<th data-width="150" data-column="datasource_name">数据源</th>
+<th data-width="80" data-column="version_sn">版本号</th>
+<th data-width="110" data-column="type">构建类型</th>
+<th data-width="80" data-column="is_tree_table">是否树表</th>
+<th data-width="100" data-column="is_crud">是否CRUD</th>
+<th data-width="100" data-column="is_editable">是否可编辑</th>
+<th data-width="100" data-column="table_remove_prefix">删除表前缀</th>
+<th data-width="150">Main Java Package</th>
+<th data-width="150">功能作者</th>
+<th data-width="80" data-column="sub_table_count">子表数</th>
+<th data-width="120" data-column="style">样式类型</th>
+<th data-width="120" data-column="state">生成状态</th>
+<th data-width="150" data-column="create_time">创建时间</th>
+<th data-width="150" data-column="update_time">更新时间</th>
+<th data-width="110">操作</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+function codeGenFormSearch_#(pageId)(formId,isDeleted){
+	var form=$("#"+formId);
+	form.find("input[name='isDeleted']").val(isDeleted);
+	if(isDeleted){
+		$("#toolbar_searchBtn_#(pageId)").removeClass("btn-primary").addClass("btn-outline-secondary");
+		$("#toolbar_trashBtn_#(pageId)").removeClass("btn-outline-danger").addClass("btn-danger");
+		$("#toolbar_recoverBtn_#(pageId)").show();
+		$("#toolbar_deleteBtn_#(pageId)").hide();
+		$("#toolbar_addBtn_#(pageId)").hide();
+		$("#toolbar_editBtn_#(pageId)").hide();
+	}else{
+		$("#toolbar_searchBtn_#(pageId)").removeClass("btn-outline-secondary").addClass("btn-primary");
+		$("#toolbar_trashBtn_#(pageId)").removeClass("btn-danger").addClass("btn-outline-danger");
+		$("#toolbar_recoverBtn_#(pageId)").hide();
+		$("#toolbar_deleteBtn_#(pageId)").show();
+		$("#toolbar_addBtn_#(pageId)").show();
+		$("#toolbar_editBtn_#(pageId)").show();
+		}
+	form.submit();
+}
+</script>
+#end

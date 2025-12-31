@@ -1,0 +1,61 @@
+#@adminJBoltLayerLayout()
+#define css()
+<style type="text/css">
+table.table.j_logininfo_table>thead>tr>th{text-align:center!important;}
+table.table.j_logininfo_table>tbody>tr>th{width:120px;text-align: right!important;}
+</style>
+#end
+
+#define main()
+<div class="jbolt_page jbolt_layer_page">
+<div class="jbolt_page_title">
+	<h1><i class="fa fa-cogs mr-2"></i>登录日志详情查看[#(log.id)]</h1>
+</div>
+<div class="jbolt_page_content">
+<table class="table table-bordered table-hover j_logininfo_table">
+<thead><th colspan="2">基本信息</th></thead>
+<tbody>
+<tr><th>登录用户:</th><td>#(log.username)(#(log.userId?? '-'))</td></tr>
+<tr><th>登录时间:</th><td>#date(log.loginTime,'yyyy年MM月dd日 HH:mm:ss')</td></tr>
+<tr>
+<th>登录状态:</th>
+<td>
+#if(log.loginState==1)
+<span class="text-success">#(log.loginStateName??)</span>	
+#else
+<span class="text-danger">#(log.loginStateName??)</span>	
+#end
+</td>
+</tr>
+</tbody>
+</table>
+
+<table class="table table-bordered table-hover j_logininfo_table">
+<thead><th colspan="2">地址信息</th></thead>
+<tbody>
+<tr><th>异地登录：</th><td><span class="text-#(log.isRemoteLogin?'danger':'')">#boolToStr(log.isRemoteLogin)</span></td></tr>
+<tr><th>登录IP：</th><td>#(log.loginIp??)</td></tr>
+<tr><th>登录地址：</th><td>#(log.loginAddress??)</td></tr>
+<tr><th>登录国家：</th><td>#(log.loginCountry??)</td></tr>
+<tr><th>登录省份：</th><td>#(log.loginProvince??)</td></tr>
+<tr><th>登录城市：</th><td>#(log.login_city??)</td></tr>
+</tbody>
+</table>
+
+<table class="table table-bordered table-hover j_logininfo_table">
+<thead><th colspan="2">终端信息</th></thead>
+<tbody>
+<tr><th>终端类型：</th><td>#boolToStr(log.isMobile,"移动端","PC端")</td></tr>
+<tr><th>操作系统：</th><td>#(log.osName??)</td></tr>
+<tr><th>系统架构：</th><td>#(log.osPlatformName??)</td></tr>
+<tr><th>浏览器：</th><td>#(log.browserName??)</td></tr>
+<tr><th>浏览器引擎：</th><td>#(log.browserEngineName??) #(log.browserEngineVersion)</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+#end
+#define js()
+<script>
+</script>
+#end

@@ -1,0 +1,61 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+	<div class="row">
+	<div class="col-md-6 col-12">
+	<div class="card">
+	    <div class="card-header">当前应用</div>
+	    <div class="card-body">
+				<h5 class="card-title">#(application.name??)</h5>
+				<label class="badge badge-primary">#(application.typeName??)</label>
+	    </div>
+	</div>
+	</div>
+	<div class="col-md-6  col-12">
+		<div class="card mt-md-0 mt-1">
+	    <div class="card-header">#(application.typeName??)</div>
+	    <div class="card-body">
+		#if(linkTarget)
+			<div class="row">
+				#if(linkTarget.logo??)
+				<div class="col-auto">
+				<img class="j_tablelist_logo" data-photobtn tooltip data-title="点击查看大图" src="#realImage(linkTarget.logo)" onerror="this.src='assets/img/uploadimg.png'"/>
+				</div>
+				#end
+				<div class="col">
+				 	<h5 class="card-title">#(linkTarget.name??)</h5>
+				 	#if(linkTarget.typeName??)
+					<label class="badge badge-primary">#(linkTarget.typeName)</label>
+				 	#end
+				 	#if(linkTarget.subjectTypeName??)
+					<label class="badge badge-info">#(linkTarget.subjectTypeName)</label>
+					#end
+				</div>
+			</div>
+			<div class="alert alert-warning">
+			若要解除关联对象，请到#(application.typeName??)管理中找到它关联对象上处理
+			</div>
+			#else
+				#if(application.linkTargetId??)
+				<div class="alert alert-warning">关联对象数据无法读取</div>
+				<a class="btn btn-danger" data-ajaxbtn href="admin/app/removeLinkTarget/#(application.id??)" data-confirm="确定解除关联对象？" data-handler="LayerMsgBox.success('操作成功',1000,refreshPjaxContainer)"><i class="fa fa-unlink"></i> 点击解除应用关联对象</a>
+				#else
+				<div class="alert alert-warning">无关联对象</div>
+				#end
+			#end
+	    </div>
+	</div>
+	</div>
+	
+</div>
+	
+</div>
+</div>
+#end
+
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="wechatMpinfoLinkAppForm")
+#end

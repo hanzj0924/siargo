@@ -1,0 +1,52 @@
+#[[#JBolt平台代码生成器 核心配置文件]]#
+
+#[[#数据源]]#
+#for(dataSource:jboltCodeGenConfig.dataSources)
+[#(dataSource.configName)]
+db_type = #(dataSource.dbType)
+is_main = #(dataSource.isMain)
+jdbc_url = #(dataSource.jdbcUrl)
+user = #(dataSource.user)
+password = #(dataSource.password)
+id_gen_mode = #(dataSource.idGenMode)
+
+#end
+
+
+#[[#默认配置]]#
+[ProjectConfig_default]
+#[[#项目类型]]#
+type=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.type)
+#[[#主包]]#
+mainPkg=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.mainPkg)
+#[[#model生成的包]]#
+modelPackage=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.modelPackage)
+#[[#生成的Model 去掉前缀]]#
+removedTableNamePrefixes=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.removedTableNamePrefixes)
+#[[#不需要生成的表名（全部小写） 一般都是一些数据库内置表什么的]]#
+filterTableNames=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.filterTableNames)
+#[[#表名中有包含以下字符串的需要过滤掉]]#
+tableNamesIndexOfStr=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.tableNamesIndexOfStr)
+#[[#表名符合的正则表达式]]#
+tableNamesPatterns=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.tableNamesPatterns)
+#[[#PermissionKey.java文件位置]]#
+permisskeyJavaFilePath=#(jboltCodeGenConfig.defaultCodeGenProjectConfig.permisskeyJavaFilePath)
+
+#[[#上次有效配置]]#
+[ProjectConfig_last]
+#[[#项目类型]]#
+type=#(jboltCodeGenConfig.lastCodeGenProjectConfig.type)
+#[[#主包]]#
+mainPkg=#(jboltCodeGenConfig.lastCodeGenProjectConfig.mainPkg)
+#[[#model生成的包]]#
+modelPackage=#(jboltCodeGenConfig.lastCodeGenProjectConfig.modelPackage)
+#[[#生成的Model 去掉前缀]]#
+removedTableNamePrefixes=#(jboltCodeGenConfig.lastCodeGenProjectConfig.removedTableNamePrefixes)
+#[[#不需要生成的表名（全部小写） 一般都是一些数据库内置表什么的]]#
+filterTableNames=#(jboltCodeGenConfig.lastCodeGenProjectConfig.filterTableNames)
+#[[#表名中有包含以下字符串的需要过滤掉]]#
+tableNamesIndexOfStr=#(jboltCodeGenConfig.lastCodeGenProjectConfig.tableNamesIndexOfStr)
+#[[#表名符合的正则表达式]]#
+tableNamesPatterns=#(jboltCodeGenConfig.lastCodeGenProjectConfig.tableNamesPatterns)
+#[[#PermissionKey.java文件位置]]#
+permisskeyJavaFilePath=#(jboltCodeGenConfig.lastCodeGenProjectConfig.permisskeyJavaFilePath)

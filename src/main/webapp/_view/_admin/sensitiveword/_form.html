@@ -1,0 +1,14 @@
+<form onsubmit="return false;" id="sensitiveWordForm" action="#(action)" method="sensitiveword">
+#if(sensitiveWord.id??)
+	<input type="hidden" name="sensitiveWord.id" value="#(sensitiveWord.id)" />
+#end
+	<div class="form-group">
+		<label>敏感词</label>
+		<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入敏感词内容" data-tips="请输入敏感词内容" maxlength="40" name="sensitiveWord.content" value="#(sensitiveWord.content??)" />
+	</div>
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="sensitiveWordForm")
+#end

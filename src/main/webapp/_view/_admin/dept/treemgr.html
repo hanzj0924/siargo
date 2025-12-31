@@ -1,0 +1,79 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
+    <div class="jbolt_page_title jb_vheader">
+        <div class="row">
+            <div class="col-sm-auto">
+                <h1><i class="jbicon2 jbi-cluster"></i> 部门管理 - 大数据量 - 树形管理模式 - <span class="text-danger">在部门树上使用鼠标左键点击和右键菜单进行操作</span></h1>
+            </div>
+            <div class="col text-center">
+            </div>
+            <div class="col-sm-auto">
+
+            </div>
+        </div>
+    </div>
+    <div class="jbolt_page_content jb_vbody">
+        <div class="row h-100" style="margin: 0px;padding: 0px;">
+            <div class="col-12 col-xl-4 col-md-6 col-xs-12 ml-0 pl-0 h-100">
+                <div class="card jb_vflex">
+                    <div class="card-header jb_vheader" style="height: 110px;">
+                        <span style="font-size:16px;"> 部门管理树</span>
+                       <div class="btn-group float-right">
+                           <button data-area="980,850" data-dialogbtn data-jstree-id="deptJstree_#(pageId)" data-handler="refreshJstree" data-title="新增部门" data-url="admin/dept/addInDialog" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+                           <button data-ajaxbtn data-confirm="确认初始化权限资源的顺序吗？" data-jstree-id="deptJstree_#(pageId)" data-handler="refreshJstree"
+                                   data-title="初始化排序" data-url="admin/dept/initRank" class="btn btn-outline-info btn-sm"><i
+                                   class="fa fa-sort"></i> 初始化排序
+                           </button>
+                       </div>
+                        <div class="btn-group float-right mx-1">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="JSTreeUtil.openAll('deptJstree_#(pageId)')" tooltip data-title="全部展开">展开</button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="JSTreeUtil.closeAll('deptJstree_#(pageId)')" tooltip data-title="全部闭合">闭合</button>
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <input type="text" data-with-clearbtn class="form-control" id="deptJsTreeSearchInput_#(pageId)"  placeholder="关键字搜索">
+                        </div>
+                    </div>
+                    <div class="card-body jb_vbody overflow-auto p-0">
+                        <div id="deptJstree_#(pageId)"
+                             data-jstree
+                             data-read-url="admin/dept/crudJsTreeDatas"
+                             data-search-input="deptJsTreeSearchInput_#(pageId)"
+                             data-open-level="2"
+                             data-curd="true"
+                             data-add-url="admin/dept/add/"
+                             data-edit-url="admin/dept/edit/"
+                             data-delete-url="admin/dept/delete/"
+                             data-move-url="admin/dept/move/"
+                             data-toggle-enable-menu="true"
+                             data-toggle-enable-url="admin/dept/toggleEnable/"
+                             data-dialog-area="800,850"
+                             data-dialog-handler="refreshJstree"
+                             data-target="portal"
+                             data-portalid="deptPortal_#(pageId)"
+                             data-change-handler="portalEdit"
+                        ></div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-8 col-md-6 col-xs-12 mr-0 pr-0 h-100">
+                <div class="card jb_vflex">
+                    <div class="card-header jb_vheader_card" style="font-size:16px;">部门详情-编辑表单</div>
+                    <div class="card-body jb_vbody overflow-auto">
+                        <div id="deptPortal_#(pageId)" data-jstree-id="deptJstree_#(pageId)" data-ajaxportal data-url="admin/dept/edit/"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#end
+#define js()
+<script>
+    $(function () {
+    });
+</script>
+#end

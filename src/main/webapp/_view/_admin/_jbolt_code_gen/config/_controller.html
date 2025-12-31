@@ -1,0 +1,178 @@
+<div class="card jb_vflex">
+	<div class="card-header jb_vheader_card">
+		<button onclick="ajaxSubmitForm('codeGenControllerForm')" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> 保存配置</button>
+	</div>
+	<div class="card-body jb_vbody">
+		<form class="form" onsubmit="return false;" id="codeGenControllerForm" action="admin/codegen/updateBase" method="post">
+			<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+			<div class="form-group row">
+		 		<label class="col-sm-3 col-form-label">生成到哪个Package</label>
+		 		<div class="col-sm-4">
+		 			<input type="text" data-autocomplete data-mustmatch="false" data-url="admin/codegen/javaPackageAutocomplete" data-rule="required" placeholder="请指定Controller生成到哪个Package" data-tips="请输入Controller生成到哪个Package" class="form-control" name="codeGen.controllerPackage" value="#(codeGen.controllerPackage??)" autocomplete="off" />
+		 		</div>
+			</div>
+		 	<div class="form-group row">
+		 		<label class="col-sm-3 col-form-label">Controller Name</label>
+		 		<div class="col-sm-4">
+		 			<input type="text" data-rule="required"  data-tips="请输入Controller Name" class="form-control" name="codeGen.controllerName" value="#(codeGen.controllerName??)" autocomplete="off" />
+		 		</div>
+		 	</div>
+		 	<div class="form-group row">
+		 		<label class="col-sm-3 col-form-label">Controller Path</label>
+		 		<div class="col-sm-4">
+		 			<input type="text" data-rule="required"  data-tips="请输入Controller Path" class="form-control" name="codeGen.controllerPath" value="#(codeGen.controllerPath??)" autocomplete="off" />
+		 		</div>
+		 	</div>
+
+			<div class="form-group row"
+				 data-radio
+				 data-rule="radio"
+				 data-value="#(codeGen.isGenOptionsAction?? 'false')"
+				 data-name="codeGen.isGenOptionsAction"
+				 data-handler="changeIsGenOptionsAction_#(pageId)"
+				 data-default="false">
+				<label class="col-sm-3 col-form-label is_required" >是否生成options接口</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isGenOptionsAction_true" type="radio" name="codeGen.isGenOptionsAction"   value="true"/>
+						<label for="r_isGenOptionsAction_true">生成</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isGenOptionsAction_false" type="radio" name="codeGen.isGenOptionsAction"   value="false"/>
+						<label for="r_isGenOptionsAction_false">不生成</label>
+					</div>
+				</div>
+			</div>
+			<fieldset class="options_setting_box d-none">
+				<hr/>
+			<div class="form-group row">
+				<label class="col-6 col-form-label font-weight-bold text-center" style="font-size: 20px;">options Action生成配置</label>
+			</div>
+			<div class="form-group row "
+				 data-radio
+				 data-rule="radio"
+				 data-value="#(codeGen.isReturnOptionType?? 'false')"
+				 data-name="codeGen.isReturnOptionType"
+				 data-default="false"
+				 data-handler="changeIsReturnOptionType_#(pageId)">
+				<label class="col-sm-3 col-form-label is_required" >options接口返回值</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isReturnOptionType_true" type="radio" name="codeGen.isReturnOptionType"   value="true"/>
+						<label for="r_isReturnOptionType_true">Option接口类型</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isReturnOptionType_false" type="radio" name="codeGen.isReturnOptionType"   value="false"/>
+						<label for="r_isReturnOptionType_false">Model List类型</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group row option_column_setting_box d-none">
+				<label class="col-sm-3 col-form-label">Option的Text用哪一列</label>
+				<div class="col-sm-4">
+					<input type="text"
+						   id="optionsTextColumn_autocomplete_#(pageId)"
+						   data-rule="required"
+						   data-notnull="false"
+						   data-width="500"
+						   data-autocomplete
+						   data-hidden-input="optionsTextColumnInput_#(pageId)"
+						   data-url="admin/codegen/optionsTextColumns/#(codeGenId?? 0)"
+						   data-para-name="column"
+						   data-text-attr="colName"
+						   data-value-attr="colName"
+						   data-column-attr="colName-120-left,remark-200-center,javaTypeName"
+						   placeholder="请指定Options的Text使用哪个字段"
+						   class="form-control"
+						   name="codeGen.optionsTextColumn"
+						   value="#(codeGen.optionsTextColumn??)"
+						   autocomplete="off" />
+					<input type="hidden" data-para-name="column" id="optionsTextColumnInput_#(pageId)" />
+				</div>
+			</div>
+			<div class="form-group row option_column_setting_box d-none">
+				<label class="col-sm-3 col-form-label">Option的Value用哪一列</label>
+				<div class="col-sm-4">
+					<input type="text"
+						   id="optionsValueColumn_autocomplete_#(pageId)"
+						   data-rule="required"
+						   data-notnull="false"
+						   data-width="500"
+						   data-autocomplete
+						   data-hidden-input="optionsValueColumnInput_#(pageId)"
+						   data-url="admin/codegen/optionsValueColumns/#(codeGenId?? 0)"
+						   data-para-name="column"
+						   data-text-attr="colName"
+						   data-value-attr="colName"
+						   data-column-attr="colName-120-left,remark-200-center,javaTypeName"
+						   placeholder="请指定Options的Value使用哪个字段"
+						   class="form-control"
+						   name="codeGen.optionsValueColumn"
+						   value="#(codeGen.optionsValueColumn??)"
+						   autocomplete="off" />
+					<input type="hidden" data-para-name="column" id="optionsValueColumnInput_#(pageId)" />
+				</div>
+			</div>
+				<hr/>
+			</fieldset>
+			<div class="form-group row"
+				 data-radio
+				 data-rule="radio"
+				 data-value="#(codeGen.isGenAutocompleteAction?? 'false')"
+				 data-name="codeGen.isGenAutocompleteAction"
+				 data-handler="changeIsGenAutocompleteAction_#(pageId)"
+				 data-default="false">
+				<label class="col-sm-3 col-form-label is_required" >是否生成Autocomplete接口</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isGenAutocompleteAction_true" type="radio" name="codeGen.isGenAutocompleteAction"   value="true"/>
+						<label for="r_isGenAutocompleteAction_true">生成</label>
+					</div>
+
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_isGenAutocompleteAction_false" type="radio" name="codeGen.isGenAutocompleteAction"   value="false"/>
+						<label for="r_isGenAutocompleteAction_false">不生成</label>
+					</div>
+				</div>
+			</div>
+
+			<fieldset class="autocomplete_column_setting_box d-none">
+				<hr/>
+			<div class="form-group row">
+				<label class="col-6 col-form-label font-weight-bold text-center" style="font-size: 20px;">autocompleteDatas Action生成配置</label>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-3 col-form-label">Autocomplete显示几条数据</label>
+				<div class="col-sm-4">
+					<input type="text" data-rule="pnumber" data-notnull="false"  data-tips="请输入Autocomplete显示数量" class="form-control" name="codeGen.autocompleteLimit" value="#(codeGen.autocompleteLimit?? 20)" autocomplete="off" />
+				</div>
+			</div>
+
+			<div class="form-group row autocomplete_column_setting_box d-none">
+				<label class="col-sm-3 col-form-label">Autocomplete搜索匹配字段</label>
+				<div class="col-sm-10">
+					<select class="form-control" id="autocompleteColumnsSelect"
+							data-autoload
+							data-rule="select"
+							data-select-type="select2"
+							multiple="multiple"
+							data-tips="请选择关键词匹配列"
+							data-url="admin/codegen/autocompleteColumns/#(codeGen.id)"
+							data-text=可多选"
+							data-text-attr="colName,remark"
+							data-value-attr="colName"
+							data-value=""
+							data-setvalueto="autocompleteMatchColumns"
+							data-select="#(codeGen.autocompleteMatchColumns??)">
+					</select>
+				</div>
+			</div>
+			<input type="hidden" id="autocompleteMatchColumns" name="codeGen.autocompleteMatchColumns" value="#(codeGen.autocompleteMatchColumns??)"/>
+				<hr/>
+			</fieldset>
+		</form>
+	</div>
+</div>

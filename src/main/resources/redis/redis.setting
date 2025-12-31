@@ -1,0 +1,43 @@
+#redis 开发环境 配置文件 支持配置N个服务端 每个为一组
+
+#默认-主服务端 名字不要修改
+[jbolt_cache]
+enable      = false
+host        = 127.0.0.1
+port        = 6379
+password    = jbolt
+timeout     = 2000
+#database   = 0
+#clientName = clientname
+#过期时间 单位 秒 -1为不设置过期
+expires     = -1
+maxTotal    = 300
+maxIdle     = 100
+minIdle     = 5
+maxWaitMillis = -1
+blockWhenExhausted = true
+testWhileIdle = true
+timeBetweenEvictionRunsMillis = 30000
+minEvictableIdleTimeMillis = 30000
+
+
+
+#扩展-电商服务端
+[mall]
+enable      = false
+host        = 127.0.0.1
+port        = 6379
+password    = jbolt
+timeout     = 2000
+#database   = 0
+#clientName = clientname
+#过期时间 单位 秒 -1为不设置过期
+expires     = -1
+maxTotal    = 300
+maxIdle     = 100
+minIdle     = 5
+maxWaitMillis = -1
+blockWhenExhausted = true
+testWhileIdle = true
+timeBetweenEvictionRunsMillis = 30000
+minEvictableIdleTimeMillis = 30000

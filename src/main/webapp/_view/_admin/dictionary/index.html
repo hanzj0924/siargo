@@ -1,0 +1,57 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+		<div class="col-sm-auto"><h1><i class="jbicon2 jbi-container"></i> 字典管理</h1></div>
+		<div class="col"></div>
+		<div class="col-sm-auto">
+		<button class="btn btn-outline-primary btn-sm" data-ajaxbtn data-url="admin/dictionary/checkandinit" data-handler="refreshPjaxContainer" data-confirm="确认检测系统默认内置数据"><i class="fa fa-eject"></i> 检测并初始化</button>
+		</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<div class="row">
+<div class="col-12 col-xl-5 col-lg-6 col-md-6">
+<div class="card mb-3">
+  <div class="card-header">
+    数据分类
+    <a href="admin/dictionarytype/add" tooltip class="pull-right" data-handler="refreshPortal" data-portal="dictionaryTypePortal" data-dialogbtn data-area="500,400" data-title="添加新数据分类"><i class="fa fa-plus text-primary"></i></a>
+  </div>
+   <div class="card-body overflow-auto jbolt_table_fill_box" style="height: calc(100vh - 220px);">
+    #ajaxPortal("/admin/dictionarytype/mgr","dictionaryTypePortal",true)
+    </div>
+</div>
+</div>
+<div  class="col-12 col-xl-7 col-lg-6 col-md-6">
+<div class="card" >
+  <div class="card-header">基础数据项 : <span id="selectDicTypeName" class="text-danger">未选</span></div>
+<div class="card-body overflow-auto jbolt_table_fill_box" style="height: calc(100vh - 220px);">
+
+ #ajaxPortal("/admin/dictionary/mgr","dictionaryPortal",true)
+ </div>
+ </div>
+</div>
+</div>
+</div>
+</div>
+#end
+
+#define js()
+<script>
+	function readDictionarys(type,typeId,title){
+		$(".dictionaryTypes tr.active").removeClass("active");
+		$(type).addClass("active");
+		  $("#selectDicTypeName").text(title);
+		  $("#dictionaryPortal").ajaxPortal(true,"/admin/dictionary/mgr/"+typeId,true);
+	}
+
+	function refreshAllPortal(){
+		LayerMsgBox.load(3,300);
+		$("#dictionaryTypePortal").ajaxPortal(true);
+		$("#dictionaryPortal").ajaxPortal(true);
+		}
+$(function(){
+})
+</script>
+#end

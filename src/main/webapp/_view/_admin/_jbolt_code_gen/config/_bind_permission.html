@@ -1,0 +1,26 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page">
+    <div class="jbolt_page_content">
+        <form onsubmit="return false;" id="codeGenBindPermissionForm" action="admin/codegen/bindPermission" method="post">
+            <input type="hidden" name="codeGenId" value="#(codeGenId??)" />
+            <div class="form-group row">
+                <label class="col-form-label col-sm-3">绑定权限资源</label>
+                <div class="col-md-8 col-lg-4 col-sm-9">
+                    <select  data-refresh="true" data-select-type="select2" class="form-control" name="permissionId"  data-text="=请选择=" data-value="0"  data-autoload data-url="admin/permission/options"></select>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+#end
+
+#define js()
+<script>
+    function afterFormSubmit(ret,callback){
+        parent.AjaxPortalUtil.refresh("codeGenPermissionPortal");
+        callback();
+    }
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="codeGenBindPermissionForm")
+#end

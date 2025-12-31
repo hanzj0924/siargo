@@ -1,0 +1,65 @@
+#define adminIFrameLayout()
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="#(basepath??)" />
+		<meta charset="utf-8" />
+		 #if(need_always_https)
+	    	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+		 #end
+		<meta name="renderer" content="webkit">
+		<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+		#@fontcss?()
+		#@bootstrapcss?()
+		<!-- jstree树形组件css资源 如果系统不使用jstree 可以注释掉这个地方 -->
+		#@jstreecss?()
+		<!-- Select2组件css资源 如果系统不使用select2 可以注释掉这个地方 -->
+		#@select2css?()
+		<!-- bootstrap-select组件css资源 如果系统不使用bootstrap-select 可以注释掉这个地方 -->
+		#@bootstrapselectcss?()
+		<!-- 系统后台管理核心封装CSS 与Bootstrap-->
+		#@maincss?()
+		<!-- 系统后台本项目特殊使用封装CSS -->
+		#@minecss?()
+		<!-- css动画 -->
+		#@animatecss?()
+		#@jqueryjs?()
+		<script type="text/javascript">
+		var needPjax=false;//默认是否pjax加载
+		var autoShowRequiredLabelStar=true;//默认是否自动处理表单中的必填项的红星样式
+		</script>
+
+		<style type="text/css">
+		.note-editable p{
+		margin-bottom: 0px;
+		}
+ 		 </style>
+		#@css?()
+	</head>
+	<body ontouchstart>
+		<span class="d-none" id="JBOLT_ASSETS_VERSION">#(JBoltConfig.ASSETS_VERSION)</span>
+		<span class="d-none" id="JBOLT_BASE_UPLOAD_PATH_PRE">#(JBOLT_BASE_UPLOAD_PATH_PRE??)</span>
+		<span class="d-none" id="JBOLT_AUTO_LOCK_SCREEN_SECONDS">#(jboltAutoLockScreenSeconds??)</span>
+		<span class="d-none" id="JBOLT_TAB_KEEP_AFTER_RELOAD">#(jboltTabKeepAfterReload??)</span>
+		<span class="d-none" id="JBOLT_GLOBAL_UPLOAD_TO">#(JBOLT_GLOBAL_UPLOAD_TO?? 'local')</span>
+		#@main?()
+		#include("__jbolttable_filterbox.html")
+		#@bootstrapjs?()
+		#@jboltmaindialogjslib?()
+		<!-- jstree树形组件js资源 如果系统不使用jstree树形组件 可以注释掉这个地方 -->
+		#@jstreejs?()
+		<!-- select2组件js -->
+		#@select2js?()
+		<!-- bootstrap-select组件js -->
+		#@bootstrapselectjs?()
+		#@jslib?()
+		<!-- 系统后台核心JS封装库 -->
+		#@mainjs?()
+		<!-- 系统后台本项目特殊使用封装JS -->
+		#@minejs?()
+		#@js?()
+	</body>
+</html>
+#end

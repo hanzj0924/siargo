@@ -1,0 +1,216 @@
+#setLocal(modelNameL=firstCharToLowerCase(modelName))
+#setLocal(isCRUD = mainLogicBean.isCRUD)
+#[[#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+]]#
+<div class="jbolt_page" data-key="#[[#]]#(pmkey)" #if(mainLogicBean.isMasterSlave) id="#(modelNameL)_mspage_#[[#(pageId)]]#" #end>
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1>#(mainLogicBean.pageTitle?? '页面标题')</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="#(modelNameL)Form_#[[#(pageId)]]#"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="#(keywords??)" />
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	#if(isCRUD && !mainLogicBean.needToolbar)
+	#if(needSort)
+	<div class="btn-group" role="group" aria-label="btn-group">
+		<button data-dialogbtn data-area="#(mainLogicBean.dialogArea?? '800,700')" data-handler="refreshJBoltTable" data-title="新增#(mainLogicBean.dataName?? '数据')"  data-url="#(mainLogicBean.realControllerKey)/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+		<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="#(mainLogicBean.realControllerKey)/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+	</div>
+	#else
+	<button data-dialogbtn data-area="#(mainLogicBean.dialogArea?? '800,700')" data-handler="refreshJBoltTable" data-title="新增#(mainLogicBean.dataName?? '数据')"  data-url="#(mainLogicBean.realControllerKey)/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+	#end
+	#end
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+#if(mainLogicBean.isMasterSlave)
+<div class="jbolttable_master_slave_box">
+<div class="split master">
+#end
+<!-- JBoltTable的数据模板定义-->
+<textarea class="jb_tpl_box" id="#(modelNameL)Rowtpl_#[[#(pageId)]]#">
+{@each datas as data,index}
+<tr data-id="${data.#(mainLogicBean.primaryKeyAttr?? 'id')}" #if(mainLogicBean.isMasterSlave)onclick="masterTableTrTriggerShowSlave(this,'${data.id}')"#end>
+<td>${pageNumber,pageSize,index | rownum}</td>
+#for(th:ths)
+#if(th.type=="Boolean")
+#if(isCRUD)
+<td><img data-switchbtn data-confirm="确定切换#(th.remark?? th.name)？" data-value="${data.#(th.name)}"  data-handler="refreshJBoltTable"  data-url="#(mainLogicBean.realControllerKey)/toggle#(firstCharToUpperCase(th.name))/${data.id}"/></td>
+#else
+<td><img data-switchbtn data-disabled="true" data-disabled-msg="抱歉，您只能查看结果，无法操作修改"  data-value="${data.#(th.name)}"/></td>
+#end
+#else
+<td>${data.#(th.name)}</td>
+#end
+#end
+#if(isCRUD && (mainLogicBean.needTrEditBtn || mainLogicBean.needTrDeleteBtn || needSort))
+<td>
+	#if(mainLogicBean.needTrEditBtn)
+	<a href="#(mainLogicBean.realControllerKey)/edit/${data.id}" data-area="#(mainLogicBean.dialogArea?? '800,700')"  tooltip data-title="修改"  data-handler="refreshJBoltTable" data-dialog-title="修改#(mainLogicBean.dataName?? '数据')" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+    #end
+	#if(mainLogicBean.needTrDeleteBtn)
+    <a href="#(mainLogicBean.realControllerKey)/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="refreshJBoltTable" data-confirm="确定删除此数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+    #end
+    #if(needSort)
+    <a href="#(mainLogicBean.realControllerKey)/up/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+    <a href="#(mainLogicBean.realControllerKey)/down/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+    #end
+</td>
+#end
+</tr>
+{@/each}
+</textarea>
+#if(mainLogicBean.needHeadBox)
+<!-- headbox -->
+<div class="jbolt_table_headbox" id="#(modelNameL)_headbox_#[[#(pageId)]]#">
+	 head box 内容区域 
+</div>
+#end
+
+#if(mainLogicBean.needToolbar)
+<!-- 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="#(modelNameL)_toolbar_#[[#(pageId)]]#">
+	<div class="btn-group" role="group" aria-label="btn-group">
+#if(isCRUD)
+		<button data-openpage="dialog" data-area="#(mainLogicBean.dialogArea?? '800,700')"  data-handler="jboltTablePageToFirst" data-title="新增#(mainLogicBean.dataName?? '数据')"  data-url="#(mainLogicBean.realControllerKey)/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+		<button data-openpage="dialog" data-area="#(mainLogicBean.dialogArea?? '800,700')"  data-handler="refreshJBoltTable" data-title="修改#(mainLogicBean.dataName?? '数据')" data-check-handler="jboltTableGetCheckedId" data-url="#(mainLogicBean.realControllerKey)/edit/" class="btn btn-outline-info btn-sm"><i class="fa fa-edit"></i> 修改</button>
+		<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr" data-check-handler="jboltTableGetCheckedIds" data-url="#(mainLogicBean.realControllerKey)/deleteByIds?ids=" data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm" ><i class="fa fa-trash"></i> 删除</button>
+#if(needSort)		
+		<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="jboltTablePageToFirst" data-title="初始化排序" data-url="#(mainLogicBean.realControllerKey)/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+#end
+#end
+		<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+	</div>
+	
+	<div class="clearfix"></div>
+</div>
+#end
+
+#if(mainLogicBean.needLeftBox)
+<!-- lefetbox -->
+<div class="jbolt_table_leftbox" id="#(modelNameL)_leftbox_#[[#(pageId)]]#">
+	<div class="jb_header"><i class="fa fa-tree"></i> <span>table leftBox</span></div>
+	<div class="jb_body">
+		left box 内容区域
+	</div>
+	<!--
+	<div class="jb_footer text-center">
+		left box footer区域
+	</div>
+	-->
+</div>
+#end
+
+#if(mainLogicBean.needRightBox)
+<!-- rightbox -->
+<div class="jbolt_table_rightbox" id="#(modelNameL)_rightbox_#[[#(pageId)]]#">
+	<div class="jb_header"><i class="fa fa-tree"></i> <span>table rightBox</span></div>
+	<div class="jb_body">
+		right box 内容区域
+	</div>
+	<!--
+	<div class="jb_footer text-center">
+		right box footer区域
+	</div>
+	-->
+</div>
+#end
+
+<table class="jbolt_table jbolt_main_table table-center"
+#if(!mainLogicBean.isMasterSlave)
+data-jbolttable
+#end
+data-height="#(mainLogicBean.isMasterSlave?'fill_box':'fill')"
+data-ajax="true"
+data-url="#(mainLogicBean.realControllerKey)/datas"
+data-column-resize="true"
+#if(isCRUD && mainLogicBean.needToolbar)
+data-column-prepend="1:checkbox"
+#end
+data-conditions-form="#(modelNameL)Form_#[[#(pageId)]]#"
+data-rowtpl="#(modelNameL)Rowtpl_#[[#(pageId)]]#"
+#if(mainLogicBean.needPaginate)data-page="#(modelNameL)Page_#[[#(pageId)]]#"#end
+#if(mainLogicBean.needToolbar)data-toolbar="#(modelNameL)_toolbar_#[[#(pageId)]]#"#end
+#if(mainLogicBean.needLeftBox)data-leftbox="#(modelNameL)_leftbox_#[[#(pageId)]]#"#end
+#if(mainLogicBean.needRightBox)data-rightbox="#(modelNameL)_rightbox_#[[#(pageId)]]#"#end
+#if(mainLogicBean.needHeadBox)data-headbox="#(modelNameL)_headbox_#[[#(pageId)]]#"#end
+#if(mainLogicBean.needFootBox)data-footbox="#(modelNameL)_footbox_#[[#(pageId)]]#"#end
+#if(isCRUD && mainLogicBean.needToolbar)
+data-fixed-columns-left="1,2,3"
+#else
+data-fixed-columns-left="1,2"
+#end
+#if(isCRUD && (mainLogicBean.needTrEditBtn || mainLogicBean.needTrDeleteBtn || needSort))
+data-fixed-columns-right="-1"
+#end
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	#for(th:ths)
+	#if(for.index==0)
+	<th data-min-width="150" data-column="#(th.columnName)">#(th.remark?? th.name)</th>
+	#else
+	<th data-width="150" data-column="#(th.columnName)">#(th.remark?? th.name)</th>
+	#end
+	#end
+	#if(isCRUD && (mainLogicBean.needTrEditBtn || mainLogicBean.needTrDeleteBtn || needSort))
+	<th data-width="#(mainLogicBean.needToolbar?100:(needSort?'170':'150'))">操作</th>
+	#end
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+#if(mainLogicBean.needFootBox)
+<!-- footbox -->
+<div class="jbolt_table_footbox" id="#(modelNameL)_footbox_#[[#(pageId)]]#">
+	  foot box 内容区域 
+</div>
+#end
+
+#if(mainLogicBean.isMasterSlave)
+</div>
+<!-- 从表区域 -->
+<div class="split slave">
+<div class="jbolt_tab_view">
+	<div class="jbolt_tab_links">
+		<a class="jbolt_tab_link active"  href="##(modelNameL)_tbc1_#[[#(pageId)]]#">从表一</a>
+		<a class="jbolt_tab_link"  href="##(modelNameL)_tbc2_#[[#(pageId)]]#">从表二</a>
+	</div>
+	<div class="jbolt_tab_contents">
+	  <div class="jbolt_tab_content active" id="#(modelNameL)_tbc1_#[[#(pageId)]]#">
+	  从表一内容
+	  </div>
+	  <div class="jbolt_tab_content" id="#(modelNameL)_tbc2_#[[#(pageId)]]#">
+	  从表二内容
+	  </div>
+	</div>
+</div>
+  
+</div>
+#end
+	
+</div>
+</div>
+#[[#end]]#
+
+#if(mainLogicBean.isMasterSlave)
+#[[#define js()]]#
+<script type="text/javascript">
+	$(function(){
+		MasterSlaveUtil.initJBoltTable("#(modelNameL)_mspage_#[[#(pageId)]]#");
+	});
+</script>
+#[[#end]]#
+#end

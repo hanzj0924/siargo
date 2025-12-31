@@ -1,0 +1,24 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page">
+<div class="jbolt_page_title mb-3">
+<div class="row">
+<div class="col-md-auto">
+#if(!JboltWithTabs)
+<a id="backToSysNoticeBtn_#(pageId)" class="btn btn-secondary btn-sm mr-1 float-left" tooltip data-title="返回通知管理" data-pjax href="admin/sysnotice"><i class="fa fa-chevron-left"></i></a>
+#end
+</div>
+<div class="col text-center">
+<h1 class="font-weight-bolder"><i class="jbicon2 jbi-sound"></i> 修改通知</h1>
+</div>
+<div class="col-md-auto">
+<button class="btn btn-primary" onclick="submitSysNoticeForm_#(pageId)()"><i class="fa fa-check"></i> 确认修改</button>
+</div>
+</div>
+</div>
+<div class="jbolt_page_content">
+#include("_form.html",action="admin/sysnotice/update")
+</div>
+</div>
+#end

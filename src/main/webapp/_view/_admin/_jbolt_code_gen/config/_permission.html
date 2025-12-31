@@ -1,0 +1,87 @@
+<div class="card jb_vflex">
+	<div class="card-header jb_vheader_card">
+		<button class="btn btn-outline-primary" onclick="autoSetCodeGenPermissionInfo()"><i class="fa fa-cogs"></i> 自动设置菜单</button>
+		<button onclick="submitThisForm()" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> 保存配置</button>
+		<button class="btn btn-info btn-sm" data-openpage="dialog" data-area="800,400" data-title="绑定已存在的权限" data-url="admin/codegen/initBindPermission/#(codeGen.id)"><i class="fa fa-plus"></i> 绑定一个已存在权限</button>
+		<button class="btn btn-danger btn-sm" data-success-time="300" data-ajaxbtn data-url="admin/codegen/unbindPermission/#(codeGen.id)" data-handler="unbindPermissionHandler" data-confirm="确认清空已绑定权限菜单？"><i class="fa fa-remove"></i> 解绑权限</button>
+		<a class="btn btn-success btn-sm" data-openpage="dialog" data-target="parent" data-area="100%,100%" data-fs="true" data-url="admin/permission" data-btn="close"><i class="fa fa-cogs"></i>系统权限资源管理</a>
+		<a class="btn btn-info btn-sm" data-openpage="ajaxportal" data-portalid="codeGenPermissionPortal" data-url="admin/codegen/permissionPortal/#(codeGen.id)"><i class="fa fa-refresh"></i>刷新</a>
+	</div>
+	<div class="card-body jb_vbody">
+		<div class="row">
+			<div class="col-7">
+				<div data-ajaxportal id="codeGenPermissionPortal" data-url="admin/codegen/permissionPortal/#(codeGen.id)"></div>
+			</div>
+			<div class="col-5">
+				<form class="form" onsubmit="return false;" id="codeGenPermissionForm" action="admin/codegen/updateBase" method="post">
+					<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+					<input type="hidden" name="codeGen.permissionId" value="#(codeGen.permissionId??)" autocomplete="off" />
+					<div class="form-group row">
+					<label class="col-sm-3 col-form-label">配置顶部导航</label>
+					<div class="col-md-6">
+					<select class="form-control"
+						name="codeGen.topnavId" 
+						data-autoload  
+						data-refresh="true"
+						data-url="admin/topnav/options"  
+						data-text="=请选择=" 
+						data-value="" 
+						data-select="#(codeGen.topnavId??)">
+					</select>
+					</div>
+					<div class="col-auto">
+		       			<a class="btn btn-danger btn-sm mt-1" data-btn="close" data-openpage="dialog" data-target="parent" data-area="100%,100%" data-fs="true" href="admin/topnav" tooltip data-title="维护顶部导航"><i class="fa fa-cogs"></i></a>
+		       		</div>
+					</div>
+					
+					
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">配置可访问角色</label>
+						<div class="col-md-6">
+							<select class="form-control"
+								data-autoload
+								data-refresh="true"
+								data-select-type="select2"
+								multiple="multiple"
+								data-url="admin/role/options"
+								data-text="=请选择角色[可多选]=" 
+								data-value="" 
+								data-setvalueto="userRoles"
+								data-select="#(codeGen.roles??)">
+							</select>
+						</div>
+						<div class="col-auto">
+			       			<a class="btn btn-danger btn-sm mt-1" data-btn="close" data-openpage="dialog" data-target="parent" data-area="100%,100%" data-fs="true" href="admin/role" tooltip data-title="维护系统角色"><i class="fa fa-cogs"></i></a>
+			       		</div>
+					</div>
+					<input type="hidden" id="userRoles" name="codeGen.roles" value="#(codeGen.roles??)"/>
+				</form>
+			</div>
+		</div>
+		
+	</div>
+</div>
+<script>
+	//自动设置permission
+	function autoSetCodeGenPermissionInfo(){
+		LayerMsgBox.confirm("确定自动处理权限菜单信息？",function(){
+			var pageTitle= $("input[name='codeGen.indexHtmlPageTitle']").val();
+			if(pageTitle){
+				$("#permissionTitle").val(pageTitle);
+			}
+
+			var controllerPath= $("input[name='codeGen.controllerPath']").val();
+			if(controllerPath){
+				var url = controllerPath;
+				if(controllerPath.charAt(0)!='/'){
+					url = "/"+controllerPath;
+				}
+				$("input[name='permission.url']").val(url);
+				if(controllerPath.charAt(0)=='/'){
+					controllerPath=controllerPath.substring(1);
+				}
+				$("input[name='permission.permissionKey']").val(controllerPath.replaceAll("/","_").toUpperCase());
+			}
+		});
+	}
+</script>

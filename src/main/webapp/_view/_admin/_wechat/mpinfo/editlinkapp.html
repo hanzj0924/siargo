@@ -1,0 +1,66 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<form onsubmit="return false;" id="wechatMpinfoLinkAppForm" action="admin/wechat/mpinfo/submitLinkApp" method="post">
+	<input type="hidden" name="mpId" value="#(wechatMpinfo.id)" />
+	<div class="row">
+	<div class="col-md-6 col-12">
+		<div class="card">
+		<div class="card-header">公众平台</div>
+		<div class="card-body">
+			<div class="row">
+				<div class="col-auto">
+				<img class="j_tablelist_logo" data-photobtn tooltip data-title="点击查看大图" src="#realImage(wechatMpinfo.logo??)" onerror="this.src='assets/img/uploadimg.png'"/>
+				</div>
+				<div class="col">
+				 	<h5 class="card-title">#(wechatMpinfo.name??)</h5>
+					<label class="badge badge-primary">#(wechatMpinfo.typeName??)</label>
+					<label class="badge badge-info">#(wechatMpinfo.subjectTypeName??)</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+		#if(application)
+		<div class="card mt-2">
+		      <div class="card-header">已关联应用</div>
+		      <div class="card-body">
+					<h5 class="card-title">#(application.name??)</h5>
+					<label class="badge badge-primary">#(application.typeName??)</label>
+	         </div>
+		</div>
+		#end
+	</div>
+	<div class="col-md-6  col-12">
+		<div class="card mt-md-0 mt-1">
+	    <div class="card-header">设置关联应用</div>
+	   <div class="card-body">
+				<input type="text" autocomplete="off" data-autocomplete data-column-attr="name-60%,typeName-40%"  data-url="admin/wechat/mpinfo/apps?type=#(wechatMpinfo.type)"  data-hiddeninput="linkAppId" class="form-control"  placeholder="请选择应用" maxlength="40" data-rule="required" data-tips="请选择应用" value="#(application.name??)">
+			    <input type="hidden" autocomplete="off" id="linkAppId" data-rule="required" data-tips="请选择应用"  name="appId" value="#(application.id??)" />
+	    </div>
+		</div>
+	</div>
+</div>
+</form>
+</div>
+</div>
+#end
+
+#define js()
+<script>
+$(function(){
+	addParentLayerDialogBtn("解除关联应用","lay_danger",function(){
+		LayerMsgBox.confirm("确认解除此公众平台绑定的应用吗?",function(){
+			LayerMsgBox.loading("执行中...",10000);
+			Ajax.get("admin/wechat/mpinfo/removeLinkApp/#(wechatMpinfo.id??)",function(res){
+					LayerMsgBox.success("操作成功",500,function(){
+						parent.refreshPjaxContainer();
+					});
+				});
+			})
+	});
+});
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="wechatMpinfoLinkAppForm")
+#end

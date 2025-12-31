@@ -1,0 +1,94 @@
+<div class="row h-100 mx-0">
+	<div class="col-4 h-100">
+		<div class="card jb_vflex">
+			<div class="card-header jb_vheader_card"><i class="fa fa-cogs mr-1"></i>表单配置
+			<button onclick="ajaxSubmitForm('codeGenFormForm',function(res){AjaxPortalUtil.refresh('#codegen_form_preview_portal_#(pageId)');})" class="btn btn-primary btn-sm float-right"><i class="fa fa-save"></i> 保存配置</button>
+			</div>
+			<div class="card-body jb_vbody">
+				<form class="form" onsubmit="return false;" id="codeGenFormForm" action="admin/codegen/updateBase" method="post">
+					<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+					<div class="form-group row">
+				 		<label class="col-sm-3 col-form-label">分几列</label>
+				 		<div class="col">
+				 			<input type="number"  min="0" max="9" maxlength="1" data-rule="pint" placeholder="请输入表单分几列"  class="form-control" name="codeGen.formColumnSize" value="#(codeGen.formColumnSize?? 1)" autocomplete="off" />
+				 		</div>
+					</div>
+					<div class="form-group row">
+				 		<label class="col-sm-3 col-form-label">列比例值</label>
+				 		<div class="col">
+				 			<input type="text" maxlength="20" data-rule="proportion_multi;sum=12" data-notnull="false" placeholder="例如: 3:9 总和必须等于12"  class="form-control" name="codeGen.formColumnProportion" value="#(codeGen.formColumnProportion??)" autocomplete="off" />
+				 			<small class="text-danger">例如: 3:9 总和必须等于12</small>
+				 		</div>
+					</div>
+					
+					<div class="form-group row" 
+							data-radio 
+							data-rule="radio"  
+							data-value="#(codeGen.formColumnDirection?? 'v')" 
+							data-name="codeGen.formColumnDirection" 
+							data-default="v">
+							<label class="col-sm-3 col-form-label is_required" >属性方向</label>
+							<div class="col"  style="padding-top: 1px;">
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_formColumnDirection_v" type="radio" name="codeGen.formColumnDirection"   value="v"/>
+									<label for="r_formColumnDirection_v">纵向</label>
+								</div>
+								
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_formColumnDirection_h" type="radio" name="codeGen.formColumnDirection"   value="h"/>
+									<label for="r_formColumnDirection_h">横向</label>
+								</div>
+							</div>
+				 	</div>
+					<div class="form-group row" 
+							data-radio 
+							data-rule="radio"  
+							data-value="#(codeGen.isFormGroupRow?? 'true')" 
+							data-name="codeGen.isFormGroupRow" 
+							data-default="true"
+							data-handler="changeIsFormGroupRow_#(pageId)">
+							<label class="col-sm-3 col-form-label is_required" >组件风格</label>
+							<div class="col"  style="padding-top: 1px;">
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isFormGroupRow_true" type="radio" name="codeGen.isFormGroupRow"   value="true"/>
+									<label for="r_isFormGroupRow_true">左右结构</label>
+								</div>
+								
+								<div class="radio radio-primary  radio-inline">
+									<input  id="r_isFormGroupRow_false" type="radio" name="codeGen.isFormGroupRow"   value="false"/>
+									<label for="r_isFormGroupRow_false">上下结构</label>
+								</div>
+							</div>
+				 	</div>
+				 	<div class="form-group row formGroupProportion_box">
+				 		<label class="col-sm-3 col-form-label">组件比例</label>
+				 		<div class="col">
+				 			<input type="text" maxlength="6"  data-rule="proportion;sum<=12" data-notnull="false"  placeholder="例如: 2:10 总和必须小于等于12"  class="form-control" name="codeGen.formGroupProportion" value="#(codeGen.formGroupProportion??)" autocomplete="off" />
+				 			<small class="text-danger">例如: 2:10 总和必须小于等于12</small>
+				 		</div>
+					</div>
+				</form>
+				
+			</div>
+		</div>
+	</div>
+	<div class="col-8 h-100">
+		<div class="card jb_vflex">
+			<div class="card-header jb_vheader_card">
+			<span class="d-inline-block mr-5"><i class="fa fa-eye mr-1"></i>表单预览</span>
+			<button onclick="FormChecker.check('codeGenFormPreviewForm')" class="btn btn-outline-danger btn-sm" ><i class="fa fa-cog mr-1"></i>测试表单校验规则</button>
+			<a data-url="admin/codegen/formPortal/#(codeGen.id)" data-openpage="ajaxportal" data-portalid="codegen_form_preview_portal_#(pageId)" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh mr-1"></i>刷新预览区</a> 
+			<button data-ajaxbtn data-confirm="确认初始化表单元素顺序？" data-handler="refreshPortal" data-portalid="codegen_form_preview_portal_#(pageId)" data-url="admin/codegen/initSortRankInform/#(codeGen.id)" class="btn btn-outline-success btn-sm" ><i class="fa fa-sort mr-1"></i>初始化排序</button>
+			<div class="btn-group btn-group-sm">
+				<button id="isFormEditModeBtn_true" class="btn btn-secondary" onclick="changeFormPreviewMode_#(pageId)(true)" tooltip data-title="编辑模式"><i class="fa fa-edit"></i></button>
+				<button id="isFormEditModeBtn_false" class="btn btn-primary" onclick="changeFormPreviewMode_#(pageId)(false)" tooltip data-title="预览模式"><i class="fa fa-eye"></i></button>
+			</div>
+			<a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></div>
+			<div class="card-body jb_vbody">
+				<form class="form" onsubmit="return false;" id="codeGenFormPreviewForm" method="post">
+					<div data-ajaxportal data-edit-mode="false" data-codegen-id="#(codeGen.id)" data-url="admin/codegen/formPortal/#(codeGen.id)" id="codegen_form_preview_portal_#(pageId)" data-form="codeGenFormForm"></div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

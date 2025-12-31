@@ -1,0 +1,70 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title" id="jbolt_page_title_#(pageId)">
+	<div class="row">
+		<div class="col-sm-auto">
+			<h1><i class="jbicon2 jbi-team"></i> 角色管理</h1>
+				<a href="javascript:void(0)" onclick="jboltTableExpandAll(this)" class="text-primary">展开</a>|<a href="javascript:void(0)" onclick="jboltTableCollapseAll(this)"  class="text-info">闭合</a>
+		</div>
+		<div class="col"></div>
+		<div class="col-sm-auto">
+			<div class="btn-group" role="group" aria-label="btn-group">
+			<button data-area="600,420" data-dialogbtn data-handler="refreshJBoltTable" data-title="新增角色" data-url="admin/role/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+			<button onclick="jboltTableRefresh(this)" class="btn btn-outline-secondary btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="role_rowtpl_tr_#(pageId)">
+<tr data-id="${id}"  data-pid="${pid}">
+<td>${name}</td>
+<td>${sn}</td>
+<td>
+<a  tooltip  title="添加子角色"  href="admin/role/addItem/${id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="添加【${name}】的子角色" data-area="600,420" class="jbolt_table_editbtn"><i class="fa fa-plus c-info"></i></a>
+<a  tooltip  title="编辑"  href="admin/role/edit/${id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="编辑" data-area="400,300" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/role/delete/${id}" data-handler="refreshJBoltTable" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+<a  tooltip  href="admin/rolepermission/settingTree/${id}" data-dialogbtn data-scroll="yes"  data-title="为角色【${name}】设置权限" data-area="700,90%"  class="jbolt_table_btn"><i class="fa fa-cogs c-info"></i></a>
+<a  tooltip  href="admin/role/users/${id}" data-dialogbtn data-btn="close" data-scroll="yes"  data-title="角色【${name}】-用户列表" data-area="980,80%" class="jbolt_table_btn"><i class="fa fa-users c-danger"></i></a>
+</td>
+</tr>
+{@if items&&items.length>0}
+{@each items as son}
+{@include "#role_rowtpl_tr_#(pageId)",son}
+{@/each}
+{@/if}
+</script>
+<script type="text/template" id="role_rowtpl_#(pageId)">
+{@each datas as data,index}
+{# 先循环第一级}
+{@include "#role_rowtpl_tr_#(pageId)",data}
+{@/each}
+</script>
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+data-jbolttable 
+data-width="auto"
+data-ajax="true"
+data-url="admin/role/datas"
+data-treetable="all:1"
+data-rowtpl="role_rowtpl_#(pageId)"
+>
+<thead class="fw-normal">
+<tr><th data-width="400">角色</th><th data-width="200">编码</th><th data-width="150">操作</th></tr>
+</thead>
+<tbody></tbody>
+</table>	
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end
+

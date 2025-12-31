@@ -1,0 +1,13 @@
+package cn.jbolt._admin.role;
+/**
+ * 基于生成器生成
+ * 系统角色的SN
+ **/
+public enum RoleSn {
+#for(role:roles)
+    /**
+     * #(role.name)
+     */
+    #(role.sn)#if((for.first&&for.last) || for.last);#else ,#end
+#end
+}

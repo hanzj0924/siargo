@@ -1,0 +1,39 @@
+<!--left nav menu start-->
+<div class="jbolt_admin_left_navs" data-pjax>
+#set(leftMenus=JBoltPermissionCache.getCurrentUserMenus())
+#set(menuDefaultIcon=JBoltGlobalConfigCache.getSystemAdminNavMenuDefaultIcon())
+#for(l1:leftMenus)
+<nav tabindex="-1" data-topnavid="#(l1.topnavId?? 0)" class="jbolt_admin_nav  animate__animated animate__fadeIn jb_animate__faster #if(isEmpty(l1.items)) single_link #end #(hasEnableTopnav?'d-none':'') #(for.first&&l1.url?"expansion":"")" data-key="#(l1.permissionKey??)">
+#if(l1.url??)
+<a tabindex="-1" title="#(l1.title??)"  data-hasurl data-open-type="#(l1.openType?? 1)" data-open-option='#(l1.openOption??)' href="#action(l1.url??)" #if(l1.isTargetBlank) target="_blank" #end data-key="#(l1.permissionKey??)"><div class="jbolt_menu_group l1link"><i class="#(l1.icons??  menuDefaultIcon)"></i><span>#(l1.title??)</span></div></a>
+#else
+<div class="jbolt_menu_group"><i class="#(l1.icons??)"></i><span>#(l1.title??)</span><i class="jbicon jb-arrowdown title_arrow"></i></div>
+#end
+#if(notEmpty(l1.items))
+<ul class="jbolt_admin_menus animate__animated animate__fadeIn jb_animate__faster" data-level="#(l1.permissionLevel+1)">
+<h3>#(l1.title??)</h3>
+#@items(l1)
+</ul>
+#end
+</nav>
+#else
+<script type="text/javascript">
+$(function(){LayerMsgBox.alert("当前用户尚未分配任何菜单权限",2);})
+</script>
+#end
+</div>
+<!--left nav menu end-->
+
+#define items(p)
+#for(son:p.items)
+#if(notEmpty(son.items))
+<li class="has_items" data-level="#(son.permissionLevel)"><a tabindex="-1"  title="#(son.title??)"  #if(son.url??) data-hasurl data-open-type="#(son.openType?? 1)" data-open-option='#(son.openOption??)'#end href="#action(son.url??,'javascript:void(0)')" #if(son.url && son.isTargetBlank) target="_blank" #end  data-key="#(son.permissionKey??)"><i  style="left:#((son.permissionLevel-2)*15+22)px;" class="#(son.icons?? menuDefaultIcon)"></i><span style="padding-left:#((son.permissionLevel-2)*15+52)px;">#(son.title??)</span><i class="jbicon jb-arrowdown title_arrow"></i></a></li>
+<ul class="jbolt_admin_menus animate__animated animate__fadeIn jb_animate__faster" data-level="#(son.permissionLevel+1)">
+#@items(son)
+</ul>
+#else
+<li data-level="#(son.permissionLevel)"><a  tabindex="-1"  title="#(son.title??)"  #if(son.url??) data-hasurl data-open-type="#(son.openType?? 1)" data-open-option='#(son.openOption??)'#end href="#action(son.url??,'javascript:void(0)')" #if(son.url && son.isTargetBlank) target="_blank" #end  data-key="#(son.permissionKey??)"><i  style="left:#((son.permissionLevel-2)*15+22)px;" class="#(son.icons??  menuDefaultIcon)"></i><span style="padding-left:#((son.permissionLevel-2)*15+52)px;">#(son.title??)</span></a></li>
+#end
+
+#end
+#end

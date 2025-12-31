@@ -1,0 +1,48 @@
+<div class="card jb_vflex">
+	<div class="card-header jb_vheader_card">
+		<button onclick="ajaxSubmitForm('codeGenViewForm')" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> 保存配置</button>
+	</div>
+	<div class="card-body jb_vbody">
+		<form class="form" onsubmit="return false;" id="codeGenViewForm" action="admin/codegen/updateBase" method="post">
+			<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+			<div class="form-group row">
+		 		<label class="col-sm-3 col-form-label">html生成到哪个目录</label>
+		 		<div class="col-sm-4">
+		 			<input type="text" data-rule="required" placeholder="请指定html生成到哪个目录" data-tips="请指定html生成到哪个目录" class="form-control" name="codeGen.htmlViewPath" value="#(codeGen.htmlViewPath??)" autocomplete="off" />
+		 		</div>
+			</div>
+			
+			<div class="form-group row" 
+				data-radio 
+				data-rule="radio"
+				data-value="#(codeGen.viewLayout?? 'jboltLayout')" 
+				data-name="codeGen.viewLayout" 
+				data-default="jboltLayout"
+				>
+				<label class="col-sm-3 col-form-label is_required" >index页面Layout</label>
+				<div class="col"  style="padding-top: 1px;">
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_viewLayout_jboltlayout" type="radio" name="codeGen.viewLayout"   value="jboltLayout"/>
+						<label for="r_viewLayout_jboltlayout">默认自适应布局</label>
+					</div>
+					
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_viewLayout_dialoglayout" type="radio" name="codeGen.viewLayout"   value="dialogLayout"/>
+						<label for="r_viewLayout_dialoglayout">DialogLayout</label>
+					</div>
+					
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_viewLayout_iframelayout" type="radio" name="codeGen.viewLayout"   value="iframeLayout"/>
+						<label for="r_viewLayout_iframelayout">IFrameLayout</label>
+					</div>
+					
+					<div class="radio radio-primary  radio-inline">
+						<input  id="r_viewLayout_SinglePageLayout" type="radio" name="codeGen.viewLayout"   value="adminSinglePageLayout"/>
+						<label for="r_viewLayout_SinglePageLayout">SinglePageLayout</label>
+					</div>
+				</div>
+		 	</div>
+			    
+		</form>
+	</div>
+</div>

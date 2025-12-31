@@ -1,0 +1,100 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+
+<div class="jbolt_page" data-key="#(pmkey)" >
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1>待办事项管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="todoForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	<div class="btn-group" role="group" aria-label="btn-group">
+		<button data-dialogbtn data-area="980,800" data-handler="refreshJBoltTable" data-title="新增待办事项"  data-url="admin/todo/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+		<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="admin/todo/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+	</div>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="todoRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.title}</td>
+<td>${data.content}</td>
+<td>${data.createTime}</td>
+<td>${data.userId}</td>
+<td>${data.updateTime}</td>
+<td>${data.state}</td>
+<td>${data.realFinishTime}</td>
+<td>${data.needFinishTime}</td>
+<td>
+	<a href="admin/todo/edit/${data.id}" data-area="980,800"  tooltip data-title="修改"  data-handler="refreshJBoltTable" dialog-title="修改待办事项" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+    <a href="admin/todo/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="removeTr" data-confirm="确定删除此数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+    <a href="admin/todo/up/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+    <a href="admin/todo/down/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+</td>
+</tr>
+{@/each}
+</script>
+
+
+
+
+<table class="jbolt_table jbolt_main_table table_striped table-center"
+data-jbolttable
+data-height="fill"
+data-ajax="true"
+data-url="admin/todo/datas"
+data-column-resize="true"
+data-conditions-form="todoForm_#(pageId)"
+data-rowtpl="todoRowtpl_#(pageId)"
+data-page="todoPage_#(pageId)"
+
+
+
+
+
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="-1"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	<th data-min-width="150" data-column="title">标题</th>
+	<th data-width="150" data-column="content">详情内容</th>
+	<th data-width="150" data-column="create_time">创建时间</th>
+	<th data-width="150" data-column="user_id">所属用户</th>
+	<th data-width="150" data-column="update_time">更新时间</th>
+	<th data-width="150" data-column="state">状态</th>
+	<th data-width="150" data-column="real_finish_time">完成时间</th>
+	<th data-width="150" data-column="need_finish_time">规定完成时间</th>
+	<th data-width="170">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+	
+</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+	$(function(){
+		MasterSlaveUtil.initJBoltTable("todo_mspage_#(pageId)");
+	});
+</script>
+#end

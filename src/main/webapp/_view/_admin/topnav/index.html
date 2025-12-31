@@ -1,0 +1,88 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-sm-auto">
+	<h1><i class="jbicon2 jbi-menu"></i> 顶部导航管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="topnavForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<button  type="submit" class="btn btn-light" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-sm-auto">
+		<div class="btn-group" role="group" aria-label="btn-group">
+			<button data-area="600,400" data-dialogbtn data-handler="refreshJBoltTable" data-title="新增顶部导航"  data-url="admin/topnav/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+			<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="admin/topnav/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+		</div>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="topnavRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr>
+{@if pageSize&&pageSize>0}
+<td>${((pageNumber-1)*pageSize)+(+index+1)}</td>
+{@else}
+<td>${+index+1}</td>
+{@/if}
+<td>${data.name}</td>
+<td><i class="${data.icon}"></i></td>
+<td>
+<a href="admin/topnav/menu/setting/${data.id}" data-dialogbtn data-area="700,90%"  tooltip data-title="为【${data.name}】分配菜单" class="jbolt_table_btn"><i class="fa fa-cog"></i></a>
+</td>
+<td><img data-switchbtn  data-value="${data.enable}" data-confirm="<span class='text-danger'>切换启用状态后，需要刷新页面后才能看到效果</span><br/>确定切换导航启用状态？" data-url="admin/topnav/toggleEnable/${data.id}"/></td>
+<td>
+	<a href="admin/topnav/edit/${data.id}" data-area="600,400"  tooltip data-title="编辑"  data-handler="refreshJBoltTable" data-dialog-title="编辑顶部导航信息" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+    <a href="admin/topnav/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="removeTr" data-confirm="确定删除这个顶部导航？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+    <a href="admin/topnav/up/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+    <a href="admin/topnav/down/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+</td>
+</tr>
+{@/each}
+</script>
+<div class="jbolt_table_view">
+<div class="jbolt_table_box">
+<div class="jbolt_table_body">
+<table class="jbolt_table jbolt_main_table table_striped thead_font_normal table-center"
+data-jbolttable
+data-ajax="true"
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="6"
+data-column-resize="true"
+data-url="admin/topnav/datas"
+data-conditions-form="topnavForm_#(pageId)"
+data-rowtpl="topnavRowtpl_#(pageId)"
+
+>
+<thead>
+<tr>
+	<th data-width="60">序号</th>
+	<th data-min-width="150">名称</th>
+	<th data-width="80">图标</th>
+	<th data-width="100">分配菜单</th>
+	<th data-width="100">是否启用</th>
+	<th data-width="200">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>	
+</div>
+</div>
+</div>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end

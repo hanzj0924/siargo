@@ -1,0 +1,173 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<div class="row">
+			<div class="col-md-auto">
+				<h1><i class="jbicon2 jbi-control"></i> 系统参数配置管理#if(typeName??):<span class="text-primary" style="font-size: 20px;">#(typeName?? '-')</span>#end </h1>
+			</div>
+			<div class="col">
+				<form class="form-inline" onsubmit="return false;" action="demo/course/jbolttable" id="globalconfig_form_#(pageId)" method="get">
+					<input type="hidden" id="typeId_#(pageId)" name="type" value="#(typeId??)" autocomplete="off" />
+					<input type="text" data-with-clearbtn="true" class="form-control d-inline-block" placeholder="关键词查询" name="keywords" value="#(keywords??)" autocomplete="off" />
+					<select class="form-control"
+							name="builtIn"
+							data-autoload
+							data-options="是:true,否:false"
+							data-text="=是否内置="
+							data-value="">
+					</select>
+					<button class="btn btn-outline-secondary"><i class="fa fa-search"></i> 查询</button>
+				</form>
+			</div>
+			<div class="col-md-auto">
+				#if(typeId??)
+				<div class="btn-group" role="group" aria-label="btn-group">
+					<button class="btn btn-outline-primary btn-sm" data-ajaxbtn data-url="admin/globalconfig/clearCacheByType/#(typeId??)"  data-confirm="确定刷新[#(typeName??)]参数缓存吗?"><i class="fa fa-refresh"></i> 刷新缓存</button>
+				</div>
+				#else
+				<div class="btn-group" role="group" aria-label="btn-group">
+					<button class="btn btn-outline-primary btn-sm" data-ajaxbtn data-url="admin/globalconfig/clearCache"  data-confirm="确定刷新全局参数缓存吗?"><i class="fa fa-refresh"></i> 刷新缓存</button>
+					<button class="btn btn-outline-danger btn-sm" data-ajaxbtn data-url="admin/globalconfig/clearReset" data-handler="refreshPjaxContainer" data-confirm="确定清空配置值重置参数吗?"><i class="fa fa-recycle"></i> 重置全部</button>
+				</div>
+				#end
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+		<!-- JBoltTable的数据模板定义-->
+		<script type="text/template" id="rowtpl_globalconfig_#(pageId)">
+			{@each datas as data,index}
+			<tr data-id="${data.id}">
+				<td>${+index+1}</td>
+				<td {@if data.remark} tooltip data-title="${data.remark}"{@/if}>${data.name}</td>
+				<td>${data.configKey}</td>
+				<td>
+					{@if data.valueType=="boolean"}
+					<img data-switchbtn data-text="true:false" data-value="${data.configValue}" data-confirm="确定切换此配置项Boolean值？"  data-url="admin/globalconfig/toggleBooleanValue/${data.id}"/>
+					{@else}
+					${data.configValue}
+					{@/if}
+				</td>
+				<td>${data.typeName}</td>
+				<td>${data.valueType}</td>
+				<td>$${data.builtIn?"<span class='badge badge-pill badge-success'>是</span>":"-"}</td>
+				<td>${data.updateTime|date_ymdhm}</td>
+				<td>
+					{@if data.builtIn}
+					{@if data.configKey=="#(GlobalConfigKey.JBOLT_ADMIN_WITH_TABS)" || data.configKey=="#(GlobalConfigKey.SYSTEM_ADMIN_LOGO)" || data.configKey=="#(GlobalConfigKey.SYSTEM_ADMIN_H50)" || data.configKey=="#(GlobalConfigKey.SYSTEM_ADMIN_GLOBAL_SEARCH_SHOW)"}
+					<a  tooltip  title="编辑"  href="admin/globalconfig/edit/${data.id}" data-scroll="yes" data-handler="reloadCurrentPage" data-title="编辑" data-area="720,400" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+					{@else if data.configKey=="#(GlobalConfigKey.ASSETS_VERSION)"}
+					<a  tooltip  title="编辑"  href="admin/globalconfig/edit/${data.id}" data-scroll="yes" data-cdrfp="true" data-title="编辑" data-area="720,360" class="jbolt_table_editbtn"><i class="fa fa-pencil c-danger"></i></a>
+					{@else if data.configKey=="#(GlobalConfigKey.JBOLT_LOGIN_BGIMG)"}
+					<a  tooltip  title="编辑"  href="admin/globalconfig/edit/${data.id}" data-scroll="yes"  data-handler="refreshJBoltTable" data-close-handler="refreshJBoltTable" data-btn="close"  data-title="设置登录页面背景图" data-area="90%,95%" class="jbolt_table_editbtn"><i class="fa fa-pencil c-success"></i></a>
+					{@else}
+					<a  tooltip  title="编辑"  href="admin/globalconfig/edit/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="编辑" data-area="800,360" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+					{@/if}
+					{@else}
+					<a  tooltip  title="编辑"  href="admin/globalconfig/editCustomConfig/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" data-title="编辑" data-area="800,500" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+					<a  tooltip  title="删除"  href="admin/globalconfig/deleteCustomConfig/${data.id}" data-handler="refreshJBoltTable" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+					{@/if}
+				</td>
+			</tr>
+			{@/each}
+		</script>
+		<!-- JBoltTable leftbox里表格的数据模板定义-->
+		<script type="text/template" id="rowtpl_type_#(pageId)">
+			<tr data-id=""  class="hand text-center active" style="height:41px;">
+				<td colspan="2">--全部类型--</td>
+			</tr>
+			{@each datas as data,index}
+			<tr data-id="${data.id}"  class="hand text-left">
+				<td>${data.name}<span class="text-info">[${data.typeKey}]</span><span class="${data.builtIn?'text-primary':''}">${data.builtIn?'[内置]':''}</span></td>
+				<td class="text-left">
+					<a  tooltip  title="新增参数"  href="admin/globalconfig/addCustomConfig/${data.id}" data-handler="refreshJBoltMainTable" data-title="新增分类【${data.name}】下的参数" data-area="800,500" class="jbolt_table_editbtn"><i class="fa fa-plus c-primary"></i></a>
+					{@if !data.builtIn}
+					<a  tooltip  title="编辑"  href="admin/globalconfig/type/edit/${data.id}" data-handler="refreshJBoltTable" data-title="编辑" data-area="600,300" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+					<a  tooltip  title="删除"  href="admin/globalconfig/type/delete/${data.id}" data-handler="refreshJBoltTable" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+					{@/if}
+					{@if index>0}
+					<a href="admin/globalconfig/type/up/${data.id}" data-ajaxbtn data-loading="执行中 "  tooltip  data-title="上移"   data-handler="refreshJBoltTable" class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+					{@/if}
+					{@if index<datas.length-1}
+					<a href="admin/globalconfig/type/down/${data.id}" data-ajaxbtn data-loading="执行中 "  tooltip  data-title="下移"  data-handler="refreshJBoltTable" class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+					{@/if}
+				</td>
+			</tr>
+			{@/each}
+		</script>
+
+		<div class="jbolt_table_leftbox #if(typeId??) d-none #end " style="width:360px" id="globalconfig_leftbox_#(pageId)">
+			<div class="jb_header"><span style="font-size: 16px;">系统参数类型管理</span>
+				<div class="float-right">
+					<a href="javascript:void(0)" data-title="刷新" tooltip onclick="jboltTableRefresh(this)"><i class="fa fa-refresh"></i></a>
+					<a href="admin/globalconfig/type/add" data-dialogbtn data-area="600,300" data-title="新增系统参数类型" tooltip  data-handler="refreshJBoltTable" class="ml-3"><i class="fa fa-plus"></i></a>
+					<a href="admin/globalconfig/type/initRank" data-ajaxbtn data-loading="执行中 " data-confirm="确定初始化顺序" tooltip  data-title="初始化顺序"  data-handler="refreshJBoltTable" class="ml-3"><i class="fa fa-sort"></i></a>
+				</div>
+			</div>
+			<div class="jb_body p-0">
+				#if(typeId??)
+				#else
+				<!-- JBoltTable的表格主体定义-->
+				<table id="globalConfigTypeTable#(pageId)" class="jbolt_table text-center"
+					   data-ajax="true"
+					   data-column-resize="true"
+					   data-url="admin/globalconfig/type/datas"
+					   data-rowtpl="rowtpl_type_#(pageId)"
+					   data-row-click-active="true"
+					   data-row-click-handler="changeGlobalConfigType_#(pageId)"
+				>
+					<thead>
+					<tr>
+						<th data-min-width="210">名称</th>
+						<th data-width="140">操作</th>
+					</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+				#end
+			</div>
+		</div>
+		<table class="table-center thead_font_normal"
+			   data-jbolttable
+			   data-width="fill"
+			   data-column-resize="true"
+			   data-height="fill"
+			   data-ajax="true"
+			   data-row-click-active="true"
+			   data-fixed-columns-left="1,2"
+			   data-fixed-columns-right="9"
+			   data-url="admin/globalconfig/datas"
+			   data-rowtpl="rowtpl_globalconfig_#(pageId)"
+			   #if(typeId??) #else data-leftbox="globalconfig_leftbox_#(pageId)"#end
+			   data-conditions-form="globalconfig_form_#(pageId)"
+		>
+			<thead>
+			<tr>
+				<th data-width="60" data-column="index">序号</th>
+				<th data-width="300">参数名</th>
+				<th data-width="300">参数KEY</th>
+				<th data-min-width="200">参数值</th>
+				<th data-width="150">所属类型</th>
+				<th data-width="80">值类型</th>
+				<th data-width="60">内置</th>
+				<th data-width="160">更新时间</th>
+				<th data-width="80">编辑</th>
+			</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+</div>
+#end
+#define js()
+<script>
+	function changeGlobalConfigType_#(pageId)(table,tr,id){
+		$("#typeId_#(pageId)").val(id);
+		$("#globalconfig_form_#(pageId)").submit();
+	}
+	$(function(){
+	});
+</script>
+#end

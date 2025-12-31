@@ -1,0 +1,46 @@
+#@jboltLayout()
+#define css()
+#@wechatmenucss?()
+#end
+ 
+#define main()
+<div class="jbolt_page">
+	<div class="jbolt_page_content">
+		<div class="row">
+		<div class="">
+		<div id="menu">
+				<div class="wxtitle">#(mpName??)</div>
+				<div class="menus">
+					<ul class="level1" id="level1Box">
+
+					</ul>
+				</div>
+				
+			</div>
+		<div class="text-center mt-4">
+				<button class="btn btn-primary" onclick="publishToWeixin()"><i class="fa fa-paper-plane mr-1"></i>确认将所有菜单同步到公众平台</button>
+				</div>
+		</div>
+			
+			<div class="col">
+				<div class="card">
+					<div class="card-header ">
+						<i class="fa fa-edit mr-1"></i>菜单编辑
+					</div>
+					<div class="card-body">
+						<section id="menuPortal" data-ajaxportal
+							data-url="admin/wechat/menu/edit/#(mpId?? 0)-0" ></section>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+#end 
+#define js()
+<script>
+var mpId="#(mpId??)";
+</script>
+#@wechatmenujs?()
+#end
+

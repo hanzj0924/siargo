@@ -1,0 +1,387 @@
+<form onsubmit="return false;" id="globalConfigForm" action="#(action)" method="post">
+	#if(globalConfig.id??)
+		<input type="hidden" name="globalConfig.id" value="#(globalConfig.id)" />
+		<input type="hidden" name="globalConfig.configKey" value="#(globalConfig.configKey??)" />
+		<input type="hidden" name="globalConfig.typeKey" value="#(globalConfig.typeKey??)" />
+	#end
+	#if(globalConfig.remark??)
+	<small class="text-danger">#(globalConfig.remark??)</small>
+	#end
+
+ 	#if(
+ 	globalConfig.configKey==GlobalConfigKey.JBOLT_ADMIN_WITH_TABS
+ 	||
+ 	globalConfig.configKey==GlobalConfigKey.JBOLT_LOGIN_USE_CAPTURE
+ 	||
+ 	globalConfig.configKey==GlobalConfigKey.JBOLT_LOGIN_BGIMG_BLUR
+ 	||
+ 	globalConfig.configKey==GlobalConfigKey.JBOLT_AUTO_CACHE_LOG
+ 	||
+ 	globalConfig.configKey==GlobalConfigKey.JBOLT_LOGIN_NEST
+ 	||
+ 	globalConfig.configKey==GlobalConfigKey.SYSTEM_ADMIN_H50
+ 	||
+ 	globalConfig.configKey==GlobalConfigKey.SYSTEM_ADMIN_GLOBAL_SEARCH_SHOW
+	||
+	globalConfig.configKey==GlobalConfigKey.JBOLT_LOCKSYSTEM_AFTER_AUTOLOGIN
+	||
+	globalConfig.configKey==GlobalConfigKey.JBOLT_DICTIONARY_DELETE_ENABLE
+ 	)
+	<div class="form-group"
+		data-radio
+		data-rule="radio"
+		data-value="#(globalConfig.configValue??)"
+		data-name="globalConfig.configValue"
+		data-default="false">
+		<label>#(globalConfig.name)</label>
+			<div class="col" >
+				<div class="radio radio-primary  radio-inline">
+					<input  id="cvaluetrue" type="radio" name="globalConfig.configValue"   value="true"/>
+					<label for="cvaluetrue">启用</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="cvaluefalse" type="radio" name="globalConfig.configValue"   value="false"/>
+					<label for="cvaluefalse">禁用</label>
+				</div>
+			</div>
+		</div>
+
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_ACTION_REPORT_WRITER)
+		<div class="form-group"
+		data-radio
+		data-rule="radio"
+		data-value="#(globalConfig.configValue??)"
+		data-name="globalConfig.configValue"
+		data-default="sysout">
+		<label>#(globalConfig.name)</label>
+			<div class="col" >
+				<div class="radio radio-primary  radio-inline">
+					<input  id="cvaluesysout" type="radio" name="globalConfig.configValue"   value="sysout"/>
+					<label for="cvaluesysout">sysout-控制台</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="cvaluefjboltlog" type="radio" name="globalConfig.configValue"   value="jboltlog"/>
+					<label for="cvaluefjboltlog">jboltlog-日志文件</label>
+				</div>
+			</div>
+		</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_ADMIN_STYLE)
+	<div class="form-group">
+	<label>#(globalConfig.name)</label>
+	<div  id="jbolt_global_config_style_box">
+	<a href="javascript:void(0)" id="jgc_default" onclick="changeJboltStyleValue(this,'default')" tooltip data-title="默认样式" class="jbolt_config_style"><img src="assets/img/style/default.jpg"/></a>
+	<a href="javascript:void(0)" id="jgc_jbolt_style_2" onclick="changeJboltStyleValue(this,'jbolt_style_2')"  tooltip data-title="JBolt_Style2" class="jbolt_config_style"><img src="assets/img/style/style2.jpg"/></a>
+	<a href="javascript:void(0)" id="jgc_jbolt_style_4" onclick="changeJboltStyleValue(this,'jbolt_style_4')"  tooltip data-title="JBolt_Style4" class="jbolt_config_style"><img src="assets/img/style/style4.jpg"/></a>
+	<a href="javascript:void(0)" id="jgc_jbolt_style_5" onclick="changeJboltStyleValue(this,'jbolt_style_5')"  tooltip data-title="JBolt_Style5" class="jbolt_config_style"><img src="assets/img/style/style5.jpg"/></a>
+	<a href="javascript:void(0)" id="jgc_jbolt_style_6" onclick="changeJboltStyleValue(this,'jbolt_style_6')"  tooltip data-title="JBolt_Style6" class="jbolt_config_style"><img src="assets/img/style/style6.jpg"/></a>
+	<input id="configValue" type="hidden" autocomplete="off"  class="form-control" data-rule="required" data-tips="请输入值" maxlength="255" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	</div>
+
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_LOGIN_CAPTURE_TYPE)
+
+	<div class="form-group"
+		data-radio
+		data-rule="radio"
+		data-value="#(globalConfig.configValue??)"
+		data-name="globalConfig.configValue"
+		data-default="default">
+		<label>#(globalConfig.name)</label>
+			<div class="col" >
+				<div class="radio radio-primary  radio-inline">
+					<input  id="default" type="radio" name="globalConfig.configValue"   value="default"/>
+					<label for="default">默认</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="gif" type="radio" name="globalConfig.configValue"   value="gif"/>
+					<label for="gif">GIF验证码</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="bubble_png" type="radio" name="globalConfig.configValue"   value="bubble_png"/>
+					<label for="bubble_png">气泡PNG</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="number_calc" type="radio" name="globalConfig.configValue"   value="number_calc"/>
+					<label for="number_calc">数字运算型</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="number_calc_cn" type="radio" name="globalConfig.configValue"   value="number_calc_cn"/>
+					<label for="number_calc_cn">数字运算型（中文）</label>
+				</div>
+			</div>
+		</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_PASSWORD_CHANGE_NOTICE_DAYS)
+	<div class="form-group">
+		<label>#(globalConfig.name)<small class="text-danger">(数据单位：天)</small></label>
+		<div class="input-group">
+			<input type="number" step="1" min="0" data-rule="pzint;len<=3"  autocomplete="off"  class="form-control" data-rule="required" data-tips="规定天数>=0 填0为关闭此功能 最大三位数" maxlength="3" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+			<div class="input-group-append"><span class="input-group-text">天</span></div>
+		</div>
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_DEPT_MGR_TYPE)
+
+	<div class="form-group"
+		 data-radio
+		 data-rule="radio"
+		 data-value="#(globalConfig.configValue??)"
+		 data-name="globalConfig.configValue"
+		 data-default="default">
+		<label>#(globalConfig.name)</label>
+		<div class="col" >
+			<div class="radio radio-primary  radio-inline">
+				<input  id="tree_table" type="radio" name="globalConfig.configValue"   value="tree_table"/>
+				<label for="tree_table">树形表格管理</label>
+			</div>
+
+			<div class="radio radio-primary  radio-inline">
+				<input  id="js_tree" type="radio" name="globalConfig.configValue"   value="js_tree"/>
+				<label for="js_tree">JS_TREE树管理</label>
+			</div>
+		</div>
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.ASSETS_VERSION)
+	<div class="form-group">
+		<label>#(globalConfig.name)</label>
+		<input type="text" autocomplete="off" id="assetsVersionInput" readonly="readonly" class="form-control" data-rule="required" data-tips="请输入值" maxlength="255" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+		<h4  class="form-text text-danger">提示：请修改版本号后，刷新浏览器，方能生效</h4>
+		<a class="btn btn-danger btn-sm my-1" href="admin/globalconfig/changeAssetsVersion"  data-ajaxbtn data-confirm="确认生成新版本号？" data-handler="LayerMsgBox.success('更换成功' ,  100 , function(){history.go(0);})"><i class="fa fa-refresh mr-1"></i>生成新版本号</a>
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.SYSTEM_NAME)
+	<div class="form-group">
+		<label>系统名称</label>
+		<input type="text" id="jboltSystemNameInput" autocomplete="off"  class="form-control" data-rule="required" data-tips="请输入 系统名称_颜色值" maxlength="255" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	<div class="row">
+	<div class="col-12">
+	<small class="text-danger"><strong>举例: </strong>JBolt极速开发平台:#FFFFFF</small>
+	<div class="form-group">
+		<label>color值：</label>
+		<input type="color" autocomplete="off" onchange="changeSystenNameColor(this.value)"/>
+		<script>
+		var jboltSystemNameInput=document.getElementById('jboltSystemNameInput');
+			function changeSystenNameColor(color){
+				var vv=jboltSystemNameInput.value;
+				var index=vv.indexOf(":#");
+				if(index!=-1){
+					vv=vv.substring(0,index);
+					vv=vv+":"+color;
+					jboltSystemNameInput.value=vv;
+				}
+			}
+		</script>
+	</div>
+	</div>
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.SYSTEM_ADMIN_LOGO)
+	<div class="form-group">
+		<label>#(globalConfig.name)</label>
+		<input type="text" autocomplete="off"  class="form-control" data-rule="required" data-tips="请输入值" maxlength="255" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	<div class="row">
+	<div class="col-sm-6">
+	<small class="text-danger"><strong>图片格式：</strong> <br>主图地址:小图地址:背景色 <br><strong>举例: </strong>assets/img/logo.png:assets/img/logo_sm.png:#2d3037</small>
+	</div>
+	<div class="col-sm-6">
+	<small class="text-danger"><strong>文本格式：</strong> <br>系统名称:简称:文字颜色:背景色:系统名称字号:简称字号  <br><strong>举例: </strong>JBolt开发平台:JBolt:#FFFFFF:#2d3037:32:30</small>
+	<div class="form-group">
+		<label>color值参考：<span id="colorValue"></span></label>
+		<input type="color" autocomplete="off" onchange="g('colorValue').innerText=this.value"/>
+	</div>
+	</div>
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.SYSTEM_ADMIN_NAV_MENU_DEFAULT_ICON)
+	<div class="form-group">
+		<label>#(globalConfig.name)</label>
+		<input type="text" autocomplete="off"  class="form-control" maxlength="40" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.SYSTEM_ADMIN_LEFT_NAV_WIDTH)
+	<div class="form-group">
+		<label>#(globalConfig.name)[60~400之间的数字]</label>
+		<input type="text" autocomplete="off"  class="form-control" min="60" max="400" data-rule="pint;>=60;<=400" data-tips="请输入60~400之间的数字"  maxlength="3" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_ADMIN_USER_KEEPLOGIN_SECONDS)
+	<div class="form-group">
+		<label>#(globalConfig.name)[（60~31622400）秒区间]（一年内） 建议值:604800</label>
+		<input type="text" autocomplete="off"  class="form-control" min="60" max="31622400" data-rule="pint;>=60;<=31622400;" data-tips="请输入正数 [60~31622400]区间"   maxlength="8" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_ADMIN_USER_NOT_KEEPLOGIN_SECONDS)
+	<div class="form-group">
+		<label>#(globalConfig.name)[（60~43200）秒区间](12小时内) 建议值:28800</label>
+		<input type="text" autocomplete="off"  class="form-control" min="60" max="43200" data-rule="pint;>=60;<=43200;" data-tips="请输入正数 [60~43200]区间"   maxlength="5" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_AUTO_LOCKSCREEN_SECONDS)
+	<div class="form-group">
+		<label>#(globalConfig.name)[（0~3600）秒区间](1小时内) 建议值:1800</label>
+		<input type="text" autocomplete="off"  class="form-control" min="0" max="3600" data-rule="pzint;>=0;<=3600;" data-tips="请输入正数 [0~3600]区间 填 0为取消自动检测"   maxlength="5" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	#elseif(globalConfig.configKey==GlobalConfigKey.JBOLT_LOGIN_BGIMG)
+	#else
+	<div class="form-group">
+		<label>#(globalConfig.name)</label>
+		<input type="text" autocomplete="off"  class="form-control" data-rule="required" data-tips="请输入值" maxlength="255" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	#end
+
+#if(globalConfig.configKey!=GlobalConfigKey.JBOLT_LOGIN_BGIMG)
+<div class="form-group">
+<label>参数类型：</label>
+<select class="form-control" style="width:300px"
+	name="globalConfig.typeId"
+	data-autoload
+	data-rule="required"
+	data-tips="请选择所属类型"
+	data-url="admin/globalconfig/type/options"
+	data-text="=请选择="
+	data-value=""
+	data-select="#(globalConfig.typeId??)">
+</select>
+</div>
+
+
+	<!-- <div class="form-group"
+		data-radio
+		data-rule="radio"
+		data-value="#(globalConfig.builtIn??)"
+		data-name="globalConfig.builtIn"
+		data-default="false">
+		<label>系统内置：</label>
+			<div class="col" >
+				<div class="radio radio-primary  radio-inline">
+					<input  id="isBuiltIn_true" type="radio" name="globalConfig.builtIn"   value="true"/>
+					<label for="isBuiltIn_true">是</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="isBuiltIn_false" type="radio" name="globalConfig.builtIn"   value="false"/>
+					<label for="isBuiltIn_false">否</label>
+				</div>
+			</div>
+		</div>	 -->
+
+#end
+</form>
+
+#if(globalConfig.configKey==GlobalConfigKey.JBOLT_LOGIN_BGIMG)
+<div class="row">
+<div class="col-8">
+	<label><h3>可视化选择</h3></label>
+	<div class="form-group"
+	data-radio
+	data-rule="radio"
+	data-value="#(globalConfig.configValue??)"
+	data-name="globalConfig.configValue"
+	data-default="options_first"
+	data-width="col-sm-3,col"
+	data-handler="changeLoginBgimg"
+	data-inline="true">
+	<div>
+	<fieldset>
+	<legend class="text-center">图片</legend>
+	#for(img:imgs)
+	<div class="radio radio-primary  radio-inline text-center" style="margin-top:10px;margin-bottom:80px;">
+		<input  id="img_#(for.index)" type="radio" name="globalConfig.configValue" value="#(img)"/>
+		<label for="img_#(for.index)"><img style="width:100px;height:60px;margin-bottom: 5px;" src="#(img)"/><br/><a target="_blank" href="#(img)">[看大图]</a></label>
+	</div>
+	#end
+	</fieldset>
+	<fieldset>
+	<legend class="text-center">视频</legend>
+	#for(video:videos)
+	<div class="radio radio-primary  radio-inline text-center" style="margin-top:10px;margin-bottom:120px;">
+		<input  id="video_#(for.index)" type="radio" name="globalConfig.configValue" value="#(video)"/>
+		<label for="video_#(for.index)"><img style="width:200px;height:100px;margin-bottom: 5px;"  src="#(video).jpg"/><br/><a data-dialogbtn data-target="parent" data-area="800,600" data-content='<div class="text-center"><video style="width:600px;height:400px;margin:10px auto;" controls="controls"><source  src="#(video)" type="video/mp4"></source></video></div>'>[看视频]</a></label>
+	</div>
+	#end
+	</fieldset>
+	</div>
+	</div>
+	</div>
+
+
+
+
+
+
+
+
+<div class="col-3">
+<label><h3>手动录入</h3></label>
+<form id="handLoginBgForm" action="#(action)" method="post">
+#if(globalConfig.id??)
+	<input type="hidden" name="globalConfig.id" value="#(globalConfig.id)" />
+	<input type="hidden" name="globalConfig.configKey" value="#(globalConfig.configKey)" />
+	<input type="hidden" name="globalConfig.typeKey" value="#(globalConfig.typeKey??)" />
+#end
+	<div class="form-group">
+		<label>系统背景资源地址(图片或视频)，图片只能是jpg,png,gif,视频只能是mp4,并且提供视频配图，用于视频加载完成前显示的背景图</label>
+		<input type="text" id="handFormLoginBgInput" autocomplete="off"  class="form-control" data-rule="required" data-tips="请输入值" maxlength="255" name="globalConfig.configValue" value="#(globalConfig.configValue??)">
+	</div>
+	<div class="form-group">
+	<label>参数类型：</label>
+	<select class="form-control" style="width:300px"
+		name="globalConfig.typeId"
+		data-autoload
+		id="globalConfigTypeId"
+		data-rule="required"
+		data-tips="请选择所属类型"
+		data-url="admin/globalconfig/type/options"
+		data-text="=请选择="
+		data-value=""
+		data-select="#(globalConfig.typeId??)">
+	</select>
+	</div>
+</form>
+<div class="text-center mt-3">
+<button class="btn btn-info" type="button" onclick="ajaxSubmitForm('handLoginBgForm')"><i class="fa fa-check mr-2"></i>提交手动输入的配置值</button>
+</div>
+<div class="text-center mt-3">
+<a  class='btn btn-primary' target="_blank" href="admin/login"><i class="fa fa-eye mr-2"></i>查看登录页面实际效果</a>
+</div>
+<div class="my-5">
+<div class="alert alert-info">
+图片存放路径在：/assets/css/img/loginbg 目录下，只能png,jpg,gif,webp
+<br/>
+<br/>
+视频存放路径在：/assets/css/video/loginbg 目录下,只能mp4，如果不用IE可以使用webm格式，
+<br/>
+<br/>
+视频背景图存放在视频同目录下，<br>名称规则是：视频全名+".jpg" 举例：<br>视频:1.mp4<br>视频背景图:1.mp4.jpg
+</div>
+</div>
+
+
+
+</div>
+</div>
+#end
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="globalConfigForm")
+<script type="text/javascript">
+#if(globalConfig.configKey==GlobalConfigKey.JBOLT_LOGIN_BGIMG)
+function changeLoginBgimg(r,v){
+	$("#handFormLoginBgInput").val(v);
+}
+#end
+#if(globalConfig.configKey==GlobalConfigKey.JBOLT_ADMIN_STYLE)
+function initChooseStyle(){
+	var name="#(globalConfig.configValue)";
+	$("#jgc_"+name).addClass("active");
+}
+initChooseStyle();
+function  changeJboltStyleValue(ele,styleName){
+	$("#configValue").val(styleName);
+	var jbolt_global_config_style_box=$("#jbolt_global_config_style_box");
+	jbolt_global_config_style_box.find(".jbolt_config_style.active").removeClass("active");
+	$(ele).addClass("active");
+	parent.changeUserJboltStyle(styleName);
+}
+#end
+</script>
+
+#end

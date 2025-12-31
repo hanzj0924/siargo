@@ -1,0 +1,72 @@
+#@jboltLayout()
+#set(pageId=RandomUtil.random(6))
+#define main()
+<div class="jbolt_page" data-key="#(pmkey??)">
+<div class="jbolt_page_title">
+<form class="form-inline d-none" id="user_form_#(pageId)">
+<input type="hidden" name="roleId" value="#(roleId??)"/>
+</form>
+</div>
+<div class="jbolt_page_content">
+
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="user_rowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td><img  data-photobtn tooltip data-title="点击查看大图" style="width: 60px;height: 60px;border-radius:50%;"  src="${data.avatar|real_image}" onerror="this.src='assets/img/avatar.jpg'"/></td>
+<td>${data.name}</td>
+<td>${data.sex|sex}</td>
+<td>${data.username}</td>
+<td>${data.phone}</td>
+<td>${data.email}</td>
+<td>{@if data.enable}<span class="badge badge-success">启用</span>{@else}<span class="badge badge-light">禁用</span>{@/if}</td>
+<td><a tooltip  title="移除"  href="admin/user/deleteRole/${data.id}-#(roleId??)" data-confirm="此操作将影响用户登录授权，确认移除此用户？" data-handler="refreshJBoltTable" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a></td>
+</tr>
+{@/each}
+</script>
+<table class="table-center"
+data-jbolttable
+id="role_users_table_#(pageId)"
+data-ajax="true"
+data-url="admin/role/userDatas"
+data-rowtpl="user_rowtpl_#(pageId)"
+data-page="userPage_#(pageId)"
+data-conditions-form="user_form_#(pageId)"
+data-ajax-success-handler="initDialogBtns_#(pageId)"
+>
+<thead>
+<tr><th data-width="60">序号</th><th data-width="100">头像</th><th data-min-width="120">姓名</th><th data-width="60">性别</th><th data-min-width="120">用户名</th><th data-min-width="120">手机号</th><th data-min-width="120">E-Mail</th><th data-width="100">是否启用</th><th  data-width="100">操作</th></tr>
+</thead>
+<tbody>
+</tbody>
+</table>	
+</div>
+</div>
+#end
+#define js()
+<script type="text/javascript">
+$(function(){
+	//系统超管才能出
+})
+
+function initDialogBtns_#(pageId)(table){
+	#if(isSystemAdmin)
+		if(!table.isEmpty){
+		//增加一个按钮-不同意
+		var btnId=addParentLayerDialogBtn("清空用户","lay_danger",function(){
+			LayerMsgBox.confirm("确认清空此角色下的所有用户?",function(){
+				LayerMsgBox.loading("执行中...",10000);
+				Ajax.get("/admin/role/clearUsers/#(roleId)",function(){
+					LayerMsgBox.success("操作成功",1000,function(){
+						refreshJBoltTable("role_users_table_#(pageId)");
+						parent.$("#"+btnId).remove();
+						});
+					});
+				});
+		});
+		}
+	#end
+}
+</script>
+#end

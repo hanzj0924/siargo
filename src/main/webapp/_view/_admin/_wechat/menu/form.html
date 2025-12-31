@@ -1,0 +1,64 @@
+#if(menu)
+<form onsubmit="return false;" id="menuEditForm" class="form-horizontal" role="form" action="#(action??)" method="post">
+<input type="hidden" name="mpId"  value="#(mpId??)"  />
+<input type="hidden" name="menu.id"  value="#(menu.id??)"  />
+	<div class="form-group row">
+		<label class="col-form-label pl-2"  style="width: 110px;">菜单标题</label>
+		<div class="col-7">
+			<input type="text" data-rule="required;" maxlength="15" class="form-control" value="#(menu.name??)"  name="menu.name" />
+		<small class="form-text text-danger">
+		#if(menu.pid==0)
+		 仅支持中英文和数字，字数不超过4个汉字或8个字母
+		#else
+		仅支持中英文和数字，字数不超过8个汉字或16个字母
+		#end
+		</small>
+		</div>
+	</div>
+	<div class="form-group row" 
+				data-radio 
+				data-name="menu.type" 
+				data-value="#(menu.type??)"
+				data-handler="changeTitle"
+				data-url="admin/wechat/menu/types"
+				data-default="none"
+				data-label="菜单类型"
+				data-width="col-sm-3,col"
+				data-inline="true"
+				></div>
+
+			<div  id="menuBox">
+			<div class="form-group row" id="appIdBox">
+				<label class="col-form-label pl-2" style="width: 110px;">APPID</label>
+				<div class="col-7">
+					<input type="text" maxlength="200"  id="appId" class="form-control" value="#(menu.appId??)"  name="menu.appId" />
+				</div>
+			</div>
+			<div class="form-group row" id="pagepathBox">
+				<label class="col-form-label pl-2" style="width: 110px;">访问页面路径</label>
+				<div class="col-7">
+					<input type="text" maxlength="200"  id="pagepath" class="form-control" value="#(menu.pagePath??)"  name="menu.pagePath" />
+				</div>
+			</div>
+			<div class="form-group row" >
+				<label class="col-form-label pl-2" style="width: 110px;" id="menuTitle">菜单值</label>
+				<div class="col-7">
+					<input type="text" maxlength="200"  id="menuValue" class="form-control" value="#(menu.value??)"  name="menu.value" />
+				</div>
+			</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-form-label pl-2" style="width: 110px;">当前顺序<span class="text-danger">[1~#(menu.pid==0?3:5 )]</span></label>
+				<div class="col-3">
+					<input type="number" tooltip data-title="取值区间[1~#(menu.pid==0?3:5 )]"  min="1" max="#(menu.pid==0?3:5)" data-rule="required;pint;>=1;<=5;" data-tips="取值区间为正整数[1~#(menu.pid==0?3:5 )]" maxlength="1" class="form-control" value="#(menu.sortRank??)"  name="menu.sortRank" />
+				</div>
+			</div>
+	
+	<div class="form-group text-center">
+		 <button type="button" onclick="submitModifyForm()" class="btn btn-success"><i class="fa fa-check mr-1"></i>确认保存</button>
+	</div>
+</form>
+#else
+<div class="alert alert-warning text-center m-2">请点击选择左侧菜单</div>
+#end
+ 

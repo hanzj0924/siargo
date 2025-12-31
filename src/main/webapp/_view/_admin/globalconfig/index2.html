@@ -1,0 +1,63 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-9">
+	<h1>系统全局参数配置管理</h1>
+	<span> #(globalConfigs.size()) 条记录</span>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<table class="table_striped table-center thead_font_normal"
+data-jbolttable
+data-width="fill"
+data-column-resize="true"
+data-height="fill"
+data-fixed-columns-left="1,2"
+>
+<thead>
+<tr><th data-width="60" data-column="index">序号</th><th data-width="300"  data-nochange>配置项</th><th data-width="300" data-nochange>配置项Value</th><th data-width="150"  data-nochange>更新时间</th><th data-width="100"  data-nochange>编辑</th><th></th></tr>
+</thead>
+<tbody>
+#for(data:globalConfigs??)
+<tr>
+<td>#(for.count)</td>
+<td>#(data.name??)</td>
+<td>#(data.configValue??)</td>
+<td>#date(data.updateTime??,"yyyy-MM-dd HH:mm")</td>
+<td>
+#if(data.configKey==GlobalConfigKey.JBOLT_ADMIN_WITH_TABS
+||
+data.configKey==GlobalConfigKey.SYSTEM_ADMIN_LOGO
+||
+data.configKey==GlobalConfigKey.SYSTEM_ADMIN_H50
+||
+data.configKey==GlobalConfigKey.SYSTEM_ADMIN_GLOBAL_SEARCH_SHOW
+)
+<a  tooltip  title="编辑"  href="admin/globalconfig/edit/#(data.id)" data-scroll="yes" data-handler="reloadCurrentPage" data-title="编辑" data-area="720,360" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+#elseif(data.configKey==GlobalConfigKey.ASSETS_VERSION)
+<a  tooltip  title="编辑"  href="admin/globalconfig/edit/#(data.id)" data-scroll="yes" data-cdrfp="true" data-btn="close" data-title="编辑" data-area="720,300" class="jbolt_table_editbtn"><i class="fa fa-pencil c-danger"></i></a>
+#elseif(data.configKey==GlobalConfigKey.JBOLT_LOGIN_BGIMG)
+<a  tooltip  title="编辑"  href="admin/globalconfig/edit/#(data.id)" data-scroll="yes" data-cdrfp="true" data-btn="close"  data-title="设置登录页面背景图" data-area="90%,90%" class="jbolt_table_editbtn"><i class="fa fa-pencil c-success"></i></a>
+#else
+<a  tooltip  title="编辑"  href="admin/globalconfig/edit/#(data.id)" data-scroll="yes" data-handler="refreshPjaxContainer" data-title="编辑" data-area="720,300" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+#end
+
+</td>
+<td></td>
+</tr>
+#end
+</tbody>
+</table>	
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end
+

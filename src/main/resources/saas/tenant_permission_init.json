@@ -1,0 +1,184 @@
+[{
+	"icons": "jbicon jb-gongzuotai1",
+	"isMenu": true,
+	"isSystemAdminDefault": true,
+	"isTargetBlank": false,
+	"openType": 1,
+	"permissionKey": "dashboard",
+	"permissionLevel": 1,
+	"sortRank": 1,
+	"title": "操作台",
+	"url": "admin/tenantDashboard"
+}, {
+	"icons": "jbicon jb-shezhi3",
+	"isMenu": true,
+	"isSystemAdminDefault": true,
+	"isTargetBlank": false,
+	"items": [{
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"openType": 1,
+		"permissionKey": "user",
+		"permissionLevel": 2,
+		"sortRank": 1,
+		"title": "用户管理",
+		"url": "admin/user"
+	},{
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"openType": 1,
+		"permissionKey": "dept",
+		"permissionLevel": 2,
+		"sortRank": 2,
+		"title": "部门管理",
+		"url": "admin/dept"
+	},{
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"openType": 1,
+		"permissionKey": "post",
+		"permissionLevel": 2,
+		"sortRank": 3,
+		"title": "岗位管理",
+		"url": "admin/post"
+	}, {
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"items": [{
+			"isMenu": true,
+			"isSystemAdminDefault": true,
+			"isTargetBlank": false,
+			"openType": 1,
+			"permissionKey": "role",
+			"permissionLevel": 3,
+			"sortRank": 1,
+			"title": "角色管理",
+			"url": "admin/role"
+		}, {
+			"isMenu": true,
+			"isSystemAdminDefault": true,
+			"isTargetBlank": false,
+			"openType": 1,
+			"permissionKey": "topnav",
+			"permissionLevel": 3,
+			"sortRank": 2,
+			"title": "顶部导航",
+			"url": "admin/topnav"
+		}, {
+			"isMenu": true,
+			"isSystemAdminDefault": true,
+			"isTargetBlank": false,
+			"openType": 1,
+			"permissionKey": "permission",
+			"permissionLevel": 3,
+			"sortRank": 3,
+			"title": "权限资源",
+			"url": "admin/permission"
+		}],
+		"openType": 1,
+		"permissionKey": "role_permission_menu",
+		"permissionLevel": 2,
+		"sortRank": 4,
+		"title": "权限配置"
+	},{
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"openType": 1,
+		"permissionKey": "globalconfig",
+		"permissionLevel": 2,
+		"sortRank": 5,
+		"title": "全局参数",
+		"url": "admin/globalconfig"
+	},{
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"openType": 1,
+		"permissionKey": "sys_notice",
+		"permissionLevel": 2,
+		"sortRank": 6,
+		"title": "系统通知",
+		"url": "admin/sysnotice"
+	}],
+	"openType": 1,
+	"permissionKey": "systemmgr",
+	"permissionLevel": 1,
+	"sortRank": 2,
+	"title": "系统管理"
+}, {
+	"icons": "jbicon jb-ITjiankong",
+	"isMenu": true,
+	"isSystemAdminDefault": true,
+	"isTargetBlank": false,
+	"items": [{
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"items": [{
+			"isMenu": true,
+			"isSystemAdminDefault": true,
+			"isTargetBlank": false,
+			"openType": 1,
+			"permissionKey": "jbolt_login_log",
+			"permissionLevel": 3,
+			"sortRank": 1,
+			"title": "登录日志",
+			"url": "admin/loginlog"
+		}, {
+			"isMenu": true,
+			"isSystemAdminDefault": true,
+			"isTargetBlank": false,
+			"openType": 1,
+			"permissionKey": "systemlog",
+			"permissionLevel": 3,
+			"sortRank": 2,
+			"title": "关键操作日志",
+			"url": "admin/systemlog"
+		}],
+		"openType": 1,
+		"permissionKey": "jbolt_log_monitor",
+		"permissionLevel": 2,
+		"sortRank": 1,
+		"title": "日志监控"
+	}, {
+		"isMenu": true,
+		"isSystemAdminDefault": true,
+		"isTargetBlank": false,
+		"openType": 1,
+		"permissionKey": "online_user",
+		"permissionLevel": 2,
+		"sortRank": 2,
+		"title": "在线用户",
+		"url": "admin/onlineuser"
+	}],
+	"openType": 1,
+	"permissionKey": "jbolt_monitor",
+	"permissionLevel": 1,
+	"pid": "0",
+	"sortRank": 3,
+	"title": "系统监控"
+}, {
+	"isMenu": false,
+	"isSystemAdminDefault": false,
+	"isTargetBlank": false,
+	"items": [{
+		"isMenu": false,
+		"isSystemAdminDefault": false,
+		"isTargetBlank": false,
+		"openType": 1,
+		"permissionKey": "ureport_detail",
+		"permissionLevel": 2,
+		"sortRank": 1,
+		"title": "Ureport报表查看权"
+	}],
+	"openType": 1,
+	"permissionKey": "logic_permission",
+	"permissionLevel": 1,
+	"sortRank": 4,
+	"title": "独立逻辑权限"
+}]

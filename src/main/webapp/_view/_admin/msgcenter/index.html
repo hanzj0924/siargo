@@ -1,0 +1,309 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
+<div class="jbolt_page_title jb_vheader">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="jbicon2 jbi-sound"></i> 个人消息中心</h1>
+	</div>
+	<div class="col">
+		
+	</div>
+	<div class="col-md-auto">
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content jb_vbody">
+<script type="text/template" id="sysNoticeRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td><span class="${data.readed?'text-muted':'text-danger'}">${data.readed?'已读':'[未读]'}</span></td>
+<td class="text-left"><a    href="admin/msgcenter/sysnotice/detail/${data.id}" data-openpage="dialog" data-close-handler="refreshJBoltTable('sysNotice_mgrtable_#(pageId)')" data-shadeclose="true" data-area="500,90%"  data-title="${data.title}">${data.title}</a></td>
+<td><span class="text-${data.files?'primary':'secondary'}"><i class="fa fa-file"></i></span></td>
+<td><span class="badge badge-${data.type|colorClassByLevel}">${data.typeName}</span></td>
+<td><span class="badge priorityLevel3_${data.priorityLevel}">${data.priorityLevelName}</span></td>
+<td><span class="badge badge-${data.receiverType|colorClassByLevel}">${data.receiverTypeName}</span></td>
+<td>${data.createTime|date_ymdhm}</td>
+<td>${data.updateTime|date_ymdhm}</td>
+</tr>
+{@/each}
+</script>
+<script type="text/template" id="todoRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td class="text-left"><a href="admin/todo/detail/${data.id}" data-openpage="dialog" data-area="800,700" data-btn="close"  data-title="${data.title}">${data.title}</a></td>
+<td>
+{@if data.state==1}
+<span class="badge badge-secondary">${data.stateName}</span>
+{@else if data.state==2}
+<span class="badge badge-info">${data.stateName}</span>
+{@else if data.state==3}
+<span class="badge badge-success">${data.stateName}</span>
+{@else if data.state==4}
+<span class="badge badge-dark">${data.stateName}</span>
+{@else if data.state==5}
+<span class="badge badge-danger">${data.stateName}</span>
+{@/if}
+</td>
+<td><span class="badge badge-${data.type|colorClassByLevel}">${data.typeName}</span></td>
+<td><span class="badge priorityLevel3_${data.priorityLevel}">${data.priorityLevelName}</span></td>
+<td>{@if data.url}<a class="btn btn-outline-primary btn-sm" href="${data.url}" data-openpage="dialog" data-title="查看关联内容"  data-area="1280,720" data-btn="close">查看</a>{@/if}</td>
+<td>${data.specifiedFinishTime|date_ymdhm}</td>
+<td>${data.realFinishTime|date_ymdhm}</td>
+<td>${data.cancelTime|date_ymdhm}</td>
+<td>${data.createUserName}</td>
+<td>${data.createTime|date_ymdhm}</td>
+<td>${data.updateTime|date_ymdhm}</td>
+<td>
+<a tooltip  data-title="编辑"  href="admin/todo/edit/${data.id}" data-scroll="yes" data-handler="refreshJBoltTable" dialog-title="编辑待办事项"  data-area="980,700" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a tooltip  data-title="删除"  href="admin/todo/delete/${data.id}" data-handler="refreshJBoltTable" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+{@/each}
+</script>
+
+<!-- sysNotice工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="sysNotice_toolbar_#(pageId)">
+	<form class="form-inline d-inline-block" id="sysNoticeForm_#(pageId)" onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<select class="form-control" name="type" data-autoload data-url="admin/dictionary/options?key=sys_notice_type" data-value-attr="sn" data-text="=类型=" data-value=""></select>
+		<select class="form-control" name="priorityLevel" data-autoload data-url="admin/dictionary/options?key=sys_notice_priority_level" data-value-attr="sn" data-text="=优先级=" data-value=""></select>
+		<select class="form-control" name="receiverType" data-autoload data-url="admin/dictionary/options?key=sys_notice_receiver_type" data-value-attr="sn" data-text="=接收者类型=" data-value=""></select>
+		<select class="form-control" name="readed" data-autoload  data-options="未读:false,已读:true" data-text="=阅读状态=" data-value=""></select>
+		<button type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+	</form>
+	
+	<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" data-url="admin/msgcenter/sysnotice/markMultiAsRead?ids=" data-confirm="确定将选中通知标记为已读？" class="btn btn-outline-primary mx-4" ><i class="fa fa-flag"></i> 标记已读</button>
+	<div class="clearfix"></div>
+</div>
+
+
+<!--工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="todo_toolbar_#(pageId)">
+	<form class="form-inline d-inline-block" id="todoForm_#(pageId)" onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<select class="form-control" name="state" data-autoload data-url="admin/dictionary/options?key=todo_state" data-text="=状态=" data-value-attr="sn" data-value=""></select>
+		<select class="form-control" name="type" data-autoload data-url="admin/dictionary/options?key=todo_type" data-text="=类型="  data-value-attr="sn"data-value=""></select>
+		<select class="form-control" name="dateTimeType" data-autoload data-url="admin/dictionary/options?key=todo_datetime_column" data-value-attr="sn" data-text="=时间类型=" data-value=""></select>
+		<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="">
+		<button type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+	</form>
+	<div class="btn btn-group">
+		<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" data-url="admin/todo/batchUpdateState?state=3&ids=" data-confirm="确定将选中待办标记为[已完成]状态？" class="btn btn-outline-primary btn-sm" ><i class="fa fa-check"></i> 标记已完成</button>
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable"
+					data-check-handler="jboltTableGetCheckedIds"
+					data-url="admin/todo/batchUpdateState?state=4&ids="
+					data-confirm="确定将选中待办标记为[已取消]状态？"
+					class="btn btn-outline-danger btn-sm">
+					<i class="fa fa-remove"></i> 标记已取消
+				</button>
+				<button id="batchDeleteTodoBtn_#(pageId)" type="button" data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" data-url="admin/todo/deleteByIds?ids=" data-confirm="确定删除选中待办事项？" class="btn btn-outline-danger btn-sm" ><i class="fa fa-trash"></i> 删除</button>
+		<button type="button" data-openpage="dialog" data-url="admin/todo/add" data-handler="refreshJBoltTable" data-title="添加待办事项" data-area="980,700" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新待办</button>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+
+<div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)">
+	<div class="jbolt_tab_links jb_vheader">
+		<a class="jbolt_tab_link"  href="#sys_notice_tabcontent"><i class="jbicon jb-tongzhi"></i> 通知</a>
+		<!-- <a class="jbolt_tab_link"  href="#private_msg_tabco
+		ntent"><i class="jbicon jb-msg1"></i> 消息</a> -->
+		<a class="jbolt_tab_link"  href="#todolist_tabcontent"><i class="jbicon jb-shijian"></i> 待办</a>
+	</div>
+	<div class="jbolt_tab_contents jb_vbody">
+		<div class="jbolt_tab_content"  id="sys_notice_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="sysNotice_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/msgcenter/sysnotice/userDatas"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="sysNoticeForm_#(pageId)"
+				data-rowtpl="sysNoticeRowtpl_#(pageId)"
+				data-page="sysNoticePage_#(pageId)"
+				data-toolbar="sysNotice_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				### 可排序列 定义 多个用逗号隔开
+				data-sortable-columns="type,priority_level,create_time,update_time,receiver_type"
+				### 当前用了哪一列去排序查询 以及具体的排序方式 用冒号隔开
+				data-sort="#((sysNotice.sortColumn&&sysNotice.sortType)?(sysNotice.sortColumn+':'+sysNotice.sortType):'')"
+				### 默认排序列
+				data-default-sort-column="create_time"
+				>
+				<thead class="fw-normal">
+				<tr>
+					<th data-width="60">序号</th>
+					<th data-width="60">状态</th>
+					<th data-min-width="300" data-column="title">标题</th>
+					<th data-width="90" data-column="files">有附件</th>
+					<th data-width="90" data-column="type">类型</th>
+					<th data-width="80" data-column="priority_level">优先级</th>
+					<th data-width="100" data-column="receiver_type">接收类型</th>
+					<th data-width="150" data-column="create_time">创建时间</th>
+					<th data-width="150" data-column="update_time">更新时间</th>
+				</tr>
+				</thead>
+				<tbody>
+				</tbody>
+				</table>
+		</div>
+		<!-- <div class="jbolt_tab_content" id="private_msg_tabcontent">2</div> -->
+		<div class="jbolt_tab_content" id="todolist_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="todolist_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/msgcenter/todo/userDatas"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="todoForm_#(pageId)"
+				data-rowtpl="todoRowtpl_#(pageId)"
+				data-page="todoPage_#(pageId)"
+				data-toolbar="todo_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				data-fixed-columns-right="-1"
+				### 可排序列 定义 多个用逗号隔开
+				data-sortable-columns="specified_finish_time,create_time,cancel_time,update_time,real_finish_time"
+				### 当前用了哪一列去排序查询 以及具体的排序方式 用冒号隔开
+				data-sort="#((todo.sortColumn&&todo.sortType)?(todo.sortColumn+':'+todo.sortType):'')"
+				### 默认排序列
+				data-default-sort-column="create_time"
+				data-menu-option="getTodoTableMenus_#(pageId)"
+				>
+				<thead class="fw-normal">
+				<tr>
+					<th data-width="60">序号</th>
+					<th data-min-width="300" data-column="title">标题</th>
+					<th data-width="100">状态</th>
+					<th data-width="120">类型</th>
+					<th data-width="90" data-column="priority_level">优先级</th>
+					<th data-width="100">关联内容</th>
+					<th data-width="150" data-column="specified_finish_time">规定完成时间</th>
+					<th data-width="150" data-column="real_finish_time">完成时间</th>
+					<th data-width="150" data-column="cancel_time">取消时间</th>
+					<th data-width="100">创建者</th>
+					<th data-width="150" data-column="create_time">创建时间</th>
+					<th data-width="150" data-column="update_time">更新时间</th>
+					<th data-width="100">操作</th>
+				</tr>
+				</thead>
+				<tbody>
+				</tbody>
+				</table>
+		</div>
+	</div>
+</div>
+
+
+
+	
+</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+function sysNoticeFormSearch_#(pageId)(formId,delFlag){
+	var form=$("#"+formId);
+	form.find("input[name='delFlag']").val(delFlag);
+	if(delFlag){
+		$("#searchBtn_#(pageId)").removeClass("btn-primary").addClass("btn-outline-secondary");
+		$("#trashBtn_#(pageId)").removeClass("btn-outline-danger").addClass("btn-danger");
+		$("#restoreNoticeBtn_#(pageId)").show();
+	}else{
+		$("#searchBtn_#(pageId)").removeClass("btn-outline-secondary").addClass("btn-primary");
+		$("#trashBtn_#(pageId)").removeClass("btn-danger").addClass("btn-outline-danger");
+		$("#restoreNoticeBtn_#(pageId)").hide();
+		}
+	form.submit();
+}
+
+function changeTodoState_#(pageId)(table,id,state){
+	var name="";
+	switch(state){
+		case 1:
+			name="未开始";
+		break;
+		case 2:
+			name="进行中";
+		break;
+		case 3:
+			name="已完成";
+		break;
+		case 4:
+			name="已取消";
+		break;
+		case 5:
+			name="未完成";
+		break;
+	}
+	LayerMsgBox.confirm("确认修改待办事项状态为【"+name+"】?",function(){
+		LayerMsgBox.loading("执行中...",10000);
+		Ajax.get("admin/todo/updateState/"+id+"-"+state,function(){
+			LayerMsgBox.success("操作成功",500,function(){
+					refreshJBoltTable(table);
+				});
+		});
+	});
+}
+
+function getTodoTableMenus_#(pageId)(){
+	return {
+		theme:"list",//list or button
+		position:"mouse",//mouse or td
+		width:180,
+		menus:[
+			{icon:"fa fa-refresh",text:"刷新",cssClass:"text-info",cssStyle:"",func:function(table,tr,td,trJsonData){
+				refreshJBoltTable(table);
+			}},
+			{icon:"fa fa-trash",text:"删除此行",cssClass:"text-danger",cssStyle:"",func:function(table,tr,td,trJsonData){
+				var trIndex=tr.data("index");
+				table.find("tbody>tr[data-index='"+trIndex+"']>td a.jbolt_table_delbtn").click();
+			}},
+			{icon:"fa fa-trash",text:"删除选中行",cssClass:"text-danger",cssStyle:"",func:function(table,tr,td,trJsonData){
+					table.toolbar.find("#batchDeleteTodoBtn_#(pageId)").click();
+			}},
+			{icon:"fa fa-edit",text:"编辑",cssClass:"text-primary",cssStyle:"",func:function(table,tr,td,trJsonData){
+				var trIndex=tr.data("index");
+				table.find("tbody>tr[data-index='"+trIndex+"']>td a.jbolt_table_editbtn").click();
+			}},
+			{br:true},
+			{icon:"fa fa-exchange",text:"状态转【未开始】",cssClass:"",cssStyle:"",func:function(table,tr,td,trJsonData){
+				changeTodoState_#(pageId)(table,trJsonData.id,1);
+			},visible:function(table,tr,td,trJsonData,menu){
+				return trJsonData.state!=1;
+			}},
+			{icon:"fa fa-exchange",text:"状态转【进行中】",cssClass:"",cssStyle:"",func:function(table,tr,td,trJsonData){
+				changeTodoState_#(pageId)(table,trJsonData.id,2);
+			},visible:function(table,tr,td,trJsonData,menu){
+				return trJsonData.state!=2;
+			}},
+			{icon:"fa fa-exchange",text:"状态转【已完成】",cssClass:"",cssStyle:"",func:function(table,tr,td,trJsonData){
+				changeTodoState_#(pageId)(table,trJsonData.id,3);
+			},visible:function(table,tr,td,trJsonData,menu){
+				return trJsonData.state!=3;
+			}},
+			{icon:"fa fa-exchange",text:"状态转【已取消】",cssClass:"",cssStyle:"",func:function(table,tr,td,trJsonData){
+				changeTodoState_#(pageId)(table,trJsonData.id,4);
+			},visible:function(table,tr,td,trJsonData,menu){
+				return trJsonData.state!=4;
+			}},
+			{icon:"fa fa-exchange",text:"状态转【未完成】",cssClass:"",cssStyle:"",func:function(table,tr,td,trJsonData){
+				changeTodoState_#(pageId)(table,trJsonData.id,5);
+			},visible:function(table,tr,td,trJsonData,menu){
+				return trJsonData.state!=5;
+			}}
+			
+	]};
+}
+$(function(){
+});
+</script>
+#end

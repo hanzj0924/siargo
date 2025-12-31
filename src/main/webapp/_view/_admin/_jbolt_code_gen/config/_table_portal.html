@@ -1,0 +1,430 @@
+#if(codeGenServiceMode??)
+#[[#@jboltLayout()]]#
+#[[#define main()]]#
+#[[#set(pageId=RandomUtil.random(6))]]#
+#end
+#if(cols==null || cols.size()==0)
+	<div class="alert alert-danger m-auto">未设置任何表格显示列属性</div>
+#else
+<div class="jbolt_page#(codeGenServiceMode?'':' jb_vflex')" data-key="#[[#(pmkey??)]]#">
+<div class="jbolt_page_title#(codeGenServiceMode?'':' jb_vheader')">
+<div class="row">
+	<div class="col-sm-auto"><h1>#if(codeGen.indexHtmlPageIcon)<i class="#(codeGen.indexHtmlPageIcon??)"></i>#end #(codeGen.indexHtmlPageTitle?? codeGen.remark)#if(editMode??)[<small class="text-danger">编辑模式</small>]#end</h1></div>
+	<div class="col">
+	#if(!codeGen.isTableMultiConditionsMode)
+	<form class="form-inline" id="#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">
+		#if(hasIsKeywordsColumn)
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="#(keywords)" />
+		#end
+		#if(conditions!=null&&conditions.size()>0)
+		#for(col:conditions)
+		#@switchIndexColType?(col)
+		#end
+		#end
+		#if(hasIsDeletedColumn)
+		<input type="hidden" name="isDeleted" value="false"/>
+		<div class="btn-group text-center mx-1">
+		<button onclick="#(codeGen.modelName)_formSearch#if(codeGenServiceMode??)_#[[#]]#(pageId)#end('#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end',false)" id="form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"  type="button" class="btn btn-outline-primary" ><i class="fa fa-search"></i> 查询</button>
+		<button onclick="#(codeGen.modelName)_formSearch#if(codeGenServiceMode??)_#[[#]]#(pageId)#end('#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end',true)"  id="form_trashBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"  type="button" class="btn btn-outline-danger" ><i class="fa fa-trash"></i> 回收站</button>
+		<button  type="button" onclick="form.reset();$('#form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end').click();" class="btn btn-outline-secondary" ><i class="fa fa-reply-all"></i> 重置</button>
+		</div>
+	    #else
+		<div class="btn-group text-center mx-1">
+			<button type="submit" class="btn btn-outline-primary" ><i class="fa fa-search"></i> 查询</button>
+			<button type="button" onclick="form.reset();refreshJBoltTable(this);" class="btn btn-outline-secondary" ><i class="fa fa-reply-all"></i> 重置</button>
+		</div>
+		#end
+	</form>
+	#end
+	</div>
+	<div class="col-sm-auto text-right">
+	#if(codeGen.isTableMultiConditionsMode)<button onclick="jboltTableToggleHeadbox(this)" class="btn btn-outline-primary btn-sm" #if(!codeGen.isTableMultiConditionsBtnShowTitle) tooltip data-title="切换显示筛选条件"#end><i class="fa fa-filter"></i>#if(codeGen.isTableMultiConditionsBtnShowTitle??) 筛选条件#end</button>#end
+	#if(codeGen.isCrud && codeGen.isPageTitleAddBtn)<button data-dialogbtn class="btn btn-outline-primary btn-sm" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/add'):('admin/codegen/formPortalTest/'+codeGen.id))" data-handler="jboltTablePageToFirst" data-area="#(codeGen.formDialogArea?? '800,600')" tooltip data-title="新增#(codeGen.modelTitle?? (codeGen.pageTitle?? codeGen.mainTableRemark??))"><i class="fa fa-plus"></i></button>#end
+	#if(codeGen.isPageTitleRefreshBtn)<button class="btn btn-outline-info btn-sm" onclick="refreshJBoltTable(this)" tooltip data-title="刷新数据"><i class="fa fa-refresh"></i></button>#end
+	#if(codeGen.isCrud && codeGen.isPageTitleInitRankBtn)<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="refreshJBoltTable" tooltip data-title="初始化排序" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/initSortRank'):('admin/codegen/testAjax'))" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i></button>#end
+	#if(codeGen.isCrud && !codeGen.isToolbar&&codeGen.isImportExcel)<button data-dialogbtn data-btn="close" tooltip data-area="600,400"  data-handler="jboltTablePageToFirst" data-title="导入Excel数据" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/initImportExcel'):('admin/codegen/initImportExcel/'+codeGen.id))" class="btn btn-outline-primary btn-sm" ><i class="fa fa-upload"></i></button>#end
+	#if(!codeGen.isToolbar&&codeGen.isExportExcel)
+		<div class="btn-group btn-group-sm">
+			#if(codeGen.isExportExcelByForm??)
+			<button tooltip data-title="导出Excel(查询结果)" data-form="#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end" class="btn btn-outline-primary btn-sm" data-downloadbtn data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/exportExcelByForm'):('admin/codegen/exportExcel/'+codeGen.id))"><i class="fa fa-download"></i></button>
+			#end
+			#if(codeGen.isExportExcelByCheckedIds??)
+			<button tooltip data-title="导出Excel(选中行数据)" data-usecheckedids="true" class="btn btn-outline-success btn-sm" data-downloadbtn data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/exportExcelByCheckedIds'):('admin/codegen/exportExcel/'+codeGen.id))"><i class="fa fa-download"></i></button>
+			#end
+			#if(codeGen.isExportExcelAll??)
+			<button tooltip data-title="导出Excel(所有数据)" class="btn btn-outline-info btn-sm" data-downloadbtn data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/exportExcelAll'):('admin/codegen/exportExcel/'+codeGen.id))"><i class="fa fa-download"></i></button>
+			#end
+		</div>
+	#end
+	</div>
+</div>
+</div>
+<div class="jbolt_page_content#(codeGenServiceMode?'':' jb_vbody')">
+	#if(codeGenServiceMode)
+	#set(dataIdStr="${data."+toCamelCase(codeGen.mainTablePkey?? 'id')+"}")
+		#else
+	#set(dataIdStr="1")
+		#end
+<!-- 定义JBoltTable使用的数据渲染模板 -->
+<textarea class="jb_tpl_box" id="#(codeGen.modelName)_tpl#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">
+{@each datas as data,index}
+#if(codeGenServiceMode)
+<tr data-id="${data.#(toCamelCase(codeGen.mainTablePkey?? 'id'))}">
+#else
+<tr data-id="1">
+#end
+<td>${pageNumber,pageSize,index | rownum}</td>
+#for(col:cols)
+#if(col.isNeedTranslate??)
+<td>${data.#(col.translateColName??)}</td>
+#else
+#if(col.isTableSwitchbtn)
+<td><img data-switchbtn data-confirm="确定切换#(col.tableLabel?? col.remark??)？" data-value="${data.#((codeGen.isTableUseRecord&&codeGen.isTableRecordCamelCase!=null&&codeGen.isTableRecordCamelCase==false)?col.colName:col.attrName)}"  data-handler="refreshJBoltTable"  data-url="#(codeGenServiceMode?((codeGen.controllerPathWithoutFirstSlash??)+'/toggle'+(firstCharToUpperCase(col.attrName?? ""))+'/'+(dataIdStr??)):('admin/codegen/testAjax'))"/></td>
+#else if(col.colFormat??)
+#if(col.colFormat == "real_image")
+<td><img data-photobtn tooltip data-title="点击查看大图"  style="width: 60px;height: 60px;" src="${data.#((codeGen.isTableUseRecord&&codeGen.isTableRecordCamelCase!=null&&codeGen.isTableRecordCamelCase==false)?col.colName:col.attrName)|#(col.colFormat??)}" onerror="this.src='assets/img/noimg.png'"/></td>
+#else
+<td>$${data.#((codeGen.isTableUseRecord&&codeGen.isTableRecordCamelCase!=null&&codeGen.isTableRecordCamelCase==false)?col.colName:col.attrName)|#(col.colFormat??)}</td>
+#end
+#else
+<td>${data.#((codeGen.isTableUseRecord&&codeGen.isTableRecordCamelCase!=null&&codeGen.isTableRecordCamelCase==false)?col.colName:col.attrName)}</td>
+#end
+#end
+#end
+#if(codeGen.isShowOptcol)
+<td>
+#if(codeGen.isCrud && codeGen.isShowOptcolEdit)
+	#if(hasIsDeletedColumn)
+	{@if data.isDeleted}
+	<a class="text-info mr-1" data-openpage="dialog" href="#(codeGen.controllerPathWithoutFirstSlash)/edit/#(dataIdStr??)" data-area="#(codeGen.formDialogArea?? '800,600')" data-title="查看#(codeGen.mainTableRemark??)"><i class="fa fa-eye"></i></a>
+	{@else}
+	<a class="jbolt_table_editbtn" href="#(codeGen.controllerPathWithoutFirstSlash)/edit/#(dataIdStr??)" data-handler="refreshJBoltTable" data-area="#(codeGen.formDialogArea?? '800,600')" data-title="编辑#(codeGen.modelTitle?? (codeGen.pageTitle?? codeGen.mainTableRemark??))"><i class="fa fa-edit"></i></a>
+	{@/if}
+	#else
+	<a class="jbolt_table_editbtn" href="#(codeGen.controllerPathWithoutFirstSlash)/edit/#(dataIdStr??)" data-handler="refreshJBoltTable" data-area="#(codeGen.formDialogArea?? '800,600')" data-title="编辑#(codeGen.modelTitle?? (codeGen.pageTitle?? codeGen.mainTableRemark??))"><i class="fa fa-edit"></i></a>
+	#end
+#end
+#if(codeGen.isCrud && codeGen.isShowOptcolDel)
+	#if(hasIsDeletedColumn)
+	<a class="jbolt_table_delbtn" href="#(codeGen.controllerPathWithoutFirstSlash)/${data.isDeleted?'realDelete':'delete'}/#(dataIdStr??)" data-handler="refreshJBoltTable" ><i class="fa fa-remove c-danger"></i></a>
+	#else
+	<a class="jbolt_table_delbtn" href="#(codeGen.controllerPathWithoutFirstSlash)/delete/#(dataIdStr??)" data-handler="refreshJBoltTable" ><i class="fa fa-remove c-danger"></i></a>
+	#end
+#end
+#if(codeGen.isCrud && hasIsDeletedColumn && codeGen.isShowOptcolRecover)
+	{@if data.isDeleted}
+	<a class="text-info mr-1" data-ajaxbtn data-confirm="确认恢复此数据?" href="#(codeGen.controllerPathWithoutFirstSlash)/recover/#(dataIdStr??)" data-handler="refreshJBoltTable" ><i class="fa fa-reply"></i></a>
+	{@/if}
+#end
+#if(codeGen.isCrud && codeGen.isShowOptcolSort)
+	<a href="#(codeGen.controllerPathWithoutFirstSlash)/up/#(dataIdStr??)" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+	<a href="#(codeGen.controllerPathWithoutFirstSlash)/down/#(dataIdStr??)" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+#end
+</td>
+#end
+</tr>
+{@/each}
+</textarea>
+#if(codeGen.isToolbar)
+<div class="jbolt_table_toolbar" id="#(codeGen.modelName)_toolbar#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">
+<div class="btn-group btn-group-sm" role="group" aria-label="btn-group">
+#if(codeGen.isCrud && codeGen.isToolbarAddBtn)
+	<button data-dialogbtn data-area="#(codeGen.formDialogArea?? '800,600')"  data-handler="jboltTablePageToFirst"  id="toolbar_addBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"  data-title="新增#(codeGen.modelTitle?? (codeGen.pageTitle?? codeGen.mainTableRemark??))" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/add'):'admin/codegen/formPortalTest/'+codeGen.id)" class="btn btn-outline-primary" ><i class="fa fa-plus"></i> 新增</button>
+#end
+#if(codeGen.isCrud && codeGen.isToolbarEditBtn)
+	<button data-dialogbtn data-area="#(codeGen.formDialogArea?? '800,600')"  data-handler="refreshJBoltTable"  id="toolbar_editBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"  data-title="编辑#(codeGen.modelTitle?? (codeGen.pageTitle?? codeGen.mainTableRemark??))" data-check-handler="jboltTableGetCheckedId" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/edit/'):'admin/codegen/formPortalTest/'+codeGen.id+'-')" class="btn btn-outline-primary"><i class="fa fa-edit"></i> 编辑</button>
+#end
+#if(codeGen.isCrud && codeGen.isToolbarDelBtn)
+	<button data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" id="toolbar_deleteBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/deleteByIds?ids='):'admin/codegen/testAjax?ids=')" data-confirm="确定删除选中数据？" class="btn btn-outline-danger" ><i class="fa fa-trash"></i> 删除</button>
+#end
+#if(codeGen.isCrud && hasIsDeletedColumn && codeGen.isToolbarRecoverBtn)
+	<button style="display:none;" data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" id="toolbar_recoverBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/recoverByIds?ids='):'admin/codegen/testAjax?ids=')"  data-confirm="确定还原回收站里选中数据？" class="btn btn-outline-info btn-sm" ><i class="fa fa-reply"></i> 还原</button>
+#end
+#if(codeGen.isToolbarRefreshBtn)<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info" ><i class="fa fa-refresh"></i> 刷新</button>#end
+</div>
+#if(codeGen.toolbarExtraButtonSize>0)
+<div class="btn-group btn-group-sm" role="group" aria-label="btn-group">
+#for(i=0;i<codeGen.toolbarExtraButtonSize;i++)
+<button class="btn btn-outline-primary"><i class="fa fa-cog"></i> btn_#(i)</button>
+#end
+</div>
+#end
+#if(codeGen.isImportExcel || codeGen.isExportExcel)
+<div class="float-right" role="group" aria-label="btn-group">
+#if(codeGen.isCrud && codeGen.isImportExcel)<button data-dialogbtn data-area="600,400"  data-handler="jboltTablePageToFirst" tooltip data-title="导入Excel数据" data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/initImportExcel'):('admin/codegen/initImportExcel/'+(codeGen.id?? 0)))" data-btn="close" class="btn btn-outline-primary btn-sm" ><i class="fa fa-upload"></i></button>#end
+#if(codeGen.isExportExcel)
+	<div class="btn-group btn-group-sm">
+		#if(codeGen.isExportExcelByForm??)
+		<button tooltip data-title="导出Excel(查询结果)" data-form="#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end" class="btn btn-outline-primary btn-sm" data-downloadbtn data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/exportExcelByForm'):('admin/codegen/exportExcel/'+codeGen.id))"><i class="fa fa-download"></i></button>
+		#end
+		#if(codeGen.isExportExcelByCheckedIds??)
+		<button tooltip data-title="导出Excel(选中行数据)" data-usecheckedids="true" class="btn btn-outline-success btn-sm" data-downloadbtn data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/exportExcelByCheckedIds'):('admin/codegen/exportExcel/'+codeGen.id))"><i class="fa fa-download"></i></button>
+		#end
+		#if(codeGen.isExportExcelAll??)
+		<button tooltip data-title="导出Excel(所有数据)" class="btn btn-outline-info btn-sm" data-downloadbtn data-url="#(codeGenServiceMode?(codeGen.controllerPathWithoutFirstSlash+'/exportExcelAll'):('admin/codegen/exportExcel/'+codeGen.id))"><i class="fa fa-download"></i></button>
+		#end
+	</div>
+#end
+</div>
+#end
+
+</div>
+#end
+#if(codeGen.isHeadbox)
+<div style="height:#(codeGen.isHeadboxHeightAuto?'auto':(codeGen.headboxHeight+'px'));" class="jbolt_table_headbox #if(codeGen.isTableMultiConditionsMode?? && codeGen.isTableMultiConditionsDefaultHide??)d-none#end" id="#(codeGen.modelName)_headbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">
+#if(codeGen.isTableMultiConditionsMode??)
+<form onsubmit="return false;"  id="#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">
+	<div class="row">
+		<div class="col">
+			<div class="row jbolt_headbox_conditions">
+				#if(hasIsKeywordsColumn)
+				<div class="col-auto">
+				<div class="input-group">
+					<div class="input-group-prepend">
+						<span class="input-group-text">关键词</span>
+					</div>
+					<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="#(keywords)" />
+				</div>
+				</div>
+				#end
+				#if(conditions!=null&&conditions.size()>0)
+				#for(col:conditions)
+				<div class="col-auto">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text">#(col.tableLabel??)</span>
+						</div>
+						#@switchIndexColType?(col)
+					</div>
+				</div>
+				#end
+				#end
+			</div>
+		</div>
+		<div class="col-auto text-center" style="width:#(hasIsDeletedColumn?200:160)px;">
+			#if(hasIsDeletedColumn)
+			<input type="hidden" name="isDeleted" value="false"/>
+			<div class="btn-group text-center btn-group-sm">
+				<button onclick="#(codeGen.modelName)_formSearch#if(codeGenServiceMode??)_#[[#]]#(pageId)#end('#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end',false)" id="form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"  type="button" class="btn btn-outline-primary" ><i class="fa fa-search"></i> 查询</button>
+				<button onclick="#(codeGen.modelName)_formSearch#if(codeGenServiceMode??)_#[[#]]#(pageId)#end('#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end',true)"  id="form_trashBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"  type="button" class="btn btn-outline-danger" ><i class="fa fa-trash"></i> 回收站</button>
+				<button  type="button" onclick="form.reset();$('#form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end').click();" class="btn btn-outline-secondary" ><i class="fa fa-reply-all"></i> 重置</button>
+			</div>
+			#else
+			<div class="btn-group text-center btn-group-sm">
+				<button type="submit" class="btn btn-outline-primary" ><i class="fa fa-search"></i> 查询</button>
+				<button type="button" onclick="form.reset();refreshJBoltTable(this);" class="btn btn-outline-secondary" ><i class="fa fa-reply-all"></i> 重置</button>
+			</div>
+			#end
+		</div>
+	</div>
+</form>
+#else
+headBox内容自行填写
+#end
+
+</div>
+#end
+#if(codeGen.isFootbox)
+<div style="height:#(codeGen.isFootboxHeightAuto?'auto':(codeGen.footboxHeight+'px'));" class="jbolt_table_footbox" id="#(codeGen.modelName)_footbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">footbox</div>
+#end
+#if(codeGen.isLeftbox)
+<div style="width:#(codeGen.leftboxWidth)px;" class="jbolt_table_leftbox" id="#(codeGen.modelName)_leftbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">
+#if(codeGen.leftboxTitle||codeGen.leftboxIcon)<div class="jb_header">#if(codeGen.leftboxIcon)<i class="#(codeGen.leftboxIcon??)"></i>#end #if(codeGen.leftboxTitle)<span>#(codeGen.leftboxTitle??)</span>#end</div>#end
+<div class="jb_body"></div>
+#if(codeGen.isLeftboxFooter)
+<div class="jb_footer text-center">
+#if(codeGen.leftboxFooterButtonCount)
+#for(i=0;i<codeGen.leftboxFooterButtonCount;i++)
+<button class="btn btn-outline-primary btn-sm">按钮_#(i)</button>
+#end
+#end
+</div>
+#end
+</div>
+#end
+#if(codeGen.isRightbox)
+<div style="width:#(codeGen.rightboxWidth)px;" class="jbolt_table_rightbox" id="#(codeGen.modelName)_rightbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end">
+#if(codeGen.rightboxTitle||codeGen.rightboxIcon)<div class="jb_header">#if(codeGen.rightboxIcon)<i class="#(codeGen.rightboxIcon??)"></i>#end #if(codeGen.rightboxTitle)<span>#(codeGen.rightboxTitle??)</span>#end</div>#end
+<div class="jb_body"></div>
+#if(codeGen.isRightboxFooter)
+<div class="jb_footer text-center">
+#if(codeGen.leftboxFooterButtonCount)
+#for(i=0;i<codeGen.leftboxFooterButtonCount;i++)
+<button class="btn btn-outline-primary btn-sm">按钮_#(i)</button>
+#end
+#end
+</div>
+#end
+</div>
+#end
+<table class="jbolt_table jbolt_main_table #if(codeGen.isTableTextCenter==null || codeGen.isTableTextCenter==true) table-center #end"
+	   data-jbolttable
+	   data-width="#(codeGen.tableWidth=='assign'?(codeGen.tableWidthAssign?? 'fill'):codeGen.tableWidth)"
+	   #if(codeGenServiceMode??)
+	   data-height="#(codeGen.tableHeight=='assign'?(codeGen.tableHeightAssign?? 'fill'):codeGen.tableHeight)"
+	   #else
+	   data-height="#(codeGen.tableHeight=='assign'?(codeGen.tableHeightAssign?? 'fill_box'):'fill_box')"
+	   #end
+	   data-ajax="true"
+	   data-conditions-form="#(codeGen.modelName)_form#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"
+	   #if(codeGenServiceMode??)
+	   data-url="#(codeGen.controllerPathWithoutFirstSlash??)/datas"
+	   #else
+	   data-url="admin/codegen/tablePortalDatas/#(codeGen.id)"
+	   #end
+	   data-rowtpl="#(codeGen.modelName)_tpl#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"
+	   data-copy-to-excel="#(codeGen.isCopyToExcel?? false)"
+	#if(codeGen.isPaginate)
+	   data-page="#(codeGen.modelName)_page"
+	#end
+	#if(codeGen.tablePagesizeOptions)
+	   data-pagesize-options="#(codeGen.tablePagesizeOptions)"
+	#end
+	#if(codeGen.isTableColumnResize)
+	   data-column-resize="true"
+	#end
+	#if(codeGen.isToolbar)
+	   data-toolbar="#(codeGen.modelName)_toolbar#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"
+	#end
+	#if(codeGen.isTablePrependColumn)
+	   data-column-prepend="#(codeGen.tablePrependColumnIndex?? 1):#(codeGen.tablePrependColumnType?? 'checkbox'):#(codeGen.isTablePrependColumnClickActive?? false):#(codeGen.isTablePrependColumnLinkparent?? false):#(codeGen.isTablePrependColumnLinkson?? false)"
+	#end
+	#if(!editMode??)
+	#if(codeGen.tableFixedColumnLeft)
+	   data-fixed-columns-left="#(codeGen.tableFixedColumnLeft)"
+	#end
+	#if(codeGen.tableFixedColumnRight)
+	   data-fixed-columns-right="#(codeGen.tableFixedColumnRight)"
+	#end
+	#end
+	#if(codeGen.isHeadbox)
+	   data-headbox="#(codeGen.modelName)_headbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"
+	#end
+	#if(codeGen.isFootbox)
+	   data-footbox="#(codeGen.modelName)_footbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"
+	#end
+	#if(codeGen.isLeftbox)
+	   data-leftbox="#(codeGen.modelName)_leftbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"
+	#end
+	#if(codeGen.isRightbox)
+	   data-rightbox="#(codeGen.modelName)_rightbox#if(codeGenServiceMode??)_#[[#]]#(pageId)#end"
+	#end
+	#if(sortableColumns)
+	   data-sortable-columns="#(sortableColumns)"
+	   #if(sortColumn&&sortType)
+	   data-sort="#((sortColumn&&sortType)?(sortColumn+':'+sortType):'')"
+	   #else
+	   data-sort="#[[#((sortColumn&&sortType)?(sortColumn+':'+sortType):'')]]#"
+	   #end
+	   #if(codeGen.tableDefaultSortColumn??)
+	   data-default-sort-column="#(codeGen.tableDefaultSortColumn??)"
+	   #end
+	#end
+	   #if(codeGen.isTableRowClickActive??)
+	   data-row-click-active="true"
+	   #end
+	   #if(codeGen.activeTrBgColor??)
+	   data-row-click-active-bgcolor="#(codeGen.activeTrBgColor??)"
+	   #end
+	   #if(codeGen.activeTrFrColor??)
+	   data-row-click-active-frcolor="#(codeGen.activeTrFrColor??)"
+	   #end
+	   #if(editMode??)
+	   data-ajax-success-handler="tablePortalTableAjaxSuccessHandler"
+	   #end
+>
+<thead class="fw-normal" #if(codeGen.theadBgColor && codeGen.theadFrColor) style="background-color: #(codeGen.theadBgColor)!important;color: #(codeGen.theadFrColor)!important;" #end >
+#if(editMode??)
+<tr class="sortable_tr">
+	<th data-width="60" data-column="index"></th>
+	#for(col:cols)
+	<th data-editmode-index="#(for.index)" data#(col.isNeedFixedWidth?'-':'-min-')width="#(col.tableColWidth?? 100)" draggable="true" data-sort-div-width="#(col.tableColWidth?? 100)" data-text="#(col.tableLabel?? col.attrName)" class="sortable_th" data-id="#(col.id)">
+	<a data-attr-id="#(col.id??)" tooltip data-title="编辑列属性值" onclick="showTableColEditor(this)" class="d-inline-block mx-1" href="javascript:void(0)"><i class="fa fa-edit text-danger"></i></a>
+	### #if(!for.first)<a class="mx-1" tooltip data-title="左移" data-ajaxbtn href="admin/codegen/modelattr/tableColUp/#(col.id)"  data-success-time="200"  data-handler="changeTablePreviewMode(true)"><i class="fa fa-arrow-left text-primary"></i></a>#end #if(!for.last)<a class="mx-1" tooltip data-title="右移"  data-ajaxbtn href="admin/codegen/modelattr/tableColDown/#(col.id)" data-success-time="200" data-handler="changeTablePreviewMode(true)"><i class="fa fa-arrow-right text-primary"></i></a>#end
+	<a class="d-inline-block mx-1 jbicon2 jbi-drag text-info jbolt_drag_trigger" tooltip draggable="true" data-title="拖动排序"></a>
+	</th>
+	#end
+	#if(codeGen.isShowOptcol??)<th data-width="#(codeGen.tableOptcolWidth?? 70)"></th>#end
+</tr>
+#end
+<tr>
+#if(editMode??)
+#if(codeGen.isTablePrependColumn)
+<th>-</th>
+#end
+#end
+<th data-width="60" data-column="index">序号</th>
+#for(col:cols)
+	<th #if(editMode??)data-editmode-index="#(for.index)"#end  data#(col.isNeedFixedWidth?'-':'-min-')width="#(col.tableColWidth?? 100)" data-column="#(col.colName)">#(col.tableLabel?? col.attrName)#if(editMode??)[#(col.sortRankIntable)]#end </th>
+#end
+#if(codeGen.isShowOptcol??)<th data-width="#(codeGen.tableOptcolWidth?? 70)">操作</th>#end
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+#end
+#if(codeGenServiceMode??)
+#[[#end]]#
+
+#[[#define js()]]#
+<script type="text/javascript">
+	#if(hasIsDeletedColumn)
+	function #(codeGen.modelName)_formSearch#if(codeGenServiceMode??)_#[[#]]#(pageId)#end(formId,isDeleted){
+		var form=$("#"+formId);
+		form.find("input[name='isDeleted']").val(isDeleted);
+		if(isDeleted){
+			$("#form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-primary").addClass("btn-outline-primary");
+			$("#form_trashBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-outline-danger").addClass("btn-danger");
+			#if(codeGen.isToolbar && codeGen.isToolbarRecoverBtn)
+			$("#toolbar_recoverBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			$("#toolbar_deleteBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			$("#toolbar_addBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			$("#toolbar_editBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			#end
+		}else{
+			$("#form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-outline-primary").addClass("btn-primary");
+			$("#form_trashBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-danger").addClass("btn-outline-danger");
+			#if(codeGen.isToolbar && codeGen.isToolbarRecoverBtn)
+			$("#toolbar_recoverBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			$("#toolbar_deleteBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			$("#toolbar_addBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			$("#toolbar_editBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			#end
+		}
+		form.submit();
+	}
+	#end
+</script>
+#[[#end]]#
+#else
+<script type="text/javascript">
+	#if(hasIsDeletedColumn)
+	function #(codeGen.modelName)_formSearch#if(codeGenServiceMode??)_#[[#]]#(pageId)#end(formId,isDeleted){
+		var form=$("#"+formId);
+		form.find("input[name='isDeleted']").val(isDeleted);
+		if(isDeleted){
+			$("#form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-primary").addClass("btn-outline-primary");
+			$("#form_trashBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-outline-danger").addClass("btn-danger");
+			#if(codeGen.isToolbar && codeGen.isToolbarRecoverBtn)
+			$("#toolbar_recoverBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			$("#toolbar_deleteBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			$("#toolbar_addBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			$("#toolbar_editBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			#end
+		}else{
+			$("#form_searchBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-outline-primary").addClass("btn-primary");
+			$("#form_trashBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").removeClass("btn-danger").addClass("btn-outline-danger");
+			#if(codeGen.isToolbar && codeGen.isToolbarRecoverBtn)
+			$("#toolbar_recoverBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").hide();
+			$("#toolbar_deleteBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			$("#toolbar_addBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			$("#toolbar_editBtn#if(codeGenServiceMode??)_#[[#]]#(pageId)#end").show();
+			#end
+		}
+		form.submit();
+	}
+	#end
+</script>
+#end

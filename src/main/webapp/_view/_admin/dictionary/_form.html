@@ -1,0 +1,34 @@
+<form onsubmit="return false;" id="dictionaryForm" action="#(action)" method="post">
+	#if(dictionary.id??)
+		<input type="hidden" name="dictionary.id" value="#(dictionary.id)" />
+	#end
+	#if(needPidSelect)
+	<div class="form-group">
+			<label>请选择上级：</label>
+			<select id="parentDictionarySelect" class="form-control"  data-url="admin/dictionary/select/#(typeId)-#(dictionary.id?? 0)"  name="dictionary.pid" data-autoload data-text="=请选择父级数据=" data-value="0" data-select="#(pid?? 0)"></select>
+		</div>
+	#end
+	<input type="hidden" name="dictionary.typeId" value="#(typeId)">
+	#if(dictionary.id??)
+	<div class="form-group">
+		<label>请输入名称：</label>
+		<input class="form-control" autocomplete="off" autofocus="autofocus"  data-rule="required"  placeholder="请输入名称 " data-tips="请输入名称 " maxlength="40" name="dictionary.name" value="#(dictionary.name??)"/>
+	</div>
+	<div class="form-group">
+		<label>请输入编码：</label>
+		<input class="form-control" autocomplete="off" placeholder="请输入编码 " maxlength="40" name="dictionary.sn" value="#(dictionary.sn??)" />
+	</div>
+	#else
+	<div class="form-group">
+		<label>请输入名称：</label>
+		<textarea style="height: 100px;" autocomplete="off" autofocus="autofocus" data-rule="len<=1000"  class="form-control"  placeholder="请输入名称 如有多个 用空格隔开 单个长度需<=100" data-tips="请输入名称 如有多个 用空格隔开 单个长度需<=100" maxlength="1000" name="dictionary.name" >#(dictionary.name??)</textarea>
+	</div>
+	<div class="form-group">
+		<label>请输入编码：</label>
+		<textarea  style="height: 100px;"  class="form-control" data-rule="len<=1000" data-notnull="false" data-tips="请输入编码 如有多个 用空格隔开 单个长度需<=100" placeholder="请输入编码 如有多个 用空格隔开 单个长度需<=100" maxlength="1000" name="dictionary.sn">#(dictionary.sn??)</textarea>
+	</div>
+	#end
+</form>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="dictionaryForm")
+#end

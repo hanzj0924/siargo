@@ -1,0 +1,219 @@
+#set(modelNameL=firstCharToLowerCase(modelName))
+<form onsubmit="return false;" id="#(modelNameL)Form" action="#[[#]]#(action)" method="post">
+<input type="hidden" name="#(modelNameL).#(mainLogicBean.primaryKeyAttr)" value="#[[#]]#(#(modelNameL).#(mainLogicBean.primaryKeyAttr)??)" />
+#if(mainLogicBean.hasPid)
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">上级#(mainLogicBean.dataName?? '数据')</label>
+		<div class="col input-group">
+			<select class="form-control" data-refresh="true"  data-autoload data-url="替换为自己的数据源地址"  name="#(modelNameL).pid" data-refresh="true" data-rule="required" data-tips="请选择上级#(mainLogicBean.dataName?? '数据')" data-text="=请选择="  data-value="" data-select="#[[#(]]# #(modelNameL).pid #[[??)]]#"></select>
+		</div>
+	</div>
+#end
+###判断设置了几列的布局生成参数 大于1就执行算法 等于1就直接switch判断组件类型并生成组件
+#if(mainLogicBean.formColCount>1)
+<div class="row">
+	### 获取要生成UI组件的字段列数量
+	#setLocal(size=cols.size())
+	### 获取主动设置的一列最小组件生成个数
+	#setLocal(formColControlCount=mainLogicBean.formColControlMinCount)
+	### 循环遍历列数
+	#for(i = 0; i < mainLogicBean.formColCount; i++)
+	### 创建列容器class=col
+	<div class="col">
+	### 计算当前开始组件下标 为当前第几列序号*一列多少个
+	#setLocal(start=i*formColControlCount)
+	### 计算当前结束组件下标 为当前开始下标+(最小个数-1)去判断如果小于总个数了就等于这个数 如果大于总个数了就等于最大下标
+	#setLocal(end=((start+(formColControlCount-1))<size?(start+(formColControlCount-1)):size-1))
+	### 循环遍历从start到end
+	#for(j = start; j <= end; j++)
+	### 挨个判断组件类型生成对应组件
+	#@switchType?(cols[j])
+	#end
+	</div>
+	#end
+</div>
+
+#else
+### 等于1就直接switch判断组件类型并生成组件
+#for(col:cols)
+#@switchType?(col)
+#end
+#end
+</form>
+#[[#]]#define js()
+<script>
+</script>
+#[[#]]#include("/_view/_admin/common/_formjs.html",formId="#(modelNameL)Form")
+#[[#]]#end
+
+#define switchType(col)
+#switch(col.uiType)
+#case("input")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  #if(col.required) data-rule="required" #end placeholder="请输入#(col.remark?? col.name)" maxlength="#(col.maxLength?? '40')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("password")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="password" data-with-clearbtn="true"  autocomplete="off"  class="form-control"  #if(col.required) data-rule="required" #end placeholder="请输入#(col.remark?? col.name)" maxlength="#(col.maxLength?? '40')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("input_number")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="number#if(col.fixed>0);fix<=#(col.fixed);#end" #if(!col.required) data-notnull="false" #end placeholder="请输入#(col.remark?? col.name)"  maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("input_pnumber")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="pnumber#if(col.fixed>0);fix<=#(col.fixed);#end" #if(!col.required) data-notnull="false" #end placeholder="请输入#(col.remark?? col.name)"  maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("input_pznumber")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="pznumber#if(col.fixed>0);fix<=#(col.fixed);#end" #if(!col.required) data-notnull="false" #end placeholder="请输入#(col.remark?? col.name)"  maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("input_pint")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="pint" #if(!col.required) data-notnull="false" #end placeholder="请输入#(col.remark?? col.name)"  maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("input_int")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off" class="form-control" data-rule="int" #if(!col.required) data-notnull="false" #end placeholder="请输入#(col.remark?? col.name)"  maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("input_pzint")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off" class="form-control" data-rule="pzint" #if(!col.required) data-notnull="false" #end placeholder="请输入#(col.remark?? col.name)"  maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("date")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-date data-type="date" data-fmt="yyyy-MM-dd" readonly="readonly" autocomplete="off" class="form-control" #if(col.required) data-rule="required" #end placeholder="请设置#(col.remark?? col.name)" data-tips="请设置#(col.remark?? col.name)" maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("datetime")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-date data-type="datetime" data-with-clearbtn="true" data-fmt="yyyy-MM-dd HH:mm" readonly="readonly" autocomplete="off" class="form-control" #if(col.required) data-rule="required" #end placeholder="请设置#(col.remark?? col.name)" data-tips="请设置#(col.remark?? col.name)" maxlength="#(col.maxLength?? '20')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("time")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-date data-type="time" data-with-clearbtn="true" data-fmt="HH:mm" readonly="readonly" autocomplete="off" class="form-control" #if(col.required) data-rule="required" #end placeholder="请设置#(col.remark?? col.name)" data-tips="请设置#(col.remark?? col.name)" maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("year")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-date data-type="year" data-with-clearbtn="true" data-fmt="yyyy" readonly="readonly" autocomplete="off" class="form-control" #if(col.required) data-rule="required" #end placeholder="请设置#(col.remark?? col.name)" data-tips="请设置#(col.remark?? col.name)" maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("month")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="text" data-date data-type="month" data-with-clearbtn="true" data-fmt="yyyy-MM" readonly="readonly" autocomplete="off" class="form-control" #if(col.required) data-rule="required" #end placeholder="请设置#(col.remark?? col.name)" data-tips="请设置#(col.remark?? col.name)" maxlength="#(col.maxLength?? '10')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("week")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+			<input type="week" data-with-clearbtn="true" autocomplete="off" class="form-control" #if(col.required) data-rule="required" #end  placeholder="请设置#(col.remark?? col.name)" data-tips="请设置#(col.remark?? col.name)" maxlength="#(col.maxLength?? '30')" name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)"/>
+		</div>
+	</div>
+#case("select")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col input-group">
+			<select class="form-control"  data-autoload data-url="替换为自己的数据源地址"  name="#(modelNameL).#(col.name)" data-refresh="true" #if(col.required) data-rule="select" #end  data-tips="请选择#(col.remark?? col.name)" data-text="=请选择="  data-value="" data-select="#[[#(]]# #(modelNameL).#(col.name) #[[??)]]#"></select>
+		</div>
+	</div>
+#case("autocomplete")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+		<input type="text" autocomplete="off" data-autocomplete data-url="demo/userAutocomplete"  data-hiddeninput="#(col.name)_hidden" class="form-control" #if(col.required) data-rule="required" #end  placeholder="请选择#(col.remark?? col.name)"  data-tips="请选择#(col.remark?? col.name)"  maxlength="200"/>
+		<input type="hidden" autocomplete="off" id="#(col.name)_hidden" #if(col.required) data-rule="required" #end  placeholder="请选择#(col.remark?? col.name)"   data-tips="请选择#(col.remark?? col.name)"  name="#(modelNameL).#(col.name)" value="#[[#]]#(#(modelNameL).#(col.name)??)" maxLength="#(col.maxLength?? '20')"/>
+		</div>
+	</div>
+#case("textarea")
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">#(col.remark?? col.name)</label>
+		<div class="col">
+		<textarea class="form-control" placeholder="请输入#(col.remark?? col.name)" data-tips="请输入#(col.remark?? col.name)"  #if(col.required) data-rule="required" #end  maxlength="#(col.maxLength?? '255')" name="#(modelNameL).#(col.name)" style="height:80px">#[[#]]#(#(modelNameL).#(col.name)??)</textarea>
+		</div>
+	</div>
+#case("radio")
+    <div class="form-group row"
+    	data-radio
+    	data-rule="radio"
+    	data-value="#[[#]]#(#(modelNameL).#(col.name)??)"
+    	data-name="#(modelNameL).#(col.name)"
+    	data-default="options_first"
+    	data-url="替换为自己的数据源地址"
+    	data-label="#(col.remark?? col.name)"
+    	data-width="col-sm-2,col"
+    	data-inline="true"
+    	></div>
+#case("radio_boolean")
+    <div class="form-group row"
+    	data-radio
+    	data-rule="radio"
+    	data-value="#[[#]]#(#(modelNameL).#(col.name)??)"
+    	data-name="#(modelNameL).#(col.name)"
+    	data-default="options_first"
+    	data-width="col-sm-2,col"
+		>
+			<label class="col-sm-2 col-form-label" >#(col.remark?? col.name)</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="r_#(col.name)_true" type="radio" name="#(modelNameL).#(col.name)" value="true"/>
+					<label for="r_#(col.name)_true">是</label>
+				</div>
+				
+				<div class="radio radio-primary  radio-inline">
+					<input  id="r_#(col.name)_false" type="radio" name="#(modelNameL).#(col.name)" value="false"/>
+					<label for="r_#(col.name)_false">否</label>
+				</div>
+			</div>
+		</div>
+#case("checkbox")
+    <div class="form-group row"
+    	data-checkbox
+    	#if(col.required) data-rule="checkbox" #end 
+    	data-value="#[[#]]#(#(modelNameL).#(col.name)??)"
+    	data-name="#(modelNameL).#(col.name)"
+    	data-default="options_first"
+    	data-url="替换为自己的数据源地址"
+    	data-label="#(col.remark?? col.name)"
+    	data-width="col-sm-2,col"
+    	data-inline="true"
+    	data-item-min-width="auto"
+    	></div>
+#end
+#end

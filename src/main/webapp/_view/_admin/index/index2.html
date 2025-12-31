@@ -1,0 +1,16 @@
+#@jboltLayout()
+#define js()
+<script type="text/javascript">
+$(function(){
+	var nav=$(".jbolt_admin_left_navs .jbolt_admin_nav").first();
+	if(nav&&nav.length>0){
+	var a=nav.find("a").first();
+	if(a&&a.length>0){
+		var url=a.attr("href");
+			$.pjax({url:url,container:"#jbolt-container"});
+		}
+		}
+});
+
+</script>
+#end

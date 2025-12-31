@@ -1,0 +1,29 @@
+<form onsubmit="return false;" id="roleForm" action="#(action)" method="post">
+		<input type="hidden" name="role.pid" value="#(pid?? 0)" />
+	#if(role.id??)
+		<input type="hidden" name="role.id" value="#(role.id)" />
+		
+	<div class="form-group">
+		<label>请输入名称:</label>
+		<input type="text" data-with-clearbtn="true"  autocomplete="off" autofocus="autofocus"  class="form-control" data-rule="required;len<=40;" data-tips="请输入角色名称" placeholder="请输入角色名称" maxlength="40" name="role.name" value="#(role.name??)">
+	</div>
+	<div class="form-group">
+		<label>请输入编码:</label>
+		<input type="text" data-with-clearbtn="true"  autocomplete="off" class="form-control" data-rule="len<=40;" data-notnull="false" data-tips="请输入角色编码 " placeholder="请输入角色编码 " maxlength="40" name="role.sn" value="#(role.sn??)">
+	</div>
+	#else
+		<div class="form-group">
+			<label>请输入名称:</label>
+			<textarea style="height: 100px"  autocomplete="off" autofocus="autofocus"  class="form-control" data-rule="required;len<=200;" data-tips="请输入角色名称 如有多个 用空格隔开" placeholder="请输入角色名称 如有多个 用空格隔开" maxlength="200" name="role.name">#(role.name??)</textarea>
+		</div>
+		
+		<div class="form-group">
+			<label>请输入编码:</label>
+			<textarea style="height: 100px"  autocomplete="off" autofocus="autofocus"  class="form-control" data-rule="len<=200;" data-notnull="false" data-tips="请输入角色编码 如有多个 用空格隔开 编码数量与名称数量保持一致" placeholder="请输入角色名称 如有多个 用空格隔开 编码数量与名称数量保持一致" maxlength="200" name="role.sn">#(role.sn??)</textarea>
+		</div>
+	#end
+	
+</form>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="roleForm")
+#end

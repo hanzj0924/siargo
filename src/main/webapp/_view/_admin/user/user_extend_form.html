@@ -1,0 +1,54 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page #(readonlyMode?'':'p-0')">
+  <div class="jbolt_page_content  #(readonlyMode?'':'p-0')" id="readonlyModeDiv">
+  <input type="hidden" name="extend.id" value="#(extend.id??)" />
+  <div class="form-group row">
+    <label class="col-sm-#(readonlyMode?2:3) col-form-label">英文全名</label>
+    <div class="col-9">
+      <input type="text" autocomplete="off"  class="form-control" placeholder="请输入用户英文全名" maxlength="40" name="extend.englishFullName" value="#(extend.englishFullName??)">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-#(readonlyMode?2:3) col-form-label">出生日期</label>
+    <div class="col-9">
+      <input type="text" autocomplete="off" data-editable="true" data-rule="date" data-tips="请输入正确日期格式" data-notnull="false" class="form-control" placeholder="请输入出生日期" maxlength="10" data-date data-type="date" data-fmt="yyyy-MM-dd" name="extend.birthday" value="#datetime(extend.birthday??,'yyyy-MM-dd')">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-#(readonlyMode?2:3) col-form-label">居住地址</label>
+    <div class="col-9">
+      <input type="text" autocomplete="off"  class="form-control" placeholder="请输入居住地址" maxlength="100" name="extend.residentialAddress" value="#(extend.residentialAddress??)">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-#(readonlyMode?2:3) col-form-label">收件人</label>
+    <div class="col-9">
+      <input type="text" autocomplete="off"  class="form-control" placeholder="请输入收件人名称" maxlength="20" name="extend.recipientName" value="#(extend.recipientName??)">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-#(readonlyMode?2:3) col-form-label">收件电话</label>
+    <div class="col-9">
+      <input type="text" autocomplete="off"  class="form-control" placeholder="请输入收件人电话" maxlength="20" name="extend.recipientPhone" value="#(extend.recipientPhone??)">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-#(readonlyMode?2:3) col-form-label">收件地址</label>
+    <div class="col-9">
+      <input type="text" autocomplete="off"  class="form-control" placeholder="请输入收件地址" maxlength="20" name="extend.recipientAddress" value="#(extend.recipientAddress??)">
+    </div>
+  </div>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+  #if(readonlyMode)
+  $(function(){
+    formDisabled("#readonlyModeDiv");
+  });
+  #end
+</script>
+#end

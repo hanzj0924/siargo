@@ -1,0 +1,245 @@
+#--
+	后台主界面UI
+--#
+#define doAdminLayout()
+#setLocal(jboltLeftNavWidth=JBoltGlobalConfigCache.getSystemAdminLeftNavWidth())
+#setLocal(checkLastPwdUpdateTimeDays=JBoltGlobalConfigCache.getSystemPasswordChangeNoticeDays())
+#setLocal(jboltEnableTopnav=JBoltTopnavCache.getJBoltEnableTopnav())
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="#(basepath??)" />
+		<meta charset="utf-8" />
+		<title>#(JBoltGlobalConfigCache.getSystemName("JBolt极速开发平台"))</title>
+		 #if(need_always_https)
+	    	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+		 #end
+		<meta name="renderer" content="webkit">
+		<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+		#@jboltpageloadingcss?()
+		#@fontcss?()
+		#@bootstrapcss?()
+		<!-- Select2组件css资源 如果系统不使用select2 可以注释掉这个地方 -->
+		#@select2css?()
+		<!-- bootstrap-select组件css资源 如果系统不使用bootstrap-select 可以注释掉这个地方 -->
+		#@bootstrapselectcss?()
+		<!-- 系统后台管理核心封装CSS 与Bootstrap-->
+		#@maincss?()
+		<!-- 系统后台本项目特殊使用封装CSS -->
+		#@minecss?()
+		<!-- 消息提醒组件 -->
+		#@lobiboxcss?()
+		<!-- css动画 -->
+		#@animatecss?()
+		#@jqueryjs?()
+		<script type="text/javascript">
+		var needPjax=true;//默认是否pjax加载
+		var autoShowRequiredLabelStar=true;//默认是否自动处理表单中的必填项的红星样式
+		var JBolt_Left_Nav_width=#(jboltLeftNavWidth);
+		var JBolt_Enable_Topnav=#(jboltEnableTopnav);
+		</script>
+		<style type="text/css">
+		.note-editable p{
+		margin-bottom: 0px;
+		}
+		/* Custom dropdown menu styles */
+		.hover-bg-light:hover {
+			background-color: rgba(0,0,0,.03) !important;
+			transition: all 0.2s ease;
+		}
+		.jb_header_Layer {
+			margin-top: 0px;
+			border-radius: 0.5rem;
+			box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.1) !important;
+			right: 5px;
+			z-index: 1000;
+		}
+		.jb_header_Layer .list-group {
+			border-radius: 0.5rem;
+			overflow: hidden;
+			border: none;
+			margin-bottom: 0;
+		}
+		.jb_header_Layer .list-group-item {
+			transition: all 0.2s ease;
+			border-color: rgba(0,0,0,0.05);
+			display: flex;
+			align-items: center;
+		}
+		.jb_header_Layer .list-group-item i {
+			transition: transform 0.2s ease;
+			width: 20px;
+			text-align: center;
+		}
+		.jb_header_Layer .list-group-item:hover i {
+			transform: translateX(2px);
+		}
+		/* Fix for Safari browser */
+		@media screen and (-webkit-min-device-pixel-ratio:0) { 
+			.jb_header_user:hover .jb_header_Layer {
+				display: block !important; 
+			}
+		}
+ 		 </style>
+		 #@css?()
+	</head>
+	<body ontouchstart data-ispjax="#(_jb_rqtype_!=null&&_jb_rqtype_=='isPjax')">
+	<!-- 全屏loading组件 -->
+	<div id="jbolt_page_loader_main" class="jbolt_page_loader_main"><div class="jbolt_page_loader"></div></div>
+	### 处理浏览器自动填充密码账号问题 影响了其它表单和可编辑表格列输入
+	<div style="height:0px;width:0px;overflow: hidden">
+		<input type="text" tabindex="-1" name="username"  style="height:0px; border:0px;" autocomplete="new-password"  />
+		<input type="password" tabindex="-1" name="password"  style="height:0px; border:0px;" autocomplete="new-password"  />
+	</div>
+	#set(user=JBoltUserCache.getCurrentAdminUser())
+	#if(user!=null)
+	#setLocal(adminGlobalSearchShow=JBoltGlobalConfigCache.getSystemAdminGlobalSearchShow())
+		<div class="jbolt_admin #if(JboltWithTabs) withtabs #end #(JBoltUserConfigCache.getCurrentUserJboltStyle()) #(enableSystemAdminH50?'h50':'')">
+			<!--top start-->
+				<div class="jbolt_admin_main_top">
+				<!--left top userInfo  start-->
+				<a href="#(basepath)admin" class="jbolt_admin_logo_box pt-2 " style="width:#(jboltLeftNavWidth)px">
+				<h1>Siargo</h1>
+				</a>
+				<!--left top userInfo  end-->
+					<a tabindex="-1" class="jbolt_topbar_btn jbolt_toggle_Left_nav_btn"><i class="jbicon2 jbi-outdent"></i></a>
+					<a tabindex="-1" class="jbolt_topbar_btn" onclick="refreshPjaxContainer(this)"><i class="jbicon2 jbi-reload"></i></a>
+
+					<!-- admin top navs -->
+					#setLocal(topnavs=JBoltTopnavCache.getTopNavs())
+					#if(notEmpty(topnavs))
+					<div class="jbolt_top_nav_box">
+						<a tabindex="-1" onclick="jboltTopNavShowLeft()" class="optbtn jbolt_topbar_btn right"><i class="fa fa-angle-left"></i></a>
+					<div id="jbolt_top_nav_scroll_container" class="jbolt_top_nav_scroll_container animate__animated animate__fadeIn">
+						<ul class="jbolt_admin_topnavs">
+						#for(nav:topnavs)
+						<li data-id="#(nav.id)"><span>#if(nav.icon)<i class="#(nav.icon)"></i>#end#(nav.name)</span></li>
+						#if(for.last)
+						<li data-id="0" class="d-none"><span><i class="jbicon jb-qitabiankuang"></i>其它</span></li>
+						#end
+						#end
+					</ul>
+					</div>
+						<a tabindex="-1" onclick="jboltTopNavShowRight()" class="optbtn jbolt_topbar_btn right"><i class="fa fa-angle-right"></i></a>
+					</div>
+					#end
+
+					<!-- <h1 class="jbolt_admin_title">#globalConfig(GlobalConfigKey.SYSTEM_NAME,"JBolt极速开发平台")</h1> -->
+					#if(adminGlobalSearchShow)
+					<div class="jbolt_search_box withicon mx-3 animate__animated animate__fadeIn">
+					<input type="search" autocomplete="new-password" name="keywords" id="searchInput" placeholder="全局搜索"/>
+					</div>
+					#end
+
+					<div class="pull-right animate__animated animate__fadeIn">
+					<!-- <a tabindex="-1" onclick="return confirm('确定退出系统?')" tooltip data-title="退出系统"  href="admin/logout" class="jbolt_topbar_btn jbolt_logout_btn"></a> -->
+					<a tabindex="-1" tooltip data-title="消息中心" href="admin/msgcenter/layer"  data-top="#(enableSystemAdminH50?51:61)" data-nomask data-height="400" data-openpage="jboltlayer" data-width="350" data-resize="true" class="jbolt_topbar_btn"><i class="jbicon jb-msg-o"></i><span id="msgCenterRedDot" class="reddot"></span></a>
+					<a tabindex="-1" data-fullscreenbtn class="jbolt_topbar_btn"><i class="jbicon2 jbi-fullscreen"></i></a>
+					<a tabindex="-1" tooltip data-title="更多样式配置" data-refresh="true"  data-width="400" data-noclose data-top="#(enableSystemAdminH50?50:60)" data-jboltlayertrigger href="admin/userconfig" class="jbolt_topbar_btn jbolt_theme_btn" ></a>
+
+					<div class="jb_header_user">
+						<div class="jb_header_loged">
+						<div class="jb_header_avatar"><img  tabindex="-1" src="#realImage(user.avatar??,'assets/img/avatar.jpg')" onerror="this.src='assets/img/avatar.jpg'"/><span class="fa fa-sort-desc p-1 ml-1"></span></div>
+						<div class="jb_header_Layer animate__animated animate__fadeInUp jb_animate__faster">
+							<div class="list-group">
+								<a tabindex="-1" href="javascript:void(0)" class="list-group-item list-group-item-action text-center font-weight-bolder bg-light">用户: #(user.name??)</a>
+								<a tabindex="-1" data-openpage data-key="user_avatar_edit" href="admin/user/avatar" class="list-group-item list-group-item-action border-top-0 py-2 hover-bg-light"><i class="fa fa-address-book-o text-primary"></i><span class="ml-2">头像修改</span></a>
+								<a tabindex="-1" data-openpage data-key="user_pwd_edit" href="admin/user/pwd" class="list-group-item list-group-item-action border-top-0 py-2 hover-bg-light"><i class="fa fa-lock text-warning"></i><span class="ml-2">密码修改</span></a>
+								<a tabindex="-1" data-handler="showJboltLockSystem" data-ajaxbtn data-confirm="确定锁屏？" href="admin/lockSystem" class="list-group-item list-group-item-action border-top-0 py-2 hover-bg-light"><i class="fa fa-window-close text-info"></i><span class="ml-2">系统锁屏</span></a>
+								<a tabindex="-1" onclick="return userLogout()" href="#" class="list-group-item list-group-item-action border-top-0 py-2 hover-bg-light"><i class="fa fa-sign-out text-danger"></i><span class="ml-2">退出</span></a>
+							</div>
+						</div>
+						</div>
+					</div>
+
+					</div>
+				</div>
+			<!--left  start-->
+			<div class="jbolt_admin_left" style="width:#(jboltLeftNavWidth)px">
+			#include("_menu.html",hasEnableTopnav=jboltEnableTopnav)
+			</div>
+			<!--left  end-->
+			<!--tabbar start-->
+			<div class="jbolt_tabbar noselect" id="jbolt_tabbar" style="left:#(jboltLeftNavWidth)px">
+			<div class="jbolt_tab_left"><i class="fa fa-angle-double-left"></i></div>
+			<div class="jbolt_tab_right"><i class="fa fa-angle-double-right"></i></div>
+				<ul class="jbolt_tabs" id="jbolt_tabs"></ul>
+			</div>
+			<!--right start-->
+			<div class="jbolt_admin_main" style="left:#(jboltLeftNavWidth)px">
+				<!--top end-->
+				<!--main container start-->
+				<div class="jbolt_admin_main_container" id="jbolt-container">
+				#if(JboltWithTabs)
+				<div data-default class="jbolt_tabcontent">
+				#@main?()
+				</div>
+				#else
+				#@main?()
+				#end
+				</div>
+				<!--main container end-->
+			</div>
+			<!--right end-->
+		</div>
+		<!-- 锁屏组件 -->
+		<div oncontextmenu="doNothing()" class="j_locksystem noselect" id="j_locksystem">
+			<div class="j_lockmain">
+			<h1>屏幕已锁</h1>
+			<div class="j_lockpassword">
+			<input onkeyup="unlockSystem(event)" maxlength="40" type="password" id="unlockpwd" placeholder="输入密码 回车解锁" name="password"  autocomplete="off" />
+			<div class="j_reloginbtn"><a onclick="showReloginDialog(false,processUnLockAndAfterLogin)" href="javascrip:void(0)">切换用户</a></div>
+			</div>
+			</div>
+		</div>
+		<span class="d-none" id="JBOLT_ASSETS_VERSION">#(JBoltConfig.ASSETS_VERSION)</span>
+		<span class="d-none" id="JBOLT_BASE_UPLOAD_PATH_PRE">#(JBOLT_BASE_UPLOAD_PATH_PRE??)</span>
+		<span class="d-none" id="JBOLT_AUTO_LOCK_SCREEN_SECONDS">#(jboltAutoLockScreenSeconds??)</span>
+		<span class="d-none" id="JBOLT_TAB_KEEP_AFTER_RELOAD">#(jboltTabKeepAfterReload??)</span>
+		<span class="d-none" id="JBOLT_GLOBAL_UPLOAD_TO">#(JBOLT_GLOBAL_UPLOAD_TO?? 'local')</span>
+		#else
+		<div class="alert alert-danger" style="max-width:400px;margin: 50px auto;">
+			尚未登录,请<a data-openpage="dialog" class='text-danger' data-title='请重新登录系统'  data-handler='reloadCurrentPage' data-area='500,400' data-url='admin/relogin'>点此</a>重新登录
+		</div>
+		#end
+		#include("__jbolttable_filterbox.html")
+		#@bootstrapjs?()
+		#@jboltmainjslib?()
+		<!-- select2组件js -->
+		#@select2js?()
+		<!-- bootstrap-select组件js -->
+		#@bootstrapselectjs?()
+		#@jslib?()
+		<!-- 消息提醒组件 -->
+		#@lobiboxjs?()
+		<!-- 系统后台核心JS封装库 -->
+		#@mainjs?()
+		<!-- 系统后台本项目特殊使用封装JS -->
+		#@minejs?()
+		#@js?()
+		<script type="text/javascript">
+		$(function(){
+			jboltAdminLayoutInitTopNavFirst();
+			#if(!JBoltConfig.JBOLT_WEBSOCKET_ENABLE)
+			initReadUserMsgCenterUnreadInfo();
+			#end
+			hideJBoltPageLoading();
+		});
+		</script>
+		#if(JBoltConfig.JBOLT_WEBSOCKET_ENABLE)
+		<!-- 系统后台websocket js -->
+		<script type="module">
+		import JBoltWS from './assets/js/jbolt_websocket/jbolt-websocket.js'
+		JBoltWS.initJBoltWebsocket('#(ctx??)',() => {
+			JBoltWS.sendCommand({command:"msgcenter_check_unread"});
+			#if(checkLastPwdUpdateTimeDays>0)
+				setTimeout(function(){JBoltWS.sendCommand({command:"check_last_pwd_update_time"});},(getRandomInt(1,10)*1000));
+			#end
+		});
+		</script>
+		#end
+</body>
+</html>
+#end

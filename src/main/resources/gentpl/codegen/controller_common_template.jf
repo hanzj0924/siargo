@@ -1,0 +1,558 @@
+#define c_index()
+   /**
+	* 首页
+	*/
+	public void index() {
+		render("index.html");
+	}
+#set(cons = "")
+#if(codeGen.isPaginate)
+    #set(cons = "getPageNumber(), getPageSize()")
+#end
+#if(hasIsKeywordsColumn)
+    #if(cons!="")
+        #set(cons = cons + ", getKeywords()")
+    #else
+        #set(cons = "getKeywords()")
+    #end
+#end
+#if(sortableColumns)
+    #if(cons!="")
+        #if(codeGen.tableDefaultSortColumn && codeGen.tableDefaultSortType)
+         #set(cons = cons + ", getSortColumn(\""+codeGen.tableDefaultSortColumn+"\"), getSortType(\""+codeGen.tableDefaultSortType+"\")")
+        #else
+         #set(cons = cons + ", getSortColumn(), getSortType()")
+        #end
+    #else
+        #if(codeGen.tableDefaultSortColumn && codeGen.tableDefaultSortType)
+        #set(cons = "getSortColumn(\""+codeGen.tableDefaultSortColumn+"\"), getSortType(\""+codeGen.tableDefaultSortType+"\")")
+        #else
+        #set(cons = "getSortColumn(), getSortType()")
+        #end
+    #end
+#end
+#if(conditions!=null&&conditions.size()>0)
+    #if(cons!="")
+        #set(cons = cons + ", ")
+    #end
+    #for(con:conditions)
+        #if(con.colName.toLowerCase() !=  "is_deleted")
+        #if(con.searchUiType && con.searchUiType.startsWith("laydate_range_"))
+        #set(cons = cons + "getDateRange"+ "(\""+con.attrName+"\","+con.searchUIDateRangeType+")"+ (for.last?"":", "))
+        #else
+        #set(cons = cons + "get"+con.javaTypeNameForGetPara + "(\""+con.attrName+"\")"+ (for.last?"":", "))
+        #end
+        #end
+    #end
+#end
+#if(hasIsDeletedColumn)
+#set(cons = cons + ", getBoolean(\"isDeleted\",false)")
+#end
+   /**
+	* 数据源
+	*/
+	public void datas() {
+		renderJsonData(service.getAdminDatas(#(cons??)));
+	}
+#end
+
+#define c_add()
+   /**
+	* 新增
+	*/
+	public void add() {
+		render("add.html");
+	}
+#end
+
+#define c_edit()
+   /**
+	* 编辑
+	*/
+	public void edit() {#setLocal(fctucName=firstCharToLowerCase(codeGen.modelName))
+		#(codeGen.modelName) #(fctucName)=service.findById(get#(getIdType?? 'Long')(0));
+		if(#(fctucName) == null){
+			renderFail(JBoltMsg.DATA_NOT_EXIST);
+			return;
+		}
+		set("#(fctucName)",#(fctucName));
+		render("edit.html");
+	}
+#end
+
+
+#define c_save()
+   /**
+	* 保存
+	*/
+	@Before(Tx.class)
+	#if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+	#end
+	public void save(@Para("#(firstCharToLowerCase(codeGen.modelName))")#(codeGen.modelName) #(firstCharToLowerCase(codeGen.modelName))) {
+		renderJson(service.save(#(firstCharToLowerCase(codeGen.modelName))));
+	}
+#end
+
+#define c_update()
+   /**
+	* 更新
+	*/
+	@Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void update(@Para("#(firstCharToLowerCase(codeGen.modelName))")#(codeGen.modelName) #(firstCharToLowerCase(codeGen.modelName))) {
+		renderJson(service.update(#(firstCharToLowerCase(codeGen.modelName))));
+	}
+#end
+
+#define c_delete()
+   /**
+	* 删除
+	*/
+	@Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void delete() {
+	#if(codeGen.isCheckCanDelete??)
+		renderJson(service.deleteById(get#(getIdType?? 'Long')(0),true));
+	#else
+		renderJson(service.deleteById(get#(getIdType?? 'Long')(0)));
+	#end
+	}
+#end
+
+
+#define c_realdelete()
+   /**
+	* real delete 真删除
+	*/
+    @Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void realDelete() {
+	#if(codeGen.isCheckCanDelete??)
+		renderJson(service.realDeleteById(get#(getIdType?? 'Long')(0),true));
+	#else
+		renderJson(service.realDeleteById(get#(getIdType?? 'Long')(0)));
+	#end
+	}
+#end
+
+#define c_recover()
+   /**
+	* 恢复假删数据
+	*/
+    @Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void recover() {
+	#if(codeGen.isCheckCanRecover??)
+		renderJson(service.recoverById(get#(getIdType?? 'Long')(0),true));
+	#else
+		renderJson(service.recoverById(get#(getIdType?? 'Long')(0)));
+	#end
+	}
+#end
+
+#define c_deleteByIds()
+   /**
+	* 批量删除
+	*/
+    @Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void deleteByIds() {
+	#if(codeGen.isCheckCanDelete??)
+		renderJson(service.deleteByIds(get("ids"),true));
+	#else
+		renderJson(service.deleteByIds(get("ids")));
+	#end
+	}
+#end
+
+#define c_realDeleteByIds()
+   /**
+	* 批量 真删除
+	*/
+    @Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void realDeleteByIds() {
+	#if(codeGen.isCheckCanDelete??)
+		renderJson(service.realDeleteByIds(get("ids"),true));
+	#else
+		renderJson(service.realDeleteByIds(get("ids")));
+	#end
+	}
+#end
+
+#define c_recoverByIds()
+   /**
+	* 批量恢复假删数据
+	*/
+    @Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void recoverByIds() {
+	#if(codeGen.isCheckCanRecover??)
+		renderJson(service.recoverByIds(get("ids"),true));
+	#else
+		renderJson(service.recoverByIds(get("ids")));
+	#end
+	}
+#end
+
+#define c_up()
+   /**
+	* 排序 上移
+	*/
+    @Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+    public void up() {
+		renderJson(service.up(get#(getIdType?? 'Long')(0)));
+	}
+#end
+
+#define c_down()
+   /**
+	* 排序 下移
+	*/
+	@Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void down() {
+		renderJson(service.down(get#(getIdType?? 'Long')(0)));
+	}
+#end
+
+
+#define c_initSortRank()
+   /**
+	* 排序 初始化
+	*/
+	@Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+    public void initSortRank() {
+		renderJson(service.initSortRank());
+	}
+#end
+#define c_downloadTpl()
+   /**
+	* 下载导入模板
+	*/
+	public void downloadTpl() {
+		renderBytesToExcelXlsFile(service.getImportExcelTpl().setFileName("#(codeGen.mainTableRemark?? '')导入模板"));
+	}
+#end
+
+#define c_initImportExcel()
+   /**
+	* 进入import_excel.html
+	*/
+	public void initImportExcel() {
+		render("import_excel.html");
+	}
+#end
+
+#define c_importExcel()
+   /**
+	* 执行导入excel
+	*/
+	public void importExcel() {
+		String uploadPath=JBoltUploadFolder.todayFolder(JBoltUploadFolder.IMPORT_EXCEL_TEMP_FOLDER);
+        UploadFile file=getFile("file",uploadPath);
+        if(notExcel(file)){
+            renderJsonFail("请上传excel文件");
+            return;
+        }
+        renderJson(service.importExcel(file.getFile()));
+	}
+#end
+
+#define c_exportExcelByForm()
+#set(cons = "")
+#if(codeGen.isPaginate)
+    #set(cons = "getPageNumber(), getPageSize()")
+#end
+#if(hasIsKeywordsColumn)
+    #if(cons!="")
+        #set(cons = cons + ", getKeywords()")
+    #else
+        #set(cons = "getKeywords()")
+    #end
+#end
+#if(sortableColumns)
+    #if(cons!="")
+        #if(codeGen.tableDefaultSortColumn && codeGen.tableDefaultSortType)
+         #set(cons = cons + ", getSortColumn(\""+codeGen.tableDefaultSortColumn+"\"), getSortType(\""+codeGen.tableDefaultSortType+"\")")
+        #else
+         #set(cons = cons + ", getSortColumn(), getSortType()")
+        #end
+    #else
+        #if(codeGen.tableDefaultSortColumn && codeGen.tableDefaultSortType)
+        #set(cons = "getSortColumn(\""+codeGen.tableDefaultSortColumn+"\"), getSortType(\""+codeGen.tableDefaultSortType+"\")")
+        #else
+        #set(cons = "getSortColumn(), getSortType()")
+        #end
+    #end
+#end
+#if(conditions!=null&&conditions.size()>0)
+    #if(cons!="")
+        #set(cons = cons + ", ")
+    #end
+    #for(con:conditions)
+        #if(con.searchUiType && con.searchUiType.startsWith("laydate_range_"))
+        #set(cons = cons + "getDateRange"+ "(\""+con.attrName+"\","+con.searchUIDateRangeType+")"+ (for.last?"":", "))
+        #else
+        #set(cons = cons + "get"+con.javaTypeNameForGetPara + "(\""+con.attrName+"\")"+ (for.last?"":", "))
+        #end
+    #end
+#end
+#if(hasIsDeletedColumn)
+#set(cons = cons + ", getBoolean(\"isDeleted\",false)")
+#end
+   /**
+	* 执行导出excel 根据查询form表单
+	*/
+	public void exportExcelByForm() {
+	    Page<#(codeGen.modelName)> pageData = service.getAdminDatas(#(cons??));
+	    if(notOk(pageData.getTotalRow())){
+	        renderJsonFail("无有效数据导出");
+	        return;
+	    }
+		renderBytesToExcelXlsxFile(service.exportExcel(pageData.getList()).setFileName("#(codeGen.mainTableRemark?? '导出数据')"));
+	}
+#end
+
+#define c_exportExcelByCheckedIds()
+    /**
+	* 执行导出excel 根据表格选中数据
+	*/
+	public void exportExcelByCheckedIds() {
+	    String ids = get("ids");
+	    if(notOk(ids)){
+	        renderJsonFail("未选择有效数据，无法导出");
+        	return;
+	    }
+	    List<#(codeGen.modelName)> datas = service.getListByIds(ids);
+	    if(notOk(datas)){
+	        renderJsonFail("无有效数据导出");
+	        return;
+	    }
+		renderBytesToExcelXlsxFile(service.exportExcel(datas).setFileName("#(codeGen.mainTableRemark?? '导出数据')"));
+	}
+#end
+
+#define c_exportExcelAll()
+    /**
+	* 执行导出excel 所有数据
+	*/
+	public void exportExcelAll() {
+	    List<#(codeGen.modelName)> datas = service.findAll();
+	    if(notOk(datas)){
+	        renderJsonFail("无有效数据导出");
+	        return;
+	    }
+		renderBytesToExcelXlsxFile(service.exportExcel(datas).setFileName("#(codeGen.mainTableRemark?? '导出数据')"));
+	}
+#end
+
+#define c_toggleEnable()
+   /**
+	* 切换启用状态
+	*/
+	@Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void toggleEnable() {
+		renderJson(service.toggleEnable(get#(getIdType?? 'Long')(0)));
+	}
+#end
+
+
+#define c_tree()
+   /**
+	* 得到树形结构数据
+	*/
+	public void tree() {
+		renderJsonData(service.getTreeDatas());
+	}
+#end
+
+
+#define c_options(hasEnable,hasIsDeleted)
+   /**
+	* 得到select radio checkbox专用options数据
+	*/
+	@UnCheck
+	public void options() {
+	#if(codeGen.isReturnOptionType??)
+	    #if(codeGen.optionsTextColumn?? && codeGen.optionsValueColumn??)
+	        #if(hasEnable && hasIsDeleted)
+       renderJsonData(service.getOptionList("#(codeGen.optionsTextColumn??)","#(codeGen.optionsValueColumn??)",true,false));
+            #else if(hasEnable && !hasIsDeleted)
+       renderJsonData(service.getOptionListEnable("#(codeGen.optionsTextColumn??)","#(codeGen.optionsValueColumn??)"));
+            #else if(!hasEnable && hasIsDeleted)
+       renderJsonData(service.getOptionListIsDeletedFalse("#(codeGen.optionsTextColumn??)","#(codeGen.optionsValueColumn??)"));
+            #else
+       renderJsonData(service.getOptionList("#(codeGen.optionsTextColumn??)","#(codeGen.optionsValueColumn??)"));
+            #end
+	    #else
+	        #if(hasEnable && hasIsDeleted)
+       renderJsonData(service.getOptionList("name","id",true,false));
+            #else if(hasEnable && !hasIsDeleted)
+       renderJsonData(service.getOptionListEnable("name","id"));
+            #else if(!hasEnable && hasIsDeleted)
+       renderJsonData(service.getOptionListIsDeletedFalse("name","id"));
+            #else
+       renderJsonData(service.getOptionList("name","id"));
+            #end
+	    #end
+	#else
+	    #if(hasEnable && hasIsDeleted)
+	    renderJsonData(service.findAll(true,false));
+	    #else if(hasEnable && !hasIsDeleted)
+	    renderJsonData(service.findAllEnable());
+	    #else if(!hasEnable && hasIsDeleted)
+	    renderJsonData(service.findAllIsDeletedFalse());
+	    #else
+	    renderJsonData(service.findAll());
+	    #end
+	#end
+	}
+#end
+
+#define c_autocompleteDatas(hasEnable,hasIsDeleted)
+   /**
+	* autocomplete组件专用数据
+	*/
+	@UnCheck
+	public void autocompleteDatas() {
+        #if(hasEnable && hasIsDeleted)
+        renderJsonData(service.getAutocompleteList(get("q"), getInt("limit",#(codeGen.autocompleteLimit?? 20)),true,"#(codeGen.autocompleteMatchColumns??)",service.selectSql().enableEq(true).isDeletedEq(false)));
+        #else if(hasEnable && !hasIsDeleted)
+        renderJsonData(service.getAutocompleteList(get("q"), getInt("limit",#(codeGen.autocompleteLimit?? 20)),true,"#(codeGen.autocompleteMatchColumns??)",service.selectSql().enableEq(true)));
+        #else if(!hasEnable && hasIsDeleted)
+        renderJsonData(service.getAutocompleteList(get("q"), getInt("limit",#(codeGen.autocompleteLimit?? 20)),true,"#(codeGen.autocompleteMatchColumns??)",service.selectSql().isDeletedEq(false)));
+        #else
+        renderJsonData(service.getAutocompleteList(get("q"), getInt("limit",#(codeGen.autocompleteLimit?? 20)),true,"#(codeGen.autocompleteMatchColumns??)"));
+        #end
+
+	}
+#end
+
+#define c_genToggleMethod(name,colName)
+   /**
+	* 切换#(colName??)
+	*/
+	@Before(Tx.class)
+    #if(!codeGen.isMainDatasource??)
+    @TxConfig(#(codeGen.modelName).DATASOURCE_CONFIG_NAME)
+    #end
+	public void #(name)() {
+	    renderJson(service.toggleBoolean(get#(getIdType?? 'Long')(0),"#(colName??)"));
+	}
+#end
+
+#define c_genUploadActionMethod(name,uploadDataName,uploadColName,uploadType)
+   /**
+	* 上传#(uploadDataName??)
+	*/
+	public void #(name)() {
+        String uploadPath= JBoltUploadFolder.todayFolder("#(uploadColName??)");
+        UploadFile file=getFile("file",uploadPath);
+        #if(uploadType == "imguploader" || uploadType == "imguploader_multi")
+        if(notImage(file)){
+            renderJsonFail("请上传图片类型文件");
+            return;
+        }
+        renderJson(jboltFileService.saveImageFile(file,uploadPath));
+        #end
+        #if(uploadType == "fileuploader" || uploadType == "fileuploader_multi")
+        renderJson(jboltFileService.saveAttachmentFile(file,uploadPath));
+        #end
+	}
+#end
+
+
+#define c_genOtherMethod(method)
+#if(method.name.indexOf("toggle")!=-1)
+#@c_genToggleMethod(method.name,method.toggleColumnName)
+#elseif(method.isUploadAction)
+#@c_genUploadActionMethod(method.name,method.uploadDataName,method.uploadColName,method.uploadType)
+#else
+	public void #(method.name)(){
+		//TODO 请实现业务逻辑代码
+		renderJsonSuccess();
+	}
+#end
+#end
+
+#define genControllerMethod(method)
+	#switch(method.name)
+		#case("index")
+			#@c_index()
+		#case("add")
+			#@c_add()
+		#case("edit")
+			#@c_edit()
+		#case("save")
+			#@c_save()
+		#case("update")
+			#@c_update()
+		#case("delete")
+			#@c_delete()
+        #case("realDelete")
+            #@c_realdelete()
+		#case("deleteByIds")
+			#@c_deleteByIds()
+		#case("recoverByIds")
+        	#@c_recoverByIds()
+        #case("realDeleteByIds")
+            #@c_realDeleteByIds()
+        #case("recover")
+            #@c_recover()
+		#case("toggleEnable")
+			#@c_toggleEnable()
+		#case("up")
+			#@c_up()
+		#case("down")
+			#@c_down()
+		#case("initSortRank")
+			#@c_initSortRank()
+        #case("initImportExcel")
+            #@c_initImportExcel()
+        #case("downloadTpl")
+            #@c_downloadTpl()
+        #case("importExcel")
+            #@c_importExcel()
+        #case("exportExcelAll")
+            #@c_exportExcelAll()
+        #case("exportExcelByForm")
+            #@c_exportExcelByForm()
+        #case("exportExcelByCheckedIds")
+            #@c_exportExcelByCheckedIds()
+		#case("tree")
+			#@c_tree()
+		#case("options")
+			#@c_options(method.hasEnableColumn,method.hasIsDeletedColumn)
+        #case("autocompleteDatas")
+            #@c_autocompleteDatas(method.hasEnableColumn,method.hasIsDeletedColumn)
+		#default
+			#@c_genOtherMethod(method)
+	#end
+#end

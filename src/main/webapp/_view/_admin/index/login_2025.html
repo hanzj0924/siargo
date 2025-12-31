@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <base href="#(basepath??)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#(JBoltGlobalConfigCache.getSystemName("JBolt极速开发平台"))</title>
+    #if(need_always_https)
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    #end
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico"/>
+    <script src="/_view/_admin/index/assets/tailwind.js"></script>
+    <link rel="stylesheet" href="/_view/_admin/index/assets/css/font.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#64748b'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '2px',
+                        DEFAULT: '4px',
+                        'md': '8px',
+                        'lg': '12px',
+                        'xl': '16px',
+                        '2xl': '20px',
+                        '3xl': '24px',
+                        'full': '9999px',
+                        'button': '4px'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media (max-width: 640px) {
+            html {
+                font-size: 14px;
+            }
+        }
+
+        @media (width > 640px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .bg-login {
+            background-size: cover;
+            background-position: center;
+        }
+
+        .glass-effect {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+            backdrop-filter: blur(10px);
+            animation: scaleIn 0.6s ease-out;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-effect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .input-focus {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .input-icon {
+            transition: color 0.3s ease;
+        }
+
+        .input-focus:focus + .input-icon i {
+            color: #2563eb !important;
+        }
+
+        button[type="submit"] {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button[type="submit"]:active {
+            transform: scale(0.98);
+        }
+
+        .form-element {
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .form-element:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .form-element:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .form-element:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .form-element:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .form-element:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        footer {
+            animation: fadeIn 0.8s ease-out;
+        }
+    </style>
+    #@logincss?()
+</head>
+<body class="min-h-screen bg-login" id="renderbox">
+### 登录表单透明玻璃风格
+### setLocal(glassStyle=JBoltGlobalConfigCache.getJBoltLoginFormStyleGlass())
+### 登录页面背景图模糊
+#setLocal(bgimgBlur=JBoltGlobalConfigCache.getJBoltLoginBgimgBlur())
+#setLocal(bgtype=JBoltGlobalConfigCache.getJboltLoginBgType())
+#setLocal(bgimg=JBoltGlobalConfigCache.getJboltLoginBgimg())
+#if(bgtype=="img")
+<div class="absolute bodybgmask #(bgimgBlur?'blur':'')" style="background-image: url('#(bgimg)');"></div>
+#else
+<video loop="loop" muted="muted" autoplay="autoplay" oncanplay="$('#bgmask').css({'background-image':'none'})">
+    <source src="#(bgimg)" type="video/mp4" ></source>
+</video>
+<div class="absolute bodybgmask #(bgimgBlur?'blur':'')" id="bgmask" style="background-image: url('#(bgimg).jpg')"></div>
+#end
+<div class="absolute inset-0 flex items-center justify-center min-h-screen px-4 z-[9999]">
+    <div class="w-[560px] glass-effect p-12 rounded-xl shadow-2xl m-auto">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl"><span style="color:#(JBoltGlobalConfigCache.getSystemNameColor('#333333'))!important;">#(JBoltGlobalConfigCache.getSystemName("JBolt极速开发平台"))</span>
+            </h1>
+        </div>
+        <form class="space-y-6" id="loginForm" method="post" onsubmit="return submitForm(this);">
+            <div class="relative form-element">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none input-icon">
+                    <i class="fas fa-user text-gray-400 w-5 h-5 flex justify-center items-center"></i>
+                </div>
+                <input type="text" maxlength="20" name="username" required="required"
+                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg input-focus focus:outline-none focus:border-primary bg-white/50 text-sm"
+                       placeholder="请输入用户名">
+            </div>
+            <div class="relative form-element">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none input-icon">
+                    <i class="fas fa-lock text-gray-400 w-5 h-5 flex justify-center items-center"></i>
+                </div>
+                <input type="password" maxlength="20" name="password" required="required"
+                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg input-focus focus:outline-none focus:border-primary bg-white/50 text-sm"
+                       placeholder="请输入密码">
+            </div>
+            #setLocal(needCapture=JBoltGlobalConfigCache.isJBoltLoginUseCapture())
+            #if(needCapture)
+            <div class="flex space-x-4 form-element">
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none input-icon">
+                        <i class="fas fa-shield-alt text-gray-400 w-5 h-5 flex justify-center items-center"></i>
+                    </div>
+                    <input type="text" maxlength="10" id="captcha" name="captcha" required="required"
+                           class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg input-focus focus:outline-none focus:border-primary bg-white/50 text-sm"
+                           placeholder="请输入验证码">
+                </div>
+                <div class="justify-center bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden hover:shadow-md transition-shadow duration-300">
+                    <span class="text-lg font-mono tracking-widest text-gray-700 h-full">
+                        <img style="height: 100%;" id="captchaimg" src="admin/captcha" onclick="changeCaptcha()"/>
+                    </span>
+                </div>
+            </div>
+            #end
+            <div class="flex items-center form-element">
+                <input type="checkbox"
+                       id="keepLogin"
+                       name="keepLogin"
+                       class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer transition-all duration-200 ease-in-out hover:border-primary">
+                <label for="keepLogin"
+                       class="ml-2 text-sm text-gray-600 cursor-pointer hover:text-primary transition-colors duration-200">保持登录状态</label>
+            </div>
+            <button type="submit"
+                    class="w-full bg-primary text-white py-3.5 px-6 rounded-lg hover:bg-primary/90 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg shadow-primary/20 whitespace-nowrap font-medium text-base tracking-wider backdrop-blur-sm hover:backdrop-blur-lg form-element">
+                登 录 系 统
+            </button>
+        </form>
+    </div>
+</div>
+<footer class="fixed bottom-0 w-full py-4 text-center text-gray-500 text-sm z-[9999]">
+    <p>#setLocal(recordInfo = JBoltGlobalConfigCache.getSystemDomainPutOnRecordInfo()) #if(recordInfo!=null)<a target="_blank" style="margin-right:6px;color:#(JBoltGlobalConfigCache.getSystemCopyrightColor('#FFFFFF'));" href="#(JBoltGlobalConfigCache.getSystemDomainPutOnRecordLink())">#(recordInfo??)</a>#end<a target="_blank"  href="#globalConfig(GlobalConfigKey.SYSTEM_COPYRIGHT_LINK,'http://jbolt.cn')">#(JBoltGlobalConfigCache.getSystemCopyrightCompany("©JBolt(JBOLT.CN)"))</a></p>
+</footer>
+<script type="text/javascript">
+    var systemLoginNest="#(JBoltGlobalConfigCache.getJboltLoginNest())";
+</script>
+#@jqueryjs?()
+#@jquerycookiejs?()
+#@layerjs?()
+#@loginjs?()
+</body>
+</html>

@@ -1,0 +1,205 @@
+#@jboltLayout() #define main()
+<div class="jbolt_page">
+	<div class="jbolt_page_content">
+		<form onsubmit="return false;" id="qareportUpdateForm"
+			action="admin/siargo/qarep/update" method="post">
+			<input type="hidden" name="qareport.id" value="#(qapro.id??)" /> <input
+				type="hidden" name="product.id" value="#(qapro.proid??)" />
+			<div class="row">
+				<div class="col">
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">订单号</label>
+						<div class="col">
+							<input type="number" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required" placeholder="请输入订单号"
+								maxlength="10" name="qareport.order_id"
+								value="#(qapro.order_id ??)" />
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">整机电流</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required"
+								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.cuc"
+								value="#(qapro.sp_cuc ??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">整机电流 8v</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required"
+								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.cucmin"
+								value="#(qapro.spC_cucimin ??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">整机电流 24v</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required"
+								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.cucmax"
+								value="#(qapro.sp_cucmax ??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">脉冲电压</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required"
+								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.pv"
+								value="#(qapro.sp_pv ??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">热头电压</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required"
+								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.thv"
+								value="#(qapro.spT_thv ??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">零点内码</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required"
+								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.zp"
+								value="#(qapro.sp_zp ??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">故障电平</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required"
+								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.fl"
+								value="#(qapro.sp_fl ??)" />
+						</div>
+					</div>
+
+				</div>
+				<div class="col">
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">客户名称</label>
+						<div class="col">
+							<select class="form-control" data-autoload
+								data-url="admin/siargo/qarep/getCustName"
+								name="qareport.cust_id" data-rule="select" data-tips="=请选择/搜索="
+								data-text="=请选择=" data-value="" data-value-attr="id"
+								data-select-type="select2" data-select="#(qapro.cust_id??)">
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">报告单类型</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload
+								name="qareport.rep_type"
+								data-url="admin/siargo/qarep/getDict?keywords=rep_type"
+								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
+								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-select="#(qapro.repType ??)">
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">产品类型</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload name="product.type"
+								data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+								data-rule="select" data-tips="请选择产品类型" data-text="=请选择="
+								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-select="#(qapro.sp_type??)">
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
+
+						<label class="col-sm-3 col-form-label">检验进度</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload name="product.insp"
+								data-url="admin/siargo/qarep/getDict?keywords=insp"
+								data-rule="select" data-tips="请选择检验进度" data-text="=请选择="
+								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-select="#(qapro.insp ??)">
+							</select>
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">流量范围</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload name="product.flow_range"
+								data-url="admin/siargo/qarep/getDict?keywords=flow_range"
+								data-rule="select" data-tips="请选择流量范围" data-text="=请选择="
+								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-select="#(qapro.sp_flow_range ??)">
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<div class="form-group row">
+						<label class="col-sm-1 col-form-label">送检数量</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required" placeholder="请输入型号"
+								maxlength="100" name="product.qsi" value="#(qapro.sp_qsi??)" />
+
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-1 col-form-label">检验数量</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required" placeholder="请输入型号"
+								maxlength="100" name="product.qi" value="#(qapro.sp_modle??)" />
+
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<label class="col-sm-1 col-form-label">型号</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required" placeholder="请输入型号"
+								maxlength="100" name="product.modle" value="#(qapro.sp_qsi??)" />
+
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-1 col-form-label">编号</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" data-rule="required" placeholder="请输入编号"
+								maxlength="100" name="product.number"
+								value="#(qapro.sp_number??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-1 col-form-label">备注</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" placeholder="请输入备注" maxlength="100"
+								name="product.des" value="#(qapro.sp_des??)" />
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+		#define js()
+		<script>
+			
+		</script>
+		#include("/_view/_admin/common/_formjs.html",formId="qareportUpdateForm")
+		#end
+	</div>
+</div>
+#end

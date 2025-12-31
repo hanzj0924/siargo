@@ -1,0 +1,64 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="postRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" data-pid="${data.pid}" data-text="(${data.sn})${data.name}">
+<td class="text-left"><span>(${data.sn})${data.name}</span></td>
+<td><span class="text-white badge badge-${(+index+1)|colorClassByLevel}">${data.typeName}</span></td>
+</tr>
+{@/each}
+</script>
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+id="choose_posts_table_#(pageId)"
+data-jbolttable
+data-ajax="true"
+data-column-prepend="1:checkbox:true"
+data-column-resize="true"
+data-url="admin/post/datas"
+data-rowtpl="postRowtpl_#(pageId)"
+data-ajax-success-handler="ajaxSuccessHandler_#(pageId)"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-min-width="300">岗位名称</th>
+	<th data-width="100">类型</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>	
+</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+var _submit_ing=false;
+function submitThisForm(){
+	if(_submit_ing){
+		return false;
+	}
+	_submit_ing=true;
+	var checkedIds   = getJboltTableCheckedIds("choose_posts_table_#(pageId)");
+	var checkedNames = getJboltTableCheckedTexts("choose_posts_table_#(pageId)");
+	if(isOk(checkedIds)&&isOk(checkedNames)){
+		 parent.setChooseReceiverDatas(checkedIds,checkedNames);
+		 parent.layer.closeAll();
+	}
+	_submit_ing=false;
+}
+
+function ajaxSuccessHandler_#(pageId)(table){
+	var ids = "#(ids??)";
+	if(ids){
+		table.me.setCheckedIds(table,ids.split(","));
+	}
+}
+</script>
+#end

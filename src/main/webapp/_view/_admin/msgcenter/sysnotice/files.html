@@ -1,0 +1,37 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<form action="admin/sysnotice/updateFiles" id="sysnotice_file_form_#(pageId)" onsubmit="return false;" method="post">
+<input type="hidden" name="id" value="#(noticeId)" autocomplete="off" />
+<input type="hidden" id="sysNotice_files_#(pageId)" name="files" value="#(filesValue??)" autocomplete="off" />
+    <div class="col">
+		<div class="j_upload_file_box" 
+		data-name="file" 
+		data-multi="true"
+		data-value-attr="id"
+		data-filebox="filebox_#(pageId)"
+		data-btn-class="btn btn-primary"
+		data-maxsize="20480"
+		data-handler="uploadMultipleFile"
+		data-placeholder="选择附件上传"
+		data-url="admin/sysnotice/uploadFiles"
+		data-hiddeninput="sysNotice_files_#(pageId)"
+		></div>
+		<div class="j_upload_filebox_multi  mt-3">
+			<ul class="j_filebox" id="filebox_#(pageId)" data-remove-confirm="true">
+			#for(data : files)
+			<li data-filebox="filebox_#(pageId)" data-hiddeninput="sysNotice_files_#(pageId)"><a target="_blank" data-path="#(data.id)" href="#realImage(data.localUrl)">#(data.fileName)</a><i title="删除" onclick="removeUploadFileBoxLi(this)" class="fa fa-trash text-danger ml-3"></i></li>
+			#end
+			</ul>
+		</div>
+	</div>
+</form>
+</div>
+</div>
+#end
+
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="sysnotice_file_form_"+pageId)
+#end

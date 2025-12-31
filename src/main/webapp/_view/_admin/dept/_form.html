@@ -1,0 +1,128 @@
+<form onsubmit="return false;" id="deptForm_#(pageId)" action="#(action)" method="post">
+#if(dept.id??)
+	<input type="hidden" name="dept.id" value="#(dept.id)" />
+	<input type="hidden" name="dept.deptPath" value="#(dept.deptPath??)" />
+#end
+<fieldset>
+    <legend>基本信息</legend>
+
+	<div class="form-group row">
+   <label class="col-sm-3 col-form-label">上级部门</label>
+       <div class="col">
+           <select class="form-control" name="dept.pid" data-select-type="select2"
+           data-url="admin/dept/options"
+           data-text-format-handler="deptTextFormatHandler_#(pageId)"
+           data-handler="syncAttrToOther"
+           data-sync-ele="#dept_sn_#(pageId)"
+           data-sync-must="#(dept==null)"
+           data-text="=无上级部门="  data-value="0" data-select="#(dept.pid?? (pid?? 0))" data-autoload></select>
+       </div>
+   </div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">部门名称</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  onblur="syncOtherInput(this.value,'#deptFullName_#(pageId)')" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入名称" data-tips="请输入名称" maxlength="40" name="dept.name" value="#(dept.name??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">部门全称</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  id="deptFullName_#(pageId)" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入全称" data-tips="请输入全称" maxlength="40" name="dept.fullName" value="#(dept.fullName??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">部门代码</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  id="dept_sn_#(pageId)" data-sync-attr="sn" data-sync-must="false" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入部门代码" data-tips="请输入部门代码" maxlength="40" name="dept.sn" value="#(dept.sn??)">
+		</div>
+	</div>
+	
+	 <div class="form-group row" 
+		data-radio 
+		data-rule="radio"  
+		data-value="#(dept.type??)" 
+		data-name="dept.type" 
+		data-default="options_first"
+		data-value-attr="sn"
+		data-url="admin/dictionary/options?key=dept_type"
+		data-label="<a class='mr-1' href='javascript:void(0)' onclick='RadioUtil.refresh(this)' tooltip data-title='刷新'><i class='fa fa-refresh'></i><a><a class='mr-1' data-target='parent' href='admin/dictionary' data-openpage='dialog' data-area='80%,80%' data-btn='close' tooltip data-title='部门类型维护'><i class='fa fa-cog'></i><a> 部门类型"
+		data-width="col-sm-3,col"
+		data-inline="true"></div>
+</fieldset>
+<fieldset>
+    <legend>详细信息</legend>
+	
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">负责人</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" placeholder="请输入负责人" data-tips="请输入负责人" maxlength="40" name="dept.leader" value="#(dept.leader??)">
+		</div>
+	</div>
+	
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">邮政编码</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" placeholder="请输入邮政编码" data-tips="请输入邮政编码" maxlength="40" name="dept.zipcode" value="#(dept.zipcode??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">电子邮箱</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" placeholder="请输入电子邮箱" data-tips="请输入电子邮箱" maxlength="40" name="dept.email" value="#(dept.email??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">联系地址</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" placeholder="请输入联系地址" data-tips="请输入联系地址" maxlength="40" name="dept.address" value="#(dept.address??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">联系电话</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" placeholder="请输入联系电话" data-tips="请输入联系电话" maxlength="40" name="dept.phone" value="#(dept.phone??)">
+		</div>
+	</div>
+</fieldset>
+
+
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">备注信息</label>
+		<div class="col">
+			<textarea style="height:100px;" class="form-control" placeholder="请输入备注信息" maxlength="255" name="dept.remark">#(dept.remark??)</textarea>
+		</div>
+	</div>
+	#if(showPortalBtn??)
+	<div class="form-group text-center">
+		<button class="btn btn-primary" type="button" onclick="submitThisFormByPortalBtn_#(pageId)(this)"><i class="fa fa-check"></i> 确 认 提 交</button>
+	</div>
+	#end
+</form>
+#define js()
+<script>
+function deptTextFormatHandler_#(pageId)(optionJsonData){
+	return "("+optionJsonData.sn+")"+optionJsonData.name;
+}
+#if(showPortalBtn??)
+var clickSubmitBtn_#(pageId) = null;
+function submitThisFormByPortalBtn_#(pageId)(btnEle){
+	clickSubmitBtn_#(pageId) = $(btnEle);
+	submitThisForm#(pageId)();
+}
+function afterFormSubmit#(pageId)(res){
+	var portal=clickSubmitBtn_#(pageId).closest("div[data-ajaxportal][data-jstree-id]");
+	if(isOk(portal)){
+		var treeId = portal.data("jstree-id");
+		JSTreeUtil.refresh(treeId,res.data);
+	}else{
+		LayerMsgBox.alert("jstree id异常",2);
+	}
+}
+#end
+</script>
+#if(showPortalBtn??)
+#include("/_view/_admin/common/_formjs.html",formId="deptForm_"+pageId,randomFunctionName=pageId)
+#else
+#include("/_view/_admin/common/_formjs.html",formId="deptForm_"+pageId)
+#end
+#end

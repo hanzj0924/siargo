@@ -1,0 +1,56 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page jbolt_layer_page">
+<div class="jbolt_page_title">
+	<h1><i class="fa fa-cogs mr-2"></i>用户个人偏好设置</h1>
+</div>
+<div class="jbolt_page_content">
+<table class="table table-borderless  table-hover">
+<tbody>
+#for(data : userConfigs)
+#if(data.valueType=="boolean")
+#if(data.configKey==GlobalConfigKey.JBOLT_ADMIN_WITH_TABS)
+<tr class="animate__animated animate__fadeInRight animate__faster"><td>#(data.name??)</td><td class="text-center"><img data-handler="changeWithTabSuccess" src="assets/img/off.png" data-value="#(data.configValue?? 'false')" data-switchbtn   data-url="admin/userconfig/toggleBooleanConfig/#(data.id)" data-text="开:关"/></td></tr>
+#else
+<tr class="animate__animated animate__fadeInRight animate__faster"><td>#(data.name??)</td><td class="text-center"><img src="assets/img/off.png" data-value="#(data.configValue?? 'false')" data-switchbtn   data-url="admin/userconfig/toggleBooleanConfig/#(data.id)" data-text="开:关"/></td></tr>
+#end
+#elseif(data.valueType=="string"&&data.configKey==GlobalConfigKey.JBOLT_ADMIN_STYLE)
+<tr>
+<td colspan="2">
+<div class="card">
+<div class="card-header">#(data.name??)</div>
+<div class="card-body" style="padding: 0px;" id="jbolt_user_config_style_box">
+<a data-ajaxbtn data-handler="LayerMsgBox.success('切换成功' ,500,changeUserJboltStyle('default'))" id="jbs_default" data-url="admin/userconfig/changeStringValue?id=#(data.id)&value=default"    data-loading="切换中..."  tooltip data-title="默认样式" class="jbolt_config_style animate__animated animate__fadeIn"><img src="assets/img/style/default.jpg"/></a>
+<a data-ajaxbtn data-handler="LayerMsgBox.success('切换成功' ,500,changeUserJboltStyle('jbolt_style_2'))" id="jbs_jbolt_style_2" data-url="admin/userconfig/changeStringValue?id=#(data.id)&value=jbolt_style_2"    data-loading="切换中..."   tooltip data-title="JBolt_Style2" class="jbolt_config_style animate__animated animate__fadeIn"><img src="assets/img/style/style2.jpg"/></a>
+<a data-ajaxbtn data-handler="LayerMsgBox.success('切换成功' ,500,changeUserJboltStyle('jbolt_style_4'))" id="jbs_jbolt_style_4" data-url="admin/userconfig/changeStringValue?id=#(data.id)&value=jbolt_style_4"    data-loading="切换中..."   tooltip data-title="JBolt_Style4" class="jbolt_config_style animate__animated animate__fadeIn"><img src="assets/img/style/style4.jpg"/></a>
+<a data-ajaxbtn data-handler="LayerMsgBox.success('切换成功' ,500,changeUserJboltStyle('jbolt_style_5'))" id="jbs_jbolt_style_5" data-url="admin/userconfig/changeStringValue?id=#(data.id)&value=jbolt_style_5"    data-loading="切换中..."   tooltip data-title="JBolt_Style5" class="jbolt_config_style animate__animated animate__fadeIn"><img src="assets/img/style/style5.jpg"/></a>
+<a data-ajaxbtn data-handler="LayerMsgBox.success('切换成功' ,500,changeUserJboltStyle('jbolt_style_6'))" id="jbs_jbolt_style_6" data-url="admin/userconfig/changeStringValue?id=#(data.id)&value=jbolt_style_6"    data-loading="切换中..."   tooltip data-title="JBolt_Style6" class="jbolt_config_style animate__animated animate__fadeIn"><img src="assets/img/style/style6.jpg"/></a>
+</div>
+</div>
+</td>
+</tr>
+<script>
+
+</script>
+#end
+#end
+</tbody>
+</table>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+function changeWithTabSuccess(){
+LayerMsgBox.confirm('选择【确定】可直接刷新当前页面<br>选择【取消】可稍后手动刷新',reloadCurrentPage);
+}
+function initChooseStyle(){
+	$("#jbs_#(JBoltUserConfigCache.getCurrentUserJboltStyle())").addClass("active");
+}
+
+$(function(){
+	initChooseStyle();
+})
+</script>
+#end

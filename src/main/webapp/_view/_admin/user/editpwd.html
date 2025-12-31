@@ -1,0 +1,31 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" >
+<div class="jbolt_page_content">
+	<form onsubmit="return false;"  id="userPwdForm" action="admin/user/submitpwd" method="post" >
+	<input type="hidden" name="userId" value="#(userId)"/>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">新密码</label>
+		<div class="col">
+			<input type="text" autocomplete="off"   autocomplete="off" class="form-control" data-rule="required" placeholder="请输入新密码"  maxlength="40" name="newPwd" >
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">确认新密码</label>
+		<div class="col">
+			<input type="text" autocomplete="off"   autocomplete="off" class="form-control" data-rule="required" placeholder="请输入确认新密码"  maxlength="40" name="reNewPwd" >
+		</div>
+	</div>
+	</form>
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+})
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="userPwdForm")
+#end
+
+

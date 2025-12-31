@@ -1,0 +1,108 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)" >
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="fa fa-user-o"></i>七牛账号管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="qiniuForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<select class="form-control"
+		data-autoload
+		data-text="=账号类型="
+		data-value=""
+		data-url="admin/dictionary/options?key=qiniu_type"
+		data-value-attr="sn"
+		name="type">
+		</select>
+		<select class="form-control"
+		data-autoload
+		data-text="=是否默认="
+		data-value=""
+		data-options="是:true,否:false"
+		name="isDefault">
+		</select>
+		<select class="form-control"
+		data-autoload
+		data-text="=是否启用="
+		data-value=""
+		data-options="是:true,否:false"
+		name="enable">
+		</select>
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		<button  type="reset" class="btn btn-outline-secondary" ><i class="fa fa-reset"></i> 重置</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	<button data-dialogbtn data-area="700,600" data-handler="refreshJBoltTable" data-title="新增七牛账号"  data-url="admin/qiniu/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<textarea id="qiniuRowtpl_#(pageId)" class="jb_tpl_box">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.name}</td>
+<td>${data.sn}</td>
+<td><span class="badge badge-${data.type==1?'info':'primary'}">${data.type==1?"个人":"企业"}</span></td>
+<td>${data.ak}</td>
+<td>${data.sk}</td>
+<td><span class="text-danger">${data.bucketCount}</span><a data-openpage href="admin/qiniu/bucket?qiniuId=${data.id}" data-title="七牛Bucket(id:${data.id})"><i class="fa fa-cogs ml-1"></i></a></td>
+<td><img data-switchbtn data-confirm="确定切换是否默认属性？" data-value="${data.isDefault}"  data-handler="refreshJBoltTable"  data-url="admin/qiniu/toggleIsDefault/${data.id}"/></td>
+<td><img data-switchbtn data-confirm="确定切换是否启用属性？" data-value="${data.enable}"  data-handler="refreshJBoltTable"  data-url="admin/qiniu/toggleEnable/${data.id}"/></td>
+<td>{@if data.remark}<a class="hand" data-dialogbtn data-area="500,300" data-content="${data.remark}" data-btn="close" tooltip data-title="查看备注"><i class="fa fa-eye"></i></a>{@else}-{@/if}</td>
+<td>${data.createTime}</td>
+<td>${data.updateTime}</td>
+<td>${data.createUserName}</td>
+<td>${data.updateUserName}</td>
+<td>
+	<a href="admin/qiniu/edit/${data.id}" data-area="700,600"  tooltip data-title="修改"  data-handler="refreshJBoltTable" data-dialog-title="修改七牛账号" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+    <a href="admin/qiniu/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="removeTr" data-confirm="确定删除此数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+</td>
+</tr>
+{@/each}
+</textarea>
+<!-- JBoltTable -->
+<table class="jbolt_table jbolt_main_table table-center"
+data-jbolttable
+data-height="fill"
+data-ajax="true"
+data-url="admin/qiniu/datas"
+data-column-resize="true"
+data-conditions-form="qiniuForm_#(pageId)"
+data-rowtpl="qiniuRowtpl_#(pageId)"
+data-page="qiniuPage_#(pageId)"
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="-1"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	<th data-min-width="150" data-column="name">账号</th>
+	<th data-width="150" data-column="sn">编号SN</th>
+	<th data-width="100" data-column="type">账号类型</th>
+	<th data-min-width="150" data-column="ak">AK</th>
+	<th data-min-width="150" data-column="sk">SK</th>
+	<th data-width="100" data-column="bucket_count">Bucket个数</th>
+	<th data-width="100" data-column="is_default">是否默认</th>
+	<th data-width="100" data-column="enable">是否启用</th>
+	<th data-width="100" data-column="remark">备注</th>
+	<th data-width="150" data-column="create_time">创建时间</th>
+	<th data-width="150" data-column="update_time">更新时间</th>
+	<th data-width="100" data-column="craete_user_id">创建人</th>
+	<th data-width="100" data-column="update_user_id">更新人</th>
+	<th data-width="100">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</div>
+</div>
+#end

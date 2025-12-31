@@ -1,0 +1,1130 @@
+<div class="row h-100 mx-0">
+	<div class="col-4 h-100 card_left_box">
+		<div class="card jb_vflex">
+			<div class=" toggleCardOpenBtn d-none">
+				<button class="btn btn-outline-primary btn-sm" onclick="toggleTableSetCard(this)" tooltip data-title="恢复"><i class="fa fa-arrow-right"></i></button>
+				<div class="title text-primary">表格设置</div>
+			</div>
+			<div class="card-header jb_vheader_card"><span class="title">
+				<button class="btn btn-outline-primary btn-sm toggleCardCloseBtn" onclick="toggleTableSetCard(this)" tooltip data-title="收缩到左侧"><i class="fa fa-arrow-left"></i></button>
+				<i class="fa fa-cogs mr-1"></i>表格设置</span>
+				<button onclick="ajaxSubmitForm('codeGenTableForm',function(res){changeTablePreviewMode(false);})" class="btn btn-primary btn-sm float-right"><i class="fa fa-save"></i> 保存配置</button>
+			</div>
+			<div class="card-body jb_vbody">
+			<form class="form h-100" onsubmit="return false;" id="codeGenTableForm" action="admin/codegen/updateBase" method="post">
+			<input type="hidden" name="codeGen.id" value="#(codeGen.id)" autocomplete="off" />
+				<div class="jbolt_tab_view jb_vflex">
+					<div class="jbolt_tab_links  jb_vheader text-center text-nowrap" style="overflow-x: auto;overflow-y: hidden;">
+						<a class="jbolt_tab_link active"  href="#table_base_#(pageId)">基础</a>
+						<a class="jbolt_tab_link"  href="#table_page_title_#(pageId)">页面Header</a>
+						<a class="jbolt_tab_link"  href="#table_box_#(pageId)">Box</a>
+						<a class="jbolt_tab_link"  href="#table_optcol_#(pageId)">操作列</a>
+						<a class="jbolt_tab_link"  href="#table_toolbar_#(pageId)">Toolbar</a>
+						<a class="jbolt_tab_link"  href="#table_prepend_column_#(pageId)">填充列</a>
+					</div>
+					<div class="jbolt_tab_contents jb_vbody">
+						<div class="jbolt_tab_content pd15 active overflow-auto" id="table_base_#(pageId)">
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">数据名称</label>
+								<div class="col">
+									<input type="text" class="form-control" placeholder="请输入数据名称" name="codeGen.modelTitle" value="#(codeGen.modelTitle?? (codeGen.indexHtmlPageTitle?? codeGen.mainTableRemark))" autocomplete="off" />
+									<small class="text-danger">数据名称用于新增、修改、删除按钮的title显示和dialog表单标题</small>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isPaginate?? 'true')"
+								 data-name="codeGen.isPaginate"
+								 data-handler="changeIsPaginateHandler_#(pageId)"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required" >是否分页</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPaginate_true" type="radio" name="codeGen.isPaginate"   value="true"/>
+										<label for="r_isPaginate_true">分页</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPaginate_false" type="radio" name="codeGen.isPaginate"   value="false"/>
+										<label for="r_isPaginate_false">不分页</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group row" id="pagesize_option_box_#(pageId)">
+								<label class="col-sm-3 col-form-label">自定义可选pagesize</label>
+								<div class="col">
+									<input type="text" placeholder="非必填 例如 10,30,60,90,120" class="form-control" name="codeGen.tablePagesizeOptions" value="#(codeGen.tablePagesizeOptions??)" autocomplete="off" />
+								</div>
+							</div>
+
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.tableWidth?? 'fill')"
+								 data-name="codeGen.tableWidth"
+								 data-handler="changeTableWidthHandler_#(pageId)"
+								 data-default="fill">
+								<label class="col-sm-3 col-form-label is_required" >表格宽度</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_tableWidth_fill" type="radio" name="codeGen.tableWidth"   value="fill"/>
+										<label for="r_tableWidth_fill">fill</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_tableWidth_auto" type="radio" name="codeGen.tableWidth"   value="auto"/>
+										<label for="r_tableWidth_auto">auto</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_tableWidth_assign" type="radio" name="codeGen.tableWidth"   value="assign"/>
+										<label for="r_tableWidth_assign">自定义</label>
+										<input style="width:100px;" readonly="readonly" class="form-control d-inline-block form-control-sm" id="tableWidthAssignInput_#(pageId)" type="text" name="codeGen.tableWidthAssign" value="#(codeGen.tableWidthAssign??)"/>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.tableHeight?? 'fill')"
+								 data-name="codeGen.tableHeight"
+								 data-handler="changeTableHeightHandler_#(pageId)"
+								 data-default="fill">
+								<label class="col-sm-3 col-form-label is_required" >表格高度</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_tableHeight_fill" type="radio" name="codeGen.tableHeight"   value="fill"/>
+										<label for="r_tableHeight_fill">fill</label>
+									</div>
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_tableHeight_fillbox" type="radio" name="codeGen.tableHeight"   value="fill_box"/>
+										<label for="r_tableHeight_fillbox">fill_box</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_tableHeight_auto" type="radio" name="codeGen.tableHeight"   value="auto"/>
+										<label for="r_tableHeight_auto">auto</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_tableHeight_assign" type="radio" name="codeGen.tableHeight"   value="assign"/>
+										<label for="r_tableHeight_assign">自定义</label>
+										<input style="width:100px;" readonly="readonly" class="form-control d-inline-block form-control-sm" id="tableHeightAssignInput_#(pageId)" type="text" name="codeGen.tableHeightAssign" value="#(codeGen.tableHeightAssign??)"/>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isTableColumnResize?? 'true')"
+								 data-name="codeGen.isTableColumnResize"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required" >列宽调整</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTableColumnResize_true" type="radio" name="codeGen.isTableColumnResize"   value="true"/>
+										<label for="r_isTableColumnResize_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTableColumnResize_false" type="radio" name="codeGen.isTableColumnResize"   value="false"/>
+										<label for="r_isTableColumnResize_false">不启用</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isCopyToExcel?? 'false')"
+								 data-name="codeGen.isCopyToExcel"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required" >CopyToExcel</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isCopyToExcel_true" type="radio" name="codeGen.isCopyToExcel"   value="true"/>
+										<label for="r_isCopyToExcel_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isCopyToExcel_false" type="radio" name="codeGen.isCopyToExcel"   value="false"/>
+										<label for="r_isCopyToExcel_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							#if(codeGen.isEditable)
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isCopyFromExcel?? 'false')"
+								 data-name="codeGen.isCopyFromExcel"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required" >CopyFromExcel</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isCopyFromExcel_true" type="radio" name="codeGen.isCopyFromExcel"   value="true"/>
+										<label for="r_isCopyFromExcel_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isCopyFromExcel_false" type="radio" name="codeGen.isCopyFromExcel"   value="false"/>
+										<label for="r_isCopyFromExcel_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							#end
+
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">固定列-左侧</label>
+								<div class="col-sm-6">
+									<input type="text" class="form-control" placeholder="例如: 1,2" name="codeGen.tableFixedColumnLeft" value="#(codeGen.tableFixedColumnLeft??)" autocomplete="off" />
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">固定列-右侧</label>
+								<div class="col-sm-6">
+									<input type="text" class="form-control" placeholder="例如: -2,-1" name="codeGen.tableFixedColumnRight" value="#(codeGen.tableFixedColumnRight??)" autocomplete="off" />
+								</div>
+							</div>
+
+
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">表单Dialog尺寸</label>
+								<div class="col-sm-6">
+									<input type="text" class="form-control" placeholder="例如: 800,600" name="codeGen.formDialogArea" value="#(codeGen.formDialogArea?? '800,600')" autocomplete="off" />
+								</div>
+							</div>
+
+							<fieldset>
+								<legend class="text-center">Thead表头配色</legend>
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">表头背景色</label>
+									<div class="col-sm-7 input-group">
+										<input type="text" class="form-control" id="codeGenTheadBgColor" placeholder="请输入背景色" data-with-clearbtn="true" name="codeGen.theadBgColor" value="#(codeGen.theadBgColor??)" autocomplete="off" />
+										<div class="input-group-append">
+											<div class="input-group-text p-0">
+												<input type="color" oninput="$('#codeGenTheadBgColor').val(this.value).change()" style="width: 40px;border:none;" value="#(codeGen.theadBgColor??)"/>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">文字颜色</label>
+									<div class="col-sm-7 input-group">
+										<input type="text" class="form-control" id="codeGenTheadFrColor" placeholder="请输入文字颜色" data-with-clearbtn="true" name="codeGen.theadFrColor" value="#(codeGen.theadFrColor??)" autocomplete="off" />
+										<div class="input-group-append">
+											<div class="input-group-text p-0">
+												<input type="color" oninput="$('#codeGenTheadFrColor').val(this.value).change()" style="width: 40px;border:none;" value="#(codeGen.theadFrColor??)"/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+
+							<fieldset>
+								<legend class="text-center">Tbody选中行配置</legend>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isTableRowClickActive?? 'false')"
+									 data-name="codeGen.isTableRowClickActive"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >行选中变色</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableRowClickActive_true" type="radio" name="codeGen.isTableRowClickActive"   value="true"/>
+											<label for="r_isTableRowClickActive_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableRowClickActive_false" type="radio" name="codeGen.isTableRowClickActive"   value="false"/>
+											<label for="r_isTableRowClickActive_false">不启用</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">背景色</label>
+									<div class="col-sm-7 input-group">
+										<input type="text" class="form-control" id="codeGenActiveTrBgColor" placeholder="请输入背景色" data-with-clearbtn="true" name="codeGen.activeTrBgColor" value="#(codeGen.activeTrBgColor??)" autocomplete="off" />
+										<div class="input-group-append">
+											<div class="input-group-text p-0">
+												<input type="color" oninput="$('#codeGenActiveTrBgColor').val(this.value).change()" style="width: 40px;border:none;" value="#(codeGen.activeTrBgColor??)"/>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">文字颜色</label>
+									<div class="col-sm-7 input-group">
+										<input type="text" class="form-control" id="codeGenActiveTrFrColor" placeholder="请输入文字颜色" data-with-clearbtn="true" name="codeGen.activeTrFrColor" value="#(codeGen.activeTrFrColor??)" autocomplete="off" />
+										<div class="input-group-append">
+											<div class="input-group-text p-0">
+												<input type="color" oninput="$('#codeGenActiveTrFrColor').val(this.value).change();" style="width: 40px;border:none;" value="#(codeGen.activeTrFrColor??)"/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+
+							<fieldset>
+								<legend class="text-center">默认排序配置</legend>
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">默认排序字段</label>
+									<div class="col-sm-6">
+										<input type="text" class="form-control" placeholder="请输入默认排序字段" name="codeGen.tableDefaultSortColumn" value="#(codeGen.tableDefaultSortColumn??)" autocomplete="off" />
+									</div>
+								</div>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.tableDefaultSortType?? desc)"
+									 data-name="codeGen.tableDefaultSortType"
+									 data-default="desc">
+									<label class="col-sm-3 col-form-label" >默认排序方式</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_tabledefaultSortType_true" type="radio" name="codeGen.tableDefaultSortType" value="asc"/>
+											<label for="r_tabledefaultSortType_true">ASC</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_tabledefaultSortType_false" type="radio" name="codeGen.tableDefaultSortType" value="desc"/>
+											<label for="r_tabledefaultSortType_false">DESC</label>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+							<fieldset>
+								<legend class="text-center">查询条件配置</legend>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isTableMultiConditionsMode?? 'false')"
+									 data-name="codeGen.isTableMultiConditionsMode"
+									 data-handler="changeIsTableMultiConditionsMode_#(pageId)"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >条件样式</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableMultiConditionsMode_true" type="radio" name="codeGen.isTableMultiConditionsMode"   value="true"/>
+											<label for="r_isTableMultiConditionsMode_true">复杂条件-多行</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableMultiConditionsMode_false" type="radio" name="codeGen.isTableMultiConditionsMode"   value="false"/>
+											<label for="r_isTableMultiConditionsMode_false">简单条件</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isTableMultiConditionsBtnShowTitle?? 'true')"
+									 data-name="codeGen.isTableMultiConditionsBtnShowTitle"
+									 data-default="true">
+									<label class="col-sm-3 col-form-label is_required" >条件切换按钮</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableMultiConditionsBtnShowTitle_true" type="radio" name="codeGen.isTableMultiConditionsBtnShowTitle"   value="true"/>
+											<label for="r_isTableMultiConditionsBtnShowTitle_true">显示图标+标题</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableMultiConditionsBtnShowTitle_false" type="radio" name="codeGen.isTableMultiConditionsBtnShowTitle"   value="false"/>
+											<label for="r_isTableMultiConditionsBtnShowTitle_false">只显示图标</label>
+										</div>
+									</div>
+								</div>
+
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isTableMultiConditionsDefaultHide?? 'true')"
+									 data-name="codeGen.isTableMultiConditionsDefaultHide"
+									 data-default="true">
+									<label class="col-sm-3 col-form-label is_required" >条件默认样式</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableMultiConditionsDefaultHide_true" type="radio" name="codeGen.isTableMultiConditionsDefaultHide"   value="true"/>
+											<label for="r_isTableMultiConditionsDefaultHide_true">隐藏</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isTableMultiConditionsDefaultHide_false" type="radio" name="codeGen.isTableMultiConditionsDefaultHide"   value="false"/>
+											<label for="r_isTableMultiConditionsDefaultHide_false">显示</label>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+							<fieldset>
+								<legend class="text-center">Excel导入导出设置</legend>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isImportExcel?? 'false')"
+									 data-name="codeGen.isImportExcel"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Excel导入</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isImportExcel_true" type="radio" name="codeGen.isImportExcel"   value="true"/>
+											<label for="r_isImportExcel_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isImportExcel_false" type="radio" name="codeGen.isImportExcel"   value="false"/>
+											<label for="r_isImportExcel_false">不启用</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isExportExcel?? 'false')"
+									 data-name="codeGen.isExportExcel"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Excel导出</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcel_true" type="radio" name="codeGen.isExportExcel"   value="true"/>
+											<label for="r_isExportExcel_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcel_false" type="radio" name="codeGen.isExportExcel"   value="false"/>
+											<label for="r_isExportExcel_false">不启用</label>
+										</div>
+									</div>
+								</div>
+								<hr>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isExportExcelByForm?? 'false')"
+									 data-name="codeGen.isExportExcelByForm"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >导出<br/>表单搜索结果</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcelByForm_true" type="radio" name="codeGen.isExportExcelByForm"   value="true"/>
+											<label for="r_isExportExcelByForm_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcelByForm_false" type="radio" name="codeGen.isExportExcelByForm"   value="false"/>
+											<label for="r_isExportExcelByForm_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isExportExcelByCheckedIds?? 'false')"
+									 data-name="codeGen.isExportExcelByCheckedIds"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >导出<br/>当前页选中行</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcelByCheckedIds_true" type="radio" name="codeGen.isExportExcelByCheckedIds"   value="true"/>
+											<label for="r_isExportExcelByCheckedIds_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcelByCheckedIds_false" type="radio" name="codeGen.isExportExcelByCheckedIds"   value="false"/>
+											<label for="r_isExportExcelByCheckedIds_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isExportExcelAll?? 'false')"
+									 data-name="codeGen.isExportExcelAll"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >导出<br/>所有数据</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcelAll_true" type="radio" name="codeGen.isExportExcelAll"   value="true"/>
+											<label for="r_isExportExcelAll_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isExportExcelAll_false" type="radio" name="codeGen.isExportExcelAll"   value="false"/>
+											<label for="r_isExportExcelAll_false">不启用</label>
+										</div>
+									</div>
+								</div>
+							</fieldset>
+
+						</div>
+						<div class="jbolt_tab_content pd15 overflow-auto" id="table_page_title_#(pageId)">
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">页面标题</label>
+								<div class="col">
+									<input type="text" class="form-control" placeholder="请输入页面标题" name="codeGen.indexHtmlPageTitle" value="#(codeGen.indexHtmlPageTitle?? codeGen.mainTableRemark)" autocomplete="off" />
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">标题ICON</label>
+								<div class="col">
+									<input type="text" class="form-control" placeholder="请设置标题ICON" name="codeGen.indexHtmlPageIcon" value="#(codeGen.indexHtmlPageIcon??)" autocomplete="off" />
+								</div>
+							</div>
+
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isPageTitleAddBtn?? 'true')"
+								 data-name="codeGen.isPageTitleAddBtn"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required">新增按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPageTitleAddBtn_true" type="radio" name="codeGen.isPageTitleAddBtn"   value="true"/>
+										<label for="r_isPageTitleAddBtn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPageTitleAddBtn_false" type="radio" name="codeGen.isPageTitleAddBtn"   value="false"/>
+										<label for="r_isPageTitleAddBtn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isPageTitleRefreshBtn?? 'true')"
+								 data-name="codeGen.isPageTitleRefreshBtn"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required">刷新按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPageTitleRefreshBtn_true" type="radio" name="codeGen.isPageTitleRefreshBtn"   value="true"/>
+										<label for="r_isPageTitleRefreshBtn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPageTitleRefreshBtn_false" type="radio" name="codeGen.isPageTitleRefreshBtn"   value="false"/>
+										<label for="r_isPageTitleRefreshBtn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isPageTitleInitRankBtn?? 'false')"
+								 data-name="codeGen.isPageTitleInitRankBtn"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required">初始化顺序按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPageTitleInitRankBtn_true" type="radio" name="codeGen.isPageTitleInitRankBtn"   value="true"/>
+										<label for="r_isPageTitleInitRankBtn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isPageTitleInitRankBtn_false" type="radio" name="codeGen.isPageTitleInitRankBtn"   value="false"/>
+										<label for="r_isPageTitleInitRankBtn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="jbolt_tab_content pd15 overflow-auto" id="table_box_#(pageId)">
+							<fieldset>
+								<legend class="text-center">Headbox设置</legend>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isHeadbox?? 'false')"
+									 data-name="codeGen.isHeadbox"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Headbox</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isHeadbox_true" type="radio" name="codeGen.isHeadbox"   value="true"/>
+											<label for="r_isHeadbox_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isHeadbox_false" type="radio" name="codeGen.isHeadbox"   value="false"/>
+											<label for="r_isHeadbox_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isHeadboxHeightAuto?? 'true')"
+									 data-name="codeGen.isHeadboxHeightAuto"
+									 data-default="true"
+									 data-handler="toggleHeadboxHeightBoxHandler"
+								>
+									<label class="col-sm-3 col-form-label is_required" >高度设置类型</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_headboxheighttype_true" type="radio" name="codeGen.isHeadboxHeightAuto"   value="true"/>
+											<label for="r_headboxheighttype_true">Auto</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_headboxheighttype_false" type="radio" name="codeGen.isHeadboxHeightAuto"   value="false"/>
+											<label for="r_headboxheighttype_false">自定义</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row d-none" id="headboxHeightBox">
+									<label class="col-sm-3 col-form-label">自定义高度</label>
+									<div class="col-sm-6">
+										<input type="number" id="codeGenheadboxHeight_#(pageId)" data-rule="pint;>=40;" step="5" maxlength="3" data-notnull="false"  min="40" class="form-control" placeholder="请输入Headbox高度" name="codeGen.headboxHeight" value="#(codeGen.headboxHeight?? 60)" autocomplete="off" />
+									</div>
+								</div>
+							</fieldset>
+							<fieldset>
+								<legend class="text-center">Footbox设置</legend>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isFootbox?? 'false')"
+									 data-name="codeGen.isFootbox"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Footbox</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isFootbox_true" type="radio" name="codeGen.isFootbox"   value="true"/>
+											<label for="r_isFootbox_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isFootbox_false" type="radio" name="codeGen.isFootbox"   value="false"/>
+											<label for="r_isFootbox_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isFootboxHeightAuto?? 'true')"
+									 data-name="codeGen.isFootboxHeightAuto"
+									 data-default="true"
+									 data-handler="toggleFootboxHeightBoxHandler"
+								>
+									<label class="col-sm-3 col-form-label is_required" >高度设置类型</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_footboxheighttype_true" type="radio" name="codeGen.isFootboxHeightAuto"   value="true"/>
+											<label for="r_footboxheighttype_true">Auto</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_footboxheighttype_false" type="radio" name="codeGen.isFootboxHeightAuto"   value="false"/>
+											<label for="r_footboxheighttype_false">自定义</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row d-none" id="footboxHeightBox">
+									<label class="col-sm-3 col-form-label">自定义高度</label>
+									<div class="col-sm-6">
+										<input type="number" data-rule="pint;>=40;" step="5" maxlength="3" data-notnull="false"  min="40" class="form-control" placeholder="请输入Footbox高度" name="codeGen.footboxHeight" value="#(codeGen.footboxHeight?? 220)" autocomplete="off" />
+									</div>
+								</div>
+							</fieldset>
+							<fieldset>
+								<legend class="text-center">Leftbox设置</legend>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isLeftbox?? 'false')"
+									 data-name="codeGen.isLeftbox"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Leftbox</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isLeftbox_true" type="radio" name="codeGen.isLeftbox"   value="true"/>
+											<label for="r_isLeftbox_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isLeftbox_false" type="radio" name="codeGen.isLeftbox"   value="false"/>
+											<label for="r_isLeftbox_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isLeftboxFooter?? 'false')"
+									 data-name="codeGen.isLeftboxFooter"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Footer</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isLeftboxFooter_true" type="radio" name="codeGen.isLeftboxFooter"   value="true"/>
+											<label for="r_isLeftboxFooter_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isLeftboxFooter_false" type="radio" name="codeGen.isLeftboxFooter"   value="false"/>
+											<label for="r_isLeftboxFooter_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">Footer按钮数</label>
+									<div class="col-sm-6">
+										<input type="number" min="0" max="9" maxlength="1" class="form-control" placeholder="请输入Leftbox footer 按钮数" name="codeGen.leftboxFooterButtonCount" value="#(codeGen.leftboxFooterButtonCount?? 0)" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">宽度</label>
+									<div class="col-sm-6">
+										<input type="number" data-rule="pint;>=100;" step="5" maxlength="3" data-notnull="false"  min="100" class="form-control" placeholder="请输入Leftbox宽度" name="codeGen.leftboxWidth" value="#(codeGen.leftboxHeight?? 220)" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">标题</label>
+									<div class="col-sm-6">
+										<input type="text" maxlength="40" class="form-control" placeholder="请输入Leftbox标题" name="codeGen.leftboxTitle" value="#(codeGen.leftboxTitle??)" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">图标</label>
+									<div class="col-sm-6">
+										<input type="text" maxlength="60" class="form-control" placeholder="请输入Leftbox图标" name="codeGen.leftboxIcon" value="#(codeGen.leftboxIcon??)" autocomplete="off" />
+									</div>
+								</div>
+							</fieldset>
+							<fieldset>
+								<legend class="text-center">Rightbox设置</legend>
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isRightbox?? 'false')"
+									 data-name="codeGen.isRightbox"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Rightbox</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isRightbox_true" type="radio" name="codeGen.isRightbox"   value="true"/>
+											<label for="r_isRightbox_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isRightbox_false" type="radio" name="codeGen.isRightbox"   value="false"/>
+											<label for="r_isRightbox_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row"
+									 data-radio
+									 data-rule="radio"
+									 data-value="#(codeGen.isRightboxFooter?? 'false')"
+									 data-name="codeGen.isRightboxFooter"
+									 data-default="false">
+									<label class="col-sm-3 col-form-label is_required" >Footer</label>
+									<div class="col"  style="padding-top: 1px;">
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isRightboxFooter_true" type="radio" name="codeGen.isRightboxFooter"   value="true"/>
+											<label for="r_isRightboxFooter_true">启用</label>
+										</div>
+
+										<div class="radio radio-primary  radio-inline">
+											<input  id="r_isRightboxFooter_false" type="radio" name="codeGen.isRightboxFooter"   value="false"/>
+											<label for="r_isRightboxFooter_false">不启用</label>
+										</div>
+									</div>
+								</div>
+
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">Footer按钮数</label>
+									<div class="col-sm-6">
+										<input type="number" min="0" max="9" maxlength="1" class="form-control" placeholder="请输入Rightbox footer 按钮数" name="codeGen.rightboxFooterButtonCount" value="#(codeGen.rightboxFooterButtonCount?? 0)" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">Rightbox宽度</label>
+									<div class="col-sm-6">
+										<input type="number" data-rule="pint;>=100;" step="5" maxlength="3" data-notnull="false"  min="100" class="form-control" placeholder="请输入Rightbox宽度" name="codeGen.rightboxWidth" value="#(codeGen.rightboxHeight?? 220)" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">标题</label>
+									<div class="col-sm-6">
+										<input type="text" maxlength="40" class="form-control" placeholder="请输入Rightbox标题" name="codeGen.rightboxTitle" value="#(codeGen.rightboxTitle??)" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label class="col-sm-3 col-form-label">图标</label>
+									<div class="col-sm-6">
+										<input type="text" maxlength="60" class="form-control" placeholder="请输入Leftbox图标" name="codeGen.rightboxIcon" value="#(codeGen.rightboxIcon??)" autocomplete="off" />
+									</div>
+								</div>
+							</fieldset>
+						</div>
+						<div class="jbolt_tab_content pd15 overflow-auto" id="table_optcol_#(pageId)">
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isShowOptcol??)"
+								 data-name="codeGen.isShowOptcol"
+								 data-default="#(codeGen.isCrud)">
+								<label class="col-sm-3 col-form-label is_required" >开启操作列</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcol_true" type="radio" name="codeGen.isShowOptcol" value="true"/>
+										<label for="r_isShowOptcol_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcol_false" type="radio" name="codeGen.isShowOptcol" value="false"/>
+										<label for="r_isShowOptcol_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">操作列宽度</label>
+								<div class="col-sm-6">
+									<input type="number" data-rule="pint;>=70;<=400" step="5" maxlength="3" data-notnull="false"  min="70" max="400" class="form-control" placeholder="请输入宽度" name="codeGen.tableOptcolWidth" value="#(codeGen.tableOptcolWidth?? 60)" autocomplete="off" />
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isShowOptcolEdit??)"
+								 data-name="codeGen.isShowOptcolEdit"
+								 data-default="#(codeGen.isCrud && codeGen.isShowOptcol)">
+								<label class="col-sm-3 col-form-label is_required" >编辑按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcolEdit_true" type="radio" name="codeGen.isShowOptcolEdit" value="true"/>
+										<label for="r_isShowOptcolEdit_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcolEdit_false" type="radio" name="codeGen.isShowOptcolEdit" value="false"/>
+										<label for="r_isShowOptcolEdit_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isShowOptcolDel??)"
+								 data-name="codeGen.isShowOptcolDel"
+								 data-default="#(codeGen.isCrud && codeGen.isShowOptcol)">
+								<label class="col-sm-3 col-form-label is_required" >删除按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcolDel_true" type="radio" name="codeGen.isShowOptcolDel" value="true"/>
+										<label for="r_isShowOptcolDel_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcolDel_false" type="radio" name="codeGen.isShowOptcolDel" value="false"/>
+										<label for="r_isShowOptcolDel_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isShowOptcolSort??)"
+								 data-name="codeGen.isShowOptcolSort"
+								 data-handler="toggleOptSortBtnShowHandler"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required">排序按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcolSort_true" type="radio" name="codeGen.isShowOptcolSort" value="true"/>
+										<label for="r_isShowOptcolSort_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isShowOptcolSort_false" type="radio" name="codeGen.isShowOptcolSort" value="false"/>
+										<label for="r_isShowOptcolSort_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row d-none" id="tableOptSortColumnBox">
+								<label class="col-sm-3 col-form-label">用哪个字段排序</label>
+									<div class="col">
+										<input type="text"
+											   data-width="500"
+											   data-autocomplete
+											   data-url="admin/codegen/intSortColumns/#(codeGen.id?? 0)"
+											   data-link-para-ele="#intSortColumns_#(pageId)"
+											   data-text-attr="colName"
+											   data-column-attr="colName-120-left,remark-200-center,javaTypeName"
+											   placeholder="请指定排序调整操作哪个字段"
+											   class="form-control"
+											   name="codeGen.tableOptSortColumn"
+											   value="#(codeGen.tableOptSortColumn??)"
+											   autocomplete="off" />
+									</div>
+								</div>
+						</div>
+						<div class="jbolt_tab_content pd15 overflow-auto" id="table_toolbar_#(pageId)">
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isToolbar?? 'false')"
+								 data-name="codeGen.isToolbar"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required" >Toolbar</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbar_true" type="radio" name="codeGen.isToolbar"   value="true"/>
+										<label for="r_isToolbar_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbar_false" type="radio" name="codeGen.isToolbar"   value="false"/>
+										<label for="r_isToolbar_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isToolbarAddBtn?? 'true')"
+								 data-name="codeGen.isToolbarAddBtn"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required" >新增按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarAddBtn_true" type="radio" name="codeGen.isToolbarAddBtn"   value="true"/>
+										<label for="r_isToolbarAddBtn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarAddBtn_false" type="radio" name="codeGen.isToolbarAddBtn"   value="false"/>
+										<label for="r_isToolbarAddBtn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isToolbarEditBtn?? 'true')"
+								 data-name="codeGen.isToolbarEditBtn"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required" >编辑按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarEditBtn_true" type="radio" name="codeGen.isToolbarEditBtn"   value="true"/>
+										<label for="r_isToolbarEditBtn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarEditBtn_false" type="radio" name="codeGen.isToolbarEditBtn"   value="false"/>
+										<label for="r_isToolbarEditBtn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isToolbarDelBtn?? 'true')"
+								 data-name="codeGen.isToolbarDelBtn"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required" >删除按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarDelBtn_true" type="radio" name="codeGen.isToolbarDelBtn"   value="true"/>
+										<label for="r_isToolbarDelBtn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarDelBtn_false" type="radio" name="codeGen.isToolbarDelBtn"   value="false"/>
+										<label for="r_isToolbarDelBtn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isToolbarRefreshBtn?? 'true')"
+								 data-name="codeGen.isToolbarRefreshBtn"
+								 data-default="true">
+								<label class="col-sm-3 col-form-label is_required" >刷新按钮</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarRefreshBtn_true" type="radio" name="codeGen.isToolbarRefreshBtn"   value="true"/>
+										<label for="r_isToolbarRefreshBtn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isToolbarRefreshBtn_false" type="radio" name="codeGen.isToolbarRefreshBtn"   value="false"/>
+										<label for="r_isToolbarRefreshBtn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">按钮预留个数</label>
+								<div class="col-6">
+									<input type="number" min="0" max="20" maxlength="2" data-rule="pzint" data-notnull="false" placeholder="请输入toolbar上额外预留按钮个数" class="form-control" name="codeGen.toolbarExtraButtonSize" value="#(codeGen.toolbarExtraButtonSize?? 0)" autocomplete="off" />
+								</div>
+							</div>
+						</div>
+						<div class="jbolt_tab_content pd15 overflow-auto" id="table_prepend_column_#(pageId)">
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isTablePrependColumn?? 'false')"
+								 data-name="codeGen.isTablePrependColumn"
+								 data-default="checkbox">
+								<label class="col-sm-3 col-form-label is_required" >是否启用</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumn_true" type="radio" name="codeGen.isTablePrependColumn"   value="true"/>
+										<label for="r_isTablePrependColumn_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumn_false" type="radio" name="codeGen.isTablePrependColumn"   value="false"/>
+										<label for="r_isTablePrependColumn_false">不启用</label>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.tablePrependColumnType?? 'checkbox')"
+								 data-name="codeGen.tablePrependColumnType"
+								 data-default="checkbox">
+								<label class="col-sm-3 col-form-label is_required" >填充列类型</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_TablePrependColumnType_checkbox" type="radio" name="codeGen.tablePrependColumnType"   value="checkbox"/>
+										<label for="r_TablePrependColumnType_checkbox">checkbox</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_TablePrependColumnType_radio" type="radio" name="codeGen.tablePrependColumnType"   value="radio"/>
+										<label for="r_TablePrependColumnType_radio">radio</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">第几列</label>
+								<div class="col-sm-6">
+									<input type="number" min="1" data-rule="pint" data-notnull="false" class="form-control" placeholder="填入列编号 从1开始 默认1" name="codeGen.tablePrependColumnIndex" value="#(codeGen.tablePrependColumnIndex?? 1)" autocomplete="off" />
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">表头rowspan</label>
+								<div class="col-sm-6">
+									<input type="number" min="1" data-rule="pint" data-notnull="false" class="form-control" placeholder="填入表头的rowspan 从1开始 默认1" name="codeGen.tablePrependColumnRowspan" value="#(codeGen.tablePrependColumnRowspan?? 1)" autocomplete="off" />
+								</div>
+							</div>
+
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isTablePrependColumnClickActive?? 'false')"
+								 data-name="codeGen.isTablePrependColumnClickActive"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required" >点行选中</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumnClickActive_true" type="radio" name="codeGen.isTablePrependColumnClickActive"   value="true"/>
+										<label for="r_isTablePrependColumnClickActive_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumnClickActive_false" type="radio" name="codeGen.isTablePrependColumnClickActive"   value="false"/>
+										<label for="r_isTablePrependColumnClickActive_false">不启用</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isTablePrependColumnLinkparent?? 'false')"
+								 data-name="codeGen.isTablePrependColumnLinkparent"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required" >linkParent</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumnLinkparent_true" type="radio" name="codeGen.isTablePrependColumnLinkparent"   value="true"/>
+										<label for="r_isTablePrependColumnLinkparent_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumnLinkparent_false" type="radio" name="codeGen.isTablePrependColumnLinkparent"   value="false"/>
+										<label for="r_isTablePrependColumnLinkparent_false">不启用</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-group row"
+								 data-radio
+								 data-rule="radio"
+								 data-value="#(codeGen.isTablePrependColumnLinkson?? 'false')"
+								 data-name="codeGen.isTablePrependColumnLinkson"
+								 data-default="false">
+								<label class="col-sm-3 col-form-label is_required" >linkSon</label>
+								<div class="col"  style="padding-top: 1px;">
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumnLinkson_true" type="radio" name="codeGen.isTablePrependColumnLinkson"   value="true"/>
+										<label for="r_isTablePrependColumnLinkson_true">启用</label>
+									</div>
+
+									<div class="radio radio-primary  radio-inline">
+										<input  id="r_isTablePrependColumnLinkson_false" type="radio" name="codeGen.isTablePrependColumnLinkson"   value="false"/>
+										<label for="r_isTablePrependColumnLinkson_false">不启用</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-8 h-100" id="table_design_right">
+		<div class="card jb_vflex">
+			<div class="card-header jb_vheader_card">
+				<span class="d-inline-block mr-5"><i class="fa fa-eye mr-1"></i>表格预览</span>
+				<button onclick="AjaxPortalUtil.refresh('#codegen_table_preview_portal_#(pageId)')" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh mr-1"></i>刷新预览区</button>
+				<button data-ajaxbtn data-confirm="确认初始化元素表格列顺序？" data-handler="refreshPortal" data-codegen-id="#(codeGen.id)" data-portalid="codegen_table_preview_portal_#(pageId)" data-url="admin/codegen/initSortRankIntable/#(codeGen.id)" class="btn btn-outline-success btn-sm" ><i class="fa fa-sort mr-1"></i>初始化排序</button>
+				<div class="btn-group btn-group-sm">
+					<button id="isTableEditModeBtn_true" class="btn btn-secondary" onclick="changeTablePreviewMode(true)" tooltip data-title="编辑模式"><i class="fa fa-edit"></i></button>
+					<button id="isTableEditModeBtn_false" class="btn btn-primary" onclick="changeTablePreviewMode(false)" tooltip data-title="预览模式"><i class="fa fa-eye"></i></button>
+				</div>
+				<a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a>
+			</div>
+			<div class="card-body jb_vbody">
+				<div class="h-100" data-ajaxportal data-edit-mode="false" data-codegen-id="#(codeGen.id)" data-url="admin/codegen/tablePortal/#(codeGen.id)" id="codegen_table_preview_portal_#(pageId)"></div>
+			</div>
+		</div>
+	</div>
+</div>

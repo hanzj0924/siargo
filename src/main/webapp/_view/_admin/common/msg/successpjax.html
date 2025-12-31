@@ -1,0 +1,24 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey??)">
+<div class="jbolt_page_content">
+ 	<div style="margin: 20px auto;max-width: 500px">
+			<div class="alert alert-success text-center">#(msg??)</div>
+			<div style="margin-top:30px;text-align: center;">
+			#if(backUrl??)
+			<a class="btn btn-primary" href="#(backUrl??)">#(backText?? '返回')</a>
+			#end
+			#if(editUrl??)
+			<a class="btn btn-success" href="#(editUrl??)">#(editText?? '继续编辑')</a>
+			#end
+			#if(detailUrl??)
+			<a class="btn btn-info" href="#(detailUrl??)">#(detailText?? '查看详情')</a>
+			#end
+			#if(addUrl??)
+			<a class="btn btn-primary" href="#(addUrl??)">#(addText?? '添加新数据')</a>
+			#end
+			</div>
+		</div>
+</div>
+</div>
+#end

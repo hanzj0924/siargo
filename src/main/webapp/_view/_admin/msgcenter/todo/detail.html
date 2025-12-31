@@ -1,0 +1,77 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+#if(todo.type == 1)
+<div class="card">
+<div class="card-body">
+#(todo.title??)
+</div>
+</div>
+#else if(todo.type == 2)
+<div class="card">
+<div class="card-header px-3 text-center"><span class="font-weight-bolder">#(todo.title??)</span></div>
+<div class="card-body p-3">
+#(todo.content??)
+</div>
+</div>
+#else if(todo.type == 3)
+<div class="card">
+<div class="card-body">
+#(todo.title??)
+</div>
+<div class="card-footer">
+<div class="alert alert-primary">
+此待办事项关联其它数据，请点击查看。
+</div>
+<a class="btn btn-outline-primary btn-sm" data-openpage  data-title="待办[#(todo.title??)]" data-target="parent" data-key="todo_#(todo.id)" href="#(todo.url??)"><i class="fa fa-link"></i> 主页打开</a>
+<a class="btn btn-danger btn-sm" data-openpage onclick="parent.layer.closeAll()"  data-title="待办[#(todo.title??)]" data-target="parent" data-key="todo_#(todo.id)" href="#(todo.url??)"><i class="fa fa-link"></i> 主页打开并关闭此详情</a>
+<a class="btn btn-outline-info btn-sm" target="_blank" href="#(todo.url??)"><i class="fa fa-link"></i> 浏览器新页面打开</a>
+<a class="btn btn-outline-success btn-sm" href="#(todo.url??)" data-openpage="dialog" data-area="1280,720" data-title="#(data.title??)" data-btn="close" data-target="parent"><i class="fa fa-link"></i> 新窗口打开</a>
+</div>
+</div>
+#else if(todo.type == 4)
+<div class="card">
+<div class="card-header px-3 text-center"><span class="font-weight-bolder">#(todo.title??)</span></div>
+<div class="card-body p-3">
+#(todo.content??)
+</div>
+<div class="card-footer">
+<div class="alert alert-primary">
+此待办事项关联其它数据，请点击查看。
+</div>
+<a class="btn btn-outline-primary btn-sm" data-openpage data-title="待办[#(todo.title??)]" data-target="parent" data-key="todo_#(todo.id)" href="#(todo.url??)"><i class="fa fa-link"></i> 主页打开</a>
+<a class="btn btn-danger btn-sm" data-openpage onclick="parent.layer.closeAll()" data-title="待办[#(todo.title??)]" data-target="parent" data-key="todo_#(todo.id)" href="#(todo.url??)"><i class="fa fa-link"></i> 主页打开并关闭此详情</a>
+<a class="btn btn-outline-info btn-sm" target="_blank" href="#(todo.url??)"><i class="fa fa-link"></i> 浏览器新页面打开</a>
+<a class="btn btn-outline-success btn-sm" href="#(todo.url??)" data-openpage="dialog" data-area="1280,720" data-title="#(data.title??)" data-btn="close" data-target="parent"><i class="fa fa-link"></i> 新窗口打开</a>
+</div>
+</div>
+#end
+
+
+
+<div class="card mt-3">
+<div class="card-body p-3">
+<table class="table table-bordered table-hover">
+<tr><th style="width:100px;">状态</th><td><span class="badge badge-#(ColorUtil.colorClassByLevel(todo.state))">#(todo.stateName?? '未设置')</span></td></tr>
+<tr><th>类型</th><td><span class="badge badge-#(ColorUtil.colorClassByLevel(todo.type))">#(todo.typeName?? '未设置')</span></td></tr>
+<tr><th>优先级</th><td><span class="badge priorityLevel3_#(todo.priorityLevel)">#(todo.priorityLevelName?? '未设置')</span></td></tr>
+<tr><th>截止时间</th><td>#datetime(todo.specifiedFinishTime)</td></tr>
+#if(todo.state == 4)
+<tr><th>取消时间</th><td>#datetime(todo.cancelTime)</td></tr>
+#else if(todo.state == 3)
+<tr><th>完成时间</th><td>#datetime(todo.realFinishTime)</td></tr>
+#end
+<tr><th>发布用户</th><td>#(JBoltUserCache.getName(todo.createUserId))</td></tr>
+<tr><th>更新用户</th><td>#(JBoltUserCache.getName(todo.updateUserId))</td></tr>
+<tr><th>创建时间</th><td>#datetime(todo.createTime)</td></tr>
+<tr><th>更新时间</th><td>#datetime(todo.updateTime)</td></tr>
+</table>
+</div>
+</div>
+
+
+</div>
+</div>
+#end

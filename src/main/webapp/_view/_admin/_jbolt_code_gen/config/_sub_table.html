@@ -1,0 +1,43 @@
+
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="rowtpl_">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+{@/each}
+</script>
+
+<!-- JBoltTable的toolbar定义-->
+<div class="jbolt_table_toolbar" id="toolbar_">
+	<div class="btn-group btn-group-sm">
+		<button class="btn btn-primary" data-dialogbtn data-url="xxx/add" data-handler="jboltTablePageToLast" data-area="720,600" data-title="新增数据"><i class="fa fa-plus"></i> 新增</button>
+		<button class="btn btn-info" data-dialogbtn data-url="xxx/edit/" data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedId" data-area="720,600" data-title="编辑数据"><i class="fa fa-edit"></i> 编辑</a>
+		<button class="btn btn-danger" data-ajaxbtn data-confirm="确定删除选中数据？"  data-url="xxx/batchDelete?ids=" data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds"><i class="fa fa-remove"></i> 删除</a>
+	</div>
+	<div class="btn-group btn-group-sm float-right">
+		<button class="btn btn-secondary" onclick="refreshJBoltTable(this)"><i class="fa fa-refresh"></i> 刷新</a>
+	</div>
+</div>
+
+<!-- JBoltTable的表格主体定义-->
+<table data-jbolttable class="text-center"
+data-ajax="true"
+data-url="xxx/datas"
+data-rowtpl="rowtpl_"
+data-toolbar="toolbar_"
+data-page="table_page_"
+data-pagesize="10"
+>
+<thead>
+	<th data-width="60">编号</th>
+	<th data-width="150"></th>
+	<th data-width="100"></th>
+	<th data-width="100"></th>
+</thead>
+<tbody></tbody>
+</table>
+

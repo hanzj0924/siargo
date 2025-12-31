@@ -1,0 +1,225 @@
+#@jboltLayout()
+#define main()
+#set(pageId = RandomUtil.random(6))
+#set(deleteDictionaryEnable = JBoltGlobalConfigCache.getSystemDictionaryDeleteEnable())
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<div class="row">
+			<div class="col-sm-auto">
+				<h1>
+					<i class="jbicon2 jbi-container"></i> 字典管理
+				</h1>
+			</div>
+			<div class="col"></div>
+			<div class="col-sm-auto">
+				<button class="btn btn-outline-primary btn-sm" data-ajaxbtn data-url="admin/dictionary/checkandinit" data-handler="refreshPjaxContainer"
+					data-confirm="确认检测系统默认内置数据">
+					<i class="fa fa-eject"></i> 检测并初始化
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+<!-- 数据字典TYPE表的的数据模板定义-->
+<script type="text/template" id="dictionaryType_tpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" class="hand">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td title="${data.name}">${data.name}{@if data.isBuildIn}<span class="text-danger">(内置)</span>{@/if}</td>
+<td title="${data.typeKey}">${data.typeKey}</td>
+<td>${data.modeLevel==1?"一级":"多级"}</td>
+	<td>
+	{@if data.isBuildIn}
+	<img data-switchbtn data-value="${data.enable}"  data-disabled="true" data-disabled-msg="系统内置字典类型，不可切换启用状态"/>
+	{@else}
+	<img data-switchbtn data-confirm="切换后此类型下的所有字典数据与类型启用状态更新一致，确定切换此字典类型启用状态？" data-value="${data.enable}"  data-handler="refreshJBoltTable"  data-url="admin/dictionarytype/toggleEnable/${data.id}"/>
+	{@/if}
+</td>
+<td>
+{@if !data.isBuildIn}
+ <a tooltip data-title="编辑" class=" d-inline-block jbolt_table_editbtn"  data-area="500,400" data-handler="refreshJBoltTable"   href="admin/dictionarytype/edit/${data.id}"><i class="fa fa-edit text-warning"></i></a>
+ <a tooltip data-title="删除" class="ml-2 d-inline-block jbolt_table_delbtn" data-confirm="确认删除此分类？" data-handler="refreshJBoltTable" href="admin/dictionarytype/delete/${data.id}"><i class="fa fa-remove text-danger"></i></a>
+{@/if}
+</td>
+</tr>
+{@/each}
+</script>
+<!-- 数据字典表的的数据模板定义-->
+<script type="text/template" id="dictionary_tpl_tr_#(pageId)">
+<tr data-id="${id}" data-pid="${pid}" data-level="${eachLevel}" data-hasitems="${items&&items.length>0}">
+<td>${name}{@if innerCustom}<span class="text-danger">(扩展)</span>{@/if}</td>
+<td class="text-center">${sn}</td>
+<td class="text-center">
+	<img data-switchbtn data-value="${enable}"  data-handler="refreshJBoltTable"  data-url="admin/dictionary/toggleEnable/${id}"/>
+</td>
+<td class="text-center">
+	{@if typeLevel == 2}
+	<a href="admin/dictionary/addItem/${typeId}-${id}" data-area="600,500"  tooltip data-title="新增下级数据"  data-handler="refreshJBoltTable" class="jbolt_table_editbtn"><i class="fa fa-plus"></i></a>
+	{@/if}
+	{@if !isBuildIn}
+	<a href="admin/dictionary/edit/${typeId}-${id}" data-area="600,400"  tooltip data-title="编辑"  data-handler="refreshJBoltTable" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+	{@/if}
+	#if(deleteDictionaryEnable)
+	{@if !isBuildIn}
+	<a href="admin/dictionary/delete/${id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="refreshJBoltTable" data-confirm="确定删除这条数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+	{@/if}
+	#end
+    <a href="admin/dictionary/up/${id}" data-success-time="50" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+    <a href="admin/dictionary/down/${id}"  data-success-time="50"  data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+</td>
+</tr>
+{@if items&&items.length>0}
+{@each items as son}
+${son,typeLevel|getDictionaryTypeLevel}
+{@include "#dictionary_tpl_tr_#(pageId)",son}
+{@/each}
+{@/if}
+</script>
+
+<script type="text/template" id="dictionary_tpl_#(pageId)">
+<!--
+{@helper getDictionaryTypeLevel}
+    function(data,level) {
+		data.typeLevel = level;
+        return data;
+    }
+{@/helper}
+-->
+{@each datas as data,index}
+${data,extraData.typeLevel|getDictionaryTypeLevel}
+{# 先循环第一级}
+{@include "#dictionary_tpl_tr_#(pageId)",data}
+{@/each}
+</script>
+		<div class="row">
+			<div class="col-12 col-xl-6 col-lg-6 col-md-6">
+				<div class="card mb-3">
+					<div class="card-header py-2">
+							<div class="row">
+								<div class="col pt-2"><label>数据分类</label></div>
+								<div class="col-md-auto">
+									<form id="dictionaryTypeForm_#(pageId)" class="form-inline" onsubmit="return false;">
+										<select name="enable" data-autoload class="form-control"
+												data-url="admin/dictionary/options?key=options_enable"
+												data-value-attr="sn"
+										></select>
+										<input data-with-clearbtn="true" class="form-control ml-1" type="text" name="keywords" autocomplete="off" placeholder="关键词检索 名称、KEY"/>
+										<button type="submit" class="btn btn-outline-primary btn-sm ml-3"><i class="fa fa-search"></i> 查询</button>
+									</form>
+								</div>
+								<div class="col-md-auto  pt-2">
+									<a href="admin/dictionarytype/add" tooltip  data-handler="refreshJBoltTable('dictionaryTypeTable_#(pageId)')"
+										data-dialogbtn data-area="500,400" data-title="添加新数据分类"><i class="fa fa-plus text-primary"></i></a>
+								</div>
+							</div>
+					</div>
+					<div class="card-body overflow-auto" style="height: calc(100vh - #(jboltLayerTop+32+32+42+60)px);">
+						<table id="dictionaryTypeTable_#(pageId)" class="table-center jbolt_table thead_font_normal dictionaryTypes" data-jbolttable data-column-resize="true" data-height="fill_box"
+							data-rowtpl="dictionaryType_tpl_#(pageId)"
+							data-ajax="true"
+							data-url="admin/dictionarytype/datas"
+							data-conditions-form="dictionaryTypeForm_#(pageId)"
+							data-page="dictionary_type_page_#(pageId)"
+							data-page-mini="true"
+							data-pagesize="15"
+						  	data-row-click-handler="readDictionarys_#(pageId)"
+  							data-row-click-active="true"
+  							data-fixed-columns-left="1"
+  							data-fixed-columns-right="-1,-2"
+  							data-ajax-success-handler="clearDicTable_#(pageId)"
+							>
+							<thead>
+								<tr>
+									<th data-width="60">序号</th>
+									<th data-min-width="100">名称</th>
+									<th data-min-width="100">标识KEY</th>
+									<th data-width="80">模式层级</th>
+									<th data-width="70">启用</th>
+									<th data-width="80">操作</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-12 col-xl-6 col-lg-6 col-md-6">
+				<div class="card">
+					<div class="card-header py-2">
+						<div class="row">
+								<div class="col pt-2"><label>数据项 :<span id="selectDicTypeName" class="text-danger">未选</span></label></div>
+								<div class="col-md-auto pt-2">
+									<span style="display:none;" id="expandCollapseOpt_#(pageId)"><a href="javascript:void(0)" onclick="jboltTableExpandAll('dictionaryTable_#(pageId)')" class="text-primary">展开</a>|<a href="javascript:void(0)" onclick="jboltTableCollapseAll('dictionaryTable_#(pageId)')"  class="text-info">闭合</a></span>
+								</div>
+								<div class="col-md-auto">
+									<form style="display:none;" id="dictionaryForm_#(pageId)" class="form-inline" onsubmit="return false;">
+										<input type="hidden" name="typeId" id="dicTypeId_#(pageId)"/>
+										<select id="dicEnableSelect_#(pageId)" name="enable" data-autoload class="form-control"
+												data-url="admin/dictionary/options?key=options_enable"
+												data-value-attr="sn"
+										></select>
+										<input  id="dicKeywords_#(pageId)"  data-with-clearbtn="true" class="form-control ml-1" type="text" name="keywords" autocomplete="off" placeholder="关键词检索 名称、编号"/>
+										<button type="submit" class="btn btn-outline-primary btn-sm ml-3"><i class="fa fa-search"></i> 查询</button>
+									</form>
+								</div>
+								<div style="display:none;" class="col-md-auto  pt-2"  id="dicOptBtns_#(pageId)">
+									<a data-link-para-ele="#dicTypeId_#(pageId)" tooltip data-title="新增此分类下数据项" data-handler="refreshJBoltTable('dictionaryTable_#(pageId)')" class="jbolt_table_addbtn text-primary mr-4" data-area="600,500" href="admin/dictionary/add"><i class="fa fa-plus"></i></a>
+									<a data-link-para-ele="#dicTypeId_#(pageId)" tooltip data-title="初始化此分类下数据项排序" data-handler="refreshJBoltTable('dictionaryTable_#(pageId)')" data-ajaxbtn data-confirm="确定初始化此分类下的数据项排序" class="text-primary  mr-4" style="" href="admin/dictionary/initRank"><i class="fa fa-sort"></i></a>
+									<a data-link-para-ele="#dicTypeId_#(pageId)" tooltip data-title="清空此分类下的所有数据项" data-ajaxbtn data-confirm="清空可能影响关联数据,确认清空此分类下的所有数据项" data-handler="refreshJBoltTable('dictionaryTable_#(pageId)')"  class="text-danger" href="admin/dictionary/clearByType"><i class="fa fa-trash"></i></a>
+								</div>
+							</div>
+
+					</div>
+					<div class="card-body overflow-auto" style="height: calc(100vh - #(jboltLayerTop+32+32+42+60)px);">
+<table id="dictionaryTable_#(pageId)" class="jbolt_table thead_font_normal dictionaryTypes" data-jbolttable data-column-resize="true" data-height="fill_box"
+	data-rowtpl="dictionary_tpl_#(pageId)"
+	data-ajax="true"
+	data-url="admin/dictionary/datas"
+	data-conditions-form="dictionaryForm_#(pageId)"
+	data-treetable="all:1"
+	>
+	<thead>
+		<tr>
+			<th data-min-width="150">名称</th>
+			<th data-width="200" class="text-center">编号(SN)</th>
+			<th data-width="70" class="text-center">启用</th>
+			<th data-width="#if(deleteDictionaryEnable??)150#else 120#end" class="text-center">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+#end
+#define js()
+<script>
+function clearDicTable_#(pageId)(){
+	$("#selectDicTypeName").text("未选");
+	$("#dicTypeId_#(pageId)").val("");
+	$("#dicKeywords_#(pageId)").val("");
+	$("#dictionaryForm_#(pageId)").hide();
+	$("#dicOptBtns_#(pageId)").hide();
+	$("#expandCollapseOpt_#(pageId)").hide();
+	refreshJBoltTable("dictionaryTable_#(pageId)");
+}
+	function readDictionarys_#(pageId)(table,tr,typeId,jsonData) {
+		$("#selectDicTypeName").text(jsonData.name);
+		$("#dicTypeId_#(pageId)").val(typeId);
+		$("#dicKeywords_#(pageId)").val("");
+		$("#dictionaryForm_#(pageId)").show();
+		$("#dicOptBtns_#(pageId)").show();
+		if(jsonData.modeLevel==2){
+			$("#expandCollapseOpt_#(pageId)").show();
+		}else{
+			$("#expandCollapseOpt_#(pageId)").hide();
+		}
+		$("#dicEnableSelect_#(pageId)").val((jsonData.enable?"true":"false")).change();
+		refreshJBoltTable("dictionaryTable_#(pageId)");
+	}
+</script>
+#end

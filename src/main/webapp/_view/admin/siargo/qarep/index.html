@@ -1,0 +1,887 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
+<div class="jbolt_page_title jb_vheader">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1><i class="jbicon jb-myreport"></i> 检验报告单管理</h1>
+	</div>
+	<div class="col">
+		
+	</div>
+	<div class="col-md-auto">
+	</div>
+	</div>
+	
+</div>
+<div class="jbolt_page_content jb_vbody">
+<!-- 全部 表单数据 -->
+<script type="text/template" id="allreportRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.orderId}</td>
+<td>
+	{@if data.repType === 1}
+		产成品
+	{@else if data.repType === 2}
+		返修品
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.prodType == 1}
+		传感器
+	{@else if data.prodType == 2}
+		小流量计
+	{@else if data.prodType == 3}
+		大流量计
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.spDes==null}
+		无
+	{@else}
+		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
+			class="btn btn-outline-info btn-sm" data-content="${data.spDes}"><i class="fa fa-eye"></i> 查看
+		</button>
+	{@/if}
+</td>
+<td>${data.spQsi}</td>
+<td>${data.spQi}</td>
+<td>${data.spModle}</td>
+<td>${data.spNumber}</td>
+<td>${data.scName}</td>
+<td>${data.formnum}</td>
+<td>
+	{@if data.insp === 1}
+		精度待检
+	{@else if data.insp === 2}
+		成品待检
+	{@else if data.insp === 3}
+		包装待检
+	{@else if data.insp === 4}
+		合格待批准
+	{@else if data.insp === 5}
+		已完成
+	{@else}
+		无
+	{@/if}
+</td>
+<td>${data.createTime}</td>
+</tr>
+{@/each}
+</script>
+
+<!-- 待检验 表单数据 -->
+<script type="text/template" id="noqRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.orderId}</td>
+<td>
+	{@if data.repType === 1}
+		产成品
+	{@else if data.repType === 2}
+		返修品
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.prodType == 1}
+		传感器
+	{@else if data.prodType == 2}
+		小流量计
+	{@else if data.prodType == 3}
+		大流量计
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.spDes==null}
+		无
+	{@else}
+		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
+			class="btn btn-outline-info btn-sm" data-content="${data.spDes}"><i class="fa fa-eye"></i> 查看
+		</button>
+	{@/if}
+</td>
+<td>${data.spQsi}</td>
+<td>${data.spQi}</td>
+<td>${data.spModle}</td>
+<td>${data.spNumber}</td>
+<td>${data.scName}</td>
+<td>${data.formnum}</td>
+<td>${data.createTime}</td>
+</tr>
+{@/each}
+</script>
+
+<!-- 精度合格 表单数据 -->
+<script type="text/template" id="accqRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.orderId}</td>
+<td>
+	{@if data.repType === 1}
+		产成品
+	{@else if data.repType === 2}
+		返修品
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.prodType == 1}
+		传感器
+	{@else if data.prodType == 2}
+		小流量计
+	{@else if data.prodType == 3}
+		大流量计
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.spDes==null}
+		无
+	{@else}
+		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
+			class="btn btn-outline-info btn-sm" data-content="${data.spDes}"><i class="fa fa-eye"></i> 查看
+		</button>
+	{@/if}
+</td>
+<td>${data.spQsi}</td>
+<td>${data.spQi}</td>
+<td>${data.spModle}</td>
+<td>${data.spNumber}</td>
+<td>${data.scName}</td>
+<td>${data.formnum}</td>
+<td>${data.accqName}</td>
+<td>${data.accqTime}</td>
+</tr>
+{@/each}
+</script>
+
+<!-- 功能外观 表单数据 -->
+<script type="text/template" id="funqRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.orderId}</td>
+<td>
+	{@if data.repType === 1}
+		产成品
+	{@else if data.repType === 2}
+		返修品
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.prodType == 1}
+		传感器
+	{@else if data.prodType == 2}
+		小流量计
+	{@else if data.prodType == 3}
+		大流量计
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.spDes==null}
+		无
+	{@else}
+		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
+			class="btn btn-outline-info btn-sm" data-content="${data.spDes}"><i class="fa fa-eye"></i> 查看
+		</button>
+	{@/if}
+</td>
+<td>${data.spQsi}</td>
+<td>${data.spQi}</td>
+<td>${data.spModle}</td>
+<td>${data.spNumber}</td>
+<td>${data.scName}</td>
+<td>${data.formnum}</td>
+<td>${data.accqName}</td>
+<td>${data.accqTime}</td>
+<td>
+	{@if data.funqName==null}
+		无
+	{@else}
+		${data.funqName}
+	{@/if}
+</td>
+<td>
+	{@if data.funqTime==null}
+		无
+	{@else}
+		${data.funqTime}
+	{@/if}
+</td>
+</tr>
+{@/each}
+
+</script>
+
+<!-- 待批准 表单数据 -->
+<script type="text/template" id="appqRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.orderId}</td>
+<td>
+	{@if data.repType === 1}
+		产成品
+	{@else if data.repType === 2}
+		返修品
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.prodType == 1}
+		传感器
+	{@else if data.prodType == 2}
+		小流量计
+	{@else if data.prodType == 3}
+		大流量计
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.spDes==null}
+		无
+	{@else}
+		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
+			class="btn btn-outline-info btn-sm" data-content="${data.spDes}"><i class="fa fa-eye"></i> 查看
+		</button>
+	{@/if}
+</td>
+<td>${data.spQsi}</td>
+<td>${data.spQi}</td>
+<td>${data.spModle}</td>
+<td>${data.spNumber}</td>
+<td>${data.scName}</td>
+<td>${data.formnum}</td>
+<td>${data.accqName}</td>
+<td>${data.accqTime}</td>
+<td>
+	{@if data.funqName==null}
+		无
+	{@else}
+		${data.funqName}
+	{@/if}
+</td>
+<td>
+	{@if data.funqTime==null}
+		无
+	{@else}
+		${data.funqTime}
+	{@/if}
+</td>
+<td>${data.appqName}</td>
+<td>${data.appqTime}</td>
+</tr>
+{@/each}
+</script>
+
+<!-- 已完成 表单数据 -->
+<script type="text/template" id="allqRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.orderId}</td>
+<td>
+	{@if data.repType === 1}
+		产成品
+	{@else if data.repType === 2}
+		返修品
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.prodType == 1}
+		传感器
+	{@else if data.prodType == 2}
+		小流量计
+	{@else if data.prodType == 3}
+		大流量计
+	{@else}
+		无
+	{@/if}
+</td>
+<td>
+	{@if data.spDes==null}
+		无
+	{@else}
+		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
+			class="btn btn-outline-info btn-sm" data-content="${data.spDes}"><i class="fa fa-eye"></i> 查看
+		</button>
+	{@/if}
+</td>
+<td>
+	{@if data.spPdfstr==null}
+		无
+	{@else}
+		<a data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
+		href="${data.spPdfstr}"><i class="fa fa-eye"></i> 查看</a> 
+	{@/if}
+	
+</td>
+<td>${data.spQsi}</td>
+<td>${data.spQi}</td>
+<td>${data.spModle}</td>
+<td>${data.spNumber}</td>
+<td>${data.scName}</td>
+<td>${data.formnum}</td>
+
+<td>${data.accqName}</td>
+<td>${data.accqTime}</td>
+<td>
+	{@if data.funqName==null}
+		无
+	{@else}
+		${data.funqName}
+	{@/if}
+</td>
+<td>
+	{@if data.funqTime==null}
+		无
+	{@else}
+		${data.funqTime}
+	{@/if}
+</td>
+<td>${data.appqName}</td>
+<td>${data.appqTime}</td>
+<td>${data.allqName}</td>
+<td>${data.allqTime}</td>
+</tr>
+{@/each}
+</script>
+
+<!-- 全部 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="allreport_toolbar_#(pageId)">
+	<div class="row">
+		<div class="col-md-auto">
+		<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
+			<input type="text" autocomplete="off" class="form-control"
+				placeholder="输入订单号" name="keywords" value="" /> 
+			<select class="form-control" name="prodType" data-autoload
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-value-attr="dickey" data-text-attr="dicvalue"
+				data-text="=产品类型=" data-value=""></select>
+			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" id="qadatepicker"  
+				placeholder="日期范围" data-range="~" name="dateRange" value="#(dateRange??)">
+			<button type="submit" class="btn btn-outline-secondary">
+				<i class="fa fa-search"></i> 查询
+			</button>
+		</form>
+		</div>
+		<div class="col text-left">
+		</div>
+		<div class="col-md-auto">
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button data-openpage="dialog" data-area="1200,850"
+					data-handler="jboltTablePageToFirst" data-title="新增"
+					data-url="admin/siargo/qarep/add"
+					class="btn btn-outline-primary ">
+					<i class="fa fa-plus"></i> 新增
+				</button>
+				<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+					data-check-handler="jboltTableGetCheckedIds"
+					data-url="admin/siargo/qarep/deleteByIds?ids="
+					data-confirm="确定删除选中数据？" class="btn btn-outline-danger ">
+					<i class="fa fa-trash"></i> 删除
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-info ">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+<!-- 未检验 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="noq_toolbar_#(pageId)">
+	<div class="row">
+		<div class="col-md-auto">
+		<form class="form-inline d-inline-block" id="noqForm_#(pageId)" onsubmit="return false;" method="post">
+			<input type="text" autocomplete="off" class="form-control"
+				placeholder="输入订单号" name="keywords" value="" /> 
+			<select class="form-control" name="prodType" data-autoload
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-value-attr="dickey" data-text-attr="dicvalue"
+				data-text="=产品类型=" data-value=""></select>
+			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date"  
+				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+			<button type="submit" class="btn btn-outline-secondary">
+				<i class="fa fa-search"></i> 查询
+			</button>
+		</form>
+		</div>
+		<div class="col text-center">
+			<!-- <button  class="btn btn-info" data-dialogbtn data-area="1000,750" data-btn-align="center"
+				data-title="查看检验项目" data-btn="close"  
+				data-url="/admin/siargo/qarep/accqHtml"><i class="fa fa-info mr-1"></i> 查看检验项目
+			</button> -->
+		</div>
+		<div class="col-md-auto">
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
+					data-confirm="确定批准选中数据？" 
+					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 精度合格
+				</button>
+				<button data-openpage="dialog" data-area="850,650"
+					data-handler="jboltTablePageToFirst" data-title="新增"
+					data-url="admin/siargo/qarep/add"
+					class="btn btn-outline-primary ">
+					<i class="fa fa-plus"></i> 新增
+				</button>
+				<button data-openpage="dialog" data-area="850,650"
+					data-handler="refreshJBoltTable" data-title="修改"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/qarep/edit/"
+					class="btn btn-outline-info ">
+					<i class="fa fa-edit"></i> 修改
+				</button>
+				<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+					data-check-handler="jboltTableGetCheckedIds"
+					data-url="admin/siargo/qarep/deleteByIds?ids="
+					data-confirm="确定删除选中数据？" class="btn btn-outline-danger ">
+					<i class="fa fa-trash"></i> 删除
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-info ">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+<!-- 精度合格 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
+	<div class="row">
+		<div class="col-md-auto">
+		<form class="form-inline d-inline-block" id="accqForm_#(pageId)" onsubmit="return false;" method="post">
+			<input type="text" autocomplete="off" class="form-control"
+				placeholder="输入订单号" name="keywords" value="" /> 
+			<select class="form-control" name="prodType" data-autoload
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-value-attr="dickey" data-text-attr="dicvalue"
+				data-text="=产品类型=" data-value=""></select>
+			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+			<button type="submit" class="btn btn-outline-secondary">
+				<i class="fa fa-search"></i> 查询
+			</button>
+		</form>
+		</div>
+		<div class="col text-left">
+		</div>
+		<div class="col-md-auto">
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
+					data-confirm="确定批准选中数据？" 
+					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 成品合格
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-info ">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+<!-- 功能/外观合格 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="funq_toolbar_#(pageId)">
+	<div class="row">
+		<div class="col-md-auto">
+		<form class="form-inline d-inline-block" id="funqForm_#(pageId)" onsubmit="return false;" method="post">
+			<input type="text" autocomplete="off" class="form-control"
+				placeholder="输入订单号" name="keywords" value="" /> 
+			<select class="form-control" name="prodType" data-autoload
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-value-attr="dickey" data-text-attr="dicvalue"
+				data-text="=产品类型=" data-value=""></select>
+			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+			<button type="submit" class="btn btn-outline-secondary">
+				<i class="fa fa-search"></i> 查询
+			</button>
+		</form>
+		</div>
+		<div class="col text-left">
+		</div>
+		<div class="col-md-auto">
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
+					data-confirm="确定批准选中数据？" 
+					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 包装合格
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-info ">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+<!-- 待批准 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="appq_toolbar_#(pageId)">
+	<div class="row">
+		<div class="col-md-auto">
+		<form class="form-inline d-inline-block" id="appqForm_#(pageId)" onsubmit="return false;" method="post">
+			<input type="text" autocomplete="off" class="form-control"
+				placeholder="输入订单号" name="keywords" value="" /> 
+			<select class="form-control" name="prodType" data-autoload
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-value-attr="dickey" data-text-attr="dicvalue"
+				data-text="=产品类型=" data-value=""></select>
+			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+			<button type="submit" class="btn btn-outline-secondary">
+				<i class="fa fa-search"></i> 查询
+			</button>
+		</form>
+		</div>
+		<div class="col text-left">
+		</div>
+		<div class="col-md-auto">
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
+					data-confirm="确定批准选中数据？" 
+					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 批准
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-info ">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+<!-- 已完成 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="allq_toolbar_#(pageId)">
+	<div class="row">
+		<div class="col-md-auto">
+		<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
+			<input type="text" autocomplete="off" class="form-control"
+				placeholder="输入订单号" name="keywords" value="" /> 
+			<select class="form-control" name="prodType" data-autoload
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-value-attr="dickey" data-text-attr="dicvalue"
+				data-text="=产品类型=" data-value=""></select>
+			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+			<button type="submit" class="btn btn-outline-secondary">
+				<i class="fa fa-search"></i> 查询
+			</button>
+		</form>
+		</div>
+		<div class="col text-left">
+		</div>
+		<div class="col-md-auto">
+			
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="/admin/siargo/qarep/toPdf?ids=" 
+					data-confirm="确定批准选中数据？" 
+					class="btn btn-outline-primary " ><i class="jbicon2 jbi-cloud-download"></i> 生成PDF
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-info ">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)">
+	<div class="jbolt_tab_links jb_vheader">
+		<a class="jbolt_tab_link"  href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
+		<a class="jbolt_tab_link"  href="#noq_tabcontent"><i class="jbicon jb-21shuru"></i> 精度待检</a>
+		<a class="jbolt_tab_link"  href="#accq_tabcontent"><i class="jbicon jb-21shuru"></i> 成品待检</a>
+		<a class="jbolt_tab_link"  href="#funq_tabcontent"><i class="jbicon jb-21shuru"></i> 包装待检</a>
+		<a class="jbolt_tab_link"  href="#appq_tabcontent"><i class="jbicon jb-21shuru"></i> 全部合格/<strong>待批准</strong></a>
+		<a class="jbolt_tab_link"  href="#allq_tabcontent"><i class="jbicon jb-xiangmushouxubeian"></i> 已完成</a>
+	</div>
+	<div class="jbolt_tab_contents jb_vbody">
+		<div class="jbolt_tab_content"  id="allreport_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="allreport_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/siargo/qarep/datas"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="allreportForm_#(pageId)"
+				data-rowtpl="allreportRowtpl_#(pageId)"
+				data-page="allreportPage_#(pageId)"
+				data-toolbar="allreport_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				>
+				<thead class="fw-normal">
+					<tr>
+						<th data-width="60">序号</th>
+						<th data-width="80" data-column="order_id">订单号</th>
+						<th data-width="100" data-column="rep_type">报告单类型</th>
+						<th data-width="80" data-column="prod_type">产品类型</th>
+						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="80" data-column="sp_qsi">送检数量</th>
+						<th data-width="80" data-column="sp_qi">检验数量</th>
+						<th data-min-width="200" data-column="sp_modle">产品型号</th>
+						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-width="150" data-column="sc_name">客户名称</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="100" data-column="insp">检验进度</th>
+						<th data-width="150" data-column="create_time">创建时间</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="jbolt_tab_content"  id="noq_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="noq_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/siargo/qarep/datas?insp=1"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="noqForm_#(pageId)"
+				data-rowtpl="noqRowtpl_#(pageId)"
+				data-page="noqPage_#(pageId)"
+				data-toolbar="noq_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				>
+				<thead class="fw-normal">
+					<tr>
+						<th data-width="60">序号</th>
+						<th data-width="80" data-column="order_id">订单号</th>
+						<th data-width="100" data-column="rep_type">报告单类型</th>
+						<th data-width="80" data-column="prod_type">产品类型</th>
+						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="80" data-column="sp_qsi">送检数量</th>
+						<th data-width="80" data-column="sp_qi">检验数量</th>
+						<th data-min-width="200" data-column="sp_modle">产品型号</th>
+						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-width="150" data-column="sc_name">客户名称</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="150" data-column="create_time">创建时间</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="jbolt_tab_content"  id="accq_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="accq_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/siargo/qarep/datas?insp=2"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="accqForm_#(pageId)"
+				data-rowtpl="accqRowtpl_#(pageId)"
+				data-page="accqPage_#(pageId)"
+				data-toolbar="accq_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				>
+				<thead class="fw-normal">
+					<tr>
+						<th data-width="60">序号</th>
+						<th data-width="80" data-column="order_id">订单号</th>
+						<th data-width="100" data-column="rep_type">报告单类型</th>
+						<th data-width="80" data-column="prod_type">产品类型</th>
+						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="80" data-column="sp_qsi">送检数量</th>
+						<th data-width="80" data-column="sp_qi">检验数量</th>
+						<th data-min-width="200" data-column="sp_modle">产品型号</th>
+						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-width="150" data-column="sc_name">客户名称</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="150" data-column="accq_uid">精度检验人</th>
+						<th data-width="150" data-column="accq_time">精度检验日期</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="jbolt_tab_content"  id="funq_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="funq_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/siargo/qarep/datas?insp=3"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="funqForm_#(pageId)"
+				data-rowtpl="funqRowtpl_#(pageId)"
+				data-page="funqPage_#(pageId)"
+				data-toolbar="funq_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				>
+				<thead class="fw-normal">
+					<tr>
+						<th data-width="60">序号</th>
+						<th data-width="80" data-column="order_id">订单号</th>
+						<th data-width="100" data-column="rep_type">报告单类型</th>
+						<th data-width="80" data-column="prod_type">产品类型</th>
+						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="80" data-column="sp_qsi">送检数量</th>
+						<th data-width="80" data-column="sp_qi">检验数量</th>
+						<th data-min-width="200" data-column="sp_modle">产品型号</th>
+						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-width="150" data-column="sc_name">客户名称</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="150" data-column="accq_uid">精度检验人员</th>
+						<th data-width="150" data-column="accq_time">精度检验日期</th>
+						<th data-width="150" data-column="funq_uid">成品检验人员</th>
+						<th data-width="150" data-column="funq_time">成品检验日期</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="jbolt_tab_content"  id="appq_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="appq_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/siargo/qarep/datas?insp=4"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="appqForm_#(pageId)"
+				data-rowtpl="appqRowtpl_#(pageId)"
+				data-page="appqPage_#(pageId)"
+				data-toolbar="appq_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				>
+				<thead class="fw-normal">
+					<tr>
+						<th data-width="60">序号</th>
+						<th data-width="80" data-column="order_id">订单号</th>
+						<th data-width="100" data-column="rep_type">报告单类型</th>
+						<th data-width="80" data-column="prod_type">产品类型</th>
+						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="80" data-column="sp_qsi">送检数量</th>
+						<th data-width="80" data-column="sp_qi">检验数量</th>
+						<th data-min-width="200" data-column="sp_modle">产品型号</th>
+						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-width="150" data-column="sc_name">客户名称</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="150" data-column="accq_uid">精度检验人员</th>
+						<th data-width="150" data-column="accq_time">精度检验日期</th>
+						<th data-width="150" data-column="funq_uid">成品检验人员</th>
+						<th data-width="150" data-column="funq_time">成品检验日期</th>
+						<th data-width="150" data-column="appq_uid"> 包装检验人员</th>
+						<th data-width="150" data-column="appq_time">包装检验日期</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="jbolt_tab_content"  id="allq_tabcontent">
+			<table class="jbolt_table jbolt_main_table table_striped table-center"
+				data-jbolttable
+				id="allq_mgrtable_#(pageId)"
+				data-height="fill_box"
+				data-ajax="true"
+				data-url="admin/siargo/qarep/datas?insp=5"
+				data-column-resize="true"
+				data-column-prepend="1:checkbox"
+				data-conditions-form="allqForm_#(pageId)"
+				data-rowtpl="allqRowtpl_#(pageId)"
+				data-page="allqPage_#(pageId)"
+				data-toolbar="allq_toolbar_#(pageId)"
+				data-fixed-columns-left="1,2,3"
+				>
+				<thead class="fw-normal">
+					<tr>
+						<th data-width="60">序号</th>
+						<th data-width="80" data-column="order_id">订单号</th>
+						<th data-width="100" data-column="rep_type">报告单类型</th>
+						<th data-width="80" data-column="prod_type">产品类型</th>
+						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="120" data-column="pdfstr">查看PDF</th>
+						<th data-width="80" data-column="sp_qsi">送检数量</th>
+						<th data-width="80" data-column="sp_qi">检验数量</th>
+						<th data-min-width="200" data-column="sp_modle">产品型号</th>
+						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-width="150" data-column="sc_name">客户名称</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="150" data-column="accq_uid">精度检验人员</th>
+						<th data-width="150" data-column="accq_time">精度检验日期</th>
+						<th data-width="150" data-column="funq_uid">成品检验人员</th>
+						<th data-width="150" data-column="funq_time">成品检验日期</th>
+						<th data-width="150" data-column="appq_uid">包装检验人员</th>
+						<th data-width="150" data-column="appq_time">包装检验日期</th>
+						<th data-width="150" data-column="allq_uid">批准人员</th>
+						<th data-width="150" data-column="allq_time">批准日期</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+function afterAJaxCallback(res){
+	AjaxPortalUtil.refresh(portal);
+}
+
+</script>
+#end

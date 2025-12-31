@@ -1,0 +1,97 @@
+<form onsubmit="return false;" id="qiniuForm" action="#(action)" method="post">
+#if(qiniu.id??)
+	<input type="hidden" name="qiniu.id" value="#(qiniu.id)" />
+#end
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">账号类型</label>
+		<div class="col">
+		<select style="width:150px" class="form-control"
+		data-autoload
+		data-rule="select"
+		data-text="=请选择="
+		data-value=""
+		data-url="admin/dictionary/options?key=qiniu_type"
+		data-value-attr="sn"
+		name="qiniu.type"
+		data-select="#(qiniu.type??)"
+		>
+		</select>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">账号</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入账号" maxlength="255" name="qiniu.name" value="#(qiniu.name??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">编号SN</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入编号SN" maxlength="40" name="qiniu.sn" value="#(qiniu.sn??)">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">AK</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入AK" maxlength="64" name="qiniu.ak" value="#(qiniu.ak??)">
+		</div>
+		<div class="col-auto text-left pl-0" tooltip data-title="如何获取账户AK?">
+		<a target="_blank" href="https://portal.qiniu.com/user/key"><i class="fa fa-question-circle"></i></a>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">SK</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入SK" maxlength="64" name="qiniu.sk" value="#(qiniu.sk??)">
+		</div>
+		<div class="col-auto text-left pl-0" tooltip data-title="如何获取账户SK?">
+		<a target="_blank" href="https://portal.qiniu.com/user/key"><i class="fa fa-question-circle"></i></a>
+		</div>
+	</div>
+	
+    <div class="form-group row"
+    	data-radio
+    	data-rule="radio"
+    	data-value="#(qiniu.isDefault??)"
+    	data-name="qiniu.isDefault"
+    	data-default="false"
+    	data-width="col-sm-3,col"
+    	data-handler="changeQiniuIsDefaultHandler"
+		>
+			<label class="col-sm-3 col-form-label" >是否默认</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="r_isDefault_true" type="radio" name="qiniu.isDefault" value="true"/>
+					<label for="r_isDefault_true">是</label>
+				</div>
+				
+				<div class="radio radio-primary  radio-inline">
+					<input  id="r_isDefault_false" type="radio" name="qiniu.isDefault" value="false"/>
+					<label for="r_isDefault_false">否</label>
+				</div>
+			</div>
+		</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">备注</label>
+		<div class="col">
+			<textarea style="height:100px" autocomplete="off"  class="form-control"  placeholder="请输入备注" maxlength="255" name="qiniu.remark" >#(qiniu.remark??)</textarea>
+		</div>
+	</div>
+</form>
+#define js()
+<script>
+function changeQiniuIsDefaultHandler(r,v){
+	if(v=="true"){
+		Ajax.get("admin/qiniu/checkDefaultExist/#(qiniu.id?? 0)",function(res){
+			if(res.data){
+				LayerMsgBox.confirm("已存在其它默认账号，如将此账号设置为默认，现存默认账号将会转为非默认，确认设置吗？",function(){},function(){
+					$("#r_isDefault_false").click();
+				});
+			}
+		});
+	}
+}
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="qiniuForm")
+#end
+

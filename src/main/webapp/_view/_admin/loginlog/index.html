@@ -1,0 +1,83 @@
+#@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<div class="row">
+			<div class="col-md-auto">
+				<h1>
+					<i class="jbicon2 jbi-Field-time"></i> 登录日志
+				</h1>
+			</div>
+			<div class="col">
+				<form class="form-inline" id="loginlogForm_#(pageId)"
+					action="admin/loginlog" method="get" data-pjaxsubmit>
+					<input type="text" data-with-clearbtn="true" autocomplete="off"
+						class="form-control" placeholder="输入关键字搜索" name="keywords"
+						value="#(keywords??)" /> <input type="text"
+						data-with-clearbtn="true" class="form-control" data-date
+						data-type="date" placeholder="日期范围" data-range="~"
+						data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+					<button type="submit"
+						class="btn btn-outline-secondary d-block d-sm-inline-block">
+						<i class="fa fa-search"></i> 查询
+					</button>
+				</form>
+			</div>
+			<div class="col-md-auto">
+				<button onclick="refreshPjaxContainer()"
+					class="btn btn-outline-secondary btn-sm">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+		<table class="table_striped thead_font_normal table-center"
+			data-jbolttable data-width="fill" data-height="fill"
+			data-column-resize="true" data-fixed-columns-left="1,2"
+			data-page="loginlogPage_#(pageId)">
+			<thead>
+				<tr>
+					<th data-width="70" data-column="index">序号</th>
+					<th data-width="150" data-nochange>用户名(id)</th>
+					<th data-width="200" data-nochange>登录状态</th>
+					<th data-width="100" data-nochange>异地登录</th>
+					<th data-width="180" data-nochange>登录时间</th>
+					<th data-min-width="200">操作系统</th>
+					<th data-width="120" data-nochange>浏览器</th>
+					<th data-width="140" data-nochange>登录IP</th>
+					<th data-width="260" data-nochange>登录地址</th>
+				</tr>
+			</thead>
+			<tbody>
+				#for(data:pageData.list??)
+				<tr data-jboltlayertrigger data-top="#(jboltLayerTop)"
+					data-url="admin/loginlog/detail/#(data.id)" data-width="640"
+					data-keep-open="true" data-nomask data-resize="true">
+					<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+					<td>#(data.username??)(#(data.userId?? '-'))</td>
+					<td>#if(data.loginState==1) <span class="text-success">#(data.loginStateName??)</span>
+						#else <span class="text-danger">#(data.loginStateName??)</span>
+						#end
+					</td>
+					<td><span class="text-#(data.isRemoteLogin?'danger':'')">#boolToStr(data.isRemoteLogin)</span></td>
+					<td>#date(data.loginTime??,"yyyy-MM-dd HH:mm:ss")</td>
+					<td>#(data.osName??)</td>
+					<td>#(data.browserName??)</td>
+					<td>#(data.loginIp??)</td>
+					<td>#(data.loginAddress??)</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+		#include("/_view/_admin/common/_jbolt_table_page.html",pageEleId="loginlogPage_"+pageId)
+	</div>
+</div>
+#end #define js()
+<script>
+$(function(){
+	//初始化page
+	initPage("loginlogPage_#(pageId)",#(pageData.totalPage??),#(pageData.pageNumber??),"loginlogForm_#(pageId)");
+});
+</script>
+#end
+

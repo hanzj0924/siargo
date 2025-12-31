@@ -1,0 +1,468 @@
+<form onsubmit="return false;" id="permissionForm" action="#(action)" method="post">
+	#if(permission.id??)
+		<input type="hidden" name="permission.id" value="#(permission.id)" />
+	#end
+<input type="hidden" name="permission.permissionLevel" value="#(level?? 1)" />
+<div class="form-group row">
+	<label class="col-form-label col-sm-3">所属模块</label>
+	<div class="col-md-6 col-lg-4 col-sm-10">
+		<select data-refresh="true" data-live-search="true" class="form-control" name="permission.ofModule" data-select="#(permission.ofModule?? 1)" data-rule="select" data-tips="请选择所属模块" data-autoload data-url="admin/permission/modules"></select>
+	</div>
+</div>
+	<div class="form-group row">
+   <label class="col-form-label col-sm-3">上级资源</label>
+       <div class="col-md-6 col-lg-4 col-sm-10">
+           <select id="pid" data-refresh="true" data-live-search="true" class="form-control" name="permission.pid"  data-text="=无上级资源=" data-value="0" data-select="#(permission.pid?? (pid?? 0))" data-autoload data-url="admin/permission/options"></select>
+       </div>
+       <div class="col-auto">
+       		<a class="btn btn-danger btn-sm mt-1" data-openpage="dialog" data-target="parent" data-area="1080,750" href="admin/permission/add" tooltip data-title="添加新上级资源"><i class="fa fa-plus"></i></a>
+       </div>
+   </div>
+    <div class="form-group row">
+    <label class="col-form-label col-sm-3">资源名称</label>
+        <div class="col-md-7 col-sm-10">
+            <input type="text" autocomplete="off"  data-rule="required" maxlength="20" placeholder="请输入资源名称" data-tips="请输入资源名称" id="permissionTitle" name="permission.title" value="#(permission.title??)" class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+    <label class="col-form-label col-sm-3">ICONS</label>
+        <div class="col-md-7 col-sm-10">
+            <input type="text" autocomplete="off"  maxlength="40" placeholder="请输入ICONS"   name="permission.icons" value="#(permission.icons??)" class="form-control">
+        	<small class="form-text text-danger">提示：icon哪里找？<a class="btn btn-link text-primary" href="https://fontawesome.com.cn/v4/icons" target="_blank">点击查看fontawesome</a> <a class="btn btn-link text-success" href="assets/plugins/font/alifont/icons.html" target="_blank">点击查看jbicon</a></small>
+        </div>
+    </div>
+    <div class="form-group row">
+    <label class="col-form-label col-sm-3">资源地址</label>
+        <div class="col-md-7 col-sm-10">
+            <input type="text" autocomplete="off"    maxlength="255" placeholder="请输入资源地址"   name="permission.url" value="#(permission.url??)" class="form-control">
+        </div>
+    </div>
+
+    <div class="form-group row">
+    <label class="col-form-label col-sm-3">权限KEY</label>
+        <div class="col-md-7 col-sm-10">
+            <input type="text" autocomplete="off"   data-rule="required" data-tips="请输入权限KEY" maxlength="40" placeholder="请输入权限KEY" tips="请输入权限KEY" name="permission.permissionKey" value="#(permission.permissionKey??)" class="form-control">
+        </div>
+    </div>
+
+
+    <div class="form-group row"
+		data-radio
+		data-rule="radio"
+		data-value="#(permission.isMenu??)"
+		data-name="permission.isMenu"
+		data-default="true">
+		<label class="col-form-label col-sm-3" >是否是菜单</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rismenutrue" type="radio" name="permission.isMenu"   value="true"/>
+					<label for="rismenutrue">是</label>
+				</div>
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rismenufalse" type="radio" name="permission.isMenu"   value="false"/>
+					<label for="rismenufalse">否</label>
+				</div>
+
+			</div>
+		</div>
+
+     <div class="form-group row"
+		data-radio
+		data-rule="radio"
+		data-value="#(permission.isTargetBlank??)"
+		data-name="permission.isTargetBlank"
+		data-handler="togglePermissionOpenType"
+		data-default="false">
+		<label class="col-form-label col-sm-3" >加载方式</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rblankfalse" type="radio" name="permission.isTargetBlank"   value="false"/>
+					<label for="rblankfalse">浏览器当前窗口</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rblanktrue" type="radio" name="permission.isTargetBlank"   value="true"/>
+					<label for="rblanktrue">浏览器新窗口</label>
+				</div>
+			<small class="form-text text-danger">提示：只有设置为菜单并且设置了资源地址，加载方式才生效</small>
+			</div>
+		</div>
+     <div class="form-group row" style="display:none;" id="permissionOpenType"
+		data-radio
+		data-rule="radio"
+		data-value="#(permission.openType??)"
+		data-name="permission.openType"
+		data-handler="processMenuOpenOptions"
+		data-default="1">
+		<label class="col-form-label col-sm-3" >打开类型</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rbopenType1" type="radio" name="permission.openType"   value="1"/>
+					<label for="rbopenType1">系统默认</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rbopenType2" type="radio" name="permission.openType"   value="2"/>
+					<label for="rbopenType2">IFrame</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rbopenType3" type="radio" name="permission.openType"   value="3"/>
+					<label for="rbopenType3">Dialog</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="rbopenType4" type="radio" name="permission.openType"   value="4"/>
+					<label for="rbopenType4">JBoltLayer组件</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group row" style="display:none;" id="menuOpenOptionBox">
+    	<label class="col-form-label col-sm-3">组件属性配置</label>
+        <div class="col-5">
+			<div class="input-group iframe_option" style="display:none;">
+				<div class="input-group-prepend">
+					<span class="input-group-text" >菜单隐藏：</span>
+				</div>
+				<select class="form-control" id="option_hideLeftNav" tooltip data-title="是否隐藏左侧菜单导航区">
+					<option value="true">隐藏</option>
+					<option  value="false">不隐藏</option>
+				</select>
+
+			</div>
+            <div class="input-group jbolt_layer_dialog_option">
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >宽：</span>
+			    </div>
+			    <input type="text" class="form-control" tooltip data-title="组件显示宽度，非必填"  placeholder="非必填项"  id="option_width"/>
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >高：</span>
+			    </div>
+			    <input type="text" class="form-control"  tooltip data-title="组件显示高度，非必填"  placeholder="非必填项"  id="option_height"/>
+			</div>
+
+            <div class="input-group mt-1 jbolt_layer_option" style="display:none;">
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >top：</span>
+			    </div>
+			    <input type="text" class="form-control"  tooltip data-title="JBoltLayer组件与顶端距离，非必填"  placeholder="非必填项"  id="option_top"/>
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >dir：</span>
+			    </div>
+			    <select class="form-control" id="option_dir" tooltip data-title="JBoltLayer组件显示位置 left or right">
+				<option  value="right">right</option>
+				<option value="left">left</option>
+				</select>
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >resize：</span>
+			    </div>
+			    <select class="form-control" id="option_resize" tooltip data-title="JBoltLayer组件是否可以手动调节宽度">
+				<option value="false">否</option>
+				<option value="true">是</option>
+				</select>
+
+			</div>
+            <div class="input-group mt-1 dialog_option" style="display:none;">
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >Dialog按钮：</span>
+			    </div>
+			    <select class="form-control" id="option_btn" tooltip data-title="是否显示Dialog右下角的按钮">
+				<option value="true">显示</option>
+				<option  value="false">不显示</option>
+				</select>
+
+			</div>
+			</div>
+			 <div class="col-5">
+			 <div class="input-group dialog_option" style="display:none;">
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >Dialog窗口标题：</span>
+			    </div>
+			    <input type="text" class="form-control"  tooltip data-title="Dialog的窗口显示标题，非必填" placeholder="非必填项"  id="option_title"/>
+			 </div>
+			<div class="input-group jbolt_layer_option" style="display:none;">
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >关闭：</span>
+			    </div>
+			    <select class="form-control" id="option_close" tooltip data-title="JBoltLayer组件是否显示关闭按钮">
+				<option value="true">显示</option>
+				<option value="false">不显示</option>
+				</select>
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >遮罩：</span>
+			    </div>
+			    <select class="form-control" id="option_nomask"  tooltip data-title="JBoltLayer组件是否显示背景遮罩层">
+				<option value="false">显示</option>
+				<option value="true">不显示</option>
+				</select>
+				<div class="input-group-prepend">
+					<span class="input-group-text" >加载方式：</span>
+				</div>
+				<select class="form-control" id="option_loadtype"  tooltip data-title="JBoltLayer组件加载方式 默认还是iframe">
+					<option value="ajaxportal">默认</option>
+					<option value="iframe">iframe</option>
+				</select>
+			</div>
+            <div class="input-group  mt-1 jbolt_layer_option" style="display:none;">
+			    <div class="input-group-prepend">
+			      <span class="input-group-text" >confirm：</span>
+			    </div>
+			    <input type="text" class="form-control"  tooltip data-title="JBoltLayer组件关闭时提示的Confirm信息，非必填" placeholder="非必填项"  id="option_confirm"/>
+
+			</div>
+
+        </div>
+        <textarea style="display:none;" class="form-control mt-2" id="permissionOpenOption" name="permission.openOption">#(permission.openOption??)</textarea>
+    	</div>
+
+	   <div class="form-group row"
+		data-radio
+		data-rule="radio"
+		data-value="#(permission.isSystemAdminDefault??)"
+		data-name="permission.isSystemAdminDefault"
+		data-default="false">
+		<label class="col-form-label col-sm-3" >是否超级管理员默认可用权限</label>
+			<div class="col"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="risSystemAdminDefaulttrue" type="radio" name="permission.isSystemAdminDefault"   value="true"/>
+					<label for="risSystemAdminDefaulttrue">是</label>
+				</div>
+				<div class="radio radio-primary  radio-inline">
+					<input  id="risSystemAdminDefaultfalse" type="radio" name="permission.isSystemAdminDefault"   value="false"/>
+					<label for="risSystemAdminDefaultfalse">否</label>
+				</div>
+
+			<small class="form-text text-danger">提示：设置后超级管理员即使没有分配其它权限，也可以正常进入系统使用功能</small>
+			</div>
+		</div>
+
+	#if(needInsertType)
+	#if(addOrInsert && addOrInsert == "insert")
+	<input type="hidden" data-rule="required" data-tips="未指定插入位置参照资源" name="insertById" value="#(insertById??)"/>
+	#end
+
+	<div class="form-group row"
+		 data-radio
+		 data-rule="radio"
+		 #if(addOrInsert && addOrInsert == "add")
+		 data-value="end"
+		#else
+		data-value="after"
+	     #end
+		 data-name="insertType">
+		<label class="col-form-label col-sm-3 text-danger font-weight-bold" >设置插入位置</label>
+		<div class="col"  style="padding-top: 1px;">
+			#if(addOrInsert && addOrInsert == "add")
+			<div class="radio radio-primary  radio-inline">
+				<input  id="insertType_1" type="radio" name="insertType"   value="start"/>
+				<label for="insertType_1">start</label>
+			</div>
+			#end
+			#if(addOrInsert && addOrInsert == "insert")
+			<div class="radio radio-primary  radio-inline">
+				<input  id="insertType_2" type="radio" name="insertType"   value="before"/>
+				<label for="insertType_2">before</label>
+			</div>
+			#end
+			#if(addOrInsert && addOrInsert == "insert")
+			<div class="radio radio-primary  radio-inline">
+				<input  id="insertType_3" type="radio" name="insertType"   value="after"/>
+				<label for="insertType_3">after</label>
+			</div>
+			#end
+			#if(addOrInsert && addOrInsert == "add")
+			<div class="radio radio-primary  radio-inline">
+				<input  id="insertType_4" type="radio" name="insertType"   value="end"/>
+				<label for="insertType_4">end</label>
+			</div>
+			#end
+			#if(addOrInsert && addOrInsert == "insert")
+			<small class="text-danger">注意：以上是相对于资源:【#(permissionName??)】的位置</small>
+			#end
+		</div>
+
+	</div>
+	#end
+
+
+</form>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="permissionForm")
+<script type="text/javascript">
+var permissionOpenType=$("#permissionOpenType"),optionHideLeftNav=$("#option_hideLeftNav"),permissionOpenOption=$("#permissionOpenOption"),menuOpenOptionBox=$("#menuOpenOptionBox");
+var optionWidth=$("#option_width"),optionHeight=$("#option_height"),optionBtn=$("#option_btn"),optionTitle=$("#option_title"),optionTop=$("#option_top"),optionDir=$("#option_dir"),optionResize=$("#option_resize"),optionClose=$("#option_close"),optionNomask=$("#option_nomask"),optionLoadType=$("#option_loadtype")
+optionConfirm=$("#option_confirm");
+//正式提交之前要处理的逻辑
+function beforeFormSubmit(){
+	var openType=permissionOpenType.find("input[name='permission.openType']:checked").val();
+	var option="";
+	if(openType=="2"){
+		var hideLeftNav=optionHideLeftNav.val();
+		var obj={"hideLeftNav":(hideLeftNav=="true")};
+		option=JSON.stringify(obj);
+	}else if(openType=="3"){
+		var width=optionWidth.val();
+		var height=optionHeight.val();
+		var title=optionTitle.val();
+		var btn=optionBtn.val();
+		var obj={"width":width?width:"","height":height?height:"","title":title?title:"","btn":btn};
+		option=JSON.stringify(obj);
+	}else if(openType=="4"){
+		var width=optionWidth.val();
+		var height=optionHeight.val();
+		var close=optionClose.val();
+		var dir=optionDir.val();
+		var resize=optionResize.val();
+		var top=optionTop.val();
+		var nomask=optionNomask.val();
+		var loadType=optionLoadType.val();
+		var confirm=optionConfirm.val();
+		var obj={"width":width?width:"","height":height?height:"","dir":dir?dir:"right","resize":resize?resize:"false","close":close,"nomask":nomask,"confirm":confirm?confirm:"","top":top?top:"",loadType:loadType};
+		option=JSON.stringify(obj);
+	}
+	permissionOpenOption.val(option);
+	return true;
+}
+/**
+ * 处理选择切换openType
+ */
+function togglePermissionOpenType(r,v){
+	if(v&&v=="true"){
+		permissionOpenType.slideUp(200);
+	}else{
+		permissionOpenType.slideDown(200);
+	}
+	RadioUtil.setChecked("permission.openType",1);
+}
+/**
+ * 处理修改界面 填充dialog的属性
+ */
+function processPermissionDialogOption(){
+	var json=permissionOpenOption.val();
+	if(json){
+		var obj=JSON.parse(json);
+		optionWidth.val(obj.width?obj.width:"800");
+		optionHeight.val(obj.height?obj.height:"600");
+		optionTitle.val(obj.title?obj.title:"");
+		optionBtn.val(obj.btn?obj.btn:"");
+	}else{
+		optionWidth.val("800");
+		optionHeight.val("600");
+		var title=$.trim($("#permissionTitle").val());
+		optionTitle.val(title);
+		optionBtn.val("false");
+	}
+
+}
+/**
+ * 处理修改界面 填充JBoltLayer的属性
+ */
+function processPermissionJBoltLayerOption(){
+	var json=permissionOpenOption.val();
+	if(json){
+		var obj=JSON.parse(json);
+		optionWidth.val(obj.width?obj.width:"600");
+		optionHeight.val(obj.height?obj.height:"");
+		optionTitle.val("");
+		optionBtn.val("");
+		optionClose.val(obj.close?obj.close:"true");
+		optionTop.val(obj.top?obj.top:"");
+		optionDir.val(obj.dir?obj.dir:"right");
+		optionResize.val(obj.resize?obj.resize:"false");
+		optionNomask.val(obj.nomask?obj.nomask:"false");
+		optionLoadType.val(obj.loadType?obj.loadType:"ajaxportal");
+		optionConfirm.val(obj.confirm?obj.confirm:"");
+		}else{
+			optionWidth.val("600");
+			optionHeight.val("");
+			optionClose.val("true");
+			optionTitle.val("");
+			optionTop.val("");
+			optionBtn.val("");
+			optionDir.val("right");
+			optionResize.val("false");
+			optionNomask.val("false");
+			optionLoadType.val("ajaxportal");
+			optionConfirm.val("");
+		}
+
+}
+
+/**
+ * 处理修改界面 填充IFrame的属性
+ */
+function processPermissionIframeOption(){
+	var json=permissionOpenOption.val();
+	if(json){
+		var obj=JSON.parse(json);
+		optionHideLeftNav.val(obj.hideLeftNav?"true":"false");
+	}else{
+		optionHideLeftNav.val("false");
+	}
+
+}
+//是否为Permissionupdate状态
+var permission_update=#(permission!=null&&permission.id!=null&&permission.id>0);
+function processMenuOpenOptions(r,v){
+	menuOpenOptionBox.find("input,select").val("");
+	if(v=="2") {
+		if (permission_update) {
+			processPermissionIframeOption();
+		} else {
+			optionHideLeftNav.val("false");
+		}
+		menuOpenOptionBox.slideDown(200, function () {
+			$(".jbolt_layer_option,.dialog_option,.jbolt_layer_dialog_option").slideUp(200);
+			$(".iframe_option").slideDown(200);
+		});
+	}else if(v=="3"){
+		if(permission_update){
+			processPermissionDialogOption();
+			}else{
+		optionWidth.val("800");
+		optionHeight.val("600");
+		var title=$.trim($("#permissionTitle").val());
+		optionTitle.val(title);
+		optionBtn.val("false");
+			}
+		menuOpenOptionBox.slideDown(200,function(){
+			$(".jbolt_layer_option").slideUp(200);
+			$(".jbolt_layer_dialog_option").slideDown(200);
+			$(".iframe_option").slideUp(200);
+			$(".dialog_option").slideDown(200);
+		});
+	}else if(v=="4"){
+		if(permission_update){
+			processPermissionJBoltLayerOption();
+		}else{
+		optionWidth.val("600");
+		optionHeight.val("");
+		optionClose.val("true");
+		optionTitle.val("");
+		optionTop.val("");
+		optionBtn.val("");
+		optionDir.val("right");
+		optionResize.val("false");
+		optionNomask.val("false");
+			optionLoadType.val("ajaxportal");
+		optionConfirm.val("");
+		}
+		menuOpenOptionBox.slideDown(200,function(){
+			$(".jbolt_layer_option").slideDown(200);
+			$(".dialog_option").slideUp(200);
+			$(".jbolt_layer_dialog_option").slideDown(200);
+			$(".iframe_option").slideUp(200);
+		});
+	}else{
+		$(".jbolt_layer_option").slideUp(200);
+		$(".dialog_option").slideUp(200);
+		$(".jbolt_layer_dialog_option").slideUp(200);
+		$(".iframe_option").slideUp(200);
+		menuOpenOptionBox.slideUp(200);
+
+	}
+}
+</script>
+
+#end

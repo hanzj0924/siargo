@@ -1,0 +1,66 @@
+#JBolt平台代码生成器 核心配置文件
+
+#数据源
+[DataSource_jbolt]
+db_type = mysql
+is_main = true
+jdbc_url = jdbc:mysql://127.0.0.1:3306/jbolt?characterEncoding=utf8&useSSL=false&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai
+user = root
+password = root
+id_gen_mode = auto
+
+[DataSource_jfinalxueyuan]
+db_type = mysql
+is_main = false
+jdbc_url = jdbc:mysql://127.0.0.1:3306/jfinalxueyuan?characterEncoding=utf8&useSSL=false&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai
+user = root
+password = root
+id_gen_mode = snowflake
+
+[DataSource_meinvtu]
+db_type = mysql
+is_main = false
+jdbc_url = jdbc:mysql://127.0.0.1:3306/meinvtu?characterEncoding=utf8&useSSL=false&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai
+user = root
+password = root
+id_gen_mode = auto
+
+
+
+#默认配置
+[ProjectConfig_default]
+#项目类型
+type=maven
+#主包
+mainPkg=cn.jbolt
+#model生成的包
+modelPackage=cn.jbolt.common.model
+#生成的Model 去掉前缀
+removedTableNamePrefixes=jb_
+#不需要生成的表名（全部小写） 一般都是一些数据库内置表什么的
+filterTableNames=dept,emp,salgrade,bonus,dtproperties
+#表名中有包含以下字符串的需要过滤掉
+tableNamesIndexOfStr=sqlite_,_old_
+#表名符合的正则表达式
+tableNamesPatterns=jb_wechat_user_-?[1-9]\\d*
+#PermissionKey.java文件位置
+permisskeyJavaFilePath=\src\main\java\cn\jbolt\_admin\permission\PermissionKey.java
+
+#上次有效配置
+[ProjectConfig_last]
+#项目类型
+type=maven
+#主包
+mainPkg=cn.jbolt
+#model生成的包
+modelPackage=cn.jbolt.xxx.model
+#生成的Model 去掉前缀
+removedTableNamePrefixes=jb_
+#不需要生成的表名（全部小写） 一般都是一些数据库内置表什么的
+filterTableNames=dept,emp,salgrade,bonus,dtproperties
+#表名中有包含以下字符串的需要过滤掉
+tableNamesIndexOfStr=sqlite_,_old_
+#表名符合的正则表达式
+tableNamesPatterns=jb_wechat_user_-?[1-9]\\d*
+#PermissionKey.java文件位置
+permisskeyJavaFilePath=\src\main\java\cn\jbolt\_admin\permission\PermissionKey.java

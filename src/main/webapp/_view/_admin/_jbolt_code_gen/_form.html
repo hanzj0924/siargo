@@ -1,0 +1,233 @@
+<form onsubmit="return false;" id="codeGenForm" action="#(action)" method="post">
+	<input type="hidden" data-sync-attr="dbType" id="dbTypeInput" name="codeGen.databaseType" value="#(codeGen.databaseType??)" />
+	<input type="hidden" name="codeGen.isSubTable" value="#(codeGen.isSubTable?? isSubTable)" />
+	<input type="hidden" data-sync-attr="remark" id="dsRemarkInput" name="codeGen.datasourceRemark" value="#(codeGen.datasourceRemark??)" />
+	<input type="hidden" data-sync-attr="isMainDatasource" id="isMainDatasourceInput" name="codeGen.isMainDatasource" value="#(codeGen.isMainDatasource??)" />
+	<input type="hidden" data-sync-attr="idGenMode" id="idGenModeInput" name="codeGen.mainTableIdgenmode" value="#(codeGen.mainTableIdgenmode??)" />
+	<input type="hidden" name="codeGen.pid" value="#(codeGen.pid?? pid)" />
+#if(codeGen.id??)
+	<input type="hidden" name="codeGen.id" value="#(codeGen.id)" />
+	<input type="hidden" name="codeGen.datasourceName" value="#(codeGen.datasourceName)" />
+#end
+
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">项目根路径</label>
+		<div class="col-6">
+			<input type="text" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入项目根路径"  data-tips="请输入项目根路径" maxlength="100" name="codeGen.projectPath" value="#(codeGen.projectPath?? projectPath)" />
+			<small class="text-danger">注意:必须为项目根路径的全路径</small>
+		</div>
+	</div>
+
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">数据源</label>
+		<div class="col-6">
+		#if(codeGen.id??)
+		<input type="text" class="form-control" data-rule="required" maxlength="100" data-tips="请选择数据源" readonly="readonly" value="#(codeGen.datasourceInfo??)" />
+		#else
+			<select class="form-control" 
+					data-autoload
+					id="dataSource"
+					name="codeGen.datasourceName" 
+					data-url="admin/codegen/datasources"
+					data-text="=请选择="
+					data-value=""
+					data-text-attr="optionText"
+					data-value-attr="name"
+					data-rule="select"
+					data-sync-ele="#dbTypeInput,#isMainDatasourceInput,#dsRemarkInput,#idGenModeInput"
+					data-para-name="datasource"
+					data-select="#(codeGen.datasourceName??)"
+					></select>
+		#end
+		</div>
+	</div>
+	
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">数据表</label>
+		<div class="col-6">
+		#if(codeGen.id??)
+		<input type="text" class="form-control" data-rule="required" maxlength="100"  readonly="readonly" value="#(tableFullName??)" />
+		#else
+			<div class="input-group">
+			<input type="text" data-refresh="true" data-limit="50" data-text-attr="fullName" data-value-attr="remark" data-column-attr="name-50%,remark-50%" data-width="620" data-text-align="left" data-link-para-ele="#dataSource" autocomplete="off" data-autocomplete  data-url="admin/codegen/tablesAutocomplete" data-header="表名,表注释"  data-hidden-input="main_table_name,main_table_remark,remove_prefix" class="form-control" data-rule="required" placeholder="请选择数据表"  data-tips="请选择数据表"  maxlength="40" value="#(tableFullName??)" />
+			<div class="input-group-append hand" tooltip data-title="重新读取数据库" data-loading="重新加载中"  data-link-para-ele="#dataSource" data-ajaxbtn data-url="admin/codegen/reloadTables" data-handler="processTablesReloadHandler" >
+				<span class="input-group-text"><i class="fa fa-database text-danger"></i></span>
+			</div>
+			</div>
+		#end
+		    <input type="hidden"  autocomplete="off" id="main_table_name" data-sync-attr="name" data-rule="required" data-tips="请选择数据表"  name="codeGen.mainTableName" value="#(codeGen.mainTableName??)" />
+			<input type="hidden" id="main_table_remark"   data-sync-attr="remark" autocomplete="off"  maxlength="100" name="codeGen.mainTableRemark" value="#(codeGen.mainTableRemark??)" />
+		</div>
+	</div>
+	
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">删除表名前缀</label>
+		<div class="col-6">
+			<input type="text" id="remove_prefix" data-sync-attr="prefix" autocomplete="off"  class="form-control" placeholder="请输入表名需要删除的前缀"  maxlength="40" name="codeGen.tableRemovePrefix" value="#(codeGen.tableRemovePrefix??)" />
+		</div>
+	</div>
+	<div class="form-group row"
+		 data-radio
+		 data-rule="radio"
+		 data-value="#(codeGen.type?? 'Admin')"
+		 data-name="codeGen.type"
+		 data-default="options_first"
+		 data-url="admin/codegen/types"
+		 data-label="构建类型"
+		 data-width="col-sm-3,col-9"
+		 data-handler="codeGenTypeHandler"
+		 data-inline="true">
+	</div>
+
+<!--	<div class="form-group row">-->
+<!--		<label class="col-sm-3 col-form-label"></label>-->
+<!--		<div class="col-6">-->
+<!--			<select class="form-control" -->
+<!--				data-autoload-->
+<!--				name="codeGen.type" -->
+<!--				data-url="admin/codegen/types"-->
+<!--				data-rule="select"-->
+<!--				data-handler="codeGenTypeHandler"-->
+<!--				data-select="#(codeGen.type?? 'Admin')"-->
+<!--				></select>-->
+<!--		</div>-->
+<!--	</div>-->
+
+	<div class="form-group row admin_type_box d-none"
+		data-radio
+		data-rule="radio"
+		data-value="#(codeGen.style??)"
+		data-name="codeGen.style"
+		data-default="options_first"
+		data-url="admin/codegen/styles"
+		data-label="样式类型"
+		data-width="col-sm-3,col-9"
+		data-inline="true">
+	</div>
+
+	<div class="form-group row"
+		data-radio
+		data-rule="radio"
+		data-name="codeGen.isCrud"
+		data-value="#(codeGen.isCrud??)"
+		data-default="options_first">
+		<label class="col-sm-3 col-form-label is_required">是否CRUD</label>
+			<div class="col-9"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="is_crud_true" type="radio" name="codeGen.isCrud"   value="true"/>
+					<label for="is_crud_true">是</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="is_crud_false" type="radio" name="codeGen.isCrud"   value="false"/>
+					<label for="is_crud_false">否</label>
+				</div>
+			</div>
+	</div>
+
+	<div class="form-group row"
+		 data-radio
+		 data-rule="radio"
+		 data-name="codeGen.isTreeTable"
+		 data-value="#(codeGen.isTreeTable??)"
+		 data-default="false">
+		<label class="col-sm-3 col-form-label is_required">树表样式</label>
+		<div class="col-9"  style="padding-top: 1px;">
+			<div class="radio radio-primary  radio-inline">
+				<input  id="is_tree_table_true" type="radio" name="codeGen.isTreeTable"   value="true"/>
+				<label for="is_tree_table_true">是</label>
+			</div>
+
+			<div class="radio radio-primary  radio-inline">
+				<input  id="is_tree_table_false" type="radio" name="codeGen.isTreeTable"   value="false"/>
+				<label for="is_tree_table_false">否</label>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row admin_type_box d-none"
+		data-radio
+		data-rule="radio"
+		data-name="codeGen.isEditable"
+		data-value="#(codeGen.isEditable??)"
+		data-default="false">
+		<label class="col-sm-3 col-form-label is_required">表格可编辑</label>
+			<div class="col-9"  style="padding-top: 1px;">
+				<div class="radio radio-primary  radio-inline">
+					<input  id="is_editable_true" type="radio" name="codeGen.isEditable"   value="true"/>
+					<label for="is_editable_true">是</label>
+				</div>
+
+				<div class="radio radio-primary  radio-inline">
+					<input  id="is_editable_false" type="radio" name="codeGen.isEditable"   value="false"/>
+					<label for="is_editable_false">否</label>
+				</div>
+			</div>
+	</div>
+	
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">开发作者</label>
+		<div class="col-6">
+			<input type="text" autocomplete="off"  class="form-control" data-rule="required" placeholder="请输入开发作者" data-tips="请输入开发作者" maxlength="60" name="codeGen.author" value="#(codeGen.author?? JBoltUserKit.getUserName())" />
+		</div>
+	</div>
+	
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">版本号</label>
+		<div class="col-6">
+			<input type="number" #if(codeGen.id??)readonly="readonly"#end autocomplete="off"  class="form-control" data-rule="pint" data-notnull="false" placeholder="请输入版本号(数字)" data-tips="请输入版本号(数字)" maxlength="10" name="codeGen.versionSn" value="#(codeGen.versionSn??)" />
+			<small class="text-danger">注意:数字类型，可不填；若不填，系统将自动生成</small>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">Main Java Package</label>
+		<div class="col-6">
+			<input type="text" data-autocomplete data-mustmatch="false" data-url="admin/codegen/javaPackageAutocomplete" autocomplete="off" id="mainJavaPackageInput"  class="form-control" data-rule="required"  placeholder="请输入java主package" data-tips="请输入版本号(数字)" maxlength="100" name="codeGen.mainJavaPackage" value="#(codeGen.mainJavaPackage?? (lastMainJavaPackage?? 'cn.jbolt.admin'))" />
+			<small class="text-danger">注意:java 默认生成的主package 默认值<span id="defaultMainJavaPackageText">cn.jbolt.admin</span></small>
+		</div>
+	</div>
+
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">Model Package</label>
+		<div class="col-sm-4">
+			<input type="text" data-autocomplete data-mustmatch="false" data-url="admin/codegen/javaPackageAutocomplete"  data-tips="请输入Model生成到哪个package" class="form-control" name="codeGen.modelPackage" value="#(codeGen.modelPackage?? (lastModelPackage?? 'cn.jbolt.common.model'))" autocomplete="off" />
+		</div>
+	</div>
+	 
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">备注</label>
+		<div class="col-9">
+			<textarea class="form-control" placeholder="请输入备注" maxlength="255" name="codeGen.remark" style="height:80px;">#(codeGen.remark??)</textarea>
+		</div>
+	</div>
+</form>
+#define js()
+<script>
+function processTablesReloadHandler(ajaxBtn){
+	var refreshBtn = ajaxBtn.parent().find(".refreshBtn");
+	if(isOk(refreshBtn)){
+		refreshBtn.click();
+	}
+}
+function codeGenTypeHandler(r,selectValue){
+	var boxs = $(".admin_type_box");
+	boxs.addClass("d-none");
+	if(selectValue){
+		var mainJavaPackageInput = $("#mainJavaPackageInput");
+		var mainJavaPackageInputVal = mainJavaPackageInput.val();
+		if(selectValue=="Admin"){
+			boxs.removeClass("d-none");
+			$("#defaultMainJavaPackageText").text("cn.jbolt.admin");
+			if(mainJavaPackageInputVal && mainJavaPackageInputVal=="cn.jbolt.api"){
+				mainJavaPackageInput.val("cn.jbolt.admin");
+			}
+		}else if(selectValue == "Api"){
+			$("#defaultMainJavaPackageText").text("cn.jbolt.api");
+			if(mainJavaPackageInputVal && mainJavaPackageInputVal=="cn.jbolt.admin"){
+				mainJavaPackageInput.val("cn.jbolt.api");
+			}
+		}
+	}
+}
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="codeGenForm")
+#end

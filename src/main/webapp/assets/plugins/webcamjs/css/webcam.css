@@ -1,0 +1,60 @@
+@charset "UTF-8";
+.webcam_photo_box{
+	position:relative;
+	width:320px;
+	height:320px;
+	overflow: hidden;
+	cursor: move;
+}
+.webcam_thumbbox{
+	width: 200px;
+	height: 200px;
+	border-radius: 200px;
+	transform: translate(-50%, -50%);
+	border: 1px solid rgb(102, 102, 102);
+	box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+	background: none repeat scroll 0% 0% transparent;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+}
+
+.webcam_spinner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	text-align: center;
+	font-size: 12px;
+	line-height:340px;
+	color: #4A4a4a;
+	background: rgba(213, 211, 211, 0.7);
+}
+
+.webcam_upload_right {
+	display: flex;
+	align-items: center;
+	flex-flow: column;
+	font-size: 12px;
+	justify-content: center;
+}
+.webcam_lager_photo,
+.webcam_small_photo,
+.webcam_mini_photo{
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	box-shadow: 0px 0px 6px #7E7E7E;
+	display: block;
+}
+.webcam_small_photo{
+	width: 80px;
+	height: 80px;
+	margin-top: 5px;
+}
+.webcam_mini_photo{
+	width: 50px;
+	height: 50px;
+	margin-top: 5px;
+}

@@ -1,0 +1,110 @@
+#@jboltLayout()
+
+#define main()
+<div class="jbolt_page #(userId)">
+<div class="jbolt_page_content">
+<table data-jbolttable class="table-center">
+<thead>
+<tr>
+	<th data-width="200">菜单</th>
+	<th data-min-width="250">已分配哪个顶部导航</th>
+	<th data-width="80">选择</th>
+</tr>
+</thead>
+ <tbody >
+  #for(data:dataList)
+		<tr onclick="toogleMyCheckbox(this)" data-id="#(data.id)" data-level="#(data.permissionLevel)" data-son="#(data.id)" data-pid="#(data.pid)">
+		    <td class="text-left"><i class="#(data.icons??)"></i> #(data.title)</td>
+		   	<td class="text-#((data.topnavName&&data.topnavId!=topnavId)?'danger':'success font-weight-bolder')">#(data.topnavName??)</td>
+		    <td class="text-center">
+		    	<button class="checkboxBtn #((data.topnavName&&data.topnavId!=topnavId)?'d-none':'')"  data-value="#(data.id)"><i class="fa fa-check"></i></button>
+		    </td>
+		</tr>
+	#end
+</tbody>
+</table>
+</div>
+</div>
+#end
+#define js()
+<script>
+needPjax=false;
+function getPermissions(){
+	var checkboxs=$("button.checkboxBtn.checked");
+	if(checkboxs&&checkboxs.length>0){
+		var array=new Array();
+		checkboxs.each(function(){
+			array.push($(this).data("value"));
+		});
+		return array.join(",");
+	}
+	return "";
+}
+
+function toogleMyCheckbox(ele){
+	var my=$(ele);
+	var checkbox=my.find(".checkboxBtn");
+	if(checkbox&&checkbox.length>0){
+		checkbox.toggleClass("checked");
+	}
+}
+
+
+function submitThisForm(successCallback){
+	var permissions=getPermissions();
+	if(permissions&&permissions.length>0){
+		Ajax.post("admin/topnav/menu/submit",{"topnavId":"#(topnavId)","permissions":permissions},function(ret){
+			LayerMsgBox.success(ret.msg,500,successCallback);
+		});
+	}else{
+		LayerMsgBox.alert("请为顶部导航设置左侧导航菜单后提交",2);
+	}
+	
+}
+function checkIds(funs){
+	for(var i =0;i<funs.length;i++){
+		var fun=funs[i];
+		$("tr[data-id='"+fun.permissionId+"']").find("button").addClass("checked");
+		}
+
+
+	
+}
+function readCheckeds(){
+	Ajax.get("admin/topnav/menu/getChecked/#(topnavId)",function(ret){
+		var datas=ret.data;
+		if(datas&&datas.length>0){
+			checkIds(datas);	
+		}
+	});
+}
+$(function(){
+	changeParentLayerDialogBtnTitle(0,"保存设置");
+	//增加一个按钮-清空配置
+	addParentLayerDialogBtn("全部清空","lay_danger",function(){
+		LayerMsgBox.confirm("确认清空所有顶部导航绑定的左侧导航菜单吗?",function(){
+			LayerMsgBox.loading("执行中...",10000);
+			Ajax.get("admin/topnav/clearAllMenus",function(res){
+					LayerMsgBox.success("操作成功",500,function(){
+						parent.refreshJBoltTable();
+						parent.LayerMsgBox.closeAll();
+					});
+				});
+			})
+	});
+	//增加一个按钮-清空配置
+	addParentLayerDialogBtn("清空当前","lay_danger",function(){
+		LayerMsgBox.confirm("确认清空此顶部导航绑定的左侧导航菜单吗?",function(){
+			LayerMsgBox.loading("执行中...",10000);
+			Ajax.get("admin/topnav/clearMenus/#(topnavId)",function(res){
+					LayerMsgBox.success("操作成功",500,function(){
+						parent.refreshJBoltTable();
+						parent.LayerMsgBox.closeAll();
+					});
+				});
+			})
+	});
+	readCheckeds();
+});
+</script>
+#end

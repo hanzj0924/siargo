@@ -1,0 +1,92 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+<div class="row">
+	<div class="col-sm-auto">
+	<h1><i class="jbicon2 jbi-cluster"></i> 部门管理</h1>
+	<a href="javascript:void(0)" onclick="jboltTableExpandAll(this)" class="text-primary">展开</a>|<a href="javascript:void(0)" onclick="jboltTableCollapseAll(this)"  class="text-info">闭合</a>
+	</div>
+	<div class="col text-center">
+		<label class="d-inline-block">筛选:</label>
+		<input data-clear-handler="onkeyup" onkeyup="jboltTableFilterByKeywords('dept_table_#(pageId)',this.value,[1,2,4,5])" data-with-clearbtn="true" autocomplete="off"  class="form-control d-inline-block ml-2"  placeholder="输入关键字 进行过滤"/>
+	</div>
+	<div class="col-sm-auto">
+		<div class="btn-group" role="group" aria-label="btn-group">
+			<button data-area="980,850" data-dialogbtn data-handler="refreshJBoltTable" data-title="新增部门" data-url="admin/dept/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+			<button data-ajaxbtn data-confirm="确认初始化权限资源的顺序吗？" data-handler="refreshJBoltTable" data-title="初始化排序" data-url="admin/dept/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
+			<button onclick="jboltTableRefresh(this)" class="btn btn-outline-secondary btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+		</div>
+	</div>
+</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="dept_rowtpl_tr_#(pageId)">
+<tr data-id="${id}" data-pid="${pid}"  data-level="${eachLevel}" data-hasitems="${items&&items.length>0}">
+<td class="text-left"><span>(${sn})${name}</span></td>
+<td>${fullName}</td>
+<td><span class="text-white badge bg-${eachLevel|colorClassByLevel}">${typeName}</span></td>
+<td>${leader}</td>
+<td>${remark}</td>
+<td><img data-switchbtn data-confirm="确定切换启用/禁用？" data-value="${enable=='1'}"  data-handler="refreshJBoltTable"  data-url="admin/dept/toggleEnable/${id}"/></td>
+<td>
+	<a href="admin/dept/add/${id}" data-area="980,850"  tooltip data-title="新增下级部门"  data-handler="refreshJBoltTable" dialog-title="新增下级部门" class="jbolt_table_editbtn"><i class="fa fa-plus"></i></a>
+	<a href="admin/dept/edit/${id}" data-area="980,850"  tooltip data-title="编辑"  data-handler="refreshJBoltTable" dialog-title="编辑部门信息" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+    <a href="admin/dept/delete/${id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="removeTr" data-confirm="确定删除这条数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+    <a href="admin/dept/up/${id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+    <a href="admin/dept/down/${id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+</td>
+</tr>
+{@if items&&items.length>0}
+{@each items as son}
+{@include "#dept_rowtpl_tr_#(pageId)",son}
+{@/each}
+{@/if}
+</script>
+
+<script type="text/template" id="deptRowtpl_#(pageId)">
+{@each datas as data,index}
+{# 先循环第一级}
+{@include "#dept_rowtpl_tr_#(pageId)",data}
+{@/each}
+</script>
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+id="dept_table_#(pageId)"
+data-jbolttable
+data-ajax="true"
+data-column-resize="true"
+data-url="admin/dept/datas"
+data-rowtpl="deptRowtpl_#(pageId)"
+###设置是treetable 默认显示到第一级 操作列在第一列
+data-treetable="all:1"
+data-fixed-columns-left="1"
+data-fixed-columns-right="6,7"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="300">部门名称</th>
+	<th data-min-width="300">部门全称</th>
+	<th data-width="150">部门类型</th>
+	<th data-width="150">负责人</th>
+	<th data-min-width="100">备注</th>
+	<th data-width="150">启用/禁用</th>
+	<th data-width="170">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>	
+
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end

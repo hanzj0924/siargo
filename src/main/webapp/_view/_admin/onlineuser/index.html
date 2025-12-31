@@ -1,0 +1,100 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+
+<div class="jbolt_page" data-key="#(pmkey)" >
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1>在线用户管理</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="onlineUserForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords"/>
+		<select class="form-control" name="state" data-autoload data-url="admin/onlineuser/stateOptions" data-text="=状态=" data-value=""></select>
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	<button onclick="refreshJBoltTable(this)" class="btn btn-outline-info btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<script type="text/template" id="onlineUserRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.userUsername}</td>
+<td>${data.sessionId}</td>
+<td><a class="btn btn-outline-info btn-sm" data-openpage="jboltlayer" data-top="#(jboltLayerTop)" data-url="admin/loginlog/detail/${data.loginLogId}" data-width="640" data-keep-open="true" data-nomask data-resize="true"><i class="fa fa-eye"></i> 查看</a></td>
+<td>
+{@if data.onlineState == 1}
+<span class="badge badge-success">在线</span>
+{@else if data.onlineState == 2}
+<span class="badge badge-dark">离线</span>
+{@else if data.onlineState == 3}
+<span class="badge badge-danger">强退下线</span>
+{@else if data.onlineState == 4}
+<span class="badge badge-danger">异端顶替</span>
+{@/if}
+</td>
+<td>${data.loginTime}</td>
+<td>${data.updateTime}</td>
+<td>$${data.isExpiration?"<span class='text-danger'>[已过期]</span>":''}${data.expirationTime}</td>
+<td>${data.offlineTime}</td>
+<td>
+{@if data.onlineState == 1}
+<a data-ajaxbtn data-confirm="确定强制下线此用户？"  data-handler="refreshJBoltTable"  href="admin/onlineuser/forcedOffline/${data.id}">强退</a>
+{@/if}
+</td>
+</tr>
+{@/each}
+</script>
+
+
+<table class="jbolt_table jbolt_main_table table_striped table-center"
+data-jbolttable
+data-height="fill"
+data-ajax="true"
+data-url="/admin/onlineuser/datas"
+data-column-resize="true"
+data-conditions-form="onlineUserForm_#(pageId)"
+data-rowtpl="onlineUserRowtpl_#(pageId)"
+data-page="onlineUserPage_#(pageId)"
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="-1"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	<th data-width="150">用户名</th>
+	<th data-min-width="150">会话ID</th>
+	<th data-width="100">登录日志</th>
+	<th data-width="120" data-column="online_state">在线状态</th>
+	<th data-width="150" data-column="login_time">登录时间</th>
+	<th data-width="150" data-column="update_time">更新时间</th>
+	<th data-width="200" data-column="expiration_time">过期时间</th>
+	<th data-width="150" data-column="offline_time">离线时间</th>
+	<th data-width="80">操作</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+	
+</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+	$(function(){
+		MasterSlaveUtil.initJBoltTable("onlineUser_mspage_#(pageId)");
+	});
+</script>
+#end

@@ -1,0 +1,47 @@
+<div class="card my-2">
+	<div class="card-header">
+        <span><i class="jbicon jb-ziyuanguanli mr-1 text-info" style="font-size:18px;"></i>缓存服务：Redis</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a><a tabindex="-1" data-portalbtn data-portalid="cache_portal_#(pageId??)" class="pull-right text-black-50 card-optbtn"><i class="jbicon2 jbi-reload"></i></a></div>
+	<div class="card-body" style="height: 300px;">
+<table class="jbolt-table table-hover table-center" data-jbolttable
+data-height="fill_box"
+data-fixed-columns-left="1,2"
+data-fixed-columns-right="-1"
+>
+	<thead>
+	    <tr>
+	        <th data-width="60">序号</th>
+	        <th data-min-width="300">ConfigName</th>
+			<th data-width="100">State</th>
+			<th data-width="150">Host</th>
+			<th data-width="100">Port</th>
+	        <th data-width="100">Timeout</th>
+	        <th data-width="100">Database</th>
+	        <th data-min-width="200">ClientName</th>
+	        <th data-width="100">Expires</th>
+	        <th data-width="100">操作</th>
+	    </tr>
+	</thead>
+	<tbody>
+		#if(settings)
+		#for(group:settings.groups)
+		#setLocal(map=settings.getMap(group))
+		<tr>
+			<td>#(for.count)</td>
+			<td>#(group)</td>
+			<td style="font-size:20px;">#(map["enable"]==null?'<i tooltip data-title="状态:未启用" class="fa fa-circle text-secondary"></i>':(map["enable"]=="true"?'<i tooltip data-title="状态:已启用" class="fa fa-circle text-success"></i>':'<i tooltip data-title="状态:未启用" class="fa fa-circle text-secondary"></i>'))</td>
+			<td>#(map["host"]??)</td>
+			<td>#(map["port"]??)</td>
+			<td>#(map["timeout"]??)</td>
+			<td>DB#(map["database"]?? 0)</td>
+			<td>#(map["clientName"]?? '-')</td>
+			<td>#(map["expires"]??  -1)</td>
+			<td>
+				<a href="admin/redis/removeCurrentDatabaseAllDatas?cacheName=#(group)" data-handler="refreshPortal" data-portalid="parentPortal" data-ajaxbtn data-confirm="确认清空缓存[#(group)][DB#(map["database"]?? 0)]中的所有数据？" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash mr-1"></i>清空</a>
+			</td>
+		</tr>
+		#end
+		#end
+	</tbody>
+</table>
+	</div>
+</div>

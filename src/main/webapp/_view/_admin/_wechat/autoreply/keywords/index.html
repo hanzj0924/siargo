@@ -1,0 +1,51 @@
+#@adminDialogLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-sm-auto">
+	<h1>关键词管理</h1>
+	<span> #(datas.size()?? 0) 条记录</span>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="wechatKeywordsForm" action="admin/wechat/keywords/#(autoReplyId?? 0)"   method="post"></form>
+	</div>
+	<div class="col-sm-auto">
+	<button data-area="700,400" data-scroll="yes" data-handler="reloadCurrentPage" data-title="新增回复规则" data-url="admin/wechat/keywords/add/#(autoReplyId?? 0)" class="jbolt_table_addbtn btn btn-outline-success" ><i class="fa fa-plus"></i> 新增</button>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-striped table-center">
+<thead>
+<tr><th style="width: 60px">序号</th><th>名称</th><th>匹配类型</th><th style="width: 120px">操作</th></tr>
+</thead>
+<tbody>
+#for(data:datas??)
+<tr>
+<td>#(for.count)</td>
+<td>#(data.name??)</td>
+<td>
+#if(data.type==WechatKeywordsType.LIKE.value)模糊匹配#end
+#if(data.type==WechatKeywordsType.EQUALS.value)全等匹配#end
+</td>  
+<td style="width: 100px">
+<a  tooltip  title="编辑"  href="admin/wechat/keywords/edit/#(autoReplyId?? 0)-#(data.id)" data-scroll="yes" data-handler="reloadCurrentPage" data-title="编辑" data-area="700,400" class="jbolt_table_editbtn"><i class="fa fa-pencil c-primary"></i></a>
+<a  tooltip  title="删除"  href="admin/wechat/keywords/delete/#(autoReplyId?? 0)-#(data.id)" data-handler="removeTr" class="jbolt_table_delbtn"><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+#end
+</tbody>
+</table>
+</div>
+</div>
+</div>
+#end
+#define js()
+<script>
+$(function(){
+});
+</script>
+#end
+

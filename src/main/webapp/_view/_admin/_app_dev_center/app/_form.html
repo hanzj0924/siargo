@@ -1,0 +1,54 @@
+<form onsubmit="return false;" id="applicationForm" action="#(action)" method="post">
+	<input type="hidden" name="application.isInner" value="#(application.isInner?? 'false')" />
+	#if(application.id??)
+		<input type="hidden" name="application.id" value="#(application.id)" />
+	#end
+	 <div class="form-group row" 
+	 	data-radio 
+	 	data-rule="radio"  
+	 	data-value="#(application.type??)" 
+	 	data-name="application.type" 
+	 	data-default="options_first"
+	 	data-url="admin/app/typesInForm"
+	 	data-inline="true"
+	 	data-align-left="true" 
+	 	data-width="col-sm-3,col"
+	 	data-label="应用类型"></div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">应用名称</label>
+		<div class="col">
+		<input type="text" autocomplete="off" placeholder="请输入应用名称 "  class="form-control" data-rule="required" data-tips="请输入应用名称"  maxlength="40" name="application.name" value="#(application.name??)">
+		</div>
+	</div>
+ 
+	 <div class="form-group row">
+		<label class="col-sm-3 col-form-label">应用简介<br/>(200字内)</label>
+		<div class="col">
+		<textarea class="form-control"  placeholder="请输入应用简介 200字以内 "  name="application.briefInfo" style="height:200px;" maxlength="200">#(application.briefInfo??)</textarea>
+		</div>
+	</div>
+	<div class="form-group row" 
+ 	data-radio 
+ 	data-rule="radio"  
+ 	data-value="#(application.needCheckSign??)" 
+ 	data-name="application.needCheckSign" 
+ 	data-default="true">
+ 	<label class="col-sm-3 col-form-label" >接口校验<br>(Signature)</label>
+ 		<div class="col"  style="padding-top: 1px;">
+ 			<div class="radio radio-primary  radio-inline">
+ 				<input  id="rchecksign_true" type="radio" name="application.needCheckSign" value="true"/>
+ 				<label for="rchecksign_true">开启</label>
+ 			</div>
+ 			<div class="radio radio-primary  radio-inline">
+ 				<input  id="rchecksign_false" type="radio" name="application.needCheckSign" value="false"/>
+ 				<label for="rchecksign_false">关闭</label>
+ 			</div>
+ <small  class="form-text text-danger">注：开启-提高安全性 关闭-对接口测试更友好</small>
+ 		</div>
+ </div>
+ 
+	  
+</form>
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="applicationForm")
+#end

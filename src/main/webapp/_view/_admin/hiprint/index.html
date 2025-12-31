@@ -1,0 +1,304 @@
+#@adminDialogLayout()
+#define css()
+#@hiprintcss()
+#end
+
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title text-center">
+	<a id="backToAdminPage_#(pageId)" class="btn btn-outline-primary float-left d-none" href="admin"><i class="fa fa-arrow-left"></i> 返回主界面</a>
+		<h1>Hiprint-打印模板设计器</h1>
+	</div>
+	<div class="jbolt_page_content">
+		<div class="container-fluid print-content">
+			<div class="row">
+				<div class="col-sm-3 col-md-2 pl-0">
+				<div class="card">
+				<div class="card-header text-center" style="height:40px;"><span><i class="fa fa-list"></i> 可选元素</span></div>
+				<div class="card-body p-2 overflow-auto" style="height:calc(100vh - 120px);">
+					<div class="hiprintElement-types hiprintEpContainer">
+						<ul class="hiprintElement-type">
+							<li>
+								<span class="type-title">常规</span>
+								<ul>
+									<li><a class="ep-draggable-item" tid="designerModule.text"> <span class="jbicon jb-textarea" aria-hidden="true"></span><span>文本</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.longText"> <span class="jbicon jb-wenjian3" aria-hidden="true"></span><span>长文</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.image"> <span class="jbicon jb-tupian2" aria-hidden="true"></span><span>图片</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.html"> <span class="jbicon jb-geshi_wendanghtml" aria-hidden="true"></span> <span>html</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.barcode"> <span class="fa fa-barcode" aria-hidden="true"></span> <span>条形码</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.qrcode"> <span class="fa fa-qrcode" aria-hidden="true"></span> <span>二维码</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.table"> <span class="jbicon2 jbi-table" aria-hidden="true"></span><span>表格</span></a></li>
+
+								</ul>
+							</li>
+							<li>
+								<span class="type-title">辅助</span>
+								<ul>
+									<li><a class="ep-draggable-item" tid="designerModule.hline"> <span class="jbicon jb-solid" aria-hidden="true"></span> <span>横线</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.vline"> <span class="jbicon jb-number1" aria-hidden="true"></span> <span>竖线</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.rect"> <span class="jbicon jb-tingzhi" aria-hidden="true"></span><span>矩形</span></a></li>
+									<li><a class="ep-draggable-item" tid="designerModule.oval"> <span class="fa fa-circle-thin" aria-hidden="true"></span> <span >椭圆</span></a></li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+
+				</div>
+				</div>
+
+				</div>
+
+
+				<!-- 中间设计区 -->
+				<div class="col-sm-7 col-md-8">
+				<div class="card">
+				<div class="card-header p-1" style="height:80px;">
+				<div class="hiprint-toolbar">
+					<button class="btn btn-primary btn-sm" data-openpage="dialog" data-link-para-ele="#tplId_#(pageId)" data-title="hiprint模板库管理" data-area="1280,600" data-btn="close" data-url="admin/hiprint/tpl"><i class="fa fa-list-alt"></i> 模板库</button>
+					<button class="btn btn-danger btn-sm" onclick="newTpl_#(pageId)();"><i class="fa fa-plus"></i> 新模板</button>
+					<div class="btn-group">
+						<button class="btn btn-outline-primary btn-sm" onclick="setPaper_#(pageId)('A3')">A3</button>
+						<button class="btn btn-outline-primary btn-sm" onclick="setPaper_#(pageId)('A4')">A4</button>
+						<button class="btn btn-outline-primary btn-sm" onclick="setPaper_#(pageId)('A5')">A5</button>
+						<button class="btn btn-outline-primary btn-sm" onclick="setPaper_#(pageId)('B3')">B3</button>
+						<button class="btn btn-outline-primary btn-sm" onclick="setPaper_#(pageId)('B4')">B4</button>
+						<button class="btn btn-outline-primary btn-sm" onclick="setPaper_#(pageId)('B5')">B5</button>
+					</div>
+
+					<div class="btn btn-group  border border-secondary" style="padding:2px;">
+						<input type="text" class="form-control text-center" id="customWidth_#(pageId)" style="width: 70px; height: 28px;" placeholder="宽/mm" />
+						<span class="label px-1">x</span>
+						<input type="text" class="form-control text-center" id="customHeight_#(pageId)" style="width: 70px; height: 28px;" placeholder="高/mm" />
+						<button class="btn btn-outline-dark btn-sm ml-2" onclick="setPaper_#(pageId)($('#customWidth_#(pageId)').val(),$('#customHeight_#(pageId)').val())"><i class="fa fa-check"></i> 自定义</button>
+					</div>
+
+					<div class="btn-group">
+					<button class="btn btn-outline-info btn-sm" onclick="rotatePaper_#(pageId)()">旋转</a>
+					<button class="btn btn-outline-danger btn-sm" onclick="clearTemplate_#(pageId)()">清空</a>
+					</div>
+
+					<button class="btn btn-danger btn-sm" data-openpage="dialog" data-area="1280,90%" data-btn="close" data-content-func="getPreviewHtmlContent_#(pageId)"><i class="fa fa-eye"></i> 预览</button>
+					<button class="btn btn-danger btn-sm d-none" id="useJsonDataPreviewBtn_#(pageId)" data-openpage="dialog" data-area="1280,90%" data-btn="close" data-content=""><i class="fa fa-eye"></i> 预览</button>
+					<button class="btn btn-danger btn-sm" data-openpage="jboltlayer" data-confirm="确认直接关闭编辑器？" data-width="980" data-resize="true" data-url="admin/hiprint/tpl/jsonDataEditor"><i class="fa fa-eye"></i> 测试预览</button>
+					<button class="btn btn-success btn-sm" onclick="saveHiprintTpl_#(pageId)()"><i class="fa fa-save"></i> 保存模板</button>
+
+					<div class="row mx-0 mt-1">
+					<div class="text-right"><label class="col-form-label text-primary">分页设计：</label></div>
+					<div class="col pl-0">
+					<div id="hiprint-printPagination_#(pageId)" class="hiprint-printPagination"></div>
+					</div>
+					</div>
+				</div>
+				</div>
+				<div class="card-body overflow-auto" style="height:calc(100vh - 160px);">
+					<div id="hiprint-printTemplate_#(pageId)" class="hiprint-printTemplate"></div>
+				</div>
+				</div>
+				</div>
+
+				<!-- 右侧设置 -->
+				<div class="col-sm-3 col-md-2">
+				<div class="card">
+				<div class="card-header text-center" style="height:40px;"><span><i class="fa fa-cogs"></i> 属性配置</span></div>
+				<div class="card-body p-2 overflow-auto" style="height:calc(100vh - 120px);">
+					<div id="PrintElementOptionSetting_#(pageId)"></div>
+				</div>
+				</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+</div>
+<form class="d-none" id="hiprintTplForm_#(pageId)" action="admin/hiprint/tpl/submit" method="post" onsubmit="return false;">
+<input type="text" data-para-name="selectedId" name="tpl.id" id="tplId_#(pageId)" value="#(tpl.id??)" />
+<input type="text" name="tpl.sn" id="tplSn_#(pageId)" value="#(tpl.sn??)" />
+<input type="text" name="tpl.name" id="tplName_#(pageId)" value="#(tpl.name??)" />
+<input type="text" name="tpl.testApiUrl" id="tplTestApiUrl_#(pageId)" value="#(tpl.testApiUrl??)" />
+<textarea style="height:80px;" class="form-control" id="tplContent_#(pageId)"  name="tpl.content">#(tpl.content??)</textarea>
+<textarea style="height:400px;" class="form-control" id="tplTestJsonData_#(pageId)"  name="tpl.testJsonData">#(tpl.testJsonData??)</textarea>
+</form>
+#end
+#define js()
+<!--[[ 测试专用  单独使用无需引入  -->
+<script src="assets/plugins/hiprint/etype-provider.js"></script>
+#@hiprintjs()
+<script>
+var hiprintTemplate_#(pageId);
+$(function(){
+	//初始化打印插件
+	hiprint.init({
+		providers : [ new JBoltElementTypeProvider() ]
+	});
+
+	//设置左侧拖拽事件
+	hiprint.PrintElementTypeManager.buildByHtml($('.ep-draggable-item'));
+	var tplContentJson = '#(tpl.content??)';
+	if(!tplContentJson){
+		tplContentJson = hiprintDesignerDefaultConfigPrintJson;
+	}else{
+		tplContentJson = tplContentJson.replace(/\n/g,"\\n").replace(/\r/g,"\\r");
+		tplContentJson = JSON.parse(tplContentJson);
+	}
+
+	hiprintTemplate_#(pageId) = new hiprint.PrintTemplate(
+			{
+				template:tplContentJson,
+				settingContainer : '#PrintElementOptionSetting_#(pageId)',
+				paginationContainer : '#hiprint-printPagination_#(pageId)'
+			});
+	//打印设计
+	hiprintTemplate_#(pageId).design('#hiprint-printTemplate_#(pageId)');
+
+	jboltBody.on("click","#hiprint-printPagination_#(pageId) .hiprint-pagination>li",function(){
+		$(this).parent().find("li.bg-primary").removeClass("bg-primary").removeClass("text-white");
+		$(this).addClass("bg-primary").addClass("text-white");
+	});
+	initPageBtnClick_#(pageId)();
+});
+
+function initPageBtnClick_#(pageId)(){
+	$("#hiprint-printPagination_#(pageId)  .hiprint-pagination>li:last").on("click",function(){
+		$("#hiprint-printPagination_#(pageId)  .hiprint-pagination>li:not(:last-child):last").addClass("bg-primary").addClass("text-white");
+		initPageBtnClick_#(pageId)();
+	});
+}
+
+function getPreviewHtmlContent_#(pageId)(){
+	return hiprintTemplate_#(pageId).getHtml().html();
+}
+
+//调整纸张
+var setPaper_#(pageId) = function(paperTypeOrWidth, height) {
+	hiprintTemplate_#(pageId).setPaper(paperTypeOrWidth, height);
+}
+
+//旋转
+var rotatePaper_#(pageId) = function() {
+	hiprintTemplate_#(pageId).rotatePaper();
+}
+//清空
+var clearTemplate_#(pageId) = function() {
+	hiprintTemplate_#(pageId).clear();
+}
+
+//测试预览带JSON的
+function priviewWithTestJsonData(printData){
+	var htmlContent = hiprintTemplate_#(pageId).getHtml(printData).html();
+	$("#useJsonDataPreviewBtn_#(pageId)").data("content",htmlContent).trigger("click");
+}
+
+//测试打印带JSON的
+function printWithTestJsonData(printData){
+	hiprintTemplate_#(pageId).print(printData);
+}
+
+//测试打印带JSON的
+function toPdfWithTestJsonData(printData){
+	var name = $("#tplName_#(pageId)").val();
+	if(!name){
+		name ="测试导出";
+	}
+	hiprintTemplate_#(pageId).toPdf(printData,name);
+
+}
+
+function setHiprintApiUrlAndTestJsonData(url,jsonStr){
+	$("#tplTestApiUrl_#(pageId)").val(url);
+	$("#tplTestJsonData_#(pageId)").val(jsonStr);
+	closeJBoltLayer(true);
+}
+
+function getHiprintApiUrlAndTestJsonData(){
+	var url = $("#tplTestApiUrl_#(pageId)").val();
+	var jsonStr = $("#tplTestJsonData_#(pageId)").val();
+	return {url:url,jsonStr:jsonStr};
+}
+
+//保存模板
+function saveHiprintTpl_#(pageId)(callback){
+	var json = hiprintTemplate_#(pageId).getJson();
+	if(!jsonObjectValueIsOk(json)){
+		LayerMsgBox.alert("请设计模板后再保存",2);
+		return;
+	}
+	var tplName = $("#tplName_#(pageId)").val();
+	LayerMsgBox.prompt("请输入模板名称",tplName,function(index,text){
+		if(!text){
+			LayerMsgBox.alert("请输入模板名称",2);
+			return;
+		}
+		$("#tplName_#(pageId)").val(text);
+		$("#tplContent_#(pageId)").val(JSON.stringify(json));
+		layer.close(index)
+		ajaxSubmitForm("hiprintTplForm_#(pageId)",function(res){
+			$("#tplId_#(pageId)").val(res.data.id);
+			LayerMsgBox.success("模板【"+text+"】保存成功！",500,callback);
+		});
+	},0);
+
+}
+
+function loadTplById(tplId){
+	if(!tplId){
+		LayerMsgBox.alert("请选择有效模板，所选模板的行必须绑定模板ID",2);
+		return;
+	}
+	window.location.href="admin/hiprint/tpl/designer/"+tplId;
+	/* LayerMsgBox.closeAll();
+	LayerMsgBox.loading("正在加载模板...",10000);
+	Ajax.get("admin/hiprint/tpl/load/"+tplId,function(res){
+		$("#tplId_#(pageId)").val(res.data.id);
+		$("#tplName_#(pageId)").val(res.data.name);
+		$("#tplContent_#(pageId)").val(res.data.content);
+		hiprintTemplate_#(pageId) = new hiprint.PrintTemplate(
+				{
+					template:res.data.content,
+					settingContainer : '#PrintElementOptionSetting_#(pageId)',
+					paginationContainer : '#hiprint-printPagination_#(pageId)'
+				});
+		//打印设计
+		hiprintTemplate_#(pageId).design('#hiprint-printTemplate_#(pageId)');
+	}); */
+}
+
+function newTpl_#(pageId)(){
+	var tplId = $("#tplId_#(pageId)").val();
+	//如果存在tpl了已经 就需要让用户选择是否保存后跳转
+	if(tplId){
+		var tplName = $("#tplName_#(pageId)").val();
+		//说明是加载的模板
+		LayerMsgBox.confirm("是否保存当前正在编辑的模板["+tplName+"]?",function(){
+			saveHiprintTpl_#(pageId)(function(){
+				window.location.href="admin/hiprint";
+			});
+		},function(){
+			window.location.href="admin/hiprint";
+		});
+	}else{
+		var json = hiprintTemplate_#(pageId).getJson();
+		if(jsonObjectValueIsOk(json)){
+			//说明是加载的模板
+			LayerMsgBox.confirm("是否保存当前正在编辑的模板?",function(){
+				saveHiprintTpl_#(pageId)(function(){
+					window.location.href="admin/hiprint";
+				});
+			},function(){
+				window.location.href="admin/hiprint";
+			});
+		}else{
+			window.location.href="admin/hiprint";
+		}
+
+	}
+
+}
+
+if(self==top){
+	$("#backToAdminPage_#(pageId)").removeClass("d-none");
+}
+</script>
+
+#end
