@@ -16,68 +16,45 @@
 								value="#(qapro.order_id ??)" />
 						</div>
 					</div>
-
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流</label>
+						<label class="col-sm-3 col-form-label">整机电流 24v</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required"
-								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.cuc"
-								value="#(qapro.sp_cuc ??)" />
+								class="form-control" placeholder="请输入整机电流 24v" maxlength="10"
+								name="product.cucmax" value="#(qapro.sp_cucmax??)" />
 						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">整机电流 8v</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required"
-								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.cucmin"
-								value="#(qapro.spC_cucimin ??)" />
+								class="form-control" placeholder="请输入整机电流 8v" maxlength="10"
+								name="product.cucmin" value="#(qapro.sp_cucimin??)" />
 						</div>
 					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流 24v</label>
-						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required"
-								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.cucmax"
-								value="#(qapro.sp_cucmax ??)" />
-						</div>
-					</div>
+
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">脉冲电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required"
-								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.pv"
-								value="#(qapro.sp_pv ??)" />
+								class="form-control" placeholder="请输入脉冲电压" maxlength="10"
+								name="product.pv" value="#(qapro.sp_pv??)" />
 						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">热头电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required"
-								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.thv"
-								value="#(qapro.spT_thv ??)" />
+								class="form-control" placeholder="请输入热头电压" maxlength="10"
+								name="product.thv" value="#(qapro.sp_thv??)" />
 						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">零点内码</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required"
-								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.zp"
-								value="#(qapro.sp_zp ??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">故障电平</label>
-						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required"
-								placeholder="如果多型号,英文逗号分割" maxlength="50" name="product.fl"
-								value="#(qapro.sp_fl ??)" />
+								class="form-control" placeholder="请输入零点内码" maxlength="10"
+								name="product.zp" value="#(qapro.sp_zp??)" />
 						</div>
 					</div>
 
@@ -129,16 +106,34 @@
 							</select>
 						</div>
 					</div>
-					
+
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">流量范围</label>
 						<div class="col input-group">
-							<select class="form-control" data-autoload name="product.flow_range"
+							<select class="form-control" data-autoload
+								name="product.flow_range"
 								data-url="admin/siargo/qarep/getDict?keywords=flow_range"
 								data-rule="select" data-tips="请选择流量范围" data-text="=请选择="
 								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-select="#(qapro.sp_flow_range ??)">
 							</select>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">整机电流</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" placeholder="请输入整机电流" maxlength="10"
+								name="product.cuc" value="#(qapro.sp_cuc??)" />
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">故障电平</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" placeholder="请输入故障电平" maxlength="10"
+								name="product.fl" value="#(qapro.sp_fl??)" />
 						</div>
 					</div>
 				</div>

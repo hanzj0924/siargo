@@ -10,7 +10,7 @@
 						<label class="col-sm-3 col-form-label">订单号</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="required" placeholder="请输入订单号"
+								class="form-control" data-rule="number" placeholder="请输入订单号"
 								maxlength="10" name="qareport.orderId"
 								value="#(qareport.orderId??)" />
 						</div>
@@ -19,7 +19,7 @@
 						<label class="col-sm-3 col-form-label">整机电流 24v</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" placeholder="请输入整机电流 24v" maxlength="10"
+								class="form-control" placeholder="请输入整机电流 24v" maxlength="10" 
 								name="product.cucmax" value="#(qareport.spCucmax??)" />
 						</div>
 					</div>
