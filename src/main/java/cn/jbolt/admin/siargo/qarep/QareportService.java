@@ -143,6 +143,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			pro.set("flow_range", product.getFlowRange());
 			pro.set("des", product.getDes());
 			pro.set("report_id", qareport.getId());
+			pro.set("cuc", product.getCuc());
+			pro.set("cucmax", product.getCucmax());
+			pro.set("cucmin", product.getCucmin());
+			pro.set("pv", product.getPv());
+			pro.set("thv", product.getThv());
+			pro.set("zp", product.getZp());
+			pro.set("fl", product.getFl());
 			pro.set("vd", 1);
 			prodsuccess = pro.save();
 

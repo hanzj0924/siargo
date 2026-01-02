@@ -46,6 +46,8 @@ public class PDFService {
 		if (report == null) {
 			throw new RuntimeException("未找到对应报告数据");
 		}
+		String proModle = report.getStr("sp_modle");
+		
 
 		// 2. 构建替换数据映射
 		Map<String, String> dataMap = buildDataMap(report);
@@ -59,8 +61,14 @@ public class PDFService {
 		} else if(report.getStr("prod_type").equals("2")){
 			wordTemplatePath = webRootPath + "/reporttemplates/小流量计模板.docx";
 		}else if(report.getStr("prod_type").equals("3")){
-			//wordTemplatePath = webRootPath + "/reporttemplates/大流量计模板.docx";
-			throw new RuntimeException("大流量计模板未完成，请联系开发者");
+			if (proModle.contains("MF66")) {
+				//wordTemplatePath = webRootPath + "/reporttemplates/大流量计模板.docx";
+			}else if (proModle.contains("MF66")) {
+				//wordTemplatePath = webRootPath + "/reporttemplates/大流量计模板.docx";
+			}else {
+				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModle);
+			}
+			
 		}else {
 			throw new RuntimeException("未找到对应模板，请联系开发者");
 		}
@@ -162,7 +170,18 @@ public class PDFService {
 		} 
 		//大流量
 		else if (report.getStr("prod_type").equals("3")) {
+			if (proModle.contains("GD")) {
+				map.put("cuc", report.getStr("sp_cuc"));
+				map.put("fl", report.getStr("sp_fl"));
+			} 
 			
+			if (proModle.contains("XD")) {
+				map.put("cucmax", report.getStr("sp_cucmax"));
+				map.put("cucmin", report.getStr("sp_cucmin"));
+				map.put("pv", report.getStr("sp_cpv"));
+				map.put("thv", report.getStr("sp_thv"));
+				map.put("zp", report.getStr("sp_zp"));
+			} 
 		} 
 		
 		return map;

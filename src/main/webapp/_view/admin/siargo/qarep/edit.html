@@ -1,5 +1,6 @@
 #@jboltLayout() #define main()
 <div class="jbolt_page">
+	
 	<div class="jbolt_page_content">
 		<form onsubmit="return false;" id="qareportUpdateForm"
 			action="admin/siargo/qarep/update" method="post">
@@ -55,6 +56,14 @@
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								class="form-control" placeholder="请输入零点内码" maxlength="10"
 								name="product.zp" value="#(qapro.sp_zp??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">故障电平</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" placeholder="请输入故障电平" maxlength="10"
+								name="product.fl" value="#(qapro.sp_fl??)" />
 						</div>
 					</div>
 
@@ -128,14 +137,7 @@
 						</div>
 					</div>
 
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">故障电平</label>
-						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" placeholder="请输入故障电平" maxlength="10"
-								name="product.fl" value="#(qapro.sp_fl??)" />
-						</div>
-					</div>
+					
 				</div>
 			</div>
 			<div class="row">

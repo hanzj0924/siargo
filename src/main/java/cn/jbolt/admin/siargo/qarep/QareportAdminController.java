@@ -10,8 +10,11 @@ import cn.jbolt.admin.siargo.dict.DictionarytypeService;
 import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
 
 import com.jfinal.core.Path;
+import com.jfinal.kit.Ret;
 import com.jfinal.kit.StrKit;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -19,11 +22,26 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.upload.UploadFile;
+
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.Product;
 import cn.jbolt.siargo.model.Qareport;
@@ -56,6 +74,236 @@ public class QareportAdminController extends JBoltBaseController {
 				
 		render("index.html");
 	}
+
+	/**
+     * 处理Excel导入
+     */
+    public void importExcel() {
+        try {
+            // 1. 获取上传的文件
+            UploadFile uploadFile = getFile();
+            if (uploadFile == null) {
+                renderJson(new Record().set("success", false).set("msg", "请选择文件"));
+                return;
+            }
+            
+            File excelFile = uploadFile.getFile();
+            
+            // 2. 读取Excel文件
+            List<Map<String, Object>> dataList = readExcel(excelFile);
+            
+            if (dataList == null || dataList.isEmpty()) {
+                renderJson(new Record().set("success", false).set("msg", "Excel文件中没有数据"));
+                return;
+            }
+            
+            // 3. 处理数据，提取所需信息
+            Map<String, Object> result = processExcelData(dataList);
+            
+            // Ret ret = new Ret();
+            //ret.set(result);
+            //renderJson(ret);
+            
+            // 4. 返回处理结果
+            result.put("success", true);
+            renderJsonData(result);
+            //renderJson(Ret.ok("操作成功"));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            renderJson(new Record().set("success", false).set("msg", "导入失败：" + e.getMessage()));
+        }
+    }
+    
+    /**
+     * 读取Excel文件内容
+     */
+    private List<Map<String, Object>> readExcel(File file) throws Exception {
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        FileInputStream fis = null;
+        Workbook workbook = null;
+        
+        try {
+            fis = new FileInputStream(file);
+            
+            // 根据文件扩展名创建不同的Workbook
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".xlsx")) {
+                workbook = new XSSFWorkbook(fis);
+            } else if (fileName.endsWith(".xls")) {
+                workbook = new HSSFWorkbook(fis);
+            } else {
+                throw new Exception("不支持的文件格式，请上传Excel文件");
+            }
+            
+            // 读取第一个sheet
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet == null) {
+                return dataList;
+            }
+            
+            // 获取标题行（第一行）
+            Row headerRow = sheet.getRow(0);
+            if (headerRow == null) {
+                return dataList;
+            }
+            
+            // 获取列标题
+            List<String> headers = new ArrayList<>();
+            for (Cell cell : headerRow) {
+                headers.add(getCellValue(cell));
+            }
+            
+            // 从第二行开始读取数据
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) {
+                    continue;
+                }
+                
+                Map<String, Object> rowData = new HashMap<>();
+                for (int j = 0; j < headers.size(); j++) {
+                    Cell cell = row.getCell(j);
+                    String header = headers.get(j);
+                    if (header != null && !header.trim().isEmpty()) {
+                        rowData.put(header, getCellValue(cell));
+                    }
+                }
+                
+                // 只添加有数据的行
+                if (!rowData.isEmpty()) {
+                    dataList.add(rowData);
+                }
+            }
+            
+        } finally {
+            if (fis != null) {
+                try { fis.close(); } catch (Exception e) {}
+            }
+            if (workbook != null) {
+                try { workbook.close(); } catch (Exception e) {}
+            }
+        }
+        
+        return dataList;
+    }
+    
+    /**
+     * 获取单元格的值
+     */
+    private String getCellValue(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue().trim();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().toString();
+                } else {
+                    // 处理数字，防止科学计数法
+                    double value = cell.getNumericCellValue();
+                    if (value == Math.floor(value)) {
+                        // 如果是整数
+                        return String.valueOf((long) value);
+                    } else {
+                        // 如果是小数
+                        return String.valueOf(value);
+                    }
+                }
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                try {
+                    return cell.getStringCellValue();
+                } catch (Exception e) {
+                    try {
+                        return String.valueOf(cell.getNumericCellValue());
+                    } catch (Exception ex) {
+                        return cell.getCellFormula();
+                    }
+                }
+            case BLANK:
+                return "";
+            default:
+                return "";
+        }
+    }
+    
+    /**
+     * 处理Excel数据，提取所需信息
+     */
+    private Map<String, Object> processExcelData(List<Map<String, Object>> dataList) {
+        Map<String, Object> result = new HashMap<>();
+        
+        if (dataList.isEmpty()) {
+            return result;
+        }
+        
+        // 1. 提取订单号（取第一个数据的订单号）
+        String orderId = (String) dataList.get(0).get("订单号");
+        result.put("orderId", orderId != null ? orderId : "");
+        
+        // 2. 提取型号并去重
+        Set<String> modelSet = dataList.stream()
+            .map(row -> (String) row.get("型号"))
+            .filter(model -> model != null && !model.trim().isEmpty())
+            .collect(Collectors.toSet());
+        
+        String models = String.join(",", modelSet);
+        result.put("modles", models);
+        
+        // 3. 提取编号，并按型号分组
+        Map<String, List<String>> modelNumbersMap = new LinkedHashMap<>();
+        
+        for (Map<String, Object> row : dataList) {
+            String model = (String) row.get("型号");
+            String number = (String) row.get("编号");
+            
+            if (model != null && number != null && !model.trim().isEmpty() && !number.trim().isEmpty()) {
+                modelNumbersMap.computeIfAbsent(model, k -> new ArrayList<>()).add(number);
+            }
+        }
+        
+        // 4. 构建编号字符串（格式：开始编号-结束编号）
+        List<String> numberRanges = new ArrayList<>();
+        List<String> quantities = new ArrayList<>();
+        
+        for (Map.Entry<String, List<String>> entry : modelNumbersMap.entrySet()) {
+            List<String> numbers = entry.getValue();
+            
+            if (!numbers.isEmpty()) {
+                // 对编号进行排序（假设编号是连续的）
+                numbers.sort(String::compareTo);
+                
+                // 获取起始编号和结束编号
+                String startNumber = numbers.get(0);
+                String endNumber = numbers.get(numbers.size() - 1);
+                
+                // 构建编号范围
+                String numberRange;
+                if (startNumber.equals(endNumber)) {
+                    numberRange = startNumber;
+                } else {
+                    numberRange = startNumber + "-" + endNumber;
+                }
+                
+                numberRanges.add(numberRange);
+                quantities.add(String.valueOf(numbers.size()));
+            }
+        }
+        
+        // 5. 构建返回结果
+        String numbers = String.join(",", numberRanges);
+        String qsis = String.join(",", quantities);
+        
+        result.put("numbers", numbers);
+        result.put("qsis", qsis);
+        
+        return result;
+    }
 	
 
 	/**

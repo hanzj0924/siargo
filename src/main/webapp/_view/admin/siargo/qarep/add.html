@@ -1,6 +1,7 @@
 #@jboltLayout() #define main()
 <div class="jbolt_page">
 	<div class="jbolt_page_content">
+		
 		<form onsubmit="return false;" id="qareportForm"
 			action="admin/siargo/qarep/save" method="post">
 			<input type="hidden" name="qareport.id" value="#(qareport.id??)" />
@@ -56,11 +57,29 @@
 								name="product.zp" value="#(qareport.spZp??)" />
 						</div>
 					</div>
-
-
-
+										<div class="form-group row">
+						<label class="col-sm-3 col-form-label">故障电平</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								class="form-control" placeholder="请输入故障电平" maxlength="10"
+								name="product.fl" value="#(qareport.spFl??)" />
+						</div>
+					</div>
 				</div>
 				<div class="col">
+					<div class="text-right" style="padding-bottom:0.1em;" >
+					<!--  data-confirm="确认导入数据？" -->
+						<div class="j_upload_file_box" 
+						data-name="file" 
+						data-btn-class="btn btn-success"
+						data-placeholder="导入"
+						data-accept="excel"
+						data-maxsize="20480"
+						data-handler="uploadFile"
+						data-url="admin/siargo/qarep/importExcel"
+						data-upload-success-handler="uploadSuccessHandler"
+						></div>
+					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">客户名称</label>
 						<div class="col">
@@ -129,14 +148,7 @@
 						</div>
 					</div>
 
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">故障电平</label>
-						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" placeholder="请输入故障电平" maxlength="10"
-								name="product.fl" value="#(qareport.spFl??)" />
-						</div>
-					</div>
+
 
 				</div>
 			</div>
@@ -192,7 +204,31 @@
 		</form>
 		#define js()
 		<script>
-			
+
+		function uploadSuccessHandler(uploader,type,fileInput,result) {
+		    var data = result;
+		    
+		    // 如果有data属性
+		    if (result && result.data) {
+		        data = result.data;
+		    }
+		    
+		    // 填充数据
+		    if (data.orderId) {
+		        $('input[name="qareport.orderId"]').val(data.orderId);
+		    }
+		    if (data.modles) {
+		        $('textarea[name="modles"]').val(data.modles);
+		    }
+		    if (data.numbers) {
+		        $('textarea[name="numbers"]').val(data.numbers);
+		    }
+		    if (data.qsis) {
+		        $('textarea[name="qsis"]').val(data.qsis);
+		        $('textarea[name="qis"]').val(data.qsis);
+		    }
+		}
+	
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="qareportForm")
 		#end
