@@ -82,10 +82,10 @@ public class QareportAdminController extends JBoltBaseController {
         try {
             // 1. 获取上传的文件
             UploadFile uploadFile = getFile();
-            if (uploadFile == null) {
-                renderJson(new Record().set("success", false).set("msg", "请选择文件"));
-                return;
-            }
+            if(notExcel(uploadFile)){
+    			renderJsonFail("请上传excel文件");
+    			return;
+    		}
             
             File excelFile = uploadFile.getFile();
             
@@ -93,25 +93,21 @@ public class QareportAdminController extends JBoltBaseController {
             List<Map<String, Object>> dataList = readExcel(excelFile);
             
             if (dataList == null || dataList.isEmpty()) {
-                renderJson(new Record().set("success", false).set("msg", "Excel文件中没有数据"));
+                renderFail("Excel文件中没有数据");
                 return;
             }
             
             // 3. 处理数据，提取所需信息
             Map<String, Object> result = processExcelData(dataList);
             
-            // Ret ret = new Ret();
-            //ret.set(result);
-            //renderJson(ret);
-            
             // 4. 返回处理结果
             result.put("success", true);
             renderJsonData(result);
-            //renderJson(Ret.ok("操作成功"));
             
         } catch (Exception e) {
             e.printStackTrace();
-            renderJson(new Record().set("success", false).set("msg", "导入失败：" + e.getMessage()));
+            renderFail("导入失败：" + e.getMessage());
+            return;
         }
     }
     
@@ -182,6 +178,15 @@ public class QareportAdminController extends JBoltBaseController {
             }
             if (workbook != null) {
                 try { workbook.close(); } catch (Exception e) {}
+            }
+            
+         // 删除临时文件
+            if (file != null && file.exists()) {
+                try {
+                    file.delete();
+                } catch (Exception e) {
+                    System.err.println("删除临时文件失败: " + e.getMessage());
+                }
             }
         }
         
