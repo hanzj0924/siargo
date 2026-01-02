@@ -21,6 +21,11 @@
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
+<td>
+	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
+	</a>
+</td>
 <td>${data.orderId}</td>
 <td>
 	{@if data.repType === 1}
@@ -56,7 +61,6 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.formnum}</td>
 <td>
 	{@if data.insp === 1}
 		精度待检
@@ -82,6 +86,11 @@
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
+<td>
+	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
+	</a>
+</td>
 <td>${data.orderId}</td>
 <td>
 	{@if data.repType === 1}
@@ -117,7 +126,6 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.formnum}</td>
 <td>${data.createTime}</td>
 </tr>
 {@/each}
@@ -128,6 +136,11 @@
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
+<td>
+	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
+	</a>
+</td>
 <td>${data.orderId}</td>
 <td>
 	{@if data.repType === 1}
@@ -163,7 +176,6 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.formnum}</td>
 <td>${data.accqName}</td>
 <td>${data.accqTime}</td>
 </tr>
@@ -175,6 +187,11 @@
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
+<td>
+	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
+	</a>
+</td>
 <td>${data.orderId}</td>
 <td>
 	{@if data.repType === 1}
@@ -210,7 +227,6 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.formnum}</td>
 <td>${data.accqName}</td>
 <td>${data.accqTime}</td>
 <td>
@@ -237,6 +253,11 @@
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
+<td>
+	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
+	</a>
+</td>
 <td>${data.orderId}</td>
 <td>
 	{@if data.repType === 1}
@@ -272,7 +293,6 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.formnum}</td>
 <td>${data.accqName}</td>
 <td>${data.accqTime}</td>
 <td>
@@ -300,6 +320,11 @@
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
+<td>
+	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
+	</a>
+</td>
 <td>${data.orderId}</td>
 <td>
 	{@if data.repType === 1}
@@ -344,8 +369,6 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.formnum}</td>
-
 <td>${data.accqName}</td>
 <td>${data.accqTime}</td>
 <td>
@@ -382,7 +405,7 @@
 				data-value-attr="dickey" data-text-attr="dicvalue"
 				data-text="=产品类型=" data-value=""></select>
 			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" id="qadatepicker"  
-				placeholder="日期范围" data-range="~" name="dateRange" value="#(dateRange??)">
+				placeholder="日期范围" data-range="~" name="dateRange" data-max="0"  value="#(dateRange??)">
 			<button type="submit" class="btn btn-outline-secondary">
 				<i class="fa fa-search"></i> 查询
 			</button>
@@ -651,11 +674,12 @@
 				data-rowtpl="allreportRowtpl_#(pageId)"
 				data-page="allreportPage_#(pageId)"
 				data-toolbar="allreport_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3"
+				data-fixed-columns-left="1,2,3,4"
 				>
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
@@ -665,7 +689,6 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="100" data-column="insp">检验进度</th>
 						<th data-width="150" data-column="create_time">创建时间</th>
 					</tr>
@@ -688,11 +711,12 @@
 				data-rowtpl="noqRowtpl_#(pageId)"
 				data-page="noqPage_#(pageId)"
 				data-toolbar="noq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3"
+				data-fixed-columns-left="1,2,3,4"
 				>
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
@@ -702,7 +726,6 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="150" data-column="create_time">创建时间</th>
 					</tr>
 				</thead>
@@ -724,11 +747,12 @@
 				data-rowtpl="accqRowtpl_#(pageId)"
 				data-page="accqPage_#(pageId)"
 				data-toolbar="accq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3"
+				data-fixed-columns-left="1,2,3,4"
 				>
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
@@ -738,7 +762,6 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="150" data-column="accq_uid">精度检验人</th>
 						<th data-width="150" data-column="accq_time">精度检验日期</th>
 					</tr>
@@ -761,11 +784,12 @@
 				data-rowtpl="funqRowtpl_#(pageId)"
 				data-page="funqPage_#(pageId)"
 				data-toolbar="funq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3"
+				data-fixed-columns-left="1,2,3,4"
 				>
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
@@ -775,7 +799,6 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="150" data-column="accq_uid">精度检验人员</th>
 						<th data-width="150" data-column="accq_time">精度检验日期</th>
 						<th data-width="150" data-column="funq_uid">成品检验人员</th>
@@ -800,11 +823,12 @@
 				data-rowtpl="appqRowtpl_#(pageId)"
 				data-page="appqPage_#(pageId)"
 				data-toolbar="appq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3"
+				data-fixed-columns-left="1,2,3,4"
 				>
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
@@ -814,7 +838,6 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="150" data-column="accq_uid">精度检验人员</th>
 						<th data-width="150" data-column="accq_time">精度检验日期</th>
 						<th data-width="150" data-column="funq_uid">成品检验人员</th>
@@ -841,11 +864,12 @@
 				data-rowtpl="allqRowtpl_#(pageId)"
 				data-page="allqPage_#(pageId)"
 				data-toolbar="allq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3"
+				data-fixed-columns-left="1,2,3,4"
 				>
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
+						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
@@ -856,7 +880,6 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
 						<th data-width="150" data-column="accq_uid">精度检验人员</th>
 						<th data-width="150" data-column="accq_time">精度检验日期</th>
 						<th data-width="150" data-column="funq_uid">成品检验人员</th>

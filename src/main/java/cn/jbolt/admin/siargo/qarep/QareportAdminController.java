@@ -117,110 +117,6 @@ public class QareportAdminController extends JBoltBaseController {
 	    renderJsonSuccess();
     }
 	
-	public void accqHtml() {
-		
-		StringBuilder html = new StringBuilder();
-        
-        // HTML 头部和基础样式
-        html.append("<!DOCTYPE html>");
-        html.append("<html lang='zh-CN'>");
-        html.append("<head>");
-        html.append("<meta charset='UTF-8'>");
-        html.append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
-        html.append("<title>小流量计出厂检验项目</title>");
-        html.append("<style>");
-        html.append("body { font-family: 'Microsoft YaHei', Arial, sans-serif; margin: 20px; }");
-        html.append("table { width: 100%; border-collapse: collapse; border: 2px solid #333; margin-top: 20px; }");
-        html.append("th, td { border: 1px solid #333; padding: 8px 12px; text-align: left; }");
-        html.append("th { background-color: #f2f2f2; font-weight: bold; text-align: center; }");
-        html.append(".table-header { background-color: #e6e6e6; font-weight: bold; }");
-        html.append("h2 { text-align: center; color: #333; }");
-        html.append(".sub { vertical-align: sub; font-size: smaller; }");
-        html.append("</style>");
-        html.append("</head>");
-        html.append("<body>");
-        
-        // 标题
-        html.append("<h2>小流量计出厂检验项目 SIARRE-QC12-02 G/1 </h2>");
-        
-        // 表格开始
-        html.append("<table>");
-        
-        // 表头
-        html.append("<tr class='table-header'>");
-        html.append("<th width='10%'>序号</th>");
-        html.append("<th width='30%'>检验项目</th>");
-        html.append("<th width='60%'>标准、要求</th>");
-        html.append("</tr>");
-        
-        // 数据行
-        html.append("<tr>");
-        html.append("<td>1</td>");
-        html.append("<td>参数设置（软件版本、最大流量、气体系数、流量单位）</td>");
-        html.append("<td>见订单及对应产品检验指导书（订单无特殊要求均为默认值，结果查询生产管理系统产品记录）</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>2</td>");
-        html.append("<td>气密性</td>");
-        html.append("<td>最大工作压力5min无泄漏(结果查询生产管理系统产品打压信息)</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>3</td>");
-        html.append("<td>精度/误差</td>");
-        html.append("<td rowspan='2'>见附表一</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>4</td>");
-        html.append("<td>重复性E<span class='sub'>r</span>=(E<span class='sub'>max</span>-E<span class='sub'>min</span>)/d<span class='sub'>n</span></td>");
-        // 注意：这一行的第三列因为与上一行合并，所以不单独写
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>5</td>");
-        html.append("<td>GDCF值</td>");
-        html.append("<td>GDCF=1000(A/N/O); 特殊气体GDCF值按照《MEMS气体质量流量计特殊气体校准作业规范》</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>6</td>");
-        html.append("<td>高、低报警（MF52XX）</td>");
-        html.append("<td>高：maxSLMP、低：0SLMP（见工装指示灯亮）</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>7</td>");
-        html.append("<td>温度显示(MF57XX)</td>");
-        html.append("<td>±3℃</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>8</td>");
-        html.append("<td>气体类型/控制方式（BC/MFC1000）</td>");
-        html.append("<td>(Air:0 Ar:1 CO2:2 N2:3 O2:4 N2:5 H2:6 He:7) (模拟:0 数字:2)</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>9</td>");
-        html.append("<td>外观（含显示盒、连接线）</td>");
-        html.append("<td>结构吻合良好，螺钉紧固，滤网安装正确平整、洁净，外观洁净，无损伤，标签、标示正确、完好。</td>");
-        html.append("</tr>");
-        
-        html.append("<tr>");
-        html.append("<td>10</td>");
-        html.append("<td>包装</td>");
-        html.append("<td>产品配线、电源适配器等包装配件齐备，产品标签、合格证书、说明书、产品质量跟踪卡、装箱单等随机文件齐备（特殊包装要求见订单）</td>");
-        html.append("</tr>");
-        
-        html.append("</table>");
-        
-        html.append("</body>");
-        html.append("</html>");
-		renderHtml(html.toString());
-	}
-	
 	/**
 	* 查询所有客户名称
 	*/
@@ -282,6 +178,19 @@ public class QareportAdminController extends JBoltBaseController {
 		}
 		set("qapro",qareport);
 		render("edit.html");
+	}
+	
+	/**
+	* 报告单详情
+	*/
+	public void details() {
+		Qareport qareport=service.qareportFindByProId(Long.parseLong(getPara("id"))); 
+		if(qareport == null){
+			renderFail(JBoltMsg.DATA_NOT_EXIST);
+			return;
+		}
+		set("qapro",qareport);
+		render("details.html");
 	}
 	
 	/**
