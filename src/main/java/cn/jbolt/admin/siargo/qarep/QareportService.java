@@ -51,7 +51,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						"sp.id as spid", "sp.modle as sp_modle", "sp.number as sp_number", "sp.type as sp_type",
 						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.flow_range as sp_flow_range", "sp.des as sp_des", 
-						"sp.pdfstr AS sp_pdfstr", "sp.cuc as sp_cuc", "sp.pv as sp_pv", "sp.thv as sp_thv", 
+						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", "sp.thv as sp_thv", 
 						"sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", "sp.cucmin as sp_cucmin")
 				.page(pageNumber, pageSize).from("siargo_qareport", "sq")
 				.leftJoin("siargo_product", "sp", "sq.id = sp.report_id")
@@ -92,19 +92,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
 
-		if (product.getInsp() > 2 && product.getType() == 2) {
-			return fail("【小流量计】未检验精度，请重新选择检验进度！");
+		if (product.getInsp() > 2) {
+			return fail("未检验精度，请重新选择检验进度！");
 		}
-		
-		if (product.getType() == 1) {
-			if (product.getInsp() > 3) {
-				return fail("【传感器】未检验精度，请重新选择检验进度！");
-			}
-			if (product.getInsp() == 2) {
-				return fail("【传感器】无成品检验，请重新选择检验进度！");
-			}
-		}
-		
 
 		if (notOk(qareport.getId())) {
 
@@ -120,21 +110,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			Product pro = new Product();
 
 			// 增加精度检验数据
-			if (product.getInsp() == 2 && product.getType() == 2) {
+			if (product.getInsp() == 2) {
 				pro.set("accq_uid", JBoltUserKit.getUserId());
 				pro.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 			}
 			
-			//传感器没有成品检验，直接包装待检
-    		if ( (product.getInsp() == 2 || product.getInsp() == 3) && product.getType() == 1) {
-    			pro.set("insp", 3);
-    			pro.set("accq_uid", JBoltUserKit.getUserId());
-				pro.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
-    			
-			} else {
-				pro.set("insp", product.getInsp());
-			}
-
+			pro.set("insp", product.getInsp());
 			pro.set("type", product.getType());
 			pro.set("modle", product.getModle());
 			pro.set("qsi", product.getQsi());
@@ -142,6 +123,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			pro.set("number", product.getNumber());
 			pro.set("flow_range", product.getFlowRange());
 			pro.set("des", product.getDes());
+			pro.set("pdfver", product.getPdfver());
 			pro.set("report_id", qareport.getId());
 			pro.set("cuc", product.getCuc());
 			pro.set("cucmax", product.getCucmax());
@@ -155,16 +137,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 		} else {
 			// 增加精度检验数据
-			if (product.getInsp() == 2 && product.getType() == 2) {
+			if (product.getInsp() == 2) {
 				product.set("accq_uid", JBoltUserKit.getUserId());
 				product.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 			}
-			
-			if ((product.getInsp() == 2 || product.getInsp() == 3) && product.getType() == 1 ) {
-				product.set("insp", 3);
-				product.set("accq_uid", JBoltUserKit.getUserId());
-				product.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
-			} 
 
 			product.set("report_id", qareport.getId());
 			product.set("vd", 1);
@@ -188,7 +164,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  DATE_FORMAT(sq.create_time, '%Y.%m.%d') AS c_time,\n" + "  sp.id AS spid,\n"
 				+ "  sp.modle AS sp_modle,\n" + "  sp.number AS sp_number,\n" + "  sp.type AS sp_type,\n"
 				+ "  sp.qsi AS sp_qsi,\n" + "  sp.qi AS sp_qi,\n" + "  sp.flow_range AS sp_flow_range,\n"
-				+ "  sp.des AS sp_des,\n" + "  sp.pdfstr AS sp_pdfstr,\n" + "  sp.cuc AS sp_cuc,\n" 
+				+ "  sp.des AS sp_des,\n" + "  sp.pdfstr AS sp_pdfstr,\n" + " sp.pdfver AS sp_pdfver,\n" + "  sp.cuc AS sp_cuc,\n" 
 				+ "  sp.pv AS sp_pv,\n" + "  sp.thv AS sp_thv,\n" + "  sp.zp AS sp_zp,\n" + "  sp.fl AS sp_fl,\n" 
 				+ "  sp.cucmax AS sp_cucmax,\n" + "  sp.cucmin AS sp_cucmin,\n"+ "  sd.`VALUE` AS sp_flow_range_name\n"
 				+ "  FROM\n" + "  `siargo_qareport` sq\n"
@@ -226,6 +202,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			return fail("报告单更新失败，请联系开发人员！");
 			// 添加日志
 			// addUpdateSystemLog(qareport.getId(), JBoltUserKit.getUserId(), qareport.get);
+		}
+		
+		if (product.getQsi() < product.getQi()) {	
+			return fail("送检数量小于检验数量，重新输入！");
 		}
 
 		// 增加精度进度

@@ -38,6 +38,17 @@
 								data-select="#(qareport.repType ??)">
 							</select>
 						</div>
+						
+						<label class="col-sm-3 col-form-label">报告单版号</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload
+								name="product.pdfver"
+								data-url="admin/siargo/qarep/getDict?keywords=pdfver"
+								data-rule="select" data-tips="请选择版号" 
+								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-select="#(qareport.pdfver ??)">
+							</select>
+						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">产品类型</label>
@@ -54,11 +65,11 @@
 
 						<label class="col-sm-3 col-form-label">检验进度</label>
 						<div class="col input-group">
-							<select class="form-control" data-autoload name="product.insp"
-								data-url="admin/siargo/qarep/getDict?keywords=insp"
+							<select class="form-control" name="product.insp"
 								data-rule="select" data-tips="请选择检验进度" data-text="=请选择="
-								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-select="#(qareport.insp ??)">
+								<option value="1">未检精度</option>
+								<option value="2">已检精度</option>
 							</select>
 						</div>
 					</div>
@@ -76,6 +87,7 @@
 							</select>
 						</div>
 					</div>
+					
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">整机电流</label>
 						<div class="col">
@@ -168,6 +180,7 @@
 								data-tips="请输入型号,如果多型号,英文逗号分割" maxlength="500" name="qsis"
 								data-with-clearbtn="true"></textarea>
 						</div>
+					</div>
 					<div class="form-group row">
 						<label class="col-sm-1 col-form-label">检验数量</label>
 						<div class="col">
@@ -176,7 +189,6 @@
 								data-tips="请输入型号,如果多型号,英文逗号分割" maxlength="500" name="qis"
 								data-with-clearbtn="true"></textarea>
 						</div>
-					</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-1 col-form-label">型号</label>

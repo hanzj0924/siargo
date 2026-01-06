@@ -210,29 +210,20 @@ public class QareportAdminController extends JBoltBaseController {
             	Product product = proservice.findById(ids.get(i));
                 if (product != null) {
                 	if(insp == 2) {
-                		//传感器没有成品检验，直接包装待检
-                		if (product.getType() == 1) {
-                			product.set("insp", 3);
-						} else {
-							product.set("insp", insp);
-						}
                 		product.set("accq_uid", JBoltUserKit.getUserId());
                 		product.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
                 	}else if(insp == 3){
-                		product.set("insp", insp);
                 		product.set("funq_uid", JBoltUserKit.getUserId());
                 		product.set("funq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 					}else if(insp == 4){
-						product.set("insp", insp);
 						product.set("appq_uid", JBoltUserKit.getUserId());
 						product.set("appq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 					}else if(insp == 5){
-						product.set("insp", insp);
 						product.set("allq_uid", JBoltUserKit.getUserId());
 						product.set("allq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 					}
-                		
-                	 product.update();
+                	product.set("insp", insp);
+                	product.update();
                 }
             }
             renderJsonSuccess();
@@ -293,25 +284,19 @@ public class QareportAdminController extends JBoltBaseController {
     	for (; i < modles.size() && i < numbers.size(); i++) {
     		
     		if (qsis.get(i) < qis.get(i)) {
-    			renderFail("送检数量应大于检验数量，重新输入！");
+    			renderFail("送检数量小于检验数量，重新输入！");
     			return;
     		}
-
     		product.setQi(qis.get(i));
     		product.setQsi(qsis.get(i));
     		product.setModle(modles.get(i));
     		product.setNumber(numbers.get(i));
     		
-    		if (dess.size()>0) {
-    			if(!StrKit.isBlank(dess.get(i))) {
-        			product.setDes(dess.get(i));
-    			}else {
-    				product.setDes(null);
-    			}
+    		if (i>= 0 && i < dess.size()) {
+        		product.setDes(dess.get(i));
 			}
     		service.save(qareport,product);
         }
-    	
     	renderJsonSuccess();
 	}
 	
@@ -343,7 +328,6 @@ public class QareportAdminController extends JBoltBaseController {
                 	product.update();
                 }
             }
-
             renderJsonSuccess();
 	}
 	

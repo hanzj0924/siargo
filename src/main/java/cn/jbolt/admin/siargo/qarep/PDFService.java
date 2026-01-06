@@ -46,7 +46,14 @@ public class PDFService {
 		if (report == null) {
 			throw new RuntimeException("未找到对应报告数据");
 		}
+		
+		// pdfver=1
+		String folderG2 = "/G2";
+		
+		
 		String proModle = report.getStr("sp_modle");
+		String prodType = report.getStr("prod_type");
+		String pdfver = report.getStr("sp_pdfver");
 		
 
 		// 2. 构建替换数据映射
@@ -54,21 +61,61 @@ public class PDFService {
 
 		// 3. 获取 web 根目录，替换 Word 模板
 		String webRootPath = PathKit.getWebRootPath();
-		String wordTemplatePath = null;
-		
-		if (report.getStr("prod_type").equals("1")) {
-			wordTemplatePath = webRootPath + "/reporttemplates/传感器模板.docx";
-		} else if(report.getStr("prod_type").equals("2")){
-			wordTemplatePath = webRootPath + "/reporttemplates/小流量计模板.docx";
-		}else if(report.getStr("prod_type").equals("3")){
-			if (proModle.contains("MF66")) {
-				//wordTemplatePath = webRootPath + "/reporttemplates/大流量计模板.docx";
-			}else if (proModle.contains("MF66")) {
-				//wordTemplatePath = webRootPath + "/reporttemplates/大流量计模板.docx";
+		String wordTemplatePath = webRootPath + "/reporttemplates";
+
+		if (prodType.equals("1")) {
+			switch(pdfver){
+	         case "1":
+	        	 wordTemplatePath = wordTemplatePath + folderG2 + "/传感器模板.docx";
+	        	 break;
+	         case "2":
+	        	 break;
+	         case "3":
+	        	 break;
+	         default:
+	        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+	      }
+		}else if(prodType.equals("2")){
+			switch(pdfver){
+	         case "1":
+	        	 wordTemplatePath = wordTemplatePath + folderG2 + "/小流量计模板.docx";
+	        	 break;
+	         case "2":
+	        	 break;
+	         case "3":
+	        	 break;
+	         default:
+	        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+	      }
+		}else if(prodType.equals("3")){
+			
+			if (proModle.contains("GD")) {
+				switch(pdfver){
+		         case "1":
+		        	 wordTemplatePath = wordTemplatePath + folderG2 + "/大流量计模板GD.docx";
+		        	 break;
+		         case "2":
+		        	 break;
+		         case "3":
+		        	 break;
+		         default:
+		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		      }
+			}else if (proModle.contains("FD")) {
+				switch(pdfver){
+		         case "1":
+		        	 wordTemplatePath = wordTemplatePath + folderG2 + "/大流量计模板FD.docx";
+		        	 break;
+		         case "2":
+		        	 break;
+		         case "3":
+		        	 break;
+		         default:
+		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		      }
 			}else {
 				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModle);
 			}
-			
 		}else {
 			throw new RuntimeException("未找到对应模板，请联系开发者");
 		}
@@ -101,8 +148,15 @@ public class PDFService {
 	    }
 	    
 	    // 6. 重命名 PDF  
+
 	 	String finalPdfPath = webRootPath + "/"+src+"/" + report.getOrderId().toString() + "_" + id.toString() + ".pdf";
-		new File(pdfPath).renameTo(new File(finalPdfPath));
+		
+	 	File finalPdfFolder = new File(webRootPath + "/"+src+"/");
+		if (!finalPdfFolder.exists()) {
+			finalPdfFolder.mkdirs();
+		}
+	 	
+	 	new File(pdfPath).renameTo(new File(finalPdfPath));
 
 		// 7. 清理临时 Word 文件
 		new File(tempWordPath).delete();
@@ -175,7 +229,7 @@ public class PDFService {
 				map.put("fl", report.getStr("sp_fl"));
 			} 
 			
-			if (proModle.contains("XD")) {
+			if (proModle.contains("FD")) {
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
 				map.put("pv", report.getStr("sp_cpv"));

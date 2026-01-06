@@ -48,7 +48,7 @@
 	{@/if}
 </td>
 <td>
-	{@if data.spDes==null}
+	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
 		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
@@ -65,7 +65,7 @@
 	{@if data.insp === 1}
 		精度待检
 	{@else if data.insp === 2}
-		成品待检
+		外观待检
 	{@else if data.insp === 3}
 		包装待检
 	{@else if data.insp === 4}
@@ -113,7 +113,7 @@
 	{@/if}
 </td>
 <td>
-	{@if data.spDes==null}
+	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
 		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
@@ -163,7 +163,7 @@
 	{@/if}
 </td>
 <td>
-	{@if data.spDes==null}
+	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
 		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
@@ -214,7 +214,7 @@
 	{@/if}
 </td>
 <td>
-	{@if data.spDes==null}
+	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
 		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
@@ -280,7 +280,7 @@
 	{@/if}
 </td>
 <td>
-	{@if data.spDes==null}
+	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
 		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
@@ -347,7 +347,7 @@
 	{@/if}
 </td>
 <td>
-	{@if data.spDes==null}
+	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
 		<button data-dialogbtn data-area="500,400" data-btn="close"  data-title="报告单备注"  
@@ -398,7 +398,7 @@
 	<div class="row">
 		<div class="col-md-auto">
 		<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control"
+			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
 				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
@@ -442,7 +442,7 @@
 	<div class="row">
 		<div class="col-md-auto">
 		<form class="form-inline d-inline-block" id="noqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control"
+			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
 				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
@@ -503,7 +503,7 @@
 	<div class="row">
 		<div class="col-md-auto">
 		<form class="form-inline d-inline-block" id="accqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control"
+			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
 				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
@@ -524,7 +524,7 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
 					data-confirm="确定批准选中数据？" 
-					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 成品合格
+					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 外观合格
 				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-info ">
@@ -541,7 +541,7 @@
 	<div class="row">
 		<div class="col-md-auto">
 		<form class="form-inline d-inline-block" id="funqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control"
+			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
 				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
@@ -579,7 +579,7 @@
 	<div class="row">
 		<div class="col-md-auto">
 		<form class="form-inline d-inline-block" id="appqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control"
+			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
 				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
@@ -617,7 +617,7 @@
 	<div class="row">
 		<div class="col-md-auto">
 		<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control"
+			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
 				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
@@ -655,7 +655,7 @@
 	<div class="jbolt_tab_links jb_vheader">
 		<a class="jbolt_tab_link"  href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
 		<a class="jbolt_tab_link"  href="#noq_tabcontent"><i class="jbicon jb-21shuru"></i> 精度待检</a>
-		<a class="jbolt_tab_link"  href="#accq_tabcontent"><i class="jbicon jb-21shuru"></i> 成品待检</a>
+		<a class="jbolt_tab_link"  href="#accq_tabcontent"><i class="jbicon jb-21shuru"></i> 外观待检</a>
 		<a class="jbolt_tab_link"  href="#funq_tabcontent"><i class="jbicon jb-21shuru"></i> 包装待检</a>
 		<a class="jbolt_tab_link"  href="#appq_tabcontent"><i class="jbicon jb-21shuru"></i> 全部合格/<strong>待批准</strong></a>
 		<a class="jbolt_tab_link"  href="#allq_tabcontent"><i class="jbicon jb-xiangmushouxubeian"></i> 已完成</a>
@@ -801,8 +801,8 @@
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="150" data-column="accq_uid">精度检验人员</th>
 						<th data-width="150" data-column="accq_time">精度检验日期</th>
-						<th data-width="150" data-column="funq_uid">成品检验人员</th>
-						<th data-width="150" data-column="funq_time">成品检验日期</th>
+						<th data-width="150" data-column="funq_uid">外观检验人员</th>
+						<th data-width="150" data-column="funq_time">外观检验日期</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -840,8 +840,8 @@
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="150" data-column="accq_uid">精度检验人员</th>
 						<th data-width="150" data-column="accq_time">精度检验日期</th>
-						<th data-width="150" data-column="funq_uid">成品检验人员</th>
-						<th data-width="150" data-column="funq_time">成品检验日期</th>
+						<th data-width="150" data-column="funq_uid">外观检验人员</th>
+						<th data-width="150" data-column="funq_time">外观检验日期</th>
 						<th data-width="150" data-column="appq_uid"> 包装检验人员</th>
 						<th data-width="150" data-column="appq_time">包装检验日期</th>
 					</tr>
@@ -882,8 +882,8 @@
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="150" data-column="accq_uid">精度检验人员</th>
 						<th data-width="150" data-column="accq_time">精度检验日期</th>
-						<th data-width="150" data-column="funq_uid">成品检验人员</th>
-						<th data-width="150" data-column="funq_time">成品检验日期</th>
+						<th data-width="150" data-column="funq_uid">外观检验人员</th>
+						<th data-width="150" data-column="funq_time">外观检验日期</th>
 						<th data-width="150" data-column="appq_uid">包装检验人员</th>
 						<th data-width="150" data-column="appq_time">包装检验日期</th>
 						<th data-width="150" data-column="allq_uid">批准人员</th>

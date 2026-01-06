@@ -15,10 +15,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String ID = "id";
     /**检验报告单ID*/
     public static final String REPORT_ID = "report_id";
-    /**产品类型:
-0小流量, 
-1传感器, 
-2大流量*/
+    /**产品类型: 1传感器,  2小流量, 3大流量*/
     public static final String TYPE = "type";
     /**产品型号*/
     public static final String MODLE = "modle";
@@ -37,11 +34,11 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     /**有效数据(valid data)*/
     public static final String VD = "vd";
     /**检验进度(Inspection Progress)：
-1未开始检验, 
-2精度合格, 
-3功能合格, 
-4外观合格, 
-5全部合格*/
+	1未开始检验, 
+	2精度合格, 
+	3功能合格, 
+	4外观合格, 
+	5全部合格*/
     public static final String INSP = "insp";
     /**精度检验日期(Accuracy qualified)*/
     public static final String ACCQ_TIME = "accq_time";
@@ -61,6 +58,8 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String ALLQ_UID = "allq_uid";
     /**pdf地址*/
     public static final String PDFSTR = "pdfstr";
+    /**pdf报告单版本号*/
+    public static final String PDFVER = "pdfver";
     /**整机电流 (Complete Unit Current)*/
     public static final String CUC = "cuc";
     /**整机电流24v*/
@@ -109,20 +108,13 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 		return getLong("report_id");
 	}
 
-	/**
-	 * 产品类型:
-0小流量, 
-1传感器, 
-2大流量
-	 */
+	/**产品类型: 1传感器,  2小流量, 3大流量*/
 	public M setType(java.lang.Long type) {
 		set("type", type);
 		return (M)this;
 	}
 	
-	/**
-	 * 产品类型:0小流量, 1传感器, 2大流量
-	 */
+	/**产品类型: 1传感器,  2小流量, 3大流量*/
 	@JBoltField(name="type" ,columnName="type",type="Long", remark="产品类型:0小流量, 1传感器, 2大流量", required=true, maxLength=10, fixed=0, order=3)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getType() {
@@ -156,7 +148,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 送检数量 (Quantity Submitted for Inspection)
 	 */
-	@JBoltField(name="qsi" ,columnName="qsi",type="Integer", remark="送检数量 (Quantity Submitted for Inspection)", required=true, maxLength=10, fixed=0, order=5)
+	@JBoltField(name="qsi" ,columnName="qsi",type="Long", remark="送检数量 (Quantity Submitted for Inspection)", required=true, maxLength=10, fixed=0, order=5)
 	public java.lang.Long getQsi() {
 		return getLong("qsi");
 	}
@@ -417,6 +409,22 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	public java.lang.String getPdfstr() {
 		return getStr("pdfstr");
 	}
+	
+	/**
+	 * pdf报告单版本号
+	 */
+	public M setPdfver(java.lang.String pdfver) {
+		set("pdfstr", pdfver);
+		return (M)this;
+	}
+	
+	/**
+	 * pdf报告单版本号
+	 */
+	@JBoltField(name="pdfver" ,columnName="pdfver",type="String", remark="pdf报告单版本号", required=false, maxLength=255, fixed=0, order=22)
+	public java.lang.String getPdfver() {
+		return getStr("pdfver");
+	}
 
 	/**
 	 * 整机电流 (Complete Unit Current)
@@ -429,7 +437,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流 (Complete Unit Current)
 	 */
-	@JBoltField(name="cuc" ,columnName="cuc",type="Double", remark="整机电流 (Complete Unit Current)", required=false, maxLength=5, fixed=2, order=22)
+	@JBoltField(name="cuc" ,columnName="cuc",type="Double", remark="整机电流 (Complete Unit Current)", required=false, maxLength=5, fixed=2, order=23)
 	public java.lang.Double getCuc() {
 		return getDouble("cuc");
 	}
@@ -445,7 +453,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流24v
 	 */
-	@JBoltField(name="cucmax" ,columnName="cucmax",type="Double", remark="整机电流24v", required=false, maxLength=5, fixed=2, order=23)
+	@JBoltField(name="cucmax" ,columnName="cucmax",type="Double", remark="整机电流24v", required=false, maxLength=5, fixed=2, order=24)
 	public java.lang.Double getCucmax() {
 		return getDouble("cucmax");
 	}
@@ -461,7 +469,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流8v
 	 */
-	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流8v", required=false, maxLength=5, fixed=2, order=24)
+	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流8v", required=false, maxLength=5, fixed=2, order=25)
 	public java.lang.Double getCucmin() {
 		return getDouble("cucmin");
 	}
@@ -477,7 +485,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 脉冲电压(Pulse Voltage)
 	 */
-	@JBoltField(name="pv" ,columnName="pv",type="Double", remark="脉冲电压(Pulse Voltage)", required=false, maxLength=5, fixed=2, order=25)
+	@JBoltField(name="pv" ,columnName="pv",type="Double", remark="脉冲电压(Pulse Voltage)", required=false, maxLength=5, fixed=2, order=26)
 	public java.lang.Double getPv() {
 		return getDouble("pv");
 	}
@@ -493,7 +501,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 热头电压(Thermal Head Voltage)
 	 */
-	@JBoltField(name="thv" ,columnName="thv",type="Double", remark="热头电压(Thermal Head Voltage)", required=false, maxLength=5, fixed=2, order=26)
+	@JBoltField(name="thv" ,columnName="thv",type="Double", remark="热头电压(Thermal Head Voltage)", required=false, maxLength=5, fixed=2, order=27)
 	public java.lang.Double getThv() {
 		return getDouble("thv");
 	}
@@ -509,7 +517,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 零点内码(Zero Point)
 	 */
-	@JBoltField(name="zp" ,columnName="zp",type="Double", remark="零点内码(Zero Point)", required=false, maxLength=5, fixed=2, order=27)
+	@JBoltField(name="zp" ,columnName="zp",type="Double", remark="零点内码(Zero Point)", required=false, maxLength=5, fixed=2, order=28)
 	public java.lang.Double getZp() {
 		return getDouble("zp");
 	}
@@ -525,10 +533,12 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 故障电平(Fault Level)
 	 */
-	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=5, fixed=2, order=28)
+	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=5, fixed=2, order=29)
 	public java.lang.Double getFl() {
 		return getDouble("fl");
 	}
+	
+	
 
 }
 

@@ -85,6 +85,8 @@ public class AdminIndexController extends JBoltBaseController {
 	@CheckPermission("dashboard")
 	@UnCheckIfSystemAdmin
 	public void dashboard(){
+		
+		
 		render("dashboard.html");
 	}
 

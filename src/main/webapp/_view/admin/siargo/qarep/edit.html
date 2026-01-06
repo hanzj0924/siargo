@@ -39,6 +39,16 @@
 								data-select="#(qapro.repType ??)">
 							</select>
 						</div>
+						<label class="col-sm-3 col-form-label">报告单版号</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload
+								name="product.pdfver"
+								data-url="admin/siargo/qarep/getDict?keywords=pdfver"
+								data-rule="select" data-tips="请选择版号" 
+								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-select="#(qapro.sp_pdfver ??)">
+							</select>
+						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">产品类型</label>
@@ -52,18 +62,16 @@
 						</div>
 					</div>
 					<div class="form-group row">
-
 						<label class="col-sm-3 col-form-label">检验进度</label>
 						<div class="col input-group">
-							<select class="form-control" data-autoload name="product.insp"
-								data-url="admin/siargo/qarep/getDict?keywords=insp"
+							<select class="form-control" name="product.insp"
 								data-rule="select" data-tips="请选择检验进度" data-text="=请选择="
-								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-select="#(qapro.insp ??)">
+								<option value="1">未检精度</option>
+								<option value="2">已检精度</option>
 							</select>
 						</div>
 					</div>
-
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">流量范围</label>
 						<div class="col input-group">
@@ -160,7 +168,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								class="form-control" data-rule="required" placeholder="请输入检验数量"
-								maxlength="100" name="product.qi" value="#(qapro.sp_modle??)" />
+								maxlength="100" name="product.qi" value="#(qapro.sp_qi??)" />
 						</div>
 					</div>
 
@@ -169,7 +177,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								class="form-control" data-rule="required" placeholder="请输入型号"
-								maxlength="100" name="product.modle" value="#(qapro.sp_qsi??)" />
+								maxlength="100" name="product.modle" value="#(qapro.sp_modle??)" />
 
 						</div>
 					</div>
@@ -178,8 +186,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								class="form-control" data-rule="required" placeholder="请输入编号"
-								maxlength="100" name="product.number"
-								value="#(qapro.sp_number??)" />
+								maxlength="100" name="product.number" value="#(qapro.sp_number??)" />
 						</div>
 					</div>
 					<div class="form-group row">
