@@ -4,8 +4,17 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.alibaba.fastjson.JSON;
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Db;
@@ -301,6 +310,145 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	@Override
 	protected int systemLogTargetType() {
 		return ProjectSystemLogTargetType.NONE.getValue();
+	}
+	
+	/**
+	 * 获取送检数量
+	 * 
+	 * @param proType
+	 * @return
+	 */
+	public Long getTotalSubmittedForInspected(int proType) {
+		String sql = "SELECT SUM( sp.qsi ) AS qsi_Total "
+				+ "FROM siargo_product sp "
+				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
+				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) AND MONTH ( sq.create_time ) = MONTH (CURDATE()) "
+				+ "AND sp.vd = 1 ";
+		if (proType>0) {
+			sql += " AND sp.type = " + proType;
+		}
+		return Db.queryLong(sql);
+	}
+	
+	
+	/**
+	 * 获取检验数量
+	 * 
+	 * @param proType
+	 * @return
+	 */
+	public Long getTotalInspected(int proType) {
+		String sql = "SELECT SUM( sp.qi ) AS qi_Total "
+				+ "FROM siargo_product sp "
+				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
+				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) AND MONTH ( sq.create_time ) = MONTH (CURDATE())  "
+				+ "AND sp.vd = 1 ";
+		if (proType>0) {
+			sql += "AND sp.type = " + proType;
+		}
+		return Db.queryLong(sql);
+	}
+	
+	/**
+	* 获取返修单数量
+	 * @return
+	 */
+	
+	public List<Map<String, Object>> getRepData() {
+	    String sql = "SELECT DATE_FORMAT( sq.create_time, '%Y-%m' ) AS FORMATMONTH, "
+	    		+ "COUNT( sq.id ) AS count "
+	    		+ "FROM siargo_qareport sq "
+	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
+	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
+	    		+ "AND sp.vd = 1 AND sq.rep_type = 2 "
+	    		+ "GROUP BY DATE_FORMAT( sq.create_time, '%Y-%m' ) "
+	    		+ "ORDER BY FORMATMONTH " ; 
+
+	    List<Record> records = Db.find(sql);
+	    
+	    // 转换为月份为key的Map
+	    Map<String, Integer> monthData = new LinkedHashMap<>();
+	    for (Record record : records) {
+	        monthData.put(record.getStr("FORMATMONTH"), record.getInt("count"));
+	    }
+	    
+	    // 生成1-12月的完整数据，使用LinkedHashMap保持特定顺序
+	    List<Map<String, Object>> result = new ArrayList<>();
+	    for (Map.Entry<String, Integer> entry : monthData.entrySet()) {
+	        Map<String, Object> item = new LinkedHashMap<>();
+	        item.put("x", entry.getKey() );  
+	        item.put("a", entry.getValue()); 
+	        result.add(item);
+	    }
+	    return result;
+	}
+	
+	/**
+	 * 获取报告单数量
+	 * @param repType
+	 * @return
+	 */
+	
+	public List<Map<String, Object>> getRepAllData() {
+	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, COUNT( sp.id ) AS count "
+	    		+ "FROM siargo_qareport sq "
+	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
+	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
+	    		+ "AND sp.vd = 1 GROUP BY MONTH ORDER BY MONTH";
+	    		
+	    List<Record> records = Db.find(sql);
+	    
+	    Map<Integer, Integer> monthData = new LinkedHashMap<>();
+	    for (Record record : records) {
+	        monthData.put(record.getInt("MONTH"), record.getInt("count"));
+	    }
+	    
+	    List<Map<String, Object>> result = new ArrayList<>();
+	    for (int month = 1; month <= 12; month++) {
+	        Map<String, Object> item = new LinkedHashMap<>();
+	        item.put("y", month + "月");  
+	        item.put("a", monthData.getOrDefault(month, 0)); 
+	        result.add(item);
+	    }
+	    return result;
+	}
+	
+	/**
+	 * 获取订单来源
+	 * @param repType
+	 * @return
+	 */
+	
+	public List<Map<String, Object>> getDonutData() {
+	    String sql = "SELECT sp.type AS type, COUNT( sp.id ) AS count "
+	    		+ "FROM siargo_product sp "
+	    		+ "LEFT JOIN siargo_qareport sq ON sq.id = sp.report_id "
+	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
+	    		+ "AND sp.vd = 1 GROUP BY sp.type ";
+	    		
+	    List<Record> records = Db.find(sql);
+	    
+	    Map<Integer, Integer> monthData = new LinkedHashMap<>();
+	    for (Record record : records) {
+	        monthData.put(record.getInt("type"), record.getInt("count"));
+	    }
+	    
+	    List<Map<String, Object>> result = new ArrayList<>();
+	    for (Map.Entry<Integer, Integer> entry : monthData.entrySet()) {
+	        Map<String, Object> item = new LinkedHashMap<>();
+	        if (entry.getKey() == 1) {
+	        	item.put("label", "传感器" ); 
+			}
+	        if (entry.getKey() == 2) {
+	        	item.put("label", "小流量" ); 
+			}
+	        if (entry.getKey() == 3) {
+	        	item.put("label", "大流量" ); 
+			} 
+	        item.put("value", entry.getValue()); 
+	        result.add(item);
+	    }
+	    return result;
 	}
 
 }

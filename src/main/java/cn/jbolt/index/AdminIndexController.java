@@ -1,7 +1,12 @@
 package cn.jbolt.index;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpSession;
+
+import com.alibaba.fastjson.JSON;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
@@ -14,6 +19,7 @@ import cn.jbolt._admin.globalconfig.GlobalConfigService;
 import cn.jbolt._admin.onlineuser.OnlineUserService;
 import cn.jbolt._admin.topnav.TopnavService;
 import cn.jbolt._admin.user.UserService;
+import cn.jbolt.admin.siargo.qarep.QareportService;
 import cn.jbolt.core.base.JBoltGlobalConfigKey;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.base.config.JBoltConfig;
@@ -51,6 +57,8 @@ public class AdminIndexController extends JBoltBaseController {
 	private TopnavService topnavService;
 	@Inject
 	private OnlineUserService onlineUserService;
+	@Inject
+	private QareportService qareportservice;
 	@UnCheck
 	@Before(JBoltNoUrlPara.class)
 	public void index(){
@@ -85,8 +93,17 @@ public class AdminIndexController extends JBoltBaseController {
 	@CheckPermission("dashboard")
 	@UnCheckIfSystemAdmin
 	public void dashboard(){
+		Map<String, String> map = new HashMap<>();
 		
-		
+		map.put("currentMonthTotal", String.format("%,d", qareportservice.getTotalSubmittedForInspected(0))+"/"+String.format("%,d", qareportservice.getTotalInspected(0)));
+		map.put("cTotal", String.format("%,d", qareportservice.getTotalSubmittedForInspected(1))+"/"+String.format("%,d", qareportservice.getTotalInspected(1)));
+		map.put("xTotal", String.format("%,d", qareportservice.getTotalSubmittedForInspected(2))+"/"+String.format("%,d", qareportservice.getTotalInspected(2)));
+		map.put("dTotal", String.format("%,d", qareportservice.getTotalSubmittedForInspected(3))+"/"+String.format("%,d", qareportservice.getTotalInspected(3)));
+
+		set("donutData",qareportservice.getDonutData());
+		set("repalldata",qareportservice.getRepAllData());
+		set("repfixdata",qareportservice.getRepData());
+		set("dashboard",map);
 		render("dashboard.html");
 	}
 
