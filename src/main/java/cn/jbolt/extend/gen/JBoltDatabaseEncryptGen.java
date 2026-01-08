@@ -10,7 +10,7 @@ public class JBoltDatabaseEncryptGen {
         //数据库原用户名
         String user = "root";
         //数据库原密码
-        String password = "root";
+        String password = "siargo";
         System.out.println("==========加密后数据输出==========");
         //密文生成
         String newUser = JBoltDesUtil.getEncryptData(user);

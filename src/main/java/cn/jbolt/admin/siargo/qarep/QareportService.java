@@ -4,6 +4,7 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
+import cn.jbolt.common.util.DateUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -355,29 +356,30 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	
 	public List<Map<String, Object>> getRepData() {
-	    String sql = "SELECT DATE_FORMAT( sq.create_time, '%Y-%m' ) AS FORMATMONTH, "
-	    		+ "COUNT( sq.id ) AS count "
+	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, "
+	    		+ "COUNT(DISTINCT sp.report_id) AS count "
 	    		+ "FROM siargo_qareport sq "
 	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
 	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
 	    		+ "AND sp.vd = 1 AND sq.rep_type = 2 "
-	    		+ "GROUP BY DATE_FORMAT( sq.create_time, '%Y-%m' ) "
-	    		+ "ORDER BY FORMATMONTH " ; 
+	    		+ "GROUP BY MONTH "
+	    		+ "ORDER BY MONTH " ; 
 
 	    List<Record> records = Db.find(sql);
 	    
 	    // 转换为月份为key的Map
-	    Map<String, Integer> monthData = new LinkedHashMap<>();
+	    Map<Integer, Integer> monthData = new LinkedHashMap<>();
 	    for (Record record : records) {
-	        monthData.put(record.getStr("FORMATMONTH"), record.getInt("count"));
+	        monthData.put(record.getInt("MONTH"), record.getInt("count"));
 	    }
 	    
 	    // 生成1-12月的完整数据，使用LinkedHashMap保持特定顺序
 	    List<Map<String, Object>> result = new ArrayList<>();
-	    for (Map.Entry<String, Integer> entry : monthData.entrySet()) {
+	    for (int month = 1; month <= 12; month++) {
+	    	String monthKey = String.format("%s-%02d", String.valueOf(java.time.Year.now().getValue()), month);
 	        Map<String, Object> item = new LinkedHashMap<>();
-	        item.put("x", entry.getKey() );  
-	        item.put("a", entry.getValue()); 
+	        item.put("x", monthKey); 
+	        item.put("a", monthData.getOrDefault(month, 0)); 
 	        result.add(item);
 	    }
 	    return result;
@@ -390,7 +392,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	
 	public List<Map<String, Object>> getRepAllData() {
-	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, COUNT( sp.id ) AS count "
+	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, COUNT(DISTINCT sp.report_id) AS count "
 	    		+ "FROM siargo_qareport sq "
 	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
 	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
@@ -420,7 +422,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	
 	public List<Map<String, Object>> getDonutData() {
-	    String sql = "SELECT sp.type AS type, COUNT( sp.id ) AS count "
+	    String sql = "SELECT sp.type AS type, COUNT(DISTINCT sp.report_id) AS count "
 	    		+ "FROM siargo_product sp "
 	    		+ "LEFT JOIN siargo_qareport sq ON sq.id = sp.report_id "
 	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "

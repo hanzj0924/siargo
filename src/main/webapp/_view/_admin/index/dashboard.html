@@ -11,7 +11,6 @@
 							<span class="float-left"><i class="jbicon jb-zhiliangrenwu j_font_30 j_left_fa text-primary rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24" id="currentMonthTotal">#(dashboard.currentMonthTotal ??)</span>
-								<span class="d-block">送检数量/检验数量</span>
 								<span class="d-block">本月送检总量/只</span>
 							</div>
 						</div>
@@ -23,7 +22,6 @@
 							<span class="float-left"><i class="jbicon jb-zhiliangbz j_font_30 j_left_fa text-success rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24">#(dashboard.cTotal ??)</span>
-								<span class="d-block">送检数量/检验数量</span>
 								<span class="d-block">本月传感器总量/只</span>
 							</div>
 						</div>
@@ -36,7 +34,6 @@
 							<span class="float-left"><i class="jbicon jb-suyuanzhijianbz j_font_30 j_left_fa text-info rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24">#(dashboard.xTotal ??)</span>
-								<span class="d-block">送检数量/检验检验数量</span>
 								<span class="d-block">本月小流量总量/只</span>
 							</div>
 						</div>
@@ -48,7 +45,6 @@
 							<span class="float-left"><i class="jbicon jb-zlgl j_font_30 j_left_fa text-danger rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24">#(dashboard.dTotal ??)</span>
-								<span class="d-block">送检数量/检验数量</span>
 								<span class="d-block">本月大流量总量/只</span>
 							</div>
 						</div>
@@ -60,7 +56,7 @@
 			<div class="row mt-2">
 				<div class="col-lg-12 col-sm-12 px-2">
 					<div class="card border-0  mb-2">
-						<div class="card-body" style="height:430px">
+						<div class="card-body" style="height:400px">
 							<h5 class="card-title"><span>今年订单量</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
 							<div id="morris-bar_#(pageId)" style="height:90%;"></div>
 						</div>
@@ -72,7 +68,7 @@
 			<div class="row mt-2">
 					<div class="col-lg-9 col-sm-12 px-2">
 						<div class="card border-0  mb-2">
-							<div class="card-body" style="height:350px">
+							<div class="card-body" style="height:300px">
 								<h5 class="card-title"><span>今年返修单量</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
 								<div id="morris-line_#(pageId)" style="height:90%;"></div>
 							</div>
@@ -80,7 +76,7 @@
 					</div>
 					<div class="col-lg-3 col-md-12 px-2">
 					<div class="card border-0  mb-2">
-						<div class="card-body"  style="height:350px">
+						<div class="card-body"  style="height:300px">
 							<h5 class="card-title"><span>今年订单来源</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
 								<div id="morris-donut_#(pageId)" style="height:90%"></div>
 						</div>

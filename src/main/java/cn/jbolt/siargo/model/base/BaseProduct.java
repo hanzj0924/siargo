@@ -64,7 +64,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String CUC = "cuc";
     /**整机电流24v*/
     public static final String CUCMAX = "cucmax";
-    /**整机电流8v*/
+    /**整机电流8v/12*/
     public static final String CUCMIN = "cucmin";
     /**脉冲电压(Pulse Voltage)*/
     public static final String PV = "pv";
@@ -469,7 +469,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流8v
 	 */
-	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流8v", required=false, maxLength=5, fixed=2, order=25)
+	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流8/12v", required=false, maxLength=5, fixed=2, order=25)
 	public java.lang.Double getCucmin() {
 		return getDouble("cucmin");
 	}
