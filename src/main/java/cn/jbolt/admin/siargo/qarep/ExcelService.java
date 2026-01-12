@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,22 +164,24 @@ public class ExcelService {
             return result;
         }
         
-        // 1. 提取订单号（取第一个数据的订单号）
+        // 提取订单号（取第一个数据的订单号）
         String orderId = (String) dataList.get(0).get("订单号");
         result.put("orderId", orderId != null ? orderId : "");
         
-        // 2. 提取型号并去重
-        Set<String> modelSet = dataList.stream()
-            .map(row -> (String) row.get("型号"))
-            .filter(model -> model != null && !model.trim().isEmpty())
-            .collect(Collectors.toSet());
+        // 提取型号并去重，保持原表格中的顺序
+        Set<String> modelSet = new LinkedHashSet<>();
+        for (Map<String, Object> row : dataList) {
+            String model = (String) row.get("型号");
+            if (model != null && !model.trim().isEmpty()) {
+                modelSet.add(model);
+            }
+        }
         
         String models = String.join(",", modelSet);
         result.put("modles", models);
         
-        // 3. 提取编号，并按型号分组
+        // 提取编号，并按型号分组，保持原顺序
         Map<String, List<String>> modelNumbersMap = new LinkedHashMap<>();
-        
         for (Map<String, Object> row : dataList) {
             String model = (String) row.get("型号");
             String number = (String) row.get("编号");
@@ -188,7 +191,7 @@ public class ExcelService {
             }
         }
         
-        // 4. 构建编号字符串（格式：开始编号-结束编号）
+        // 构建编号字符串（格式：开始编号-结束编号）
         List<String> numberRanges = new ArrayList<>();
         List<String> quantities = new ArrayList<>();
         
@@ -196,10 +199,7 @@ public class ExcelService {
             List<String> numbers = entry.getValue();
             
             if (!numbers.isEmpty()) {
-                // 对编号进行排序（假设编号是连续的）
-                numbers.sort(String::compareTo);
-                
-                // 获取起始编号和结束编号
+                // 不需要重新排序，保持原顺序
                 String startNumber = numbers.get(0);
                 String endNumber = numbers.get(numbers.size() - 1);
                 
@@ -216,7 +216,7 @@ public class ExcelService {
             }
         }
         
-        // 5. 构建返回结果
+        // 构建返回结果
         String numbers = String.join(",", numberRanges);
         String qsis = String.join(",", quantities);
         

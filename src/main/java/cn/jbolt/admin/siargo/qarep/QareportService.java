@@ -323,7 +323,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * @param proType
 	 * @return
 	 */
-	public Long getTotalSubmittedForInspected(int proType) {
+	public Long getTotalQSI(int proType) {
 		String sql = "SELECT SUM( sp.qsi ) AS qsi_Total "
 				+ "FROM siargo_product sp "
 				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
@@ -342,7 +342,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * @param proType
 	 * @return
 	 */
-	public Long getTotalInspected(int proType) {
+	public Long getTotalQI(int proType) {
 		String sql = "SELECT SUM( sp.qi ) AS qi_Total "
 				+ "FROM siargo_product sp "
 				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "

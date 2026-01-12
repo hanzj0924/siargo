@@ -31,7 +31,7 @@ public class PDFService {
 		// 查询数据
 		Qareport report = qaservice.qareportFindByProId(id);
 		if (report == null) {
-			throw new RuntimeException("未找到对应报告数据");
+			throw new RuntimeException("未找到对应报告单数据");
 		}
 		
 		// 初始化数据
@@ -50,11 +50,11 @@ public class PDFService {
         String outputFileName = webRootPath + "/"+ pdfsrc + folderVer +"/" + report.getOrderId().toString() + "_" + id.toString() + ".pdf";
         // 获取完整模板路径
         String inputFileName = getInputFile(webRootPath,prodType,pdfver,proModle,folderVer);
-		
-        //模板是否存在
+        
+        //模板文件夹是否存在
     	File inputPdfFolder = new File(inputFileName);
 		if (!inputPdfFolder.exists()) {
-			throw new RuntimeException("未找到对应模板！请联系管理员。");
+			inputPdfFolder.mkdirs();
 		}
         
         //PDF文件夹是否存在
@@ -102,7 +102,7 @@ public class PDFService {
             BaseFont bf = BaseFont.createFont(webRootPath + "/assets/fonts/SIMSUN.TTC,0", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
             form.addSubstitutionFont(bf);
             
-            // 查询数据
+            // 映射数据
             Map<String, String> dataMap = buildDataMap(report);
             
             // 遍历data 给pdf表单表格赋值
@@ -154,16 +154,16 @@ public class PDFService {
 		map.put("sp_number", report.getStr("sp_number"));
 		map.put("accq_name", report.getStr("accq_name"));
 		map.put("accq_time", report.getStr("accq_time"));
-		map.put("accq_email", report.getStr("accq_email"));
+		map.put("accq_email", report.getStr("accq_email") == null? "" : report.getStr("accq_email"));
 		map.put("funq_name", report.getStr("funq_name"));
 		map.put("funq_time", report.getStr("funq_time"));
-		map.put("funq_email", report.getStr("accq_email"));
+		map.put("funq_email", report.getStr("funq_email") == null? "" : report.getStr("funq_email"));
 		map.put("appq_name", report.getStr("appq_name"));
 		map.put("appq_time", report.getStr("appq_time"));
-		map.put("appq_email", report.getStr("accq_email"));
+		map.put("appq_email", report.getStr("appq_email") == null? "" : report.getStr("appq_email"));
 		map.put("allq_name", report.getStr("allq_name"));
 		map.put("allq_time", report.getStr("allq_time"));
-		map.put("allq_email", report.getStr("accq_email"));
+		map.put("allq_email", report.getStr("allq_email") == null? "" : report.getStr("allq_email"));
 		
 		//检验项目 小流量
 		if (report.getStr("prod_type").equals("2")) {
@@ -185,16 +185,15 @@ public class PDFService {
 		} 
 		//大流量
 		else if (report.getStr("prod_type").equals("3")) {
-			map.put("flow_range", report.getStr("sp_flow_range_name"));
+			map.put("flow_range", report.getStr("sp_flow_range_name")  == null? "" : report.getStr("sp_flow_range_name"));
 			
 			if (proModle.contains("GD")) {
-				map.put("cucmin", report.getStr("sp_cucmin"));
+				map.put("cuc", report.getStr("sp_cuc"));
 				map.put("thv", report.getStr("sp_thv"));
 				map.put("zp", report.getStr("sp_zp"));
 				map.put("fl", report.getStr("sp_fl"));
-			} 
-			
-			if (proModle.contains("FD-E")) {
+				
+			}if (proModle.contains("FD-E")) {
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
 				map.put("pv", report.getStr("sp_pv"));
@@ -204,7 +203,7 @@ public class PDFService {
 				map.put("zp", report.getStr("sp_zp"));
 				map.put("fl", "/");
 				map.put("bv", "/");
-			
+				
 			}else if (proModle.contains("FD-D"))  { 
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
@@ -217,7 +216,6 @@ public class PDFService {
 				map.put("bv", report.getStr("sp_bv"));
 			} 
 		}
-		
 		return map;
 	}
 
@@ -238,8 +236,9 @@ public class PDFService {
 	         case "4":
 	        	 break;
 	         default:
-	        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+	        	 throw new RuntimeException("未找到传感器对应版号模板，请联系开发者");
 	      }
+			
 		}else if(prodType.equals("2")){
 			
 			if (proModle.contains("MFC") || proModle.contains("BC")) {
@@ -252,7 +251,7 @@ public class PDFService {
 		         case "4":
 		        	 break;
 		         default:
-		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		        	 throw new RuntimeException("未找到控制器对应版号模板，请联系开发者");
 		      }
 			} else {
 				switch(pdfver){
@@ -264,10 +263,9 @@ public class PDFService {
 		         case "4":
 		        	 break;
 		         default:
-		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		        	 throw new RuntimeException("未找到小流量对应版号模板，请联系开发者");
 		      }
 			}
-			
 			
 		}else if(prodType.equals("3")){
 			
@@ -281,8 +279,9 @@ public class PDFService {
 		         case "4":
 		        	 break;
 		         default:
-		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		        	 throw new RuntimeException("未找到中低压对应版号模板，请联系开发者");
 		      }
+				
 			}else if (proModle.contains("FD")) {
 				switch(pdfver){
 		         case "2":
@@ -293,15 +292,15 @@ public class PDFService {
 		         case "4":
 		        	 break;
 		         default:
-		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		        	 throw new RuntimeException("未找到工业表对应版号模板，请联系开发者");
 		      }
+				
 			}else {
 				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModle);
 			}
 		}else {
 			throw new RuntimeException("未找到对应模板，请联系开发者");
 		}
-		
 		return inputFileName;
 	}
 	

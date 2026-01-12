@@ -64,7 +64,7 @@ public class QareportAdminController extends JBoltBaseController {
      */
     public void importExcel() {
         try {
-            // 1. 获取上传的文件
+            // 获取上传的文件
             UploadFile uploadFile = getFile();
             if(notExcel(uploadFile)){
     			renderJsonFail("请上传excel文件");
@@ -73,7 +73,7 @@ public class QareportAdminController extends JBoltBaseController {
             
             File excelFile = uploadFile.getFile();
             
-            // 2. 读取Excel文件
+            // 读取Excel文件
             List<Map<String, Object>> dataList = excelservice.readExcel(excelFile);
             
             if (dataList == null || dataList.isEmpty()) {
@@ -81,10 +81,10 @@ public class QareportAdminController extends JBoltBaseController {
                 return;
             }
             
-            // 3. 处理数据，提取所需信息
+            // 处理数据，提取所需信息
             Map<String, Object> result = excelservice.processExcelData(dataList);
             
-            // 4. 返回处理结果
+            // 返回处理结果
             result.put("success", true);
             renderJsonData(result);
             
@@ -100,11 +100,6 @@ public class QareportAdminController extends JBoltBaseController {
 	 * 生成PDF
 	 */
 	public void toPdf() throws Exception {
-		// PDF禁止缓存
-	    getResponse().setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-	    getResponse().setHeader("Pragma", "no-cache");
-	    getResponse().setDateHeader("Expires", 0);
-	    
 	    String pdfsrc = "PDF";
 		String idsJson = getPara("ids");
 	    List<Long> ids = Arrays.stream(idsJson.split(","))
@@ -283,7 +278,7 @@ public class QareportAdminController extends JBoltBaseController {
     	Product product = getModel(Product.class, "product");
     	
     	if (product.getFlowRange() == null && product.getType() == 3) {
-			renderFail("流量范围未输入！");
+			renderFail("请输入流量范围！");
 			return;
 		}
     	if (product.getCuc() != null && (product.getCuc() < 6 || product.getCuc() > 25)) {
@@ -314,11 +309,11 @@ public class QareportAdminController extends JBoltBaseController {
 			renderFail("电池电压3.2505V-3.3495V，请重新输入！");
 			return;
 		}
-		if (product.getLa() != null && product.getLa() < 50) {
+		if (product.getLa() != null && product.getLa() > 50) {
 			renderFail("本地地址超过50，请重新输入！");
 			return;
 		}
-		if (product.getThv() != null && product.getThv() <= 1690) {
+		if (product.getThv() != null && product.getThv() > 1690) {
 			renderFail("热头电压1690，请重新输入！");
 			return;
 		}

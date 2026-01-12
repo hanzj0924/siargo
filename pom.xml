@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>cn.siago</groupId>
-	<artifactId>siago</artifactId>
-	<version>5.4.5</version>
+	<groupId>cn.siargo</groupId>
+	<artifactId>siargo</artifactId>
+	<version>1.5.25</version>
 	<packaging>jar</packaging>
-	<name>siago</name>
-	<description>siago qc</description>
+	<name>siargo</name>
+	<description>siargo</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -293,7 +295,8 @@
 			<version>${undertow_core.version}</version>
 		</dependency>
 
-		<!-- 避免控制台输出如下提示信息： SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+		<!-- 避免控制台输出如下提示信息： SLF4J: Failed to load class
+		"org.slf4j.impl.StaticLoggerBinder".
 			项目中实际上用不到这个 jar 包 注意：eclipse 下可以将 scope 设置为 provided -->
 
 		<!--slf4j及log4j日志-->
@@ -333,7 +336,8 @@
 			<version>${log4j2.version}</version>
 		</dependency>
 		<!--用于解决web环境下关闭服务器时可能出现的log4j线程无法及时关闭的warn，web工程需要包含log4j-web，非web工程不需要 -->
-		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-web -->
+		<!--
+		https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-web -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-web</artifactId>
@@ -349,8 +353,6 @@
 		    <scope>runtime</scope>
 		    <version>3.4.2</version>
 		</dependency> -->
-
-
 
 
 		<!--自选库 -->
@@ -372,9 +374,9 @@
 
 		<!-- caffeine 缓存 -->
 		<dependency>
-		   <groupId>com.github.ben-manes.caffeine</groupId>
-		   <artifactId>caffeine</artifactId>
-		   <version>${caffeine.version}</version>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>${caffeine.version}</version>
 		</dependency>
 
 		<!--<dependency>
@@ -558,14 +560,14 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/jbolt_core.jar</systemPath>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.itextpdf</groupId>
-		    <artifactId>itextpdf</artifactId>
-		    <version>${itextpdf.version}</version>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>${itextpdf.version}</version>
 		</dependency>
-		
-		</dependencies>
+
+	</dependencies>
 
 
 	<build>
@@ -584,7 +586,8 @@
 				</configuration>
 			</plugin>
 
-			<!-- jar 包中的配置文件优先级高于 config 目录下的 "同名文件" 因此，打包时需要排除掉 jar 包中来自 src/main/resources
+			<!-- jar 包中的配置文件优先级高于 config 目录下的 "同名文件" 因此，打包时需要排除掉 jar 包中来自
+			src/main/resources
 				目录的 配置文件，否则部署时 config 目录中的同名配置文件不会生效 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -607,7 +610,8 @@
 				</configuration>
 			</plugin>
 
-			<!-- 使用 mvn clean package 打包 更多配置可参考官司方文档：http://maven.apache.org/plugins/maven-assembly-plugin/single-mojo.html -->
+			<!-- 使用 mvn clean package 打包
+			更多配置可参考官司方文档：http://maven.apache.org/plugins/maven-assembly-plugin/single-mojo.html -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -623,7 +627,8 @@
 						<configuration>
 							<!-- 打包生成的文件名 -->
 							<finalName>${project.artifactId}</finalName>
-							<!-- jar 等压缩文件在被打包进入 zip、tar.gz 时是否压缩，设置为 false 可加快打包速度 -->
+							<!-- jar 等压缩文件在被打包进入 zip、tar.gz 时是否压缩，设置为 false
+							可加快打包速度 -->
 							<recompressZippedFiles>false</recompressZippedFiles>
 							<!-- 打包生成的文件是否要追加 release.xml 中定义的 id 值 -->
 							<appendAssemblyId>true</appendAssemblyId>
