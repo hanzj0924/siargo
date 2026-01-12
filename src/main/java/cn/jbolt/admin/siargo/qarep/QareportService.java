@@ -259,7 +259,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		int month = now.getMonthValue();
 		long fornum = year * 100L + month;
 
-		String sql = "SELECT COUNT(*) FROM `siargo_qareport` sq WHERE DATE_FORMAT(sq.create_time, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')";
+		String sql = "SELECT COUNT(sq.id) FROM `siargo_qareport` sq WHERE DATE_FORMAT(sq.create_time, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')";
 
 		return fornum * 1000 + Db.queryLong(sql) + 1;
 	}
