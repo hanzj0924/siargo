@@ -105,13 +105,14 @@ public class QareportAdminController extends JBoltBaseController {
 	    getResponse().setHeader("Pragma", "no-cache");
 	    getResponse().setDateHeader("Expires", 0);
 	    
+	    String pdfsrc = "PDF";
 		String idsJson = getPara("ids");
 	    List<Long> ids = Arrays.stream(idsJson.split(","))
 	            .map(String::trim)
 	            .map(Long::parseLong)
 	            .collect(Collectors.toList());
 	    for (int i =0; i < ids.size() ; i++) {
-	    	pdfservice.generateReportPdf(ids.get(i),"PDF");
+	    	pdfservice.generateReportPdf(ids.get(i),pdfsrc);
         }
 			
 	    renderJsonSuccess();
@@ -280,6 +281,47 @@ public class QareportAdminController extends JBoltBaseController {
     	
     	Qareport qareport = getModel(Qareport.class, "qareport");
     	Product product = getModel(Product.class, "product");
+    	
+    	if (product.getFlowRange() == null && product.getType() == 3) {
+			renderFail("流量范围未输入！");
+			return;
+		}
+    	if (product.getCuc() != null && (product.getCuc() < 6 || product.getCuc() > 25)) {
+			renderFail("整机最大电流6-24mA，请重新输入！");
+			return;
+		}
+		if (product.getCucmin() != null && product.getCucmin() > 31) {
+			renderFail("整机电流超过30mA，请重新输入！");
+			return;
+		}
+		if (product.getCucmax() != null && product.getCucmax() > 21) {
+			renderFail("整机电流超过20mA，请重新输入！");
+			return;
+		}
+		if (product.getPv() != null && product.getPv() > 4.75) {
+			renderFail("脉冲电压超过4.75V，请重新输入！");
+			return;
+		}
+		if (product.getZp() != null && product.getZp() > 30) {
+			renderFail("零点内码超过30，请重新输入！");
+			return;
+		}
+		if (product.getFl() != null && product.getFl() > 2.7) {
+			renderFail("故障电平超过2.7V，请重新输入！");
+			return;
+		}
+		if (product.getBv() != null && (product.getBv() > 3.3495 || product.getBv() < 3.2505)) {
+			renderFail("电池电压3.2505V-3.3495V，请重新输入！");
+			return;
+		}
+		if (product.getLa() != null && product.getLa() < 50) {
+			renderFail("本地地址超过50，请重新输入！");
+			return;
+		}
+		if (product.getThv() != null && product.getThv() <= 1690) {
+			renderFail("热头电压1690，请重新输入！");
+			return;
+		}
 
     	for (; i < modles.size() && i < numbers.size(); i++) {
     		
@@ -287,6 +329,7 @@ public class QareportAdminController extends JBoltBaseController {
     			renderFail("送检数量小于检验数量，重新输入！");
     			return;
     		}
+    		
     		product.setQi(qis.get(i));
     		product.setQsi(qsis.get(i));
     		product.setModle(modles.get(i));

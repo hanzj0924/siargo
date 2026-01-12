@@ -31,18 +31,17 @@
 						<label class="col-sm-3 col-form-label">报告单类型</label>
 						<div class="col input-group">
 							<select class="form-control" data-autoload
-								name="qareport.repType"
+								name="qareport.repType"  style="width:130px;"
 								data-url="admin/siargo/qarep/getDict?keywords=rep_type"
 								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
 								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-select="#(qareport.repType ??)">
 							</select>
 						</div>
-						
 						<label class="col-sm-3 col-form-label">报告单版号</label>
-						<div class="col input-group">
+						<div class="col input-group" >
 							<select class="form-control" data-autoload
-								name="product.pdfver"
+								name="product.pdfver" 
 								data-url="admin/siargo/qarep/getDict?keywords=pdfver"
 								data-rule="select" data-tips="请选择版号" 
 								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
@@ -87,20 +86,28 @@
 							</select>
 						</div>
 					</div>
-					
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流</label>
+						<label class="col-sm-3 col-form-label">整机最大电流 8v</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="number"
-								class="form-control" placeholder="请输入整机电流" maxlength="10"
+								data-notnull="false" data-rule="siargo_tofixed_2"
+								class="form-control" placeholder="整机最大电流 8v(6-24mA)" maxlength="5"
 								name="product.cuc" value="#(qareport.spCuc??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">故障电平</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								data-notnull="false" data-rule="siargo_tofixed_2"
+								class="form-control" placeholder="请输入故障电平(≧2.7V)" maxlength="5"
+								name="product.fl" value="#(qareport.spFl??)" />
 						</div>
 					</div>
 					
 				</div>
 				<div class="col">
-					<div class="text-right" style="padding-bottom:0.1em;" >
+					<div class="text-right" style="padding-bottom:0.5em;margin-bottom: 0.5em;" >
 					<!--  data-confirm="确认导入数据？" -->
 						<div class="j_upload_file_box" 
 						data-name="file" 
@@ -117,36 +124,44 @@
 						<label class="col-sm-3 col-form-label">整机电流 24v</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off" 
-								data-notnull="false"  data-rule="number"
-								class="form-control" placeholder="请输入整机电流 24v" maxlength="10" 
+								data-notnull="false"  data-rule="siargo_tofixed_2"
+								class="form-control" placeholder="请输入整机电流 24v(≤0.5mA/10~20mA)" maxlength="5" 
 								name="product.cucmax" value="#(qareport.spCucmax??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流 8/12v</label>
+						<label class="col-sm-3 col-form-label">整机电流 12v</label>
 						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="number"
-								class="form-control" placeholder="请输入整机电流 8/12v" maxlength="10"
+							<input type="number" data-with-clearbtn="true" autocomplete="off"
+								data-notnull="false" data-rule="siargo_tofixed_2"
+								class="form-control" placeholder="请输入整机电流 12v(≤0.5mA/10~30mA)" maxlength="5"
 								name="product.cucmin" value="#(qareport.spCucimin??)" />
 						</div>
 					</div>
-
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">脉冲电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="number"
-								class="form-control" placeholder="请输入脉冲电压" maxlength="10"
-								name="product.pv" value="#(qareport.spPv	??)" />
+								data-notnull="false" data-rule="siargo_tofixed_2"
+								class="form-control" placeholder="请输入脉冲电压(≧2.7V/≧4.75V)" maxlength="5"
+								name="product.pv" value="#(qareport.spPv??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">本地地址</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								data-notnull="false"  data-rule="pint"
+								class="form-control" placeholder="请输入本地地址(≤50)" maxlength="2"
+								name="product.la" value="#(qareport.spLa??)" />
 						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">热头电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="number"
-								class="form-control" placeholder="请输入热头电压" maxlength="10"
+								data-notnull="false" data-rule="pint"
+								class="form-control" placeholder="请输入热头电压(≤1690)" maxlength="4"
 								name="product.thv" value="#(qareport.spThv??)" />
 						</div>
 					</div>
@@ -154,20 +169,21 @@
 						<label class="col-sm-3 col-form-label">零点内码</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="number"
-								class="form-control" placeholder="请输入零点内码" maxlength="10"
+								data-notnull="false" data-rule="pint"
+								class="form-control" placeholder="请输入零点内码(≤30)" maxlength="2"
 								name="product.zp" value="#(qareport.spZp??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">故障电平</label>
+						<label class="col-sm-3 col-form-label">电池电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="number"
-								class="form-control" placeholder="请输入故障电平" maxlength="10"
-								name="product.fl" value="#(qareport.spFl??)" />
+								data-notnull="false"  data-rule="siargo_tofixed_4"
+								class="form-control" placeholder="请输入电池电压(3.2505-3.3495V)" maxlength="6"
+								name="product.bv" value="#(qareport.spBv??)" />
 						</div>
 					</div>
+					
 				</div>
 			</div>
 			<div class="row">
@@ -197,7 +213,6 @@
 								data-rule="required" placeholder="如果多型号,英文逗号分割"
 								data-tips="请输入型号,如果多型号,英文逗号分割" maxlength="500" name="modles"
 								data-with-clearbtn="true"></textarea>
-
 						</div>
 					</div>
 					<div class="form-group row">

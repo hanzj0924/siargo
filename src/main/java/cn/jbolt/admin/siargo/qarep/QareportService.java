@@ -4,18 +4,14 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
-import cn.jbolt.common.util.DateUtil;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Db;
@@ -61,8 +57,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						"sp.id as spid", "sp.modle as sp_modle", "sp.number as sp_number", "sp.type as sp_type",
 						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.flow_range as sp_flow_range", "sp.des as sp_des", 
-						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", "sp.thv as sp_thv", 
-						"sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", "sp.cucmin as sp_cucmin")
+						"sp.pdfstr AS sp_pdfstr", "CONCAT(sp.pdfstr, '?t=', UNIX_TIMESTAMP()) as sp_pdfstrtime", 
+						"sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", "sp.thv as sp_thv", 
+						"sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", "sp.cucmin as sp_cucmin",
+						"sp.bv as sp_bv", "sp.la as sp_la"
+						)
 				.page(pageNumber, pageSize).from("siargo_qareport", "sq")
 				.leftJoin("siargo_product", "sp", "sq.id = sp.report_id")
 				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
@@ -142,6 +141,8 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			pro.set("thv", product.getThv());
 			pro.set("zp", product.getZp());
 			pro.set("fl", product.getFl());
+			pro.set("bv", product.getBv());
+			pro.set("la", product.getLa());
 			pro.set("vd", 1);
 			prodsuccess = pro.save();
 
@@ -167,16 +168,19 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  sp.insp,\n" + "  DATE_FORMAT(sp.accq_time, '%Y-%m-%d %H:%i') AS accq_time,\n"
 				+ "  DATE_FORMAT(sp.funq_time, '%Y-%m-%d %H:%i') AS funq_time,\n"
 				+ "  DATE_FORMAT(sp.appq_time, '%Y-%m-%d %H:%i') AS appq_time,\n"
-				+ "  DATE_FORMAT(sp.allq_time, '%Y-%m-%d %H:%i') AS allq_time,\n" + "  accq_user.NAME AS accq_name,\n"
-				+ "  funq_user.NAME AS funq_name,\n" + "  appq_user.NAME AS appq_name,\n"
-				+ "  allq_user.NAME AS allq_name,\n"
+				+ "  DATE_FORMAT(sp.allq_time, '%Y-%m-%d %H:%i') AS allq_time,\n" 
+				+ "  accq_user.NAME AS accq_name,\n funq_user.NAME AS funq_name,\n" 
+				+ "  appq_user.NAME AS appq_name,\n allq_user.NAME AS allq_name,\n"
+				+ "  accq_user.email AS accq_email,\n funq_user.email AS funq_email,\n" 
+				+ "  appq_user.email AS appq_email,\n allq_user.email AS allq_email,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') AS create_time,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y.%m.%d') AS c_time,\n" + "  sp.id AS spid,\n"
 				+ "  sp.modle AS sp_modle,\n" + "  sp.number AS sp_number,\n" + "  sp.type AS sp_type,\n"
 				+ "  sp.qsi AS sp_qsi,\n" + "  sp.qi AS sp_qi,\n" + "  sp.flow_range AS sp_flow_range,\n"
 				+ "  sp.des AS sp_des,\n" + "  sp.pdfstr AS sp_pdfstr,\n" + " sp.pdfver AS sp_pdfver,\n" + "  sp.cuc AS sp_cuc,\n" 
 				+ "  sp.pv AS sp_pv,\n" + "  sp.thv AS sp_thv,\n" + "  sp.zp AS sp_zp,\n" + "  sp.fl AS sp_fl,\n" 
-				+ "  sp.cucmax AS sp_cucmax,\n" + "  sp.cucmin AS sp_cucmin,\n"+ "  sd.`VALUE` AS sp_flow_range_name\n"
+				+ "  sp.cucmax AS sp_cucmax,\n" + "  sp.cucmin AS sp_cucmin,\n"+ "  sd.`VALUE` AS sp_flow_range_name,\n "
+				+ "	 sp.bv AS sp_bv,\n"+ "  sp.la AS sp_la\n" 
 				+ "  FROM\n" + "  `siargo_qareport` sq\n"
 				+ "  LEFT JOIN `siargo_product` AS sp ON sq.id = sp.report_id\n"
 				+ "  LEFT JOIN `siargo_customer` AS sc ON sc.id = sq.cust_id\n"

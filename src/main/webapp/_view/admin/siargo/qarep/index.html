@@ -360,7 +360,7 @@
 		无
 	{@else}
 		<a data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
-		href="${data.spPdfstr}"><i class="fa fa-eye"></i> 查看</a> 
+		href="${data.spPdfstrtime}"><i class="fa fa-eye"></i> 查看</a> 
 	{@/if}
 	
 </td>
@@ -420,12 +420,6 @@
 					data-url="admin/siargo/qarep/add"
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
-				</button>
-				<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
-					data-check-handler="jboltTableGetCheckedIds"
-					data-url="admin/siargo/qarep/deleteByIds?ids="
-					data-confirm="确定删除选中数据？" class="btn btn-outline-danger ">
-					<i class="fa fa-trash"></i> 删除
 				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-info ">
@@ -904,6 +898,17 @@
 <script type="text/javascript">
 function afterAJaxCallback(res){
 	AjaxPortalUtil.refresh(portal);
+}
+
+function loadPDF() {
+    const timestamp = new Date().getTime();
+    const pdfUrl = `/PDF/G2/1_2010554967707762689.pdf?t=${timestamp}`;
+    
+    // 如果是iframe嵌入
+    document.getElementById('pdfFrame').src = pdfUrl;
+    
+    // 或者直接打开
+    window.open(pdfUrl, '_blank');
 }
 
 </script>

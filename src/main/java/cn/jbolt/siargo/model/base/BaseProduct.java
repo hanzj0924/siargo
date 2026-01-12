@@ -33,12 +33,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String DELETE_TIME = "delete_time";
     /**有效数据(valid data)*/
     public static final String VD = "vd";
-    /**检验进度(Inspection Progress)：
-	1未开始检验, 
-	2精度合格, 
-	3功能合格, 
-	4外观合格, 
-	5全部合格*/
+    /**检验进度(Inspection Progress)： 1未开始检验, 2精度合格, 3功能合格, 4外观合格, 5全部合格*/
     public static final String INSP = "insp";
     /**精度检验日期(Accuracy qualified)*/
     public static final String ACCQ_TIME = "accq_time";
@@ -74,6 +69,12 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String ZP = "zp";
     /**故障电平(Fault Level)*/
     public static final String FL = "fl";
+    /**电池电压(Battery Voltage)*/
+    public static final String BV = "bv";
+    /**本地地址(Local Address)*/
+    public static final String LA = "la";
+    
+    
 	/**
 	 * 产品ID
 	 */
@@ -437,7 +438,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流 (Complete Unit Current)
 	 */
-	@JBoltField(name="cuc" ,columnName="cuc",type="Double", remark="整机电流 (Complete Unit Current)", required=false, maxLength=5, fixed=2, order=23)
+	@JBoltField(name="cuc" ,columnName="cuc",type="Double", remark="整机电流 (Complete Unit Current)", required=false, maxLength=4, fixed=2, order=23)
 	public java.lang.Double getCuc() {
 		return getDouble("cuc");
 	}
@@ -453,7 +454,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流24v
 	 */
-	@JBoltField(name="cucmax" ,columnName="cucmax",type="Double", remark="整机电流24v", required=false, maxLength=5, fixed=2, order=24)
+	@JBoltField(name="cucmax" ,columnName="cucmax",type="Double", remark="整机电流24v", required=false, maxLength=4, fixed=2, order=24)
 	public java.lang.Double getCucmax() {
 		return getDouble("cucmax");
 	}
@@ -469,7 +470,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流8v
 	 */
-	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流8/12v", required=false, maxLength=5, fixed=2, order=25)
+	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流8/12v", required=false, maxLength=4, fixed=2, order=25)
 	public java.lang.Double getCucmin() {
 		return getDouble("cucmin");
 	}
@@ -485,7 +486,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 脉冲电压(Pulse Voltage)
 	 */
-	@JBoltField(name="pv" ,columnName="pv",type="Double", remark="脉冲电压(Pulse Voltage)", required=false, maxLength=5, fixed=2, order=26)
+	@JBoltField(name="pv" ,columnName="pv",type="Double", remark="脉冲电压(Pulse Voltage)", required=false, maxLength=4, fixed=2, order=26)
 	public java.lang.Double getPv() {
 		return getDouble("pv");
 	}
@@ -493,7 +494,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 热头电压(Thermal Head Voltage)
 	 */
-	public M setThv(java.lang.Double thv) {
+	public M setThv(java.lang.Integer thv) {
 		set("thv", thv);
 		return (M)this;
 	}
@@ -501,15 +502,15 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 热头电压(Thermal Head Voltage)
 	 */
-	@JBoltField(name="thv" ,columnName="thv",type="Double", remark="热头电压(Thermal Head Voltage)", required=false, maxLength=5, fixed=2, order=27)
-	public java.lang.Double getThv() {
-		return getDouble("thv");
+	@JBoltField(name="thv" ,columnName="thv",type="Integer", remark="热头电压(Thermal Head Voltage)", required=false, maxLength=4, fixed=0, order=27)
+	public java.lang.Integer getThv() {
+		return getInt("thv");
 	}
 
 	/**
 	 * 零点内码(Zero Point)
 	 */
-	public M setZp(java.lang.Double zp) {
+	public M setZp(java.lang.Integer zp) {
 		set("zp", zp);
 		return (M)this;
 	}
@@ -517,9 +518,9 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 零点内码(Zero Point)
 	 */
-	@JBoltField(name="zp" ,columnName="zp",type="Double", remark="零点内码(Zero Point)", required=false, maxLength=5, fixed=2, order=28)
-	public java.lang.Double getZp() {
-		return getDouble("zp");
+	@JBoltField(name="zp" ,columnName="zp",type="Integer", remark="零点内码(Zero Point)", required=false, maxLength=2, fixed=0, order=28)
+	public java.lang.Integer getZp() {
+		return getInt("zp");
 	}
 
 	/**
@@ -533,12 +534,42 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 故障电平(Fault Level)
 	 */
-	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=5, fixed=2, order=29)
+	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=4, fixed=2, order=29)
 	public java.lang.Double getFl() {
 		return getDouble("fl");
 	}
 	
+	/**
+	 * 电池电压(Battery Voltage)
+	 */
+	public M setBv(java.lang.Double bv) {
+		set("bv", bv);
+		return (M)this;
+	}
 	
+	/**
+	 * 电池电压(Battery Voltage)
+	 */
+	@JBoltField(name="bv" ,columnName="bv",type="Double", remark="电池电压(Battery Voltage)", required=false, maxLength=5, fixed=4, order=30)
+	public java.lang.Double getBv() {
+		return getDouble("bv");
+	}
+	
+	/**
+	 * 本地地址(Local Address)
+	 */
+	public M setLa(java.lang.Integer la) {
+		set("la", la);
+		return (M)this;
+	}
+	
+	/**
+	 * 本地地址(Local Address)
+	 */
+	@JBoltField(name="la" ,columnName="la",type="Integer", remark="本地地址(Local Address)", required=false, maxLength=2, fixed=0, order=31)
+	public java.lang.Integer getLa() {
+		return getInt("zp");
+	}
 
 }
 

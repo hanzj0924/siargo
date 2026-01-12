@@ -358,6 +358,8 @@
 			{"name":"日期(年-月-日)","sn":"date"},
 			{"name":"时间(时:分:秒)","sn":"time"},
 			{"name":"时间(时:分)","sn":"time_hm"},
+			{"name":"siargo_小数点保留_2位","sn":"siargo_tofixed_2"},
+			{"name":"siargo_小数点保留_3位","sn":"siargo_tofixed_3"},
 			{"name":"金额_两位小数","sn":"money"},
 			{"name":"金额_四位小数","sn":"money_4"},
 			{"name":"手机号","sn":"phone"},

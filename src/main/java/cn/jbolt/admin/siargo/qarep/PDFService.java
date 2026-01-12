@@ -1,24 +1,15 @@
 package cn.jbolt.admin.siargo.qarep;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-
+import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFFooter;
-import org.apache.poi.xwpf.usermodel.XWPFHeader;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-
+import com.itextpdf.text.pdf.AcroFields;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.PathKit;
 
@@ -35,144 +26,116 @@ import cn.jbolt.siargo.model.Qareport;
 public class PDFService {
 	@Inject
 	private QareportService qaservice;
-
-	/**
-	 * 根据 ID 生成 PDF 报告
-	 */
-	public void generateReportPdf(Long id,String src) throws Exception {
-
-		// 1. 查询数据
+	
+	public void generateReportPdf(Long id,String pdfsrc) {
+		// 查询数据
 		Qareport report = qaservice.qareportFindByProId(id);
 		if (report == null) {
 			throw new RuntimeException("未找到对应报告数据");
 		}
 		
-		// pdfver=1
-		String folderG2 = "/G2";
-		
-		
+		// 初始化数据
 		String proModle = report.getStr("sp_modle");
 		String prodType = report.getStr("prod_type");
 		String pdfver = report.getStr("sp_pdfver");
-		
+		OutputStream os = null;
+        PdfStamper ps = null;
+        PdfReader reader = null;
 
-		// 2. 构建替换数据映射
-		Map<String, String> dataMap = buildDataMap(report);
-
-		// 3. 获取 web 根目录，替换 Word 模板
+		// 获取 web 根目录
 		String webRootPath = PathKit.getWebRootPath();
-		String wordTemplatePath = webRootPath + "/reporttemplates";
-
-		if (prodType.equals("1")) {
-			switch(pdfver){
-	         case "1":
-	        	 wordTemplatePath = wordTemplatePath + folderG2 + "/传感器模板.docx";
-	        	 break;
-	         case "2":
-	        	 break;
-	         case "3":
-	        	 break;
-	         default:
-	        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
-	      }
-		}else if(prodType.equals("2")){
-			switch(pdfver){
-	         case "1":
-	        	 wordTemplatePath = wordTemplatePath + folderG2 + "/小流量计模板.docx";
-	        	 break;
-	         case "2":
-	        	 break;
-	         case "3":
-	        	 break;
-	         default:
-	        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
-	      }
-		}else if(prodType.equals("3")){
-			
-			if (proModle.contains("GD")) {
-				switch(pdfver){
-		         case "1":
-		        	 wordTemplatePath = wordTemplatePath + folderG2 + "/大流量计模板GD.docx";
-		        	 break;
-		         case "2":
-		        	 break;
-		         case "3":
-		        	 break;
-		         default:
-		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
-		      }
-			}else if (proModle.contains("FD")) {
-				switch(pdfver){
-		         case "1":
-		        	 wordTemplatePath = wordTemplatePath + folderG2 + "/大流量计模板FD.docx";
-		        	 break;
-		         case "2":
-		        	 break;
-		         case "3":
-		        	 break;
-		         default:
-		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
-		      }
-			}else {
-				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModle);
-			}
-		}else {
-			throw new RuntimeException("未找到对应模板，请联系开发者");
+        // PDF版号
+     	String folderVer = "/G" + pdfver;
+        // 生成的文件路径
+        String outputFileName = webRootPath + "/"+ pdfsrc + folderVer +"/" + report.getOrderId().toString() + "_" + id.toString() + ".pdf";
+        // 获取完整模板路径
+        String inputFileName = getInputFile(webRootPath,prodType,pdfver,proModle,folderVer);
+		
+        //模板是否存在
+    	File inputPdfFolder = new File(inputFileName);
+		if (!inputPdfFolder.exists()) {
+			throw new RuntimeException("未找到对应模板！请联系管理员。");
+		}
+        
+        //PDF文件夹是否存在
+    	File PdfFolder = new File(webRootPath + "/"+ pdfsrc + folderVer);
+		if (!PdfFolder.exists()) {
+			PdfFolder.mkdirs();
 		}
 		
-		String tempWordPath = webRootPath + "/temp/temp_" + System.currentTimeMillis() + ".docx";
-		replaceWordKeepFormat(wordTemplatePath, tempWordPath, dataMap);
-
-		// 4. 转换为 PDF
-		String pdfPath = tempWordPath.replace(".docx", ".pdf");
-		convertWordToPdf(tempWordPath, pdfPath);
-		
-		// 5. 如果目标文件已存在，先删除
+		//如果目标PDF文件已存在，先删除
 		File oldPdfFile = new File(webRootPath + report.getStr("sp_pdfstr"));
 	    if (oldPdfFile.exists()) {
 	        boolean oldFileScuess= oldPdfFile.delete();
+	        
+	        // 如果删除失败，尝试强制删除
 	        if (!oldFileScuess) {
-	            // 删除失败，尝试强制删除
+	        	
 	            System.gc(); // 触发垃圾回收，释放文件句柄
+	            
 	            try {
 	                Thread.sleep(100); // 等待一下
 	            } catch (InterruptedException e) {
 	                Thread.currentThread().interrupt();
 	            }
 	            
+	            // 再次删除，如果还是删除失败，尝试其他方法
 	            if (!oldFileScuess) {
-	                // 如果还是删除失败，尝试其他方法
 	                throw new RuntimeException("无法删除已存在的文件，请联系开发者: " + webRootPath + report.getStr("sp_pdfstr"));
 	    		}
             }
 	    }
-	    
-	    // 6. 重命名 PDF  
+        
+	    try {
+            os = new FileOutputStream(new File(outputFileName));
+            
+            // 读入pdf表单
+            reader = new PdfReader(inputFileName);
+            
+            // 根据表单生成一个新的pdf
+            ps = new PdfStamper(reader, os);
+            
+            // 获取pdf表单
+            AcroFields form = ps.getAcroFields();
+            
+            // 给表单添加中文字体
+            BaseFont bf = BaseFont.createFont(webRootPath + "/assets/fonts/SIMSUN.TTC,0", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            form.addSubstitutionFont(bf);
+            
+            // 查询数据
+            Map<String, String> dataMap = buildDataMap(report);
+            
+            // 遍历data 给pdf表单表格赋值
+            for (String key : dataMap.keySet()) {
+                form.setField(key, dataMap.get(key).toString());
+            }
+            ps.setFormFlattening(true);
+            
+            // 更新 PDF 地址
+    		Product product = new Product().findById(id);
+    		product.setPdfstr("/" + pdfsrc + folderVer + "/"  + report.getOrderId().toString() + "_" + id.toString() + ".pdf");
+    		product.update();
+    		
+        } catch (Exception e) {
+            System.out.println("===============PDF导出失败=============");
+            e.printStackTrace();
+        } finally {
+            try {
+                ps.close();
+                reader.close();
+                os.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-	 	String finalPdfPath = webRootPath + "/"+src+"/" + report.getOrderId().toString() + "_" + id.toString() + ".pdf";
-		
-	 	File finalPdfFolder = new File(webRootPath + "/"+src+"/");
-		if (!finalPdfFolder.exists()) {
-			finalPdfFolder.mkdirs();
-		}
-	 	
-	 	new File(pdfPath).renameTo(new File(finalPdfPath));
-
-		// 7. 清理临时 Word 文件
-		new File(tempWordPath).delete();
-		
-		// 8. 更新 PDF 地址
-		Product product = new Product().findById(id);
-		product.setPdfstr("/PDF/" + report.getOrderId().toString() + "_" + id.toString() + ".pdf");
-		product.update();
-		
-	}
 
 	/**
 	 * 构建数据映射
 	 */
 	private Map<String, String> buildDataMap(Qareport report) {
-		Map<String, String> map = new HashMap<>();
+		Map<String, String> map = new HashMap<String, String>();
 		String proModle = report.getStr("sp_modle");
 		
 		map.put("formnum", report.getFormnum().toString());
@@ -191,13 +154,16 @@ public class PDFService {
 		map.put("sp_number", report.getStr("sp_number"));
 		map.put("accq_name", report.getStr("accq_name"));
 		map.put("accq_time", report.getStr("accq_time"));
+		map.put("accq_email", report.getStr("accq_email"));
 		map.put("funq_name", report.getStr("funq_name"));
 		map.put("funq_time", report.getStr("funq_time"));
+		map.put("funq_email", report.getStr("accq_email"));
 		map.put("appq_name", report.getStr("appq_name"));
 		map.put("appq_time", report.getStr("appq_time"));
+		map.put("appq_email", report.getStr("accq_email"));
 		map.put("allq_name", report.getStr("allq_name"));
 		map.put("allq_time", report.getStr("allq_time"));
-		
+		map.put("allq_email", report.getStr("accq_email"));
 		
 		//检验项目 小流量
 		if (report.getStr("prod_type").equals("2")) {
@@ -216,154 +182,127 @@ public class PDFService {
 			} else {
 				map.put("para7", "/");
 			}
-			if (proModle.contains("MFC1000") || proModle.contains("BC")) {
-				map.put("para8", "ok");
-			} else {
-				map.put("para8", "/");
-			}	
 		} 
 		//大流量
 		else if (report.getStr("prod_type").equals("3")) {
+			map.put("flow_range", report.getStr("sp_flow_range_name"));
+			
 			if (proModle.contains("GD")) {
-				map.put("cuc", report.getStr("sp_cuc"));
+				map.put("cucmin", report.getStr("sp_cucmin"));
+				map.put("thv", report.getStr("sp_thv"));
+				map.put("zp", report.getStr("sp_zp"));
 				map.put("fl", report.getStr("sp_fl"));
 			} 
 			
-			if (proModle.contains("FD")) {
+			if (proModle.contains("FD-E")) {
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
-				map.put("pv", report.getStr("sp_cpv"));
+				map.put("pv", report.getStr("sp_pv"));
+				map.put("pulseValue", "ok");
+				map.put("la", report.getStr("sp_la"));
 				map.put("thv", report.getStr("sp_thv"));
 				map.put("zp", report.getStr("sp_zp"));
+				map.put("fl", "/");
+				map.put("bv", "/");
+			
+			}else if (proModle.contains("FD-D"))  { 
+				map.put("cucmax", report.getStr("sp_cucmax"));
+				map.put("cucmin", report.getStr("sp_cucmin"));
+				map.put("pv", report.getStr("sp_pv"));
+				map.put("pulseValue", "/");
+				map.put("la", report.getStr("sp_la"));
+				map.put("thv", report.getStr("sp_thv"));
+				map.put("fl", report.getStr("sp_fl"));
+				map.put("zp", report.getStr("sp_zp"));
+				map.put("bv", report.getStr("sp_bv"));
 			} 
-		} 
+		}
 		
 		return map;
 	}
 
+	
 	/**
-	 * 替换 Word 模板中的占位符
+	 * 构建模板路径
 	 */
-	public static void replaceWordKeepFormat(String templatePath, String outputPath, Map<String, String> dataMap)
-			throws IOException {
-		FileInputStream fis = new FileInputStream(templatePath);
-		XWPFDocument doc = new XWPFDocument(fis);
-		fis.close();
-
-		// 1. 处理所有段落
-		for (XWPFParagraph paragraph : doc.getParagraphs()) {
-			replaceInParagraph(paragraph, dataMap);
-		}
-
-		// 2. 处理所有表格
-		for (XWPFTable table : doc.getTables()) {
-			for (XWPFTableRow row : table.getRows()) {
-				for (XWPFTableCell cell : row.getTableCells()) {
-					for (XWPFParagraph paragraph : cell.getParagraphs()) {
-						replaceInParagraph(paragraph, dataMap);
-					}
-				}
+	public String getInputFile(String webRootPath, String prodType, String pdfver , String proModle, String folderVer) {
+		String inputFileName = webRootPath + "/reporttemplates" + folderVer;
+		
+		if (prodType.equals("1")) {
+			switch(pdfver){
+	         case "2":
+	        	 inputFileName = inputFileName + "/传感器模板.pdf";
+	        	 break;
+	         case "3":
+	        	 break;
+	         case "4":
+	        	 break;
+	         default:
+	        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+	      }
+		}else if(prodType.equals("2")){
+			
+			if (proModle.contains("MFC") || proModle.contains("BC")) {
+				switch(pdfver){
+		         case "2":
+		        	 inputFileName = inputFileName + "/控制器模板.pdf";
+		        	 break;
+		         case "3":
+		        	 break;
+		         case "4":
+		        	 break;
+		         default:
+		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		      }
+			} else {
+				switch(pdfver){
+		         case "2":
+		        	 inputFileName = inputFileName + "/小流量计模板.pdf";
+		        	 break;
+		         case "3":
+		        	 break;
+		         case "4":
+		        	 break;
+		         default:
+		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		      }
 			}
-		}
-
-		// 3. 处理页眉
-		for (XWPFHeader header : doc.getHeaderList()) {
-			for (XWPFParagraph paragraph : header.getParagraphs()) {
-				replaceInParagraph(paragraph, dataMap);
+			
+			
+		}else if(prodType.equals("3")){
+			
+			if (proModle.contains("GD")) {
+				switch(pdfver){
+		         case "2":
+		        	 inputFileName = inputFileName + "/中低压模板.pdf";
+		        	 break;
+		         case "3":
+		        	 break;
+		         case "4":
+		        	 break;
+		         default:
+		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		      }
+			}else if (proModle.contains("FD")) {
+				switch(pdfver){
+		         case "2":
+		        	 inputFileName = inputFileName + "/工业表模板.pdf";
+		        	 break;
+		         case "3":
+		        	 break;
+		         case "4":
+		        	 break;
+		         default:
+		        	 throw new RuntimeException("未找到对应版号模板，请联系开发者");
+		      }
+			}else {
+				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModle);
 			}
+		}else {
+			throw new RuntimeException("未找到对应模板，请联系开发者");
 		}
-
-		// 4. 处理页脚
-		for (XWPFFooter footer : doc.getFooterList()) {
-			for (XWPFParagraph paragraph : footer.getParagraphs()) {
-				replaceInParagraph(paragraph, dataMap);
-			}
-		}
-
-		// 保存文档
-		FileOutputStream fos = new FileOutputStream(outputPath);
-		doc.write(fos);
-		fos.close();
-		doc.close();
-	}
-
-	private static void replaceInParagraph(XWPFParagraph paragraph, Map<String, String> dataMap) {
-	    List<XWPFRun> runs = paragraph.getRuns();
-	    if (runs == null || runs.isEmpty()) {
-	        return;
-	    }
-	    
-	    // 合并所有 run 的文本
-	    StringBuilder fullText = new StringBuilder();
-	    for (XWPFRun run : runs) {
-	        String text = run.getText(0);
-	        if (text != null) {
-	            fullText.append(text);
-	        }
-	    }
-	    
-	    String originalText = fullText.toString();
-	    String newText = originalText;
-	    
-	    // 替换所有占位符
-	    for (Map.Entry<String, String> entry : dataMap.entrySet()) {
-	        String placeholder = "${" + entry.getKey() + "}";
-	        String replacement = entry.getValue() != null ? entry.getValue() : "";
-	        
-	        // 确保替换时保持适当的格式
-	        if (newText.contains(placeholder)) {
-	            newText = newText.replace(placeholder, replacement);
-	        }
-	    }
-	    
-	    // 如果文本没有变化，直接返回
-	    if (originalText.equals(newText)) {
-	        return;
-	    }
-	    
-	    // 清空所有 run
-	    for (XWPFRun run : runs) {
-	        run.setText("", 0);
-	    }
-	    
-	    // 将新文本放入第一个 run
-	    if (!runs.isEmpty()) {
-	        runs.get(0).setText(newText, 0);
-	    }
-	}
-
-	/**
-	 * 调用 Office COM 组件将 Word 转换为 PDF（仅限 Windows）
-	 */
-	private void convertWordToPdf(String wordPath, String pdfPath) throws Exception {
-		// 确保路径是绝对路径
-		wordPath = new File(wordPath).getAbsolutePath();
-		pdfPath = new File(pdfPath).getAbsolutePath();
-
-		// 使用 VBScript 调用 Word 转换（无需额外依赖）
-		String script = "Set objWord = CreateObject(\"Word.Application\")\n" + "objWord.Visible = False\n"
-				+ "objWord.DisplayAlerts = False\n" + "Set objDoc = objWord.Documents.Open(\""
-				+ wordPath.replace("\\", "\\\\") + "\")\n" + "objDoc.SaveAs \"" + pdfPath.replace("\\", "\\\\")
-				+ "\", 17 ' 17 = wdFormatPDF\n" + "objDoc.Close\n" + "objWord.Quit\n" + "Set objDoc = Nothing\n"
-				+ "Set objWord = Nothing";
-
-		// 将脚本写入临时文件
-		String scriptPath = "convert.vbs";
-		try (FileWriter writer = new FileWriter(scriptPath)) {
-			writer.write(script);
-		}
-
-		// 执行 VBScript
-		ProcessBuilder pb = new ProcessBuilder("cscript", "//Nologo", scriptPath);
-		Process process = pb.start();
-		int exitCode = process.waitFor();
-
-		// 清理临时脚本文件
-		new File(scriptPath).delete();
-
-		if (exitCode != 0) {
-			throw new RuntimeException("Word 转 PDF 失败，请确保已安装 Microsoft Office");
-		}
+		
+		return inputFileName;
 	}
 	
 

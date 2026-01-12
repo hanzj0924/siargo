@@ -93,7 +93,7 @@ var DashBoardUtil_#(pageId)={
 		init:function(){
             //creating line chart
             var $lineData = #json(repfixdata);
-            this.createLineChart('morris-line_#(pageId)',  $lineData, 'x', ['a'], ['订单量']);
+            this.createLineChart('morris-line_#(pageId)',  $lineData, 'x', ['a'], ['返修单量']);
 
             //creating bar chart
             var $barData = #json(repalldata);
@@ -101,13 +101,8 @@ var DashBoardUtil_#(pageId)={
             this.createBarChart('morris-bar_#(pageId)', $barData, 'y', ['a'], ['订单量'], ['#4c84ff']);
 
             //creating donut chart
-            var $donutData1 = [
-                {label: "传感器", value: 50},
-                {label: "小流量", value: 40},
-                {label: "大流量", value: 10}
-            ];
             var $donutData = #json(donutData);
-            this.createDonutChart('morris-donut_#(pageId)', $donutData, ['#00a5a8', "#f43f5d", '#d1d337', '#10c888']);
+            this.createDonutChart('morris-donut_#(pageId)', $donutData, ['#00a5a8', "#f43f5d", '#10c888', '#d1d337']);
 
 		},
 		createAreaChart :function (element, pointSize, lineWidth, data, xkey, ykeys, labels, lineColors) {
