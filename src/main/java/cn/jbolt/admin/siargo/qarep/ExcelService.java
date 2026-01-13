@@ -19,7 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 
 /**
- * ExcelService Service
+ * Excel Service
  * 
  * @ClassName: ExcelService
  * @author: hanzj

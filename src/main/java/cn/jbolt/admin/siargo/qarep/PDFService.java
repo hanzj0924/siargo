@@ -74,15 +74,11 @@ public class PDFService {
 	            System.gc(); // 触发垃圾回收，释放文件句柄
 	            
 	            try {
-	                Thread.sleep(100); // 等待一下
+	                Thread.sleep(200); // 等待一下
 	            } catch (InterruptedException e) {
 	                Thread.currentThread().interrupt();
 	            }
 	            
-	            // 再次删除，如果还是删除失败，尝试其他方法
-	            if (!oldFileScuess) {
-	                throw new RuntimeException("无法删除已存在的文件，请联系开发者: " + webRootPath + report.getStr("sp_pdfstr"));
-	    		}
             }
 	    }
         

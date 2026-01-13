@@ -361,7 +361,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	
 	public List<Map<String, Object>> getRepData() {
 	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, "
-	    		+ "COUNT(DISTINCT sp.report_id) AS count "
+	    		+ "COUNT(DISTINCT sq.order_id) AS count "
 	    		+ "FROM siargo_qareport sq "
 	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
 	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
@@ -396,7 +396,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	
 	public List<Map<String, Object>> getRepAllData() {
-	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, COUNT(DISTINCT sp.report_id) AS count "
+	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, COUNT(DISTINCT sq.order_id) AS count "
 	    		+ "FROM siargo_qareport sq "
 	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
 	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
@@ -431,7 +431,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    		+ "LEFT JOIN siargo_qareport sq ON sq.id = sp.report_id "
 	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
 	    		+ "AND sp.vd = 1 GROUP BY sp.type ";
-	    		
+	    
 	    List<Record> records = Db.find(sql);
 	    
 	    Map<Integer, Integer> monthData = new LinkedHashMap<>();

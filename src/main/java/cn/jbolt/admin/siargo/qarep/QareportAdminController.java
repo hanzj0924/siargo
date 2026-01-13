@@ -232,7 +232,7 @@ public class QareportAdminController extends JBoltBaseController {
 	*/
     @Before(Tx.class)
 	public void save() {
-    	int i = 0;
+    	
     	String qisJson = getPara("qis");
     	String qsisJson = getPara("qsis");
     	String dessJson = getPara("dess");
@@ -257,8 +257,8 @@ public class QareportAdminController extends JBoltBaseController {
                 .map(String::trim)
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
-    	List<String> dess = new ArrayList<String>();
     	
+    	List<String> dess = new ArrayList<String>();
     	if (!StrKit.isBlank(dessJson)) {
     		dess = Arrays.stream(dessJson.split(","))
                     .map(String::trim)
@@ -319,7 +319,7 @@ public class QareportAdminController extends JBoltBaseController {
 			return;
 		}
 
-    	for (; i < modles.size() && i < numbers.size(); i++) {
+    	for (int i = 0; i < modles.size() && i < numbers.size(); i++) {
     		
     		if (qsis.get(i) < qis.get(i)) {
     			renderFail("送检数量小于检验数量，重新输入！");
