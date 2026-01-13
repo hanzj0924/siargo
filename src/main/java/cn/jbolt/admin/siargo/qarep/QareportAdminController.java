@@ -126,7 +126,7 @@ public class QareportAdminController extends JBoltBaseController {
 	* 查询数据字典
 	*/
 	public void getDict() {	
-		renderJsonData(dicttypeservice.getDictName(getKeywords()));
+		renderJsonData(dicttypeservice.getDictName(getKeywords(),Boolean.parseBoolean(getPara("isOrderBy").trim())));
 	}
   	
   	/**

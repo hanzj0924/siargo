@@ -33,7 +33,7 @@
 						<div class="col input-group">
 							<select class="form-control" data-autoload
 								name="qareport.rep_type"
-								data-url="admin/siargo/qarep/getDict?keywords=rep_type"
+								data-url="admin/siargo/qarep/getDict?keywords=rep_type&isOrderBy=false"
 								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
 								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-select="#(qapro.repType ??)">
@@ -43,7 +43,7 @@
 						<div class="col input-group">
 							<select class="form-control" data-autoload
 								name="product.pdfver"
-								data-url="admin/siargo/qarep/getDict?keywords=pdfver"
+								data-url="admin/siargo/qarep/getDict?keywords=pdfver&isOrderBy=true"
 								data-rule="select" data-tips="请选择版号" 
 								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-select="#(qapro.sp_pdfver ??)">
@@ -54,7 +54,7 @@
 						<label class="col-sm-3 col-form-label">产品类型</label>
 						<div class="col input-group">
 							<select class="form-control" data-autoload name="product.type"
-								data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+								data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
 								data-rule="select" data-tips="请选择产品类型" data-text="=请选择="
 								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-select="#(qapro.sp_type??)">
@@ -77,7 +77,7 @@
 						<div class="col input-group">
 							<select class="form-control" data-autoload
 								name="product.flow_range"
-								data-url="admin/siargo/qarep/getDict?keywords=flow_range"
+								data-url="admin/siargo/qarep/getDict?keywords=flow_range&isOrderBy=false"
 								data-rule="select" data-tips="请选择流量范围" data-text="=请选择="
 								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
 								data-notnull="false"  data-rule="select"

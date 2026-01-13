@@ -33,13 +33,13 @@ public class DictionarytypeService extends JBoltBaseService<Dictionarytype> {
 	 * @param keywords
 	 * @return
 	 */
-	public List<Record> getDictName( String keywords) {
+	public List<Record> getDictName( String keywords,boolean isOrderBy) {
 		Sql sql = Sql.mysql()
 				.select("dic.key as dickey","dic.value as dicvalue")
 				.from(table(),"dict")
 				.leftJoin("siargo_dictionary","dic","dic.type_id = dict.id")
 				.like("dict_type", keywords)
-				.orderBy("dic.id", false);
+				.orderBy("dic.id", isOrderBy);
 		return findRecord(sql);
 	}
 	
