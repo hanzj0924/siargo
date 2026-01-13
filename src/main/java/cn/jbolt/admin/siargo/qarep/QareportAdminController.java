@@ -106,6 +106,7 @@ public class QareportAdminController extends JBoltBaseController {
 	            .map(String::trim)
 	            .map(Long::parseLong)
 	            .collect(Collectors.toList());
+	    
 	    for (int i =0; i < ids.size() ; i++) {
 	    	pdfservice.generateReportPdf(ids.get(i),pdfsrc);
         }
@@ -293,16 +294,16 @@ public class QareportAdminController extends JBoltBaseController {
 			renderFail("整机电流超过20mA，请重新输入！");
 			return;
 		}
-		if (product.getPv() != null && product.getPv() > 4.75) {
-			renderFail("脉冲电压超过4.75V，请重新输入！");
+		if (product.getPv() != null && (product.getPv() < 2.7 || product.getPv() > 99.999)) {
+			renderFail("脉冲电压低于2.7V或超上限99.999，请重新输入！");
 			return;
 		}
 		if (product.getZp() != null && product.getZp() > 30) {
 			renderFail("零点内码超过30，请重新输入！");
 			return;
 		}
-		if (product.getFl() != null && product.getFl() > 2.7) {
-			renderFail("故障电平超过2.7V，请重新输入！");
+		if (product.getFl() != null && (product.getFl() < 2.7 || product.getFl() > 99.99)) {
+			renderFail("故障电平低于2.7V或超上限99.99，请重新输入！");
 			return;
 		}
 		if (product.getBv() != null && (product.getBv() > 3.3495 || product.getBv() < 3.2505)) {
@@ -314,7 +315,7 @@ public class QareportAdminController extends JBoltBaseController {
 			return;
 		}
 		if (product.getThv() != null && product.getThv() > 1690) {
-			renderFail("热头电压1690，请重新输入！");
+			renderFail("热头电压超过1690，请重新输入！");
 			return;
 		}
 

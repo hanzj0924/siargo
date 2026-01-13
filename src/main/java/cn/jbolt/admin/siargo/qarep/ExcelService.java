@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -168,7 +167,7 @@ public class ExcelService {
         String orderId = (String) dataList.get(0).get("订单号");
         result.put("orderId", orderId != null ? orderId : "");
         
-        // 提取型号并去重，保持原表格中的顺序
+        // 提取型号并去重，保持原表格顺序
         Set<String> modelSet = new LinkedHashSet<>();
         for (Map<String, Object> row : dataList) {
             String model = (String) row.get("型号");
@@ -180,7 +179,7 @@ public class ExcelService {
         String models = String.join(",", modelSet);
         result.put("modles", models);
         
-        // 提取编号，并按型号分组，保持原顺序
+        // 提取编号，并按型号分组，保持原表格顺序
         Map<String, List<String>> modelNumbersMap = new LinkedHashMap<>();
         for (Map<String, Object> row : dataList) {
             String model = (String) row.get("型号");

@@ -49,10 +49,10 @@ public class PDFService {
         // 生成的文件路径
         String outputFileName = webRootPath + "/"+ pdfsrc + folderVer +"/" + report.getOrderId().toString() + "_" + id.toString() + ".pdf";
         // 获取完整模板路径
-        String inputFileName = getInputFile(webRootPath,prodType,pdfver,proModle,folderVer);
+        String inputFileName = getInputFile(webRootPath,prodType,pdfver,proModle);
         
         //模板文件夹是否存在
-    	File inputPdfFolder = new File(inputFileName);
+    	File inputPdfFolder = new File(webRootPath + "/reporttemplates" + folderVer);
 		if (!inputPdfFolder.exists()) {
 			inputPdfFolder.mkdirs();
 		}
@@ -165,7 +165,7 @@ public class PDFService {
 		map.put("allq_time", report.getStr("allq_time"));
 		map.put("allq_email", report.getStr("allq_email") == null? "" : report.getStr("allq_email"));
 		
-		//检验项目 小流量
+		//小流量
 		if (report.getStr("prod_type").equals("2")) {
 			if (proModle.contains("MF66")) {
 				map.put("para2", "/");
@@ -223,8 +223,8 @@ public class PDFService {
 	/**
 	 * 构建模板路径
 	 */
-	public String getInputFile(String webRootPath, String prodType, String pdfver , String proModle, String folderVer) {
-		String inputFileName = webRootPath + "/reporttemplates" + folderVer;
+	public String getInputFile(String webRootPath, String prodType, String pdfver , String proModle) {
+		String inputFileName = webRootPath + "/reporttemplates/G" + pdfver;
 		
 		if (prodType.equals("1")) {
 			switch(pdfver){
@@ -294,8 +294,19 @@ public class PDFService {
 		         default:
 		        	 throw new RuntimeException("未找到工业表对应版号模板，请联系开发者");
 		      }
-				
-			}else {
+			}else if (proModle.contains("MF2032")){
+				switch(pdfver){
+		         case "2":
+		        	 inputFileName = inputFileName + "/小流量计模板.pdf";
+		        	 break;
+		         case "3":
+		        	 break;
+		         case "4":
+		        	 break;
+		         default:
+		        	 throw new RuntimeException("未找到工业表对应版号模板，请联系开发者");
+		      }
+			}else{
 				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModle);
 			}
 		}else {

@@ -534,7 +534,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 故障电平(Fault Level)
 	 */
-	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=4, fixed=2, order=29)
+	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=5, fixed=3, order=29)
 	public java.lang.Double getFl() {
 		return getDouble("fl");
 	}
