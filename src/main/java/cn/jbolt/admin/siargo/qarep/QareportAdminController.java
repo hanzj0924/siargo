@@ -8,6 +8,7 @@ import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt.admin.siargo.customer.CustomerService;
 import cn.jbolt.admin.siargo.dict.DictionarytypeService;
 import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
+import cn.jbolt.common.util.StringUtil;
 
 import com.jfinal.core.Path;
 import com.jfinal.kit.StrKit;
@@ -178,6 +179,20 @@ public class QareportAdminController extends JBoltBaseController {
 	}
 	
 	/**
+	* 编辑Des
+	*/
+	public void editDes() {
+		Product product = getModel(Product.class, "product").findById(getLong(0));
+		if(product == null){
+			renderFail(JBoltMsg.DATA_NOT_EXIST);
+			return;
+		}
+		set("product",product);
+		render("editdes.html");
+	}
+	
+	
+	/**
 	* 报告单详情
 	*/
 	public void details() {
@@ -346,7 +361,24 @@ public class QareportAdminController extends JBoltBaseController {
 	public void update() {
 		renderJson(service.update(getModel(Qareport.class, "qareport"),getModel(Product.class, "product")));
 	}
-	
+    
+    /**
+	* 更新Des
+	*/
+    @Before(Tx.class)
+	public void updateDes() {
+    	Product prold = getModel(Product.class, "product");
+
+    	Product product = proservice.findById(prold.getId());
+    	if(product == null){
+			renderFail(JBoltMsg.DATA_NOT_EXIST);
+			return;
+		}
+
+    	product.setDes(StringUtil.isEmpty(prold.getDes())? "" : prold.getDes().trim());
+		renderJsonData(product.update());
+	}
+    
    /**
 	* 删除
 	*/

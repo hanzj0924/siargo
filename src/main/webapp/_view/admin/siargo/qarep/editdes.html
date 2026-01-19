@@ -1,0 +1,29 @@
+#@jboltLayout() #define main()
+<div class="jbolt_page">
+	<div class="jbolt_page_content">
+		<form onsubmit="return false;" id="qareportUpdateDesForm"
+			action="admin/siargo/qarep/updateDes" method="post">
+			<input type="hidden" name="product.id" value="#(product.id??)" />
+			<div class="row">
+				<div class="col">
+					<div class="form-group row">
+						<label class="col-sm-1 col-form-label">订单备注</label>
+						<div class="col">
+							<textarea class="form-control" style="height: 100px" data-with-clearbtn="true"
+								placeholder="请输入备注" data-tips="请输入备注" 
+								maxlength="500" name="product.des" data-with-clearbtn="true">
+							#(product.des??)
+							</textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+		#define js()
+		<script>
+		</script>
+		#include("/_view/_admin/common/_formjs.html",formId="qareportUpdateDesForm")
+		#end
+	</div>
+</div>
+#end

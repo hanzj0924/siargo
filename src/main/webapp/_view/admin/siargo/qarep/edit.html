@@ -209,10 +209,11 @@
 					<div class="form-group row">
 						<label class="col-sm-1 col-form-label">备注</label>
 						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" placeholder="请输入备注" maxlength="100"
-								name="product.des" value="#(qapro.sp_des??)" />
-
+							<textarea class="form-control" style="height: 50px"
+								placeholder="请输入备注" data-tips="请输入备注" data-with-clearbtn="true"
+								maxlength="500" name="dess" data-with-clearbtn="true">
+							#(qapro.sp_des??)
+							</textarea>
 						</div>
 					</div>
 				</div>

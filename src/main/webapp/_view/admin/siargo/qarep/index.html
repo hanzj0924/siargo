@@ -401,7 +401,7 @@
 			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
 				data-value-attr="dickey" data-text-attr="dicvalue"
 				data-text="=产品类型=" data-value=""></select>
 			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" id="qadatepicker"  
@@ -421,8 +421,15 @@
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
 				</button>
-				<button onclick="jboltTableRefresh(this)"
+				<button data-openpage="dialog" data-area="350,350"
+					data-handler="refreshJBoltTable" data-title="修改备注"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
+					<i class="fa fa-edit"></i> 修改备注
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-secondary ">
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
@@ -439,7 +446,7 @@
 			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
 				data-value-attr="dickey" data-text-attr="dicvalue"
 				data-text="=产品类型=" data-value=""></select>
 			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date"  
@@ -461,7 +468,7 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
 					data-confirm="确定批准选中数据？" 
-					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 精度合格
+					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 精度合格
 				</button>
 				<button data-openpage="dialog" data-area="1100,850"
 					data-handler="jboltTablePageToFirst" data-title="新增"
@@ -483,7 +490,7 @@
 					<i class="fa fa-trash"></i> 删除
 				</button>
 				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-info ">
+					class="btn btn-outline-secondary ">
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
@@ -500,7 +507,7 @@
 			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
 				data-value-attr="dickey" data-text-attr="dicvalue"
 				data-text="=产品类型=" data-value=""></select>
 			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
@@ -518,10 +525,17 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
 					data-confirm="确定批准选中数据？" 
-					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 外观合格
+					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 外观合格
+				</button>
+				<button data-openpage="dialog" data-area="350,350"
+					data-handler="refreshJBoltTable" data-title="修改备注"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/qarep/editDes/"
+					class="btn btn-outline-info ">
+					<i class="fa fa-edit"></i> 修改备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-info ">
+					class="btn btn-outline-secondary ">
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
@@ -538,7 +552,7 @@
 			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
 				data-value-attr="dickey" data-text-attr="dicvalue"
 				data-text="=产品类型=" data-value=""></select>
 			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
@@ -556,10 +570,17 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
 					data-confirm="确定批准选中数据？" 
-					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 包装合格
+					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 包装合格
+				</button>
+				<button data-openpage="dialog" data-area="350,350"
+					data-handler="refreshJBoltTable" data-title="修改备注"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/qarep/editDes/"
+					class="btn btn-outline-info ">
+					<i class="fa fa-edit"></i> 修改备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-info ">
+					class="btn btn-outline-secondary ">
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
@@ -576,7 +597,7 @@
 			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
 				data-value-attr="dickey" data-text-attr="dicvalue"
 				data-text="=产品类型=" data-value=""></select>
 			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
@@ -594,10 +615,17 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
 					data-confirm="确定批准选中数据？" 
-					class="btn btn-outline-primary " ><i class="jbicon jb-chenggong1"></i> 批准
+					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 批准
+				</button>
+				<button data-openpage="dialog" data-area="350,350"
+					data-handler="refreshJBoltTable" data-title="修改备注"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/qarep/editDes/"
+					class="btn btn-outline-info ">
+					<i class="fa fa-edit"></i> 修改备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-info ">
+					class="btn btn-outline-secondary ">
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
@@ -614,7 +642,7 @@
 			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 				placeholder="输入订单号" name="keywords" value="" /> 
 			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/siargo/qarep/getDict?keywords=prod_type"
+				data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
 				data-value-attr="dickey" data-text-attr="dicvalue"
 				data-text="=产品类型=" data-value=""></select>
 			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
@@ -635,8 +663,15 @@
 					data-confirm="确定批准选中数据？" 
 					class="btn btn-outline-primary " ><i class="jbicon2 jbi-cloud-download"></i> 生成PDF
 				</button>
-				<button onclick="jboltTableRefresh(this)"
+				<button data-openpage="dialog" data-area="350,350"
+					data-handler="refreshJBoltTable" data-title="修改备注"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
+					<i class="fa fa-edit"></i> 修改备注
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-secondary ">
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
