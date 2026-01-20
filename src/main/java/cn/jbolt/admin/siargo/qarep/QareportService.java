@@ -71,21 +71,37 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid").eq("sp.vd", 1);
 
 		sql.like("order_id", keywords);
-
+		
+		if (isOk(startTime) && isOk(endTime)) {
+			sql.bwDate("sq.create_time",startTime,endTime);
+		}
+		
 		if (prodType > 0) {
 			sql.eq("sp.type", prodType);
 		}
+		
 		if (insp > 0) {
 			sql.eq("sp.insp", insp);
+			
+			switch(insp){
+	         case 1:
+	        	 sql.orderBy("sq.create_time", true);
+	         case 2:
+	        	 sql.orderBy("sp.accq_time", true);
+	         case 3:
+	        	 sql.orderBy("sp.funq_time", true);
+	         case 4:
+	        	 sql.orderBy("sp.appq_time", true);
+	         case 5:
+	        	 sql.orderBy("sp.allq_time", true);
+	         default:
+	        	 sql.orderBy("sq.create_time", true);
+			}
+			
+		}else {
+			sql.orderBy("sq.create_time", true);
 		}
 		
-		if (isOk(startTime) && isOk(endTime)) {
-			sql.bwDate("create_time",startTime,endTime);
-		}
-
-
-		sql.orderBy("sq.create_time", true);
-
 		return paginateRecord(sql, true);
 	}
 
