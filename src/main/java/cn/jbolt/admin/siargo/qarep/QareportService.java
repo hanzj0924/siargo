@@ -57,7 +57,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						"sp.id as spid", "sp.modle as sp_modle", "sp.number as sp_number", "sp.type as sp_type",
 						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.flow_range as sp_flow_range", "sp.des as sp_des", 
-						"sp.pdfstr AS sp_pdfstr", "CONCAT(sp.pdfstr, '?t=', UNIX_TIMESTAMP()) as sp_pdfstrtime", 
+						"sp.pdfstr AS sp_pdfstr", 
 						"sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", "sp.thv as sp_thv", 
 						"sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", "sp.cucmin as sp_cucmin",
 						"sp.bv as sp_bv", "sp.la as sp_la"

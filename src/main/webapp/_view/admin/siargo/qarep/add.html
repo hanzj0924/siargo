@@ -227,9 +227,9 @@
 					<div class="form-group row">
 						<label class="col-sm-1 col-form-label">备注</label>
 						<div class="col">
-							<textarea class="form-control" style="height: 50px"
+							<textarea class="form-control" style="height: 50px;white-space: pre;"
 								placeholder="如果多型号，英文逗号分割" data-tips="如果多型号，英文逗号分割"
-								maxlength="500" name="dess" data-with-clearbtn="true"></textarea>
+								maxlength="250" name="dess" data-with-clearbtn="true"></textarea>
 						</div>
 					</div>
 				</div>
@@ -237,7 +237,6 @@
 		</form>
 		#define js()
 		<script>
-
 		function uploadSuccessHandler(uploader,type,fileInput,result) {
 		    var data = result.data;
 	    
