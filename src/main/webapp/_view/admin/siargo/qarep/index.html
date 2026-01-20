@@ -1,24 +1,4 @@
 #@jboltLayout()
-#define css()
-<style>
-    .remark-dialog .modal-body {
-        white-space: pre-wrap !important;
-        word-wrap: break-word !important;
-        font-family: 'Consolas', 'Monaco', monospace !important;
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    
-    /* 如果 JBolt 有固定的对话框类名 */
-    .jbolt-dialog-content {
-        white-space: pre-wrap !important;
-        word-wrap: break-word !important;
-    }
-</style>
-#end
 #define main()
 #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page jb_vflex" data-key="#(pmkey)">
@@ -72,7 +52,7 @@
 		无
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word; padding: 15px;'>
+            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
@@ -139,7 +119,7 @@
 		无
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word; padding: 15px;'>
+            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
@@ -191,7 +171,7 @@
 		无
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word; padding: 15px;'>
+            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
@@ -244,7 +224,7 @@
 		无
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word; padding: 15px;'>
+            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
@@ -312,7 +292,7 @@
 		无
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word; padding: 15px;'>
+            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
@@ -381,7 +361,7 @@
 		无
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word; padding: 15px;'>
+            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
