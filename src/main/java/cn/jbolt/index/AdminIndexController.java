@@ -102,19 +102,19 @@ public class AdminIndexController extends JBoltBaseController {
 				+"(检验)");
 		map.put("cTotal", 
 				String.format("%,d", qareportservice.getTotalQSI(1)==null? 0:qareportservice.getTotalQSI(1))
-				+"(送检)/"
+				+"/"
 				+String.format("%,d", qareportservice.getTotalQI(1)==null? 0:qareportservice.getTotalQI(1))
-				+"(检验)");
+				);
 		map.put("xTotal", 
 				String.format("%,d", qareportservice.getTotalQSI(2)==null? 0:qareportservice.getTotalQSI(2))
-				+"(送检)/"
+				+"/"
 				+String.format("%,d", qareportservice.getTotalQI(2)==null? 0:qareportservice.getTotalQI(2))
-				+"(检验)");
+				);
 		map.put("dTotal", 
 				String.format("%,d", qareportservice.getTotalQSI(3)==null? 0:qareportservice.getTotalQSI(3))
-				+"(送检)/"
+				+"/"
 				+String.format("%,d", qareportservice.getTotalQI(3)==null? 0:qareportservice.getTotalQI(3))
-				+"(检验)");
+				);
 
 		set("donutData",qareportservice.getDonutData());
 		set("repalldata",qareportservice.getRepAllData());

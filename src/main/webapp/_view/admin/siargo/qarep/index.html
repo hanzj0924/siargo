@@ -51,7 +51,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
+		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
@@ -118,7 +118,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
+		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
@@ -170,7 +170,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
+		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
@@ -223,7 +223,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
+		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
@@ -291,7 +291,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
+		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
@@ -360,7 +360,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		无
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="报告单备注" class="btn btn-outline-info btn-sm" 
+		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
 			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
@@ -435,11 +435,11 @@
 					<i class="fa fa-plus"></i> 新增
 				</button>
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改报告单备注"
+					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改报告单备注
+					<i class="fa fa-edit"></i> 修改产品备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-secondary ">
@@ -480,7 +480,7 @@
 				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
-					data-confirm="确定批准选中数据？" 
+					data-confirm="选中数据确定检验合格？" 
 					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 精度合格
 				</button>
 				<button data-openpage="dialog" data-area="1100,850"
@@ -537,15 +537,15 @@
 				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
-					data-confirm="确定批准选中数据？" 
+					data-confirm="选中数据确定检验合格？" 
 					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 外观合格
 				</button>
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改报告单备注"
+					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改报告单备注
+					<i class="fa fa-edit"></i> 修改产品备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-secondary ">
@@ -582,15 +582,15 @@
 				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
-					data-confirm="确定批准选中数据？" 
+					data-confirm="选中数据确定检验合格？" 
 					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 包装合格
 				</button>
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改报告单备注"
+					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改报告单备注
+					<i class="fa fa-edit"></i> 修改产品备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-secondary ">
@@ -631,11 +631,11 @@
 					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 批准
 				</button>
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改报告单备注"
+					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改报告单备注
+					<i class="fa fa-edit"></i> 修改产品备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-secondary ">
@@ -673,15 +673,15 @@
 				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="/admin/siargo/qarep/toPdf?ids=" 
-					data-confirm="确定批准选中数据？" 
+					data-confirm="确定生成选中数据？" 
 					class="btn btn-outline-primary " ><i class="jbicon2 jbi-cloud-download"></i> 生成PDF
 				</button>
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改报告单备注"
+					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改报告单备注
+					<i class="fa fa-edit"></i> 修改产品备注
 				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-secondary ">
@@ -953,7 +953,7 @@ $(document).on('click', '[data-dialogbtn]', function() {
     var $btn = $(this);
     var content = $btn.data('content');
     
-    if (content && $btn.data('title') === '报告单备注') {
+    if (content && $btn.data('title') === '产品备注') {
         // 预处理内容，确保格式正确
         $btn.data('content', '<div style="white-space: pre-wrap; word-wrap: break-word;">' 
                            + content.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;') 

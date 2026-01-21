@@ -382,8 +382,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
 	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
 	    		+ "AND sp.vd = 1 AND sq.rep_type = 2 "
-	    		+ "GROUP BY MONTH "
-	    		+ "ORDER BY MONTH " ; 
+	    		+ "GROUP BY MONTH ORDER BY MONTH " ; 
 
 	    List<Record> records = Db.find(sql);
 	    
