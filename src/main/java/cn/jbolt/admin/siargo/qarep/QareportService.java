@@ -343,7 +343,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		String sql = "SELECT SUM( sp.qsi ) AS qsi_Total "
 				+ "FROM siargo_product sp "
 				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) AND MONTH ( sq.create_time ) = MONTH (CURDATE()) "
+				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
 				+ "AND sp.vd = 1 ";
 		if (proType>0) {
 			sql += " AND sp.type = " + proType;
@@ -362,7 +362,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		String sql = "SELECT SUM( sp.qi ) AS qi_Total "
 				+ "FROM siargo_product sp "
 				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) AND MONTH ( sq.create_time ) = MONTH (CURDATE())  "
+				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
 				+ "AND sp.vd = 1 ";
 		if (proType>0) {
 			sql += "AND sp.type = " + proType;
@@ -371,25 +371,31 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	}
 	
 	/**
-	* 获取返修单数量
+	* 获取每个月返修表数量
 	 * @return
 	 */
-	
 	public List<Map<String, Object>> getRepData() {
-	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, "
-	    		+ "COUNT(DISTINCT sq.order_id) AS count "
-	    		+ "FROM siargo_qareport sq "
-	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
-	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
-	    		+ "AND sp.vd = 1 AND sq.rep_type = 2 "
-	    		+ "GROUP BY MONTH ORDER BY MONTH " ; 
+	    String sql = "SELECT "
+	    		+ "  MONTH(sq.create_time) AS MONTH, "
+	    		+ "  SUM(sp.qsi) AS qsi_reTotal "
+	    		+ "FROM "
+	    		+ "  siargo_product sp "
+	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
+	    		+ "WHERE "
+	    		+ "  YEAR(sq.create_time) = YEAR(CURDATE()) "
+	    		+ "  AND MONTH(sq.create_time) = MONTH(CURDATE()) "
+	    		+ "  AND sp.vd = 1 AND sq.rep_type = 2  "
+	    		+ "GROUP BY "
+	    		+ "  MONTH(sq.create_time) "
+	    		+ "ORDER BY "
+	    		+ "  MONTH(sq.create_time) ";
 
 	    List<Record> records = Db.find(sql);
 	    
 	    // 转换为月份为key的Map
 	    Map<Integer, Integer> monthData = new LinkedHashMap<>();
 	    for (Record record : records) {
-	        monthData.put(record.getInt("MONTH"), record.getInt("count"));
+	        monthData.put(record.getInt("MONTH"), record.getInt("qsi_reTotal"));
 	    }
 	    
 	    // 生成1-12月的完整数据，使用LinkedHashMap保持特定顺序
@@ -405,30 +411,49 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	}
 	
 	/**
-	 * 获取报告单数量
+	 * 获取每个月送检数量(
 	 * @param repType
 	 * @return
 	 */
 	
 	public List<Map<String, Object>> getRepAllData() {
-	    String sql = "SELECT MONTH ( sq.create_time ) AS MONTH, COUNT(DISTINCT sq.order_id) AS count "
-	    		+ "FROM siargo_qareport sq "
-	    		+ "INNER JOIN siargo_product sp ON sp.report_id = sq.id "
-	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
-	    		+ "AND sp.vd = 1 GROUP BY MONTH ORDER BY MONTH";
+	    String sql = "SELECT "
+	    		+ "  MONTH(sq.create_time) AS MONTH, "
+	    		+ "  SUM(CASE WHEN sp.type = 1 THEN sp.qsi ELSE 0 END) AS sensor_qsi, "
+	    		+ "  SUM(CASE WHEN sp.type = 2 THEN sp.qsi ELSE 0 END) AS small_flow_qsi, "
+	    		+ "  SUM(CASE WHEN sp.type = 3 THEN sp.qsi ELSE 0 END) AS large_flow_qsi "
+	    		+ " FROM "
+	    		+ "  siargo_product sp "
+	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
+	    		+ "WHERE "
+	    		+ "  YEAR(sq.create_time) = YEAR(CURDATE()) "
+	    		+ "  AND MONTH(sq.create_time) = MONTH(CURDATE()) "
+	    		+ "  AND sp.vd = 1 "
+	    		+ "GROUP BY "
+	    		+ "  MONTH(sq.create_time) "
+	    		+ "ORDER BY "
+	    		+ "  MONTH(sq.create_time) ";
 	    		
 	    List<Record> records = Db.find(sql);
 	    
-	    Map<Integer, Integer> monthData = new LinkedHashMap<>();
+	    Map<Integer, Integer> sensorData  = new LinkedHashMap<>();
+	    Map<Integer, Integer> smallFlowData  = new LinkedHashMap<>();
+	    Map<Integer, Integer> largeFlowData  = new LinkedHashMap<>();
+	    
 	    for (Record record : records) {
-	        monthData.put(record.getInt("MONTH"), record.getInt("count"));
+	    	int month = record.getInt("MONTH");
+	        sensorData.put(month, record.getInt("sensor_qsi"));
+	        smallFlowData.put(month, record.getInt("small_flow_qsi"));
+	        largeFlowData.put(month, record.getInt("large_flow_qsi"));
 	    }
 	    
 	    List<Map<String, Object>> result = new ArrayList<>();
 	    for (int month = 1; month <= 12; month++) {
 	        Map<String, Object> item = new LinkedHashMap<>();
 	        item.put("y", month + "月");  
-	        item.put("a", monthData.getOrDefault(month, 0)); 
+	        item.put("a", sensorData.getOrDefault(month, 0));      // 传感器数据
+	        item.put("b", smallFlowData.getOrDefault(month, 0));   // 小流量数据
+	        item.put("c", largeFlowData.getOrDefault(month, 0));   // 大流量数据
 	        result.add(item);
 	    }
 	    return result;

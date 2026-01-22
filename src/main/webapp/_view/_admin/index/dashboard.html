@@ -11,7 +11,7 @@
 							<span class="float-left"><i class="jbicon jb-zhiliangrenwu j_font_30 j_left_fa text-primary rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24" id="currentMonthTotal">#(dashboard.currentMonthTotal ??)</span>
-								<span class="d-block">本月送检总量(只)</span>
+								<span class="d-block">本年度送检总量/只</span>
 							</div>
 						</div>
 					</div>
@@ -22,7 +22,7 @@
 							<span class="float-left"><i class="jbicon jb-zhiliangbz j_font_30 j_left_fa text-success rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24">#(dashboard.cTotal ??)</span>
-								<span class="d-block">本月传感器总量(只)</span>
+								<span class="d-block">本年度传感器总量/只</span>
 							</div>
 						</div>
 					</div>
@@ -34,7 +34,7 @@
 							<span class="float-left"><i class="jbicon jb-suyuanzhijianbz j_font_30 j_left_fa text-info rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24">#(dashboard.xTotal ??)</span>
-								<span class="d-block">本月小流量总量(只)</span>
+								<span class="d-block">本年度小流量总量/只</span>
 							</div>
 						</div>
 					</div>
@@ -45,31 +45,27 @@
 							<span class="float-left"><i class="jbicon jb-zlgl j_font_30 j_left_fa text-danger rounded"></i></span>
 							<div class="text-right ">
 								<span class="d-block  j_font_24">#(dashboard.dTotal ??)</span>
-								<span class="d-block">本月大流量总量(只)</span>
+								<span class="d-block">本年大流量总量/只</span>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			
-			
 			<div class="row mt-2">
 				<div class="col-lg-12 col-sm-12 px-2">
 					<div class="card border-0  mb-2">
 						<div class="card-body" style="height:400px">
-							<h5 class="card-title"><span>订单量</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+							<h5 class="card-title"><span>送检总量(包含退修)/只</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
 							<div id="morris-bar_#(pageId)" style="height:90%;"></div>
 						</div>
 					</div>
 				</div>
-
 			</div>
-			
 			<div class="row mt-2">
 					<div class="col-lg-9 col-sm-12 px-2">
 						<div class="card border-0  mb-2">
 							<div class="card-body" style="height:300px">
-								<h5 class="card-title"><span>退修单量</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+								<h5 class="card-title"><span>退修总量/只</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
 								<div id="morris-line_#(pageId)" style="height:90%;"></div>
 							</div>
 						</div>
@@ -77,7 +73,7 @@
 					<div class="col-lg-3 col-md-12 px-2">
 					<div class="card border-0  mb-2">
 						<div class="card-body"  style="height:300px">
-							<h5 class="card-title"><span>本年度订单来源</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+							<h5 class="card-title"><span>本年度报告单来源/订单</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
 								<div id="morris-donut_#(pageId)" style="height:90%"></div>
 						</div>
 					</div>
@@ -98,7 +94,7 @@ var DashBoardUtil_#(pageId)={
             //creating bar chart
             var $barData = #json(repalldata);
             
-            this.createBarChart('morris-bar_#(pageId)', $barData, 'y', ['a'], ['订单量'], ['#4c84ff']);
+            this.createBarChart('morris-bar_#(pageId)', $barData, 'y', ['a', 'b', 'c'], ['传感器', '小流量', '大流量'], ['#4c84ff', '#10c888', '#f43f5d'])
 
             //creating donut chart
             var $donutData = #json(donutData);
@@ -130,10 +126,11 @@ var DashBoardUtil_#(pageId)={
 		                ykeys: ykeys,
 		                labels: labels,
 		                gridLineColor: '#eee',
-		                barSizeRatio: 0.4,
+		                barSizeRatio: 0.6,
 		                resize: true,
 		                hideHover: 'auto',
-		                barColors: lineColors
+		                barColors: lineColors,
+		                stacked: false
 		            });
 		        },
 		        
