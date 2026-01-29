@@ -19,7 +19,7 @@
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">客户名称</label>
 						<div class="col">
-							<select class="form-control " data-autoload
+							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/siargo/qarep/getCustName" name="qareport.custId"
 								data-text="=请选择/搜索=" data-value-attr="id" data-rule="select"
 								data-text-attr="name" data-select="#(qareport.custId ??)"
@@ -32,9 +32,9 @@
 						<div class="col input-group">
 							<select class="form-control" data-autoload
 								name="qareport.repType"  style="width:130px;"
-								data-url="admin/siargo/qarep/getDict?keywords=rep_type&isOrderBy=false"
+								data-url="admin/dictionary/options?key=siargo_rep_type"
 								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
-								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-value="" data-value-attr="sn"  
 								data-select="#(qareport.repType ??)">
 							</select>
 						</div>
@@ -42,9 +42,9 @@
 						<div class="col input-group" >
 							<select class="form-control" data-autoload
 								name="product.pdfver" 
-								data-url="admin/siargo/qarep/getDict?keywords=pdfver&isOrderBy=true"
+								data-url="admin/dictionary/options?key=siargo_pdfver"
 								data-rule="select" data-tips="请选择版号" 
-								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-value="" data-value-attr="sn"  
 								data-select="#(qareport.pdfver ??)">
 							</select>
 						</div>
@@ -53,9 +53,9 @@
 						<label class="col-sm-3 col-form-label">产品类型</label>
 						<div class="col input-group">
 							<select class="form-control" data-autoload name="product.type"
-								data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
+								data-url="admin/dictionary/options?key=siargo_prod_type"
 								data-rule="select" data-tips="请选择产品类型" data-text="=请选择="
-								data-value="" data-value-attr="dickey" data-text-attr="dicvalue"
+								data-value="" data-value-attr="sn"  
 								data-select="#(qareport.prodType ??)">
 							</select>
 						</div>
@@ -76,10 +76,10 @@
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">流量范围</label>
 						<div class="col">
-							<select class="form-control " data-autoload
-								data-url="admin/siargo/qarep/getDict?keywords=flow_range&isOrderBy=false"
+							<select class="form-control " data-autoload data-refresh="true"
+								data-url="admin/dictionary/options?key=siargo_flow_range"
 								name="product.flow_range" data-text="=请选择/搜索="
-								data-value-attr="dickey" data-text-attr="dicvalue"
+								data-value-attr="sn"  
 								data-select="#(qareport.spFlowRange ??)"
 								data-notnull="false"  data-rule="select"
 								data-select-type="select2">
@@ -87,12 +87,12 @@
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机最大电流 8v</label>
+						<label class="col-sm-3 col-form-label">电池电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="siargo_tofixed_2"
-								class="form-control" placeholder="6-24mA" maxlength="5"
-								name="product.cuc" value="#(qareport.spCuc??)" />
+								data-notnull="false"  data-rule="siargo_tofixed_4"
+								class="form-control" placeholder="3.2505-3.3495V" maxlength="6"
+								name="product.bv" value="#(qareport.spBv??)" />
 						</div>
 					</div>
 					<div class="form-group row">
@@ -139,6 +139,15 @@
 						</div>
 					</div>
 					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">整机电流 8v</label>
+						<div class="col">
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								data-notnull="false" data-rule="siargo_tofixed_2"
+								class="form-control" placeholder="6-24mA" maxlength="5"
+								name="product.cuc" value="#(qareport.spCuc??)" />
+						</div>
+					</div>
+					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">脉冲电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
@@ -174,15 +183,7 @@
 								name="product.zp" value="#(qareport.spZp??)" />
 						</div>
 					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">电池电压</label>
-						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false"  data-rule="siargo_tofixed_4"
-								class="form-control" placeholder="3.2505-3.3495V" maxlength="6"
-								name="product.bv" value="#(qareport.spBv??)" />
-						</div>
-					</div>
+					
 					
 				</div>
 			</div>

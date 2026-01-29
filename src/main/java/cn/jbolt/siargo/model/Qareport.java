@@ -4,6 +4,7 @@ import cn.jbolt.siargo.model.base.BaseQareport;
 
 import cn.jbolt.core.annotation.TableBind;
 import cn.jbolt.core.base.JBoltIDGenMode;
+import cn.jbolt.core.cache.JBoltDictionaryCache;
 
 /**
  * 矽翔质管部：检验报告单(Quality Report)

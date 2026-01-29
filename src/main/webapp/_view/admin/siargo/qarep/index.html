@@ -27,26 +27,8 @@
 	</a>
 </td>
 <td>${data.orderId}</td>
-<td>
-	{@if data.repType === 1}
-		产成品
-	{@else if data.repType === 2}
-		退修品
-	{@else}
-		无
-	{@/if}
-</td>
-<td>
-	{@if data.prodType == 1}
-		传感器
-	{@else if data.prodType == 2}
-		小流量计
-	{@else if data.prodType == 3}
-		大流量计
-	{@else}
-		无
-	{@/if}
-</td>
+<td>${data.retypeName}</td>
+<td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
 		无
@@ -63,21 +45,7 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>
-	{@if data.insp === 1}
-		精度待检
-	{@else if data.insp === 2}
-		外观待检
-	{@else if data.insp === 3}
-		包装待检
-	{@else if data.insp === 4}
-		合格待批准
-	{@else if data.insp === 5}
-		已完成
-	{@else}
-		无
-	{@/if}
-</td>
+<td>${data.inspName}</td>
 <td>${data.createTime}</td>
 </tr>
 {@/each}
@@ -94,26 +62,8 @@
 	</a>
 </td>
 <td>${data.orderId}</td>
-<td>
-	{@if data.repType === 1}
-		产成品
-	{@else if data.repType === 2}
-		退修品
-	{@else}
-		无
-	{@/if}
-</td>
-<td>
-	{@if data.prodType == 1}
-		传感器
-	{@else if data.prodType == 2}
-		小流量计
-	{@else if data.prodType == 3}
-		大流量计
-	{@else}
-		无
-	{@/if}
-</td>
+<td>${data.retypeName}</td>
+<td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
 		无
@@ -146,26 +96,8 @@
 	</a>
 </td>
 <td>${data.orderId}</td>
-<td>
-	{@if data.repType === 1}
-		产成品
-	{@else if data.repType === 2}
-		退修品
-	{@else}
-		无
-	{@/if}
-</td>
-<td>
-	{@if data.prodType == 1}
-		传感器
-	{@else if data.prodType == 2}
-		小流量计
-	{@else if data.prodType == 3}
-		大流量计
-	{@else}
-		无
-	{@/if}
-</td>
+<td>${data.retypeName}</td>
+<td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
 		无
@@ -199,26 +131,8 @@
 	</a>
 </td>
 <td>${data.orderId}</td>
-<td>
-	{@if data.repType === 1}
-		产成品
-	{@else if data.repType === 2}
-		退修品
-	{@else}
-		无
-	{@/if}
-</td>
-<td>
-	{@if data.prodType == 1}
-		传感器
-	{@else if data.prodType == 2}
-		小流量计
-	{@else if data.prodType == 3}
-		大流量计
-	{@else}
-		无
-	{@/if}
-</td>
+<td>${data.retypeName}</td>
+<td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
 		无
@@ -267,26 +181,8 @@
 	</a>
 </td>
 <td>${data.orderId}</td>
-<td>
-	{@if data.repType === 1}
-		产成品
-	{@else if data.repType === 2}
-		退修品
-	{@else}
-		无
-	{@/if}
-</td>
-<td>
-	{@if data.prodType == 1}
-		传感器
-	{@else if data.prodType == 2}
-		小流量计
-	{@else if data.prodType == 3}
-		大流量计
-	{@else}
-		无
-	{@/if}
-</td>
+<td>${data.retypeName}</td>
+<td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
 		无
@@ -336,26 +232,8 @@
 	</a>
 </td>
 <td>${data.orderId}</td>
-<td>
-	{@if data.repType === 1}
-		产成品
-	{@else if data.repType === 2}
-		退修品
-	{@else}
-		无
-	{@/if}
-</td>
-<td>
-	{@if data.prodType == 1}
-		传感器
-	{@else if data.prodType == 2}
-		小流量计
-	{@else if data.prodType == 3}
-		大流量计
-	{@else}
-		无
-	{@/if}
-</td>
+<td>${data.retypeName}</td>
+<td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
 		无
@@ -429,7 +307,7 @@
 		<div class="col-md-auto">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button data-openpage="dialog" data-area="1100,850"
-					data-handler="jboltTablePageToFirst" data-title="新增"
+					data-handler="jboltTablePageToFirst" data-title="新建报告单"
 					data-url="admin/siargo/qarep/add"
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
@@ -484,7 +362,7 @@
 					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 精度合格
 				</button>
 				<button data-openpage="dialog" data-area="1100,850"
-					data-handler="jboltTablePageToFirst" data-title="新增"
+					data-handler="jboltTablePageToFirst" data-title="新建报告单"
 					data-url="admin/siargo/qarep/add"
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增

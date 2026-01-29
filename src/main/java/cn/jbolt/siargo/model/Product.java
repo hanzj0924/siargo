@@ -3,6 +3,7 @@ package cn.jbolt.siargo.model;
 import cn.jbolt.siargo.model.base.BaseProduct;
 import cn.jbolt.core.annotation.TableBind;
 import cn.jbolt.core.base.JBoltIDGenMode;
+import cn.jbolt.core.cache.JBoltDictionaryCache;
 
 /**
  * 订单里的产品型号，跟报告单多对一关系
@@ -11,5 +12,8 @@ import cn.jbolt.core.base.JBoltIDGenMode;
 @SuppressWarnings("serial")
 @TableBind(dataSource = "main" , table = "siargo_product" , primaryKey = "id" , idGenMode = JBoltIDGenMode.SNOWFLAKE)
 public class Product extends BaseProduct<Product> {
+	public String getProdTypeName() {
+		return JBoltDictionaryCache.me.getNameBySn("siargo_prod_type", getType()+"");
+	}
 }
 

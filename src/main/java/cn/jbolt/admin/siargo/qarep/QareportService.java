@@ -51,26 +51,43 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, int prodType, int insp, Date startTime, Date endTime) {
 		Sql sql = Sql.mysql()
-				.select("sq.id", "sq.order_id", "sc.name sc_name", "sq.formnum", "sp.type AS prod_type", "sq.rep_type",
-						"sp.insp", "sp.accq_time", "sp.funq_time", "sp.appq_time", "sp.allq_time",
+				.select("sq.id", "sq.order_id", "sc.name AS sc_name", "sq.formnum",
+						"sp.accq_time", "sp.funq_time", "sp.appq_time", "sp.allq_time",
 						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						"sp.id as spid", "sp.modle as sp_modle", "sp.number as sp_number", "sp.type as sp_type",
 						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.flow_range as sp_flow_range", "sp.des as sp_des", 
-						"sp.pdfstr AS sp_pdfstr", 
-						"sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", "sp.thv as sp_thv", 
-						"sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", "sp.cucmin as sp_cucmin",
-						"sp.bv as sp_bv", "sp.la as sp_la"
+						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", 
+						"sp.thv as sp_thv", "sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", 
+						"sp.cucmin as sp_cucmin", "sp.bv as sp_bv", "sp.la as sp_la", 
+						"d_type.name AS type_name","d_insp.name AS insp_name","d_flow.name AS flow_name",
+						"d_pdfver.name AS pdfver_name","d_retype.name AS retype_name"
 						)
-				.page(pageNumber, pageSize).from("siargo_qareport", "sq")
-				.leftJoin("siargo_product", "sp", "sq.id = sp.report_id")
+				.page(pageNumber, pageSize).from("siargo_product", "sp")
+				.leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
 				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
+				.leftJoin("jb_dictionary", "d_type", "d_type.type_key = 'siargo_prod_type' "
+						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+						+ "AND d_type.enable = '1' ")
+				.leftJoin("jb_dictionary", "d_retype", "d_retype.type_key = 'siargo_rep_type' "
+						+ "AND d_retype.sn COLLATE utf8mb4_general_ci = CAST(sq.rep_type AS CHAR) "
+						+ "AND d_retype.enable = '1' ")
+				.leftJoin("jb_dictionary", "d_insp", "d_insp.type_key = 'siargo_insp' "
+						+ "AND d_insp.sn COLLATE utf8mb4_general_ci = CAST(sp.insp AS CHAR) "
+						+ "AND d_insp.enable = '1' ")
+				.leftJoin("jb_dictionary", "d_pdfver", "d_pdfver.type_key = 'siargo_pdfver' "
+						+ "AND d_pdfver.sn COLLATE utf8mb4_general_ci = CAST(sp.pdfver AS CHAR) "
+						+ "AND d_pdfver.enable = '1' ")
+				.leftJoin("jb_dictionary", "d_flow", "d_flow.type_key = 'siargo_flow_range' "
+						+ "AND d_flow.sn COLLATE utf8mb4_general_ci = sp.flow_range "
+						+ "AND d_flow.enable = '1' ")
 				.leftJoin("jb_user", "accq_user", "accq_user.id = sp.accq_uid")
 				.leftJoin("jb_user", "funq_user", "funq_user.id = sp.funq_uid")
 				.leftJoin("jb_user", "appq_user", "appq_user.id = sp.appq_uid")
 				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid").eq("sp.vd", 1);
 
 		sql.like("order_id", keywords);
+		
 		
 		if (isOk(startTime) && isOk(endTime)) {
 			sql.bwDate("sq.create_time",startTime,endTime);
@@ -195,12 +212,28 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  sp.qsi AS sp_qsi,\n" + "  sp.qi AS sp_qi,\n" + "  sp.flow_range AS sp_flow_range,\n"
 				+ "  sp.des AS sp_des,\n" + "  sp.pdfstr AS sp_pdfstr,\n" + " sp.pdfver AS sp_pdfver,\n" + "  sp.cuc AS sp_cuc,\n" 
 				+ "  sp.pv AS sp_pv,\n" + "  sp.thv AS sp_thv,\n" + "  sp.zp AS sp_zp,\n" + "  sp.fl AS sp_fl,\n" 
-				+ "  sp.cucmax AS sp_cucmax,\n" + "  sp.cucmin AS sp_cucmin,\n"+ "  sd.`VALUE` AS sp_flow_range_name,\n "
-				+ "	 sp.bv AS sp_bv,\n"+ "  sp.la AS sp_la\n" 
+				+ "  sp.cucmax AS sp_cucmax,\n" + "  sp.cucmin AS sp_cucmin,\n"
+				+ "	 sp.bv AS sp_bv,\n"+ "  sp.la AS sp_la\n, "
+				+ "  d_type.NAME AS type_name, d_insp.NAME AS insp_name, "
+				+ "  d_flow.NAME AS flow_name, d_pdfver.NAME AS pdfver_name, d_retype.NAME AS retype_name" 
 				+ "  FROM\n" + "  `siargo_qareport` sq\n"
 				+ "  LEFT JOIN `siargo_product` AS sp ON sq.id = sp.report_id\n"
 				+ "  LEFT JOIN `siargo_customer` AS sc ON sc.id = sq.cust_id\n"
-				+ "  LEFT JOIN `siargo_dictionary` AS sd ON sd.`KEY` = sp.flow_range AND sd.type_id = 4\n"
+				+ "   LEFT JOIN `jb_dictionary` AS d_type ON d_type.type_key = 'siargo_prod_type'\r\n"
+				+ "  AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR)\r\n"
+				+ "  AND d_type.ENABLE = '1'\r\n"
+				+ "  LEFT JOIN `jb_dictionary` AS d_retype ON d_retype.type_key = 'siargo_rep_type'\r\n"
+				+ "  AND d_retype.sn COLLATE utf8mb4_general_ci = CAST(sq.rep_type AS CHAR)\r\n"
+				+ "  AND d_retype.ENABLE = '1'\r\n"
+				+ "  LEFT JOIN `jb_dictionary` AS d_insp ON d_insp.type_key = 'siargo_insp'\r\n"
+				+ "  AND d_insp.sn COLLATE utf8mb4_general_ci = CAST(sp.insp AS CHAR)\r\n"
+				+ "  AND d_insp.ENABLE = '1'\r\n"
+				+ "  LEFT JOIN `jb_dictionary` AS d_pdfver ON d_pdfver.type_key = 'siargo_pdfver'\r\n"
+				+ "  AND d_pdfver.sn COLLATE utf8mb4_general_ci = CAST(sp.pdfver AS CHAR)\r\n"
+				+ "  AND d_pdfver.ENABLE = '1'\r\n"
+				+ "  LEFT JOIN `jb_dictionary` AS d_flow ON d_flow.type_key = 'siargo_flow_range'\r\n"
+				+ "  AND d_flow.sn COLLATE utf8mb4_general_ci = sp.flow_range\r\n"
+				+ "  AND d_flow.ENABLE = '1'"
 				+ "  LEFT JOIN jb_user AS accq_user ON accq_user.id = sp.accq_uid\n"
 				+ "  LEFT JOIN jb_user AS funq_user ON funq_user.id = sp.funq_uid\n"
 				+ "  LEFT JOIN jb_user AS appq_user ON appq_user.id = sp.appq_uid\n"

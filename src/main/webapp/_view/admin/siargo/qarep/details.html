@@ -1,112 +1,126 @@
 #@jboltLayout() #define main()
+<style>
+.readonly-border {
+    pointer-events: none;      /* 阻止所有鼠标事件 */
+    cursor: not-allowed;       /* 显示禁用光标 */
+}
+
+.readonly-border:focus {
+    outline: none;            /* 移除焦点轮廓 */
+    box-shadow: none;         /* 移除阴影效果 */
+}
+</style>
 <div class="jbolt_page">
 	<div class="jbolt_page_content">
 			<div class="row">
 				<div class="col">
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">订单号</label>
+					<div class="form-group row" contenteditable="false" >
+						<label class="col-sm-3 col-form-label">订单号：</label>
 						<div class="col">
-							<input type="number" disabled class="form-control" value="#(qapro.order_id ??)" />
+							<input type="text" class="form-control readonly-border" value="#(qapro.order_id ??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">客户名称</label>
+						<label class="col-sm-3 col-form-label">客户名称：</label>
 						<div class="col">
-							<select class="form-control" data-autoload disabled
-								data-url="admin/siargo/qarep/getCustName"
-								data-value-attr="id" data-text-attr="name"
-								data-select-type="select2" data-select="#(qapro.cust_id??)">
-							</select>
+							<input type="text" class="form-control readonly-border" value="#(qapro.sc_name ??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">报告单类型</label>
-						<div class="col input-group">
-							<select class="form-control" data-autoload disabled
-								data-url="admin/siargo/qarep/getDict?keywords=rep_type&isOrderBy=false"
-								data-value-attr="dickey" data-text-attr="dicvalue"
-								data-select="#(qapro.repType ??)">
-							</select>
+						<label class="col-sm-3 col-form-label">报告单类型：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.retype_name ??)" />
 						</div>
-						<label class="col-sm-3 col-form-label">报告单版号</label>
-						<div class="col input-group">
-							<select class="form-control" data-autoload disabled
-								data-url="admin/siargo/qarep/getDict?keywords=pdfver&isOrderBy=true"
-								data-value-attr="dickey" data-text-attr="dicvalue"
-								data-select="#(qapro.sp_pdfver ??)">
-							</select>
+						<label class="col-sm-3 col-form-label">报告单版号：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.pdfver_name ??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">产品类型</label>
-						<div class="col input-group">
-							<select class="form-control" data-autoload disabled
-								data-url="admin/siargo/qarep/getDict?keywords=prod_type&isOrderBy=false"
-								data-value-attr="dickey" data-text-attr="dicvalue"
-								data-select="#(qapro.sp_type??)">
-							</select>
+						<label class="col-sm-3 col-form-label">产品类型：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.type_name??)" />
 						</div>
 					</div>
 					<div class="form-group row">
 
-						<label class="col-sm-3 col-form-label">检验进度</label>
-						<div class="col input-group">
-							<select class="form-control" data-autoload disabled
-								data-url="admin/siargo/qarep/getDict?keywords=insp&isOrderBy=false"
-								data-value-attr="dickey" data-text-attr="dicvalue"
-								data-select="#(qapro.insp ??)">
-							</select>
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">流量范围</label>
-						<div class="col input-group">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_flow_range_name??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机最大电流 8v</label>
+						<label class="col-sm-3 col-form-label">检验进度：</label>
 						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_cuc??)" />
+							<input type="text" class="form-control readonly-border" value="#(qapro.insp_name ??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">送检数量：</label>
+						<div class="col input-group">
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_qsi??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">检验数量：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_qi??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">产品型号：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_modle??)" />
 						</div>
 					</div>
 				</div>
 				<div class="col">
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流 24v</label>
-						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_cucmax??)" />
+						<label class="col-sm-3 col-form-label">流量范围：</label>
+						<div class="col input-group">
+							<input type="text" class="form-control readonly-border" value="#(qapro.flow_name??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流 8/12v</label>
+						<label class="col-sm-3 col-form-label">整机电流 24v：</label>
 						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_cucmin??)" />
-						</div>
-					</div>
-
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">脉冲电压</label>
-						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_pv??)" />
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_cucmax??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">热头电压</label>
+						<label class="col-sm-3 col-form-label">整机电流 12v：</label>
 						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_thv??)" />
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_cucmin??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">零点内码</label>
+						<label class="col-sm-3 col-form-label">整机电流 8v：</label>
 						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_zp??)" />
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_cuc??)" />
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">故障电平</label>
+						<label class="col-sm-3 col-form-label">脉冲电压：</label>
 						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_fl??)" />
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_pv??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">本地地址：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_la??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">热头电压：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_thv??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">零点内码：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_zp??)" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">故障电平：</label>
+						<div class="col">
+							<input type="text" class="form-control readonly-border" value="#(qapro.sp_fl??)" />
 						</div>
 					</div>
 				</div>
@@ -114,33 +128,15 @@
 			<div class="row">
 				<div class="col">
 					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">送检数量</label>
+						<label class="col-sm-1 col-form-label">编号：</label>
 						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_qsi??)" />
+							<textarea class="form-control readonly-border" style="height: 110px;white-space: pre;" >#(qapro.sp_number??)</textarea>
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">检验数量</label>
+						<label class="col-sm-1 col-form-label">备注：</label>
 						<div class="col">
-							<input type="text" disabled class="form-control" value="#(qapro.sp_qi??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">型号</label>
-						<div class="col">
-							<input type="text" class="form-control" disabled value="#(qapro.sp_modle??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">编号</label>
-						<div class="col">
-							<input type="text" class="form-control" disabled value="#(qapro.sp_number??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">备注</label>
-						<div class="col">
-							<textarea class="form-control" style="height: 120px;white-space: pre;" disabled>#(qapro.sp_des??)</textarea>
+							<textarea class="form-control readonly-border" style="height: 110px;white-space: pre;" >#(qapro.sp_des??)</textarea>
 						</div>
 					</div>
 				</div>

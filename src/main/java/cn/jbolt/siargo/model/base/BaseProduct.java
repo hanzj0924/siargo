@@ -568,7 +568,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	 */
 	@JBoltField(name="la" ,columnName="la",type="Integer", remark="本地地址(Local Address)", required=false, maxLength=2, fixed=0, order=31)
 	public java.lang.Integer getLa() {
-		return getInt("zp");
+		return getInt("la");
 	}
 
 }

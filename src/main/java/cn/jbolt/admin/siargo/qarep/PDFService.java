@@ -181,7 +181,7 @@ public class PDFService {
 		} 
 		//大流量
 		else if (report.getStr("prod_type").equals("3")) {
-			map.put("flow_range", report.getStr("sp_flow_range_name")  == null? "" : report.getStr("sp_flow_range_name"));
+			map.put("flow_range", report.getStr("flow_name")  == null? "" : report.getStr("flow_name"));
 			
 			if (proModle.contains("GD")) {
 				map.put("cuc", report.getStr("sp_cuc"));
@@ -290,7 +290,7 @@ public class PDFService {
 		         default:
 		        	 throw new RuntimeException("未找到工业表对应版号模板，请联系开发者");
 		      }
-			}else if (proModle.contains("MF2032")){
+			}else if (proModle.contains("MF2032") || proModle.contains("MF2025")){
 				switch(pdfver){
 		         case "2":
 		        	 inputFileName = inputFileName + "/小流量计模板.pdf";
