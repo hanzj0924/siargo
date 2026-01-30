@@ -108,9 +108,11 @@ public class PDFService {
             ps.setFormFlattening(true);
             
             // 更新 PDF 地址
-    		Product product = new Product().findById(id);
-    		product.setPdfstr("/" + pdfsrc + folderVer + "/"  + report.getOrderId().toString() + "_" + id.toString() + ".pdf");
-    		product.update();
+            if (pdfsrc.equals("export/PDF")) {
+            	Product product = new Product().findById(id);
+        		product.setPdfstr("/" + pdfsrc + folderVer + "/"  + report.getOrderId().toString() + "_" + id.toString() + ".pdf");
+        		product.update();
+			}
     		
         } catch (Exception e) {
             System.out.println("===============PDF导出失败=============");

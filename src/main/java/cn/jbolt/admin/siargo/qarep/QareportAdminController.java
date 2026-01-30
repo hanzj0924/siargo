@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 import cn.jbolt.core.base.JBoltMsg;
@@ -94,12 +95,30 @@ public class QareportAdminController extends JBoltBaseController {
         }
     }
     
-
+	/**
+	 * 生成上个月PDF
+	 * Last month
+	 */
+	public void toPdfs() throws Exception {
+	    String pdfsrc = "export/LastMonthPDF";
+	    List<Record> records = service.getIds();
+	    if (records == null || records.isEmpty()) {
+	    	renderFail("无上月数据!");
+	    	return;
+	    }
+	    for (Record record : records) {
+	    	Long id = record.getLong("id");
+	        pdfservice.generateReportPdf(id,pdfsrc);
+	    }
+	    
+	    renderJsonSuccess("已完成，前往服务器桌面查看！");
+    }
+    
 	/**
 	 * 生成PDF
 	 */
 	public void toPdf() throws Exception {
-	    String pdfsrc = "PDF";
+	    String pdfsrc = "export/PDF";
 		String idsJson = getPara("ids");
 	    List<Long> ids = Arrays.stream(idsJson.split(","))
 	            .map(String::trim)

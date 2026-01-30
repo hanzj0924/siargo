@@ -1,7 +1,7 @@
 #@jboltLayout() #define main()
 <div class="jbolt_page">
 	<div class="jbolt_page_content">
-		
+
 		<form onsubmit="return false;" id="qareportForm"
 			action="admin/siargo/qarep/save" method="post">
 			<input type="hidden" name="qareport.id" value="#(qareport.id??)" />
@@ -31,21 +31,19 @@
 						<label class="col-sm-3 col-form-label">报告单类型</label>
 						<div class="col input-group">
 							<select class="form-control" data-autoload
-								name="qareport.repType"  style="width:130px;"
+								name="qareport.repType" style="width: 130px;"
 								data-url="admin/dictionary/options?key=siargo_rep_type"
 								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
-								data-value="" data-value-attr="sn"  
+								data-value="" data-value-attr="sn"
 								data-select="#(qareport.repType ??)">
 							</select>
 						</div>
 						<label class="col-sm-3 col-form-label">报告单版号</label>
-						<div class="col input-group" >
-							<select class="form-control" data-autoload
-								name="product.pdfver" 
+						<div class="col input-group">
+							<select class="form-control" data-autoload name="product.pdfver"
 								data-url="admin/dictionary/options?key=siargo_pdfver"
-								data-rule="select" data-tips="请选择版号" 
-								data-value="" data-value-attr="sn"  
-								data-select="#(qareport.pdfver ??)">
+								data-rule="select" data-tips="请选择版号" data-value=""
+								data-value-attr="sn" data-select="#(qareport.pdfver ??)">
 							</select>
 						</div>
 					</div>
@@ -55,7 +53,7 @@
 							<select class="form-control" data-autoload name="product.type"
 								data-url="admin/dictionary/options?key=siargo_prod_type"
 								data-rule="select" data-tips="请选择产品类型" data-text="=请选择="
-								data-value="" data-value-attr="sn"  
+								data-value="" data-value-attr="sn"
 								data-select="#(qareport.prodType ??)">
 							</select>
 						</div>
@@ -79,9 +77,8 @@
 							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/dictionary/options?key=siargo_flow_range"
 								name="product.flow_range" data-text="=请选择/搜索="
-								data-value-attr="sn"  
-								data-select="#(qareport.spFlowRange ??)"
-								data-notnull="false"  data-rule="select"
+								data-value-attr="sn" data-select="#(qareport.spFlowRange ??)"
+								data-notnull="false" data-rule="select"
 								data-select-type="select2">
 							</select>
 						</div>
@@ -90,7 +87,7 @@
 						<label class="col-sm-3 col-form-label">电池电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false"  data-rule="siargo_tofixed_4"
+								data-notnull="false" data-rule="siargo_tofixed_4"
 								class="form-control" placeholder="3.2505-3.3495V" maxlength="6"
 								name="product.bv" value="#(qareport.spBv??)" />
 						</div>
@@ -104,28 +101,25 @@
 								name="product.fl" value="#(qareport.spFl??)" />
 						</div>
 					</div>
-					
+
 				</div>
 				<div class="col">
-					<div class="text-right" style="padding-bottom:0.5em;margin-bottom: 0.5em;" >
-					<!--  data-confirm="确认导入数据？" -->
-						<div class="j_upload_file_box" 
-						data-name="file" 
-						data-btn-class="btn btn-success"
-						data-placeholder="导入"
-						data-accept="excel"
-						data-maxsize="20480"
-						data-handler="uploadFile"
-						data-url="admin/siargo/qarep/importExcel"
-						data-upload-success-handler="uploadSuccessHandler"
-						></div>
+					<div class="text-right"
+						style="padding-bottom: 0.5em; margin-bottom: 0.5em;">
+						<!--  data-confirm="确认导入数据？" -->
+						<div class="j_upload_file_box" data-name="file"
+							data-btn-class="btn btn-success" data-placeholder="导入"
+							data-accept="excel" data-maxsize="20480"
+							data-handler="uploadFile"
+							data-url="admin/siargo/qarep/importExcel"
+							data-upload-success-handler="uploadSuccessHandler"></div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">整机电流 24v</label>
 						<div class="col">
-							<input type="text" data-with-clearbtn="true" autocomplete="off" 
-								data-notnull="false"  data-rule="siargo_tofixed_2"
-								class="form-control" placeholder="≤0.5mA/10~20mA" maxlength="5" 
+							<input type="text" data-with-clearbtn="true" autocomplete="off"
+								data-notnull="false" data-rule="siargo_tofixed_2"
+								class="form-control" placeholder="≤0.5mA/10~20mA" maxlength="5"
 								name="product.cucmax" value="#(qareport.spCucmax??)" />
 						</div>
 					</div>
@@ -160,31 +154,31 @@
 						<label class="col-sm-3 col-form-label">本地地址</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false"  data-rule="pint"
-								class="form-control" placeholder="≤50" maxlength="2"
-								name="product.la" value="#(qareport.spLa??)" />
+								data-notnull="false" data-rule="pint" class="form-control"
+								placeholder="≤50" maxlength="2" name="product.la"
+								value="#(qareport.spLa??)" />
 						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">热头电压</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="pint"
-								class="form-control" placeholder="≤1690" maxlength="4"
-								name="product.thv" value="#(qareport.spThv??)" />
+								data-notnull="false" data-rule="pint" class="form-control"
+								placeholder="≤1690" maxlength="4" name="product.thv"
+								value="#(qareport.spThv??)" />
 						</div>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">零点内码</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
-								data-notnull="false" data-rule="pint"
-								class="form-control" placeholder="≤30" maxlength="2"
-								name="product.zp" value="#(qareport.spZp??)" />
+								data-notnull="false" data-rule="pint" class="form-control"
+								placeholder="≤30" maxlength="2" name="product.zp"
+								value="#(qareport.spZp??)" />
 						</div>
 					</div>
-					
-					
+
+
 				</div>
 			</div>
 			<div class="row">
@@ -228,7 +222,8 @@
 					<div class="form-group row">
 						<label class="col-sm-1 col-form-label">备注</label>
 						<div class="col">
-							<textarea class="form-control" style="height: 50px;white-space: pre;"
+							<textarea class="form-control"
+								style="height: 50px; white-space: pre;"
 								placeholder="如果多型号，英文逗号分割" data-tips="如果多型号，英文逗号分割"
 								maxlength="900" name="dess" data-with-clearbtn="true"></textarea>
 						</div>
@@ -238,25 +233,24 @@
 		</form>
 		#define js()
 		<script>
-		function uploadSuccessHandler(uploader,type,fileInput,result) {
-		    var data = result.data;
-	    
-		    // 填充数据
-		    if (data.orderId) {
-		        $('input[name="qareport.orderId"]').val(data.orderId);
-		    }
-		    if (data.modles) {
-		        $('textarea[name="modles"]').val(data.modles);
-		    }
-		    if (data.numbers) {
-		        $('textarea[name="numbers"]').val(data.numbers);
-		    }
-		    if (data.qsis) {
-		        $('textarea[name="qsis"]').val(data.qsis);
-		        $('textarea[name="qis"]').val(data.qsis);
-		    }
-		}
-	
+			function uploadSuccessHandler(uploader, type, fileInput, result) {
+				var data = result.data;
+
+				// 填充数据
+				if (data.orderId) {
+					$('input[name="qareport.orderId"]').val(data.orderId);
+				}
+				if (data.modles) {
+					$('textarea[name="modles"]').val(data.modles);
+				}
+				if (data.numbers) {
+					$('textarea[name="numbers"]').val(data.numbers);
+				}
+				if (data.qsis) {
+					$('textarea[name="qsis"]').val(data.qsis);
+					$('textarea[name="qis"]').val(data.qsis);
+				}
+			}
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="qareportForm")
 		#end

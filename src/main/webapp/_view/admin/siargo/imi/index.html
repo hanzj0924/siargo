@@ -1,0 +1,102 @@
+#@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+
+	<div class="jbolt_page_title">
+		<div class="row">
+			<div class="col-md-auto">
+				<h1>来料到货单管理</h1>
+			</div>
+			<div class="col">
+				<form class="form-inline" id="imageForm_#(pageId)"
+					onsubmit="return false;" method="post">
+					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+						placeholder="输入到货单号搜索" name="keywords" value="" />
+					<select class="form-control" data-autoload data-refresh="true"
+						data-url="admin/dictionary/options?key=siargo_supplier"
+						name="supplierId" data-text="=请选择/搜索=" data-with-clearbtn="true"
+						data-select="#(image.supplier_id ??)" style="width: 500px !important;"
+						data-notnull="false"  data-rule="select"
+						data-select-type="select2">
+					</select>
+					<button type="submit" class="btn btn-outline-secondary">
+						<i class="fa fa-search"></i> 查询
+					</button>
+				</form>
+			</div>
+			<div class="col-md-auto"></div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+		<!-- JBoltTable的数据模板定义-->
+		<textarea class="jb_tpl_box" id="imageRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.storageName}</td>
+<td>${data.supplierId}</td>
+<td>${data.filePath}</td>
+<td>${data.description}</td>
+<td>${data.uploaderName}</td>
+<td>${data.uploadTime}</td>
+</tr>
+{@/each}
+</textarea>
+
+		<!-- 工具条 toolbar -->
+		<div class="jbolt_table_toolbar" id="image_toolbar_#(pageId)">
+			<div class="btn-group" role="group" aria-label="btn-group">
+				<button data-openpage="dialog" data-area="1100,850"
+					data-handler="jboltTablePageToFirst" data-title="上传到货单"
+					data-url="admin/siargo/imi/add"
+					class="btn btn-outline-primary btn-sm">
+					<i class="fa fa-plus"></i> 新增
+				</button>
+				<button data-openpage="dialog" data-area="1100,850"
+					data-handler="refreshJBoltTable" data-title="修改到货单图片信息"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/imi/edit/"
+					class="btn btn-outline-info btn-sm">
+					<i class="fa fa-edit"></i> 修改
+				</button>
+				<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+					data-check-handler="jboltTableGetCheckedIds"
+					data-url="admin/siargo/imi/deleteByIds?ids="
+					data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm">
+					<i class="fa fa-trash"></i> 删除
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-secondary btn-sm">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
+
+			<div class="clearfix"></div>
+		</div>
+
+		<table class="jbolt_table jbolt_main_table table-center"
+			data-jbolttable data-height="fill" data-ajax="true"
+			data-url="admin/siargo/imi/datas" data-column-resize="true"
+			data-column-prepend="1:checkbox"
+			data-conditions-form="imageForm_#(pageId)"
+			data-rowtpl="imageRowtpl_#(pageId)" data-page="imagePage_#(pageId)"
+			data-toolbar="image_toolbar_#(pageId)" data-fixed-columns-left="1,2">
+			<thead class="fw-normal">
+				<tr>
+					<th data-width="60">序号</th>
+					<th data-width="150" data-column="storage_name">到货单号</th>
+					<th data-min-width="150" data-column="supplier_id">供应商</th>
+					<th data-width="150" data-column="file_path">文件存储路径</th>
+					<th data-width="150" data-column="description">图片描述</th>
+					<th data-width="150" data-column="uploader_id">上传者</th>
+					<th data-width="150" data-column="upload_time">上传时间</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+
+
+	</div>
+</div>
+#end
+

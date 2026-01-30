@@ -16,6 +16,7 @@ import com.jfinal.kit.Kv;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Db;
 import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
+import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
 import cn.jbolt.core.kit.JBoltUserKit;
@@ -36,7 +37,27 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	protected Qareport dao() {
 		return dao;
 	}
+	
+	/**
+	 * 获取上个月的id
+	 * @param startTime
+	 * @param endTime
+	 * @return
+	 */
+	public List<Record> getIds() {
+	    Sql sql = Sql.mysql()
+	            .select("sp.id")
+	            .from("siargo_product", "sp")
+	            .leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
+	            .eq("sp.vd", 1)
+	            .eq("sp.insp", 5)
+	            .bwDate("sq.create_time",
+	                    DateUtil.lastMonthFirstDay(DateUtil.getNow()),
+	                    DateUtil.lastMonthLastDay(DateUtil.getNow()));
 
+	    return findRecord(sql);
+	}
+	
 	/**
 	 * 后台管理分页查询
 	 * 

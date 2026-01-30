@@ -1,0 +1,39 @@
+<form onsubmit="return false;" id="imageForm" action="#(action)"
+	method="post">
+	<input type="hidden" name="image.id" value="#(image.id??)" />
+	<div class="row">
+		<div class="col">
+			<div class="form-group row">
+				<label class="col-sm-1 col-form-label">供应商：</label>
+				<div class="col-sm-3">
+					<select class="form-control " data-autoload data-refresh="true"
+						data-url="admin/dictionary/options?key=siargo_supplier"
+						name="image.supplierId" data-text="=请选择/搜索=" data-value-attr="sn"
+						data-select="#(image.supplierId ??)" data-notnull="false"
+						data-rule="select" data-select-type="select2">
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<div class="form-group row">
+				<label class="col-sm-1 col-form-label">图片描述：</label>
+				<div class="col">
+					<textarea class="form-control" style="height: 100px;white-space: pre;"
+						placeholder="请输入图片描述" data-tips="请输入图片描述"
+						maxlength="900" name="image.description" data-with-clearbtn="true">#(image.description??)
+					</textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</form>
+#define js()
+<script>
+	
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="imageForm") #end
+
