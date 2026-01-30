@@ -86,7 +86,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				.leftJoin("jb_user", "appq_user", "appq_user.id = sp.appq_uid")
 				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid").eq("sp.vd", 1);
 
-		sql.like("order_id", keywords);
+		sql.like("sq.order_id", keywords);
 		
 		
 		if (isOk(startTime) && isOk(endTime)) {

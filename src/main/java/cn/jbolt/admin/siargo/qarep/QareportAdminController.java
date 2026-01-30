@@ -6,7 +6,6 @@ import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt.admin.siargo.customer.CustomerService;
-import cn.jbolt.admin.siargo.dict.DictionarytypeService;
 import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
 import cn.jbolt.common.util.StringUtil;
 
@@ -49,8 +48,7 @@ public class QareportAdminController extends JBoltBaseController {
 	private ProductService proservice;
 	@Inject
 	private CustomerService custservice;
-	@Inject
-	private DictionarytypeService dicttypeservice;
+
 	
    /**
 	* 首页
@@ -122,14 +120,6 @@ public class QareportAdminController extends JBoltBaseController {
 		renderJsonData(custservice.findAll());
 	}
 	
-	
-	/**
-	* 查询数据字典
-	*/
-	public void getDict() {	
-		renderJsonData(dicttypeservice.getDictName(getKeywords(),Boolean.parseBoolean(getPara("isOrderBy").trim())));
-	}
-  	
   	/**
 	* 数据源
 	*/
