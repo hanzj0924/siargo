@@ -31,6 +31,10 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
     public static final String STATUS = "status";
     /**删除时间*/
     public static final String DELETED_TIME = "deleted_time";
+    /**更新时间*/
+    public static final String UPDATED_TIME = "updated_time";
+    /**更新者ID*/
+    public static final String UPDATE_ID = "update_id";
 	/**
 	 * 主键ID
 	 */
@@ -59,7 +63,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 供应商ID
 	 */
-	@JBoltField(name="supplierId" ,columnName="supplier_id",type="String", remark="供应商ID", required=true, maxLength=255, fixed=0, order=2)
+	@JBoltField(name="supplierId" ,columnName="supplier_id",type="String", remark="供应商ID", required=false, maxLength=255, fixed=0, order=2)
 	public java.lang.String getSupplierId() {
 		return getStr("supplier_id");
 	}
@@ -75,7 +79,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 存储文件名（到货单号）
 	 */
-	@JBoltField(name="storageName" ,columnName="storage_name",type="String", remark="存储文件名（到货单号）", required=true, maxLength=100, fixed=0, order=3)
+	@JBoltField(name="storageName" ,columnName="storage_name",type="String", remark="存储文件名（到货单号）", required=false, maxLength=100, fixed=0, order=3)
 	public java.lang.String getStorageName() {
 		return getStr("storage_name");
 	}
@@ -91,7 +95,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 文件存储路径
 	 */
-	@JBoltField(name="filePath" ,columnName="file_path",type="String", remark="文件存储路径", required=true, maxLength=500, fixed=0, order=4)
+	@JBoltField(name="filePath" ,columnName="file_path",type="String", remark="文件存储路径", required=false, maxLength=500, fixed=0, order=4)
 	public java.lang.String getFilePath() {
 		return getStr("file_path");
 	}
@@ -107,7 +111,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 文件MD5值（去重）
 	 */
-	@JBoltField(name="md5Hash" ,columnName="md5_hash",type="String", remark="文件MD5值（去重）", required=true, maxLength=32, fixed=0, order=5)
+	@JBoltField(name="md5Hash" ,columnName="md5_hash",type="String", remark="文件MD5值（去重）", required=false, maxLength=32, fixed=0, order=5)
 	public java.lang.String getMd5Hash() {
 		return getStr("md5_hash");
 	}
@@ -139,7 +143,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 上传时间
 	 */
-	@JBoltField(name="uploadTime" ,columnName="upload_time",type="Date", remark="上传时间", required=true, maxLength=19, fixed=0, order=7)
+	@JBoltField(name="uploadTime" ,columnName="upload_time",type="Date", remark="上传时间", required=false, maxLength=19, fixed=0, order=7)
 	public java.util.Date getUploadTime() {
 		return getDate("upload_time");
 	}
@@ -172,7 +176,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 状态：1-正常，0-删除
 	 */
-	@JBoltField(name="status" ,columnName="status",type="Integer", remark="状态：1-正常，0-删除", required=true, maxLength=3, fixed=0, order=10)
+	@JBoltField(name="status" ,columnName="status",type="Integer", remark="状态：1-正常，0-删除", required=true, maxLength=3, fixed=0, order=9)
 	public java.lang.Integer getStatus() {
 		return getInt("status");
 	}
@@ -188,9 +192,42 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 删除时间
 	 */
-	@JBoltField(name="deletedTime" ,columnName="deleted_time",type="Date", remark="删除时间", required=false, maxLength=19, fixed=0, order=11)
+	@JBoltField(name="deletedTime" ,columnName="deleted_time",type="Date", remark="删除时间", required=false, maxLength=19, fixed=0, order=10)
 	public java.util.Date getDeletedTime() {
 		return getDate("deleted_time");
+	}
+
+	/**
+	 * 更新时间
+	 */
+	public M setUpdatedTime(java.util.Date updatedTime) {
+		set("updated_time", updatedTime);
+		return (M)this;
+	}
+	
+	/**
+	 * 更新时间
+	 */
+	@JBoltField(name="updatedTime" ,columnName="updated_time",type="Date", remark="更新时间", required=false, maxLength=19, fixed=0, order=11)
+	public java.util.Date getUpdatedTime() {
+		return getDate("updated_time");
+	}
+
+	/**
+	 * 更新者ID
+	 */
+	public M setUpdateId(java.lang.Long updateId) {
+		set("update_id", updateId);
+		return (M)this;
+	}
+	
+	/**
+	 * 更新者ID
+	 */
+	@JBoltField(name="updateId" ,columnName="update_id",type="Long", remark="更新者ID", required=false, maxLength=19, fixed=0, order=12)
+	@JSONField(serializeUsing= ToStringSerializer.class)
+	public java.lang.Long getUpdateId() {
+		return getLong("update_id");
 	}
 
 }

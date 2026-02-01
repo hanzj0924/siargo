@@ -4,6 +4,7 @@ import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
+import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
 import cn.jbolt.common.config.JBoltUploadFolder;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
@@ -22,6 +23,7 @@ import com.jfinal.upload.UploadFile;
 
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.Image;
+import cn.jbolt.siargo.model.Product;
 
 /**
  * 来料到货单管理 Controller
@@ -155,14 +157,32 @@ public class ImageAdminController extends JBoltBaseController {
 	 */
 	@Before(Tx.class)
 	public void update() {
-		renderJson(service.update(getModel(Image.class, "image"), null));
+		renderJson(service.update(getModel(Image.class, "image")));
+	}
+	
+	/**
+	* 删除
+	*/
+    @Before(Tx.class)
+	public void deleteByIds() {
+    	String idsJson = getPara("ids");
+
+        List<Long> ids = Arrays.stream(idsJson.split(","))
+                .map(String::trim)
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+
+            for (Long id : ids) {
+            	service.delete(id);
+            }
+            renderJsonSuccess();
 	}
 
 	/**
 	 * 批量删除
 	 */
 	@Before(Tx.class)
-	public void deleteByIds() {
+	public void deleteByIds1() {
 		renderJson(service.deleteByBatchIds(get("ids")));
 	}
 

@@ -11,7 +11,7 @@
  Target Server Version : 80405 (8.4.5)
  File Encoding         : 65001
 
- Date: 01/02/2026 20:23:32
+ Date: 02/02/2026 00:26:30
 */
 
 SET NAMES utf8mb4;
@@ -32,8 +32,10 @@ CREATE TABLE `siargo_image`  (
   `uploader_id` bigint NULL DEFAULT NULL COMMENT '上传者ID',
   `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态：1-正常，0-删除',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `updated_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `update_id` bigint NULL DEFAULT NULL COMMENT '更新者ID',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_md5_hash`(`md5_hash` ASC) USING BTREE,
+  INDEX `uk_md5_hash`(`md5_hash` ASC) USING BTREE,
   INDEX `idx_supplier_id`(`supplier_id` ASC) USING BTREE,
   INDEX `idx_upload_time`(`upload_time` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,

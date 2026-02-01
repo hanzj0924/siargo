@@ -42,6 +42,7 @@ public class ImageService extends JBoltBaseService<Image> {
 
 	public static final int STATUS_NORMAL = 1;
 	public static final int STATUS_DELETED = 0;
+	public static final String webRootPath = PathKit.getWebRootPath();
 
 	/**
 	 * 后台管理分页查询
@@ -57,12 +58,14 @@ public class ImageService extends JBoltBaseService<Image> {
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, String supplierId) {
 		Sql sql = Sql.mysql()
-				.select("si.supplier_id" , "si.storage_name", "si.file_path", "si.md5_hash",
-						"si.description", "si.upload_time", "si.status", "si.deleted_time", 
-						"ju.name AS uploader_name", "jd.name AS supplier_name")
+				.select("si.id" ,"si.supplier_id" , "si.storage_name", "si.file_path", "si.md5_hash",
+						"si.description", "si.upload_time","si.updated_time", "si.status", "si.deleted_time", 
+						"jd.name AS supplier_name",
+						"ju_uploader.name AS uploader_name", "ju_update.name AS update_name")
 				.page(pageNumber, pageSize)
 				.from("siargo_image", "si")
-				.leftJoin("jb_user", "ju", "ju.id = si.uploader_id")
+				.leftJoin("jb_user", "ju_uploader", "ju_uploader.id = si.uploader_id")
+				.leftJoin("jb_user", "ju_update", "ju_update.id = si.update_id")
 				.leftJoin("jb_dictionary", "jd", "jd.type_key = 'siargo_supplier'  "
 						+ "AND jd.sn COLLATE utf8mb4_general_ci = CAST(si.supplier_id AS CHAR) "
 						+ "AND jd.enable = '1' ")
@@ -82,7 +85,6 @@ public class ImageService extends JBoltBaseService<Image> {
 	 */
 	public Ret save( Image image, String tempPath) {
 		Image dbImage = new Image();
-		String webRootPath = PathKit.getWebRootPath();
 		File tempFile = new File(webRootPath + tempPath);
 		String localPath = File.separator + "upload" + File.separator + 
 				JBoltUploadFolder.SIARGO_UPLOAD_IMI + File.separator + 
@@ -97,26 +99,14 @@ public class ImageService extends JBoltBaseService<Image> {
 		String md5 = getMd5(tempFile);
 
 		// 检查图片是否已存在
-		
 		 Image existImage = findByMd5(md5); 
 		 if (existImage != null){ 
 			 return fail("图片 " + existImage.getStorageName() + " 已经存在！"); 
 		 }
 		 
-		 //去文件名掉后缀
-		 String fileName = tempFile.getName();
-		 String fileNameWithoutExtension;
-
-		 int dotIndex = fileName.lastIndexOf('.');
-		 if (dotIndex > 0) {
-		     fileNameWithoutExtension = fileName.substring(0, dotIndex);
-		 } else {
-		     fileNameWithoutExtension = fileName; // 没有后缀的情况
-		 }
-		 
 		dbImage.set("supplier_id", image.getSupplierId());
-		dbImage.set("storage_name", fileNameWithoutExtension);
-		dbImage.set("file_path", FileUtil.normalize(tempPath));
+		dbImage.set("storage_name", getFileName(tempFile));
+		dbImage.set("file_path", FileUtil.normalize(localPath + File.separator + tempFile.getName()));
 		dbImage.set("md5_hash", md5);
 		dbImage.set("description", image.getDescription());
 		dbImage.set("upload_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
@@ -129,7 +119,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			try {
 				Files.move(
 						tempFile.toPath(),
-						Paths.get(webRootPath, localPath + File.separator + fileName),
+						Paths.get(webRootPath, localPath + File.separator + tempFile.getName()),
 				        StandardCopyOption.REPLACE_EXISTING  // 如果目标文件存在则替换
 				    );
 			} catch (IOException e) {
@@ -154,6 +144,26 @@ public class ImageService extends JBoltBaseService<Image> {
 		} catch (IOException e) {
 			throw new RuntimeException("计算文件MD5失败", e);
 		}
+	}
+	
+	/**
+	 * 获取文件名
+	 * 
+	 * @param file 文件对象
+	 * @return MD5 字符串
+	 */
+	public String getFileName(File file) {
+		//去文件名掉后缀
+		 String fileName = file.getName();
+		 String fileNameWithoutExtension;
+
+		 int dotIndex = fileName.lastIndexOf('.');
+		 if (dotIndex > 0) {
+		     fileNameWithoutExtension = fileName.substring(0, dotIndex);
+		 } else {
+		     fileNameWithoutExtension = fileName; // 没有后缀的情况
+		 }
+		 return fileNameWithoutExtension;
 	}
 
 	/**
@@ -187,11 +197,11 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * @param image
 	 * @return
 	 */
-	public Ret update(Image image, String uploadPath) {
+	public Ret update(Image image) {
 		if (image == null || notOk(image.getId())) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		// 更新时需要判断数据存在
+		
 		Image dbImage = findById(image.getId());
 		if (dbImage == null) {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
@@ -200,13 +210,74 @@ public class ImageService extends JBoltBaseService<Image> {
 		if (image.getStatus() == STATUS_DELETED) {
 			image.set("deleted_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 		}
+		
+		File tempFile = new File(webRootPath + image.getFilePath());
+		String localPath = File.separator + "upload" + File.separator + 
+				JBoltUploadFolder.SIARGO_UPLOAD_IMI + File.separator + 
+				dicIdFindBySn(image.getSupplierId()).getStr("id");
+		
+    	File locaFolder = new File(webRootPath + localPath);
+		if (!locaFolder.exists()) {
+			locaFolder.mkdirs();
+		}
+		
+		// 计算MD5（用于去重）
+		String md5 = getMd5(tempFile);
 
+		// 检查图片是否已存在
+		if (!image.getFilePath().equals(dbImage.getFilePath())) {
+			Image existImage = findByMd5(md5); 
+			 	if (existImage != null){ 
+			 		return fail("图片 " + existImage.getStorageName() + " 已经存在！"); 
+			 	}
+		}
+		 
+		image.set("storage_name", getFileName(tempFile));
+		image.set("file_path", FileUtil.normalize(image.getFilePath()));
+		image.set("md5_hash", md5);
+		image.set("description", image.getDescription());
+		image.set("updated_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+		image.set("update_id", JBoltUserKit.getUserId());
 		boolean success = image.update();
 		if (success) {
+			try {
+				File oldFile = new File(webRootPath + dbImage.getFilePath());
+				oldFile.delete();
+				
+				Files.move(
+						tempFile.toPath(),
+						Paths.get(webRootPath, localPath + File.separator + tempFile.getName()),
+				        StandardCopyOption.REPLACE_EXISTING  // 如果目标文件存在则替换
+				    );
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			// 添加日志
 			// addUpdateSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
 		}
 		return ret(success);
+	}
+	
+	/**
+	 * 删除
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Ret delete(Long id) {
+		Image dbImage = findById(id);
+		if (dbImage == null) {
+			return fail(JBoltMsg.DATA_NOT_EXIST);
+		}
+		
+		File oldFile = new File(webRootPath + dbImage.getFilePath());
+		oldFile.delete();
+		
+		dbImage.set("deleted_time",SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+		dbImage.set("status", STATUS_DELETED);
+
+		return ret(dbImage.update());
 	}
 
 	/**
