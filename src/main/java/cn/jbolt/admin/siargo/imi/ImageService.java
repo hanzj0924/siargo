@@ -16,6 +16,8 @@ import com.jfinal.kit.Kv;
 import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FilenameUtils;
+
 import cn.hutool.core.io.FileUtil;
 import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
 import cn.jbolt.common.config.JBoltUploadFolder;
@@ -165,6 +167,63 @@ public class ImageService extends JBoltBaseService<Image> {
 		 }
 		 return fileNameWithoutExtension;
 	}
+	
+	/**
+	 * 使用 Apache Commons IO 获取带点的扩展名
+	 * @param file 文件对象
+	 * @return 带点的扩展名
+	 */
+	public String getExtensionWithDotApacheCommons(File file) {
+	    if (file == null) {
+	        return "";
+	    }
+	    String extension = FilenameUtils.getExtension(file.getName());
+	    return extension.isEmpty() ? "" : "." + extension;
+	}
+	
+	/**
+	 * 重命名文件
+	 * @param oldFilePath 原文件完整路径（相对路径）
+	 * @param newName 新的文件名（包含扩展名）
+	 * @return 新文件的完整路径，如果重命名失败则返回 null
+	 */
+	public String renameFile(String oldFilePath, String newName) {
+	    try {
+	        // 构建原文件的绝对路径
+	        File oldFile = new File(webRootPath + oldFilePath);
+	        
+	        // 获取原文件扩展名
+	        String extension = getExtensionWithDotApacheCommons(oldFile);
+	        
+	        // 构建新文件的绝对路径
+	        String newAbsolutePath = oldFile.getParent() + File.separator + newName + extension;
+	        File newFile = new File(newAbsolutePath);
+	        
+	        // 检查新文件是否已存在
+	        if (newFile.exists()) {
+	            throw new RuntimeException("目标文件已存在: " + newAbsolutePath);
+	        }
+	        
+	        // 执行重命名
+	        boolean success = oldFile.renameTo(newFile);
+	        
+	        if (success) {
+	            // 构建并返回相对于 web 根目录的路径 从绝对路径中去除 webRootPath 部分
+	            String relativePath = newAbsolutePath.substring(webRootPath.length());
+	            
+	            // 将路径分隔符统一为 "/"（适用于 Web 路径）
+	            relativePath = relativePath.replace(File.separator, "/");
+	            
+	            return relativePath;
+	        } else {
+	            return null;
+	        }
+	    } catch (Exception e) {
+	        System.err.println("重命名文件时发生异常: " + e.getMessage());
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
 
 	/**
 	 * 根据MD5查找已存在的图片
@@ -231,28 +290,35 @@ public class ImageService extends JBoltBaseService<Image> {
 			 		return fail("图片 " + existImage.getStorageName() + " 已经存在！"); 
 			 	}
 		}
-		 
-		image.set("storage_name", getFileName(tempFile));
-		image.set("file_path", FileUtil.normalize(image.getFilePath()));
+		
+		if (!image.getStorageName().equals(dbImage.getStorageName())) {
+			image.set("file_path", FileUtil.normalize(renameFile(dbImage.getFilePath(),image.getStorageName())));
+		} else {
+			image.set("file_path", FileUtil.normalize(image.getFilePath()));
+		}
+
 		image.set("md5_hash", md5);
 		image.set("description", image.getDescription());
 		image.set("updated_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 		image.set("update_id", JBoltUserKit.getUserId());
 		boolean success = image.update();
 		if (success) {
-			try {
-				File oldFile = new File(webRootPath + dbImage.getFilePath());
-				oldFile.delete();
-				
-				Files.move(
-						tempFile.toPath(),
-						Paths.get(webRootPath, localPath + File.separator + tempFile.getName()),
-				        StandardCopyOption.REPLACE_EXISTING  // 如果目标文件存在则替换
-				    );
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if (!(image.getFilePath().equals(dbImage.getFilePath()) && image.getStorageName().equals(dbImage.getStorageName()))) {
+				try {
+					File oldFile = new File(webRootPath + dbImage.getFilePath());
+					oldFile.delete();
+					
+					Files.move(
+							tempFile.toPath(),
+							Paths.get(webRootPath, localPath + File.separator + tempFile.getName()),
+					        StandardCopyOption.REPLACE_EXISTING  // 如果目标文件存在则替换
+					    );
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
+			
 			// 添加日志
 			// addUpdateSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
 		}
