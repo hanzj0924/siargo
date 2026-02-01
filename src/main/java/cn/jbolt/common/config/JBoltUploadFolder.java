@@ -28,6 +28,7 @@ public class JBoltUploadFolder {
 	public static String todayFolder(String path){
 		return path + SEPARATOR + todayFolder();
 	}
+	
 	public static final String DEMO_EDITOR_IMAGE = "demo" + SEPARATOR + "editor";
 	public static final String DEMO_IMAGE_UPLOADER = "demo" + SEPARATOR + "imguploader";
 	public static final String DEMO_FILE_UPLOADER = "demo" + SEPARATOR + "fileuploader";
@@ -47,4 +48,6 @@ public class JBoltUploadFolder {
 	public static final String DEMO_APITEST_IMAGE = "demo" + SEPARATOR + "apitest" + SEPARATOR + "image";
 	public static final String SYSNOTICE_FILES = "sysnotice" + SEPARATOR + "files";
 	public static final String IMPORT_EXCEL_TEMP_FOLDER = "exceltemps";
+	public static final String SIARGO_UPLOAD_IMI = "imi" ;
+	
 }

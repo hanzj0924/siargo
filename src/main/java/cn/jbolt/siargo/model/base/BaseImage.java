@@ -15,8 +15,6 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
     public static final String ID = "id";
     /**供应商ID*/
     public static final String SUPPLIER_ID = "supplier_id";
-    /**原始文件名*/
-    public static final String ORIGINAL_NAME = "original_name";
     /**存储文件名（到货单号）*/
     public static final String STORAGE_NAME = "storage_name";
     /**文件存储路径*/
@@ -67,22 +65,6 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	}
 
 	/**
-	 * 原始文件名
-	 */
-	public M setOriginalName(java.lang.String originalName) {
-		set("original_name", originalName);
-		return (M)this;
-	}
-	
-	/**
-	 * 原始文件名
-	 */
-	@JBoltField(name="originalName" ,columnName="original_name",type="String", remark="原始文件名", required=true, maxLength=255, fixed=0, order=3)
-	public java.lang.String getOriginalName() {
-		return getStr("original_name");
-	}
-
-	/**
 	 * 存储文件名（到货单号）
 	 */
 	public M setStorageName(java.lang.String storageName) {
@@ -93,7 +75,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 存储文件名（到货单号）
 	 */
-	@JBoltField(name="storageName" ,columnName="storage_name",type="String", remark="存储文件名（到货单号）", required=true, maxLength=100, fixed=0, order=4)
+	@JBoltField(name="storageName" ,columnName="storage_name",type="String", remark="存储文件名（到货单号）", required=true, maxLength=100, fixed=0, order=3)
 	public java.lang.String getStorageName() {
 		return getStr("storage_name");
 	}
@@ -109,7 +91,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 文件存储路径
 	 */
-	@JBoltField(name="filePath" ,columnName="file_path",type="String", remark="文件存储路径", required=true, maxLength=500, fixed=0, order=5)
+	@JBoltField(name="filePath" ,columnName="file_path",type="String", remark="文件存储路径", required=true, maxLength=500, fixed=0, order=4)
 	public java.lang.String getFilePath() {
 		return getStr("file_path");
 	}
@@ -125,7 +107,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 文件MD5值（去重）
 	 */
-	@JBoltField(name="md5Hash" ,columnName="md5_hash",type="String", remark="文件MD5值（去重）", required=true, maxLength=32, fixed=0, order=6)
+	@JBoltField(name="md5Hash" ,columnName="md5_hash",type="String", remark="文件MD5值（去重）", required=true, maxLength=32, fixed=0, order=5)
 	public java.lang.String getMd5Hash() {
 		return getStr("md5_hash");
 	}
@@ -141,7 +123,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 图片描述
 	 */
-	@JBoltField(name="description" ,columnName="description",type="String", remark="图片描述", required=false, maxLength=500, fixed=0, order=7)
+	@JBoltField(name="description" ,columnName="description",type="String", remark="图片描述", required=false, maxLength=500, fixed=0, order=6)
 	public java.lang.String getDescription() {
 		return getStr("description");
 	}
@@ -157,7 +139,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 上传时间
 	 */
-	@JBoltField(name="uploadTime" ,columnName="upload_time",type="Date", remark="上传时间", required=true, maxLength=19, fixed=0, order=8)
+	@JBoltField(name="uploadTime" ,columnName="upload_time",type="Date", remark="上传时间", required=true, maxLength=19, fixed=0, order=7)
 	public java.util.Date getUploadTime() {
 		return getDate("upload_time");
 	}
@@ -173,7 +155,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 上传者ID
 	 */
-	@JBoltField(name="uploaderId" ,columnName="uploader_id",type="Long", remark="上传者ID", required=false, maxLength=19, fixed=0, order=9)
+	@JBoltField(name="uploaderId" ,columnName="uploader_id",type="Long", remark="上传者ID", required=false, maxLength=19, fixed=0, order=8)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getUploaderId() {
 		return getLong("uploader_id");

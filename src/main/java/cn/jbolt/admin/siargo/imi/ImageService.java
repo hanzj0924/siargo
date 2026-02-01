@@ -2,35 +2,47 @@ package cn.jbolt.admin.siargo.imi;
 
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
-
+import com.jfinal.upload.UploadFile;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
-
-import java.util.Date;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import com.jfinal.kit.Kv;
-import com.jfinal.kit.Okv;
+import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
-import com.jfinal.plugin.activerecord.Db;
-
+import org.apache.commons.codec.digest.DigestUtils;
+import cn.hutool.core.io.FileUtil;
 import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
+import cn.jbolt.common.config.JBoltUploadFolder;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
 import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.siargo.model.Image;
+import cn.jbolt.siargo.model.Product;
+
 /**
  * 来料到货单管理 Service
- * @ClassName: ImageService   
+ * 
+ * @ClassName: ImageService
  * @author: hanzj
- * @date: 2026-01-30 16:19  
+ * @date: 2026-01-30 16:19
  */
 public class ImageService extends JBoltBaseService<Image> {
-	private final Image dao=new Image().dao();
+	private final Image dao = new Image().dao();
+
 	@Override
 	protected Image dao() {
 		return dao;
 	}
-	
+
+	public static final int STATUS_NORMAL = 1;
+	public static final int STATUS_DELETED = 0;
+
 	/**
 	 * 后台管理分页查询
 	 * 
@@ -45,110 +57,202 @@ public class ImageService extends JBoltBaseService<Image> {
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, String supplierId) {
 		Sql sql = Sql.mysql()
-				.select("si.supplier_id", "si.original_name", "si.storage_name", "si.file_path", 
-						"si.md5_hash", "si.description", "si.upload_time", "si.status", "si.deleted_time", 
-						"ju.name AS uploader_name")
-				.page(pageNumber, pageSize).from("siargo_image", "si")
+				.select("si.supplier_id" , "si.storage_name", "si.file_path", "si.md5_hash",
+						"si.description", "si.upload_time", "si.status", "si.deleted_time", 
+						"ju.name AS uploader_name", "jd.name AS supplier_name")
+				.page(pageNumber, pageSize)
+				.from("siargo_image", "si")
 				.leftJoin("jb_user", "ju", "ju.id = si.uploader_id")
+				.leftJoin("jb_dictionary", "jd", "jd.type_key = 'siargo_supplier'  "
+						+ "AND jd.sn COLLATE utf8mb4_general_ci = CAST(si.supplier_id AS CHAR) "
+						+ "AND jd.enable = '1' ")
 				.like("si.supplier_id", supplierId)
 				.like("si.storage_name", keywords)
-				.eq("si.status", 1)
+				.eq("si.status", STATUS_NORMAL)
 				.orderBy("si.upload_time", true);
-				;
+		;
 		return paginateRecord(sql, true);
 	}
-	
+
 	/**
 	 * 保存
+	 * 
 	 * @param image
 	 * @return
 	 */
-	public Ret save(Image image) {
-		if(image==null || isOk(image.getId())) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
+	public Ret save( Image image, String tempPath) {
+		Image dbImage = new Image();
+		String webRootPath = PathKit.getWebRootPath();
+		File tempFile = new File(webRootPath + tempPath);
+		String localPath = File.separator + "upload" + File.separator + 
+				JBoltUploadFolder.SIARGO_UPLOAD_IMI + File.separator + 
+				dicIdFindBySn(image.getSupplierId()).getStr("id");
 		
-		image.set("original_name", "original_name");
-		image.set("storage_name", "storage_name");
-		image.set("file_path", "file_path");
-		image.set("md5_hash", "md5_hash");
-		image.set("uploader_id", JBoltUserKit.getUserId());
-		image.set("upload_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
-		image.set("status", 1);
+    	File locaFolder = new File(webRootPath + localPath);
+		if (!locaFolder.exists()) {
+			locaFolder.mkdirs();
+		}
 
-		boolean success=image.save();
-		if(success) {
-			//添加日志
-			//addSaveSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
+		// 计算MD5（用于去重）
+		String md5 = getMd5(tempFile);
+
+		// 检查图片是否已存在
+		
+		 Image existImage = findByMd5(md5); 
+		 if (existImage != null){ 
+			 return fail("图片 " + existImage.getStorageName() + " 已经存在！"); 
+		 }
+		 
+		 //去文件名掉后缀
+		 String fileName = tempFile.getName();
+		 String fileNameWithoutExtension;
+
+		 int dotIndex = fileName.lastIndexOf('.');
+		 if (dotIndex > 0) {
+		     fileNameWithoutExtension = fileName.substring(0, dotIndex);
+		 } else {
+		     fileNameWithoutExtension = fileName; // 没有后缀的情况
+		 }
+		 
+		dbImage.set("supplier_id", image.getSupplierId());
+		dbImage.set("storage_name", fileNameWithoutExtension);
+		dbImage.set("file_path", FileUtil.normalize(tempPath));
+		dbImage.set("md5_hash", md5);
+		dbImage.set("description", image.getDescription());
+		dbImage.set("upload_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+		dbImage.set("uploader_id", JBoltUserKit.getUserId());
+		dbImage.set("status", STATUS_NORMAL);
+
+		boolean success = dbImage.save();
+		
+		if (success) {
+			try {
+				Files.move(
+						tempFile.toPath(),
+						Paths.get(webRootPath, localPath + File.separator + fileName),
+				        StandardCopyOption.REPLACE_EXISTING  // 如果目标文件存在则替换
+				    );
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// 添加日志
+			// addSaveSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
 		}
 		return ret(success);
 	}
+
+	/**
+	 * 计算文件的 MD5 值
+	 * 
+	 * @param file 文件对象
+	 * @return MD5 字符串
+	 */
+	public String getMd5(File file) {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			return DigestUtils.md5Hex(fis);
+		} catch (IOException e) {
+			throw new RuntimeException("计算文件MD5失败", e);
+		}
+	}
+
+	/**
+	 * 根据MD5查找已存在的图片
+	 * 
+	 * @param md5 字符串
+	 * @return Image Image
+	 */
+	public Image findByMd5(String md5) {
+		return dao.findFirst("SELECT * FROM siargo_image WHERE md5_hash = ? AND status = ?", md5, STATUS_NORMAL);
+	}
 	
+	/**
+	 * 根据Sn查找dictionary ID
+	 * 
+	 * @param sn 字符串
+	 * @return Record Record
+	 */
+	public Record dicIdFindBySn(String sn) {
+		Sql sql = Sql.mysql().select("jd.id")
+				.from("jb_dictionary", "jd")
+				.eq("jd.type_key", "siargo_supplier")
+				.eq("jd.ENABLE", STATUS_NORMAL )
+				.eq("jd.sn", sn);
+		return findFirstRecord(sql);
+	}
+
 	/**
 	 * 更新
+	 * 
 	 * @param image
 	 * @return
 	 */
-	public Ret update(Image image) {
-		if(image==null || notOk(image.getId())) {
+	public Ret update(Image image, String uploadPath) {
+		if (image == null || notOk(image.getId())) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		//更新时需要判断数据存在
-		Image dbImage=findById(image.getId());
-		if(dbImage==null) {return fail(JBoltMsg.DATA_NOT_EXIST);}
-		
-		if (image.getStatus() == 0) {
+		// 更新时需要判断数据存在
+		Image dbImage = findById(image.getId());
+		if (dbImage == null) {
+			return fail(JBoltMsg.DATA_NOT_EXIST);
+		}
+
+		if (image.getStatus() == STATUS_DELETED) {
 			image.set("deleted_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
 		}
-		
-		boolean success=image.update();
-		if(success) {
-			//添加日志
-			//addUpdateSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
+
+		boolean success = image.update();
+		if (success) {
+			// 添加日志
+			// addUpdateSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
 		}
 		return ret(success);
 	}
-	
+
 	/**
 	 * 删除 指定多个ID
+	 * 
 	 * @param ids
 	 * @return
 	 */
 	public Ret deleteByBatchIds(String ids) {
-		return deleteByIds(ids,true);
+		return deleteByIds(ids, true);
 	}
-	
+
 	/**
 	 * 删除数据后执行的回调
+	 * 
 	 * @param image 要删除的model
-	 * @param kv 携带额外参数一般用不上
+	 * @param kv    携带额外参数一般用不上
 	 * @return
 	 */
 	@Override
 	protected String afterDelete(Image image, Kv kv) {
-		//addDeleteSystemLog(image.getId(), JBoltUserKit.getUserId(),image.getName());
+		// addDeleteSystemLog(image.getId(), JBoltUserKit.getUserId(),image.getName());
 		return null;
 	}
-	
+
 	/**
 	 * 检测是否可以删除
+	 * 
 	 * @param image 要删除的model
-	 * @param kv 携带额外参数一般用不上
+	 * @param kv    携带额外参数一般用不上
 	 * @return
 	 */
 	@Override
 	public String checkCanDelete(Image image, Kv kv) {
-		//如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
+		// 如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
 		return checkInUse(image, kv);
 	}
-	
+
 	/**
-	 * 设置返回二开业务所属的关键systemLog的targetType 
+	 * 设置返回二开业务所属的关键systemLog的targetType
+	 * 
 	 * @return
 	 */
 	@Override
 	protected int systemLogTargetType() {
 		return ProjectSystemLogTargetType.NONE.getValue();
 	}
-	
+
 }

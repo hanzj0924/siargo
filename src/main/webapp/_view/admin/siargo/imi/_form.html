@@ -4,8 +4,8 @@
 	<div class="row">
 		<div class="col">
 			<div class="form-group row">
-				<label class="col-sm-1 col-form-label">供应商：</label>
-				<div class="col-sm-3">
+				<label class="col-sm-1 col-form-label">供应商</label>
+				<div class="col-sm-4">
 					<select class="form-control " data-autoload data-refresh="true"
 						data-url="admin/dictionary/options?key=siargo_supplier"
 						name="image.supplierId" data-text="=请选择/搜索=" data-value-attr="sn"
@@ -19,21 +19,53 @@
 	<div class="row">
 		<div class="col">
 			<div class="form-group row">
-				<label class="col-sm-1 col-form-label">图片描述：</label>
+				<label class="col-sm-1 col-form-label">图片描述</label>
 				<div class="col">
-					<textarea class="form-control" style="height: 100px;white-space: pre;"
-						placeholder="请输入图片描述" data-tips="请输入图片描述"
-						maxlength="900" name="image.description" data-with-clearbtn="true">#(image.description??)
+					<textarea class="form-control"
+						style="height: 100px; white-space: pre;" placeholder="请输入图片描述"
+						data-tips="请输入图片描述" maxlength="900" name="image.description"
+						data-with-clearbtn="true">#(image.description??)
 					</textarea>
 				</div>
 			</div>
 		</div>
 	</div>
-
+	<div class="row">
+		<div class="col">
+			<input type="text" data-rule="required" data-tips="请在下方选择图片上传"
+				name="imgUploadUrl" id="imgUploadUrl" value="#(imgUploadUrl??)"
+				class="form-control" />
+		</div>
+	</div>
 </form>
+
+#if(msg)
+<div class="alert alert-danger">#(msg??)</div>
+#end
+<fieldset class="form-page-fieldset">
+	<legend>批量上传图片</legend>
+	<div class="form-group">
+		<div class="j_upload_imgbox_multi row">
+			<div class="col-md col-12">
+				<ul class="j_imgbox" style="border: 1px dashed #ddd;" id="imgbox"
+					data-remove-confirm="true"
+					data-imgstyle="width:100px;height:100px;"></ul>
+			</div>
+			<div class="col-md-auto col-12">
+				<div class="j_img_uploder" data-multi="true" data-imgbox="imgbox"
+					data-upload-success-handler="uploadHandler"
+					data-url="/admin/siargo/imi/uploadImages"
+					data-handler="uploadMultipleFile" data-hiddeninput="imgUploadUrl"
+					data-area="80,80" data-maxsize="2000"></div>
+			</div>
+		</div>
+	</div>
+</fieldset>
 #define js()
 <script>
-	
+function uploadHandler(type,fileInput,res){
+	//alert(JSON.stringify(res))
+}
 </script>
 #include("/_view/_admin/common/_formjs.html",formId="imageForm") #end
 

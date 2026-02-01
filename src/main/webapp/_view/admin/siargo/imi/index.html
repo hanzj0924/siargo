@@ -3,19 +3,21 @@
 
 	<div class="jbolt_page_title">
 		<div class="row">
-			<div class="col-md-auto">
+			<div class="col-sm-2">
 				<h1>来料到货单管理</h1>
 			</div>
-			<div class="col">
+			<div class="col-sm-8">
 				<form class="form-inline" id="imageForm_#(pageId)"
 					onsubmit="return false;" method="post">
 					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 						placeholder="输入到货单号搜索" name="keywords" value="" />
-					<select class="form-control" data-autoload data-refresh="true"
+					<select class="form-control" data-autoload 
 						data-url="admin/dictionary/options?key=siargo_supplier"
-						name="supplierId" data-text="=请选择/搜索=" data-with-clearbtn="true"
-						data-select="#(image.supplier_id ??)" style="width: 500px !important;"
-						data-notnull="false"  data-rule="select"
+						data-refresh="true"
+						name="supplierId" 
+						data-text="=请选择=" 
+						data-with-clearbtn="true"
+						data-width="200px"
 						data-select-type="select2">
 					</select>
 					<button type="submit" class="btn btn-outline-secondary">
@@ -23,7 +25,7 @@
 					</button>
 				</form>
 			</div>
-			<div class="col-md-auto"></div>
+			<div class="col-sm-2"></div>
 		</div>
 	</div>
 	<div class="jbolt_page_content">
@@ -33,8 +35,10 @@
 <tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>${data.storageName}</td>
-<td>${data.supplierId}</td>
-<td>${data.filePath}</td>
+<td>${data.supplierName}</td>
+<td>
+	<img data-imgviewer src="${data.filePath}"  class="m-1"  style="height: 50px;" tooltip data-title="点击查看大图" />	
+</td>
 <td>${data.description}</td>
 <td>${data.uploaderName}</td>
 <td>${data.uploadTime}</td>
@@ -85,8 +89,8 @@
 					<th data-width="60">序号</th>
 					<th data-width="150" data-column="storage_name">到货单号</th>
 					<th data-min-width="150" data-column="supplier_id">供应商</th>
-					<th data-width="150" data-column="file_path">文件存储路径</th>
-					<th data-width="150" data-column="description">图片描述</th>
+					<th data-width="150" data-column="file_path">图片</th>
+					<th data-width="150" data-column="description">描述</th>
 					<th data-width="150" data-column="uploader_id">上传者</th>
 					<th data-width="150" data-column="upload_time">上传时间</th>
 				</tr>
@@ -99,4 +103,22 @@
 	</div>
 </div>
 #end
+#define js()
+<script type="text/javascript">
+function afterAJaxCallback(res){
+	AjaxPortalUtil.refresh(portal);
+}
 
+//将原本的href属性替换为带有时间戳的URL，以避免缓存
+function loadfile (element, originalPdfUrl) {
+    // 阻止默认行为（如果链接已有默认行为）
+    event.preventDefault ? event.preventDefault() : (event.returnValue = false);
+    
+    const timestamp = new Date().getTime();
+    const fileUrl = originalPdfUrl + '?t=' + timestamp;
+    
+    element.href = fileUrl;
+}
+
+</script>
+#end

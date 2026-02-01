@@ -14,7 +14,7 @@ import cn.jbolt.core.server.JBoltServer;
 public class ProjectServer extends JBoltServer {
 	@Override
 	public String getProjectName() {
-		return "JBolt Platform Pro";
+		return "矽翔质管部管理系统";
 	}
 
 	@Override
