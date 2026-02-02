@@ -3,6 +3,8 @@ package cn.jbolt.common.util;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,6 +29,10 @@ public class DateUtil {
     public static final String YMDHM = "yyyy-MM-dd HH:mm";
     public static final String MDHM = "MM-dd HH:mm";
     public static final String MD = "MM-dd";
+    public static final String YM = "yyyyMM";
+    public static final String EXPORT_FORMAT_DATE_TIME = "yyyyMMdd-hhmmss";
+    
+    
     /**
      * 取小值
      */
@@ -44,9 +50,11 @@ public class DateUtil {
     public static Date getNow(){
     	return Calendar.getInstance().getTime();
     }
+    
     public static String getNowStr(){
     	return format(getNow(), YMD);
     }
+    
     public static String getNowStr(String pattern){
        return format(getNow(), pattern);
     }
@@ -59,6 +67,7 @@ public class DateUtil {
     	sdf.applyPattern(pattern);
     	return sdf.format(date);
     }
+    
     public static String formatWithT(Date date, String pattern) {
       String value=format(date, pattern);
       if(StrKit.isBlank(value)) {return "";}
@@ -74,6 +83,16 @@ public class DateUtil {
     	cal.clear();
     	cal.setTime(date);
     	return cal.getActualMaximum(Calendar.DATE);
+    }
+    
+    /**
+     * 将当前Date转化为指定格式字符串 <br>
+     * 
+     * @param fromFormat
+     * @return String
+     */
+    public static String getDateString(String fromFormat) {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern(fromFormat));
     }
     
 

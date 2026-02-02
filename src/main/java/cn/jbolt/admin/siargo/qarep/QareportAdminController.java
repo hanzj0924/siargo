@@ -6,7 +6,7 @@ import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt.admin.siargo.customer.CustomerService;
-import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
+import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.common.util.StringUtil;
 
 import com.jfinal.core.Path;
@@ -232,16 +232,16 @@ public class QareportAdminController extends JBoltBaseController {
                 if (product != null) {
                 	if(insp == 2) {
                 		product.set("accq_uid", JBoltUserKit.getUserId());
-                		product.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+                		product.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
                 	}else if(insp == 3){
                 		product.set("funq_uid", JBoltUserKit.getUserId());
-                		product.set("funq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+                		product.set("funq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 					}else if(insp == 4){
 						product.set("appq_uid", JBoltUserKit.getUserId());
-						product.set("appq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+						product.set("appq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 					}else if(insp == 5){
 						product.set("allq_uid", JBoltUserKit.getUserId());
-						product.set("allq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+						product.set("allq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 					}
                 	product.set("insp", insp);
                 	product.update();
@@ -403,7 +403,7 @@ public class QareportAdminController extends JBoltBaseController {
             for (Long id : ids) {
             	Product product = proservice.findById(id); 
                 if (product != null) {
-                	product.set("delete_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+                	product.set("delete_time", DateUtil.getDateString(DateUtil.YMDHMS));
                 	product.set("vd", 0);
                 	product.update();
                 }

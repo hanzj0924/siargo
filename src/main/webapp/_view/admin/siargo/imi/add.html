@@ -37,7 +37,7 @@
 			<div class="row">
 				<div class="col">
 					<input type="hidden" data-rule="required" data-tips="请在下方选择图片上传"
-						name="imgUploadUrl" id="imgUploadUrl" value="#(imgUploadUrl??)"
+						name="imgUploadUrl" id="imgUploadUrl" value="#(image.filePath??)"
 						class="form-control" />
 				</div>
 			</div>
@@ -56,20 +56,25 @@
 							data-imgstyle="width:100px;height:100px;"></ul>
 					</div>
 					<div class="col-md-auto col-12">
-						<div class="j_img_uploder" data-multi="true" data-imgbox="imgbox"
+						<div class="j_img_uploder" 
+							data-multi="true" 
+							data-imgbox="imgbox"
 							data-upload-success-handler="uploadHandler"
-							data-url="/admin/siargo/imi/uploadImages"
-							data-handler="uploadMultipleFile" data-hiddeninput="imgUploadUrl"
-							data-area="80,80" data-maxsize="2000"></div>
+							data-url="/admin/siargo/imi/uploadImages?save=true"
+							data-handler="uploadMultipleFile" 
+							data-hiddeninput="imgUploadUrl"
+							data-area="80,80" data-maxsize="102400"></div>
 					</div>
 				</div>
 			</div>
 		</fieldset>
 		#define js()
 		<script>
-			function uploadHandler(type, fileInput, res) {
-				//alert(JSON.stringify(res))
-			}
+		function uploadHandler(uploader, type, fileInput, result) {
+			var data = result.data;
+
+			
+		}
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="imageForm") #end
 	</div>

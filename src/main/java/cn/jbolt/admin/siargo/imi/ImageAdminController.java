@@ -4,7 +4,6 @@ import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
-import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
 import cn.jbolt.common.config.JBoltUploadFolder;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
@@ -14,7 +13,9 @@ import com.jfinal.kit.Ret;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.jfinal.aop.Before;
@@ -45,7 +46,7 @@ public class ImageAdminController extends JBoltBaseController {
 	 * 上传图片到临时文件
 	 */
 	public void uploadImages() {
-
+		boolean save = getParaToBoolean("save");
 		String tempUploadPath = JBoltUploadFolder.SIARGO_UPLOAD_IMI + File.separator + "temp" + File.separator;
 		List<UploadFile> files = getFiles(tempUploadPath);
 		if (files == null || files.size() == 0) {
@@ -65,6 +66,7 @@ public class ImageAdminController extends JBoltBaseController {
 		}
 		
 		List<String> retFiles = new ArrayList<String>();
+		String originaName = null ;
 		StringBuilder errormsg = new StringBuilder();
 		String tempPath =File.separator + "upload" + File.separator ;
 		for (UploadFile uploadFile : files) {
@@ -86,10 +88,12 @@ public class ImageAdminController extends JBoltBaseController {
 	            } else {
 	                // 重命名失败，使用原文件名
 	                errormsg.append("文件 " + uploadFile.getFileName() + " 重命名失败;");
-	                retFiles.add(tempPath + tempUploadPath + uploadFile.getFileName());
+	                retFiles.add(tempPath + tempUploadPath + fileName);
 	            }
+	            originaName = service.getFileName(targetFile);
 	        } catch (Exception e) {
 	            // 发生异常，使用原文件名
+	        	
 	            errormsg.append("文件 " + uploadFile.getFileName() + " 处理失败: " + e.getMessage() + ";");
 	        }
 		}
@@ -97,7 +101,17 @@ public class ImageAdminController extends JBoltBaseController {
 			renderJsonFail(errormsg.toString());
 			return;
 		}
-		renderJsonData(retFiles, errormsg.toString());
+		
+		if (save) {
+			renderJsonData(retFiles,errormsg.toString());
+		} else {
+			Map<String, Object> result = new HashMap<>();
+		    result.put("filesName", originaName);
+		    result.put("files", retFiles);
+		    result.put("message", errormsg.toString());
+		    
+			renderJsonData(result);
+		}
 	}
 
 	/**

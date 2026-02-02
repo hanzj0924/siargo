@@ -47,7 +47,7 @@
 			</div>
 			<div class="row">
 				<div class="col">
-					<input type="hidden" data-rule="required" data-tips="请在下方选择图片上传"
+					<input type="text" data-rule="required" data-tips="请在下方选择图片上传"
 						name="image.filePath" id="imgUploadUrl" value="#(image.filePath??)"
 						class="form-control" />
 				</div>
@@ -61,14 +61,16 @@
 			<div class="card">
 				<div class="card-body">
 					<fieldset class="form-page-fieldset">
-						<legend>单图修改</legend>
+						<legend>修改图片</legend>
 						<div class="form-group text-center">
-							<div class="j_img_uploder" data-handler="uploadFile"
-								data-url="/admin/siargo/imi/uploadImages"
+							<div class="j_img_uploder" 
+								data-handler="uploadFile"
+								data-url="/admin/siargo/imi/uploadImages?save=false"
 								data-upload-success-handler="uploadHandler"
 								data-value="#realImage(image.filePath??)"
-								data-hiddeninput="imgUploadUrl" data-area="400,400"
-								data-maxsize="2000"></div>
+								data-hiddeninput="imgUploadUrl" 
+								data-area="300,300"
+								data-maxsize="102400"></div>
 						</div>
 					</fieldset>
 				</div>
@@ -76,9 +78,18 @@
 		</div>
 		#define js()
 		<script>
-			function uploadHandler(type, fileInput, res) {
-				//alert(JSON.stringify(res))
+		function uploadHandler(uploader, type, fileInput, result) {
+			var data = result.data;
+			
+			if ($('input[name="image.storageName"]').length) {
+			    $('input[name="image.storageName"]').val(data.filesName);
 			}
+			
+			if ($('input[name="image.filePath"]').length) {
+			    $('input[name="image.filePath"]').val(data.files);
+			}
+			
+		}
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="imageUpdateForm")
 		#end

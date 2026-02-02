@@ -97,9 +97,9 @@ public class AdminIndexController extends JBoltBaseController {
 		
 		map.put("currentMonthTotal", 
 				String.format("%,d", qareportservice.getTotalQSI(0)==null? 0:qareportservice.getTotalQSI(0))
-				+"(送检)/"
+				+"(送)/"
 				+String.format("%,d", qareportservice.getTotalQI(0)==null? 0:qareportservice.getTotalQI(0))
-				+"(检验)");
+				+"(检)");
 		map.put("cTotal", 
 				String.format("%,d", qareportservice.getTotalQSI(1)==null? 0:qareportservice.getTotalQSI(1))
 				+"/"

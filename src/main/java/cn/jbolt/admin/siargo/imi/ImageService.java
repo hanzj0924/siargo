@@ -19,8 +19,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
 import cn.jbolt.common.config.JBoltUploadFolder;
+import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
 import cn.jbolt.core.kit.JBoltUserKit;
@@ -45,6 +45,8 @@ public class ImageService extends JBoltBaseService<Image> {
 	public static final int STATUS_NORMAL = 1;
 	public static final int STATUS_DELETED = 0;
 	public static final String webRootPath = PathKit.getWebRootPath();
+	public static final String localPath = File.separator + "upload" + 
+			File.separator + JBoltUploadFolder.SIARGO_UPLOAD_IMI +  File.separator ;
 
 	/**
 	 * 后台管理分页查询
@@ -88,11 +90,10 @@ public class ImageService extends JBoltBaseService<Image> {
 	public Ret save( Image image, String tempPath) {
 		Image dbImage = new Image();
 		File tempFile = new File(webRootPath + tempPath);
-		String localPath = File.separator + "upload" + File.separator + 
-				JBoltUploadFolder.SIARGO_UPLOAD_IMI + File.separator + 
-				dicIdFindBySn(image.getSupplierId()).getStr("id");
+		String path = localPath + dicIdFindBySn(image.getSupplierId()).getStr("id") + 
+						File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator ;
 		
-    	File locaFolder = new File(webRootPath + localPath);
+    	File locaFolder = new File(webRootPath + path);
 		if (!locaFolder.exists()) {
 			locaFolder.mkdirs();
 		}
@@ -108,10 +109,10 @@ public class ImageService extends JBoltBaseService<Image> {
 		 
 		dbImage.set("supplier_id", image.getSupplierId());
 		dbImage.set("storage_name", getFileName(tempFile));
-		dbImage.set("file_path", FileUtil.normalize(localPath + File.separator + tempFile.getName()));
+		dbImage.set("file_path", FileUtil.normalize(path + tempFile.getName()));
 		dbImage.set("md5_hash", md5);
 		dbImage.set("description", image.getDescription());
-		dbImage.set("upload_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+		dbImage.set("upload_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		dbImage.set("uploader_id", JBoltUserKit.getUserId());
 		dbImage.set("status", STATUS_NORMAL);
 
@@ -121,7 +122,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			try {
 				Files.move(
 						tempFile.toPath(),
-						Paths.get(webRootPath, localPath + File.separator + tempFile.getName()),
+						Paths.get(webRootPath, path + tempFile.getName()),
 				        StandardCopyOption.REPLACE_EXISTING  // 如果目标文件存在则替换
 				    );
 			} catch (IOException e) {
@@ -187,7 +188,7 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * @param newName 新的文件名（包含扩展名）
 	 * @return 新文件的完整路径，如果重命名失败则返回 null
 	 */
-	public String renameFile(String oldFilePath, String newName) {
+	public String getRenameFilePath(String oldFilePath, String newName, String supplierId) {
 	    try {
 	        // 构建原文件的绝对路径
 	        File oldFile = new File(webRootPath + oldFilePath);
@@ -196,7 +197,8 @@ public class ImageService extends JBoltBaseService<Image> {
 	        String extension = getExtensionWithDotApacheCommons(oldFile);
 	        
 	        // 构建新文件的绝对路径
-	        String newAbsolutePath = oldFile.getParent() + File.separator + newName + extension;
+	        String newAbsolutePath = localPath + dicIdFindBySn(supplierId) + 
+					File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator + newName + extension;
 	        File newFile = new File(newAbsolutePath);
 	        
 	        // 检查新文件是否已存在
@@ -266,52 +268,69 @@ public class ImageService extends JBoltBaseService<Image> {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
 		}
 
-		if (image.getStatus() == STATUS_DELETED) {
-			image.set("deleted_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
-		}
 		
 		File tempFile = new File(webRootPath + image.getFilePath());
-		String localPath = File.separator + "upload" + File.separator + 
-				JBoltUploadFolder.SIARGO_UPLOAD_IMI + File.separator + 
-				dicIdFindBySn(image.getSupplierId()).getStr("id");
+		String path = localPath + dicIdFindBySn(image.getSupplierId()).getStr("id") + 
+				File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator ;
 		
-    	File locaFolder = new File(webRootPath + localPath);
+    	File locaFolder = new File(webRootPath + path);
 		if (!locaFolder.exists()) {
 			locaFolder.mkdirs();
 		}
 		
-		// 计算MD5（用于去重）
 		String md5 = getMd5(tempFile);
-
-		// 检查图片是否已存在
-		if (!image.getFilePath().equals(dbImage.getFilePath())) {
-			Image existImage = findByMd5(md5); 
+		boolean sameStorageName = image.getStorageName().equals(dbImage.getStorageName());
+		boolean sameFilePath = image.getFilePath().equals(dbImage.getFilePath());
+		boolean sameSupplier = image.getSupplierId().equals(dbImage.getSupplierId());
+		
+		if (!sameSupplier) {
+			try {
+				Files.move(
+						Paths.get(webRootPath, dbImage.getFilePath()),
+						Paths.get(webRootPath, path + tempFile.getName()),
+				        StandardCopyOption.REPLACE_EXISTING  
+				    );
+			} catch (IOException e) {
+				// TODO 自动生成的 catch 块
+				e.printStackTrace();
+			}
+			image.set("file_path", FileUtil.normalize(path + tempFile.getName()));
+		}
+		
+		//?
+		if (!sameStorageName) {
+			if (!sameFilePath) {
+				Image existImage = findByMd5(md5); 
 			 	if (existImage != null){ 
 			 		return fail("图片 " + existImage.getStorageName() + " 已经存在！"); 
 			 	}
+			} 
+			image.set("file_path", FileUtil.normalize(
+					getRenameFilePath(dbImage.getFilePath(),image.getStorageName(),image.getSupplierId())));
+		} else {
+			if (!sameFilePath) {
+			 	image.set("file_path", FileUtil.normalize(
+						getRenameFilePath(dbImage.getFilePath(),image.getStorageName(),image.getSupplierId())));	
+			} 
 		}
 		
-		if (!image.getStorageName().equals(dbImage.getStorageName())) {
-			image.set("file_path", FileUtil.normalize(renameFile(dbImage.getFilePath(),image.getStorageName())));
-		} else {
-			image.set("file_path", FileUtil.normalize(image.getFilePath()));
-		}
 
+		if (image.getStatus() == STATUS_DELETED) {
+			image.set("deleted_time", DateUtil.getDateString(DateUtil.YMDHMS));
+		}
+		
 		image.set("md5_hash", md5);
 		image.set("description", image.getDescription());
-		image.set("updated_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+		image.set("updated_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		image.set("update_id", JBoltUserKit.getUserId());
 		boolean success = image.update();
 		if (success) {
-			if (!(image.getFilePath().equals(dbImage.getFilePath()) && image.getStorageName().equals(dbImage.getStorageName()))) {
+			if (!sameFilePath) {
 				try {
-					File oldFile = new File(webRootPath + dbImage.getFilePath());
-					oldFile.delete();
-					
 					Files.move(
-							tempFile.toPath(),
-							Paths.get(webRootPath, localPath + File.separator + tempFile.getName()),
-					        StandardCopyOption.REPLACE_EXISTING  // 如果目标文件存在则替换
+							Paths.get(webRootPath, image.getFilePath()),
+							Paths.get(webRootPath, path + tempFile.getName()),
+					        StandardCopyOption.REPLACE_EXISTING  
 					    );
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -340,7 +359,7 @@ public class ImageService extends JBoltBaseService<Image> {
 		File oldFile = new File(webRootPath + dbImage.getFilePath());
 		oldFile.delete();
 		
-		dbImage.set("deleted_time",SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+		dbImage.set("deleted_time",DateUtil.getDateString(DateUtil.YMDHMS));
 		dbImage.set("status", STATUS_DELETED);
 
 		return ret(dbImage.update());

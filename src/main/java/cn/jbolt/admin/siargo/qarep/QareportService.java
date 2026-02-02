@@ -15,7 +15,6 @@ import java.util.Map;
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Db;
-import cn.jbolt.admin.siargo.siargoutil.SiargoUtil;
 import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
@@ -162,7 +161,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		if (notOk(qareport.getId())) {
 
 			// 保存到报告单表
-			qareport.set("create_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+			qareport.set("create_time", DateUtil.getDateString(DateUtil.YMDHMS));
 			qareport.set("formnum", creatFormnum());
 
 			qareport.save();
@@ -175,7 +174,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			// 增加精度检验数据
 			if (product.getInsp() == 2) {
 				pro.set("accq_uid", JBoltUserKit.getUserId());
-				pro.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+				pro.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 			}
 			
 			pro.set("insp", product.getInsp());
@@ -204,7 +203,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			// 增加精度检验数据
 			if (product.getInsp() == 2) {
 				product.set("accq_uid", JBoltUserKit.getUserId());
-				product.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+				product.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 			}
 
 			product.set("report_id", qareport.getId());
@@ -295,22 +294,22 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		// 增加精度进度
 		if (product.getInsp() == 2) {
 			product.set("accq_uid", JBoltUserKit.getUserId());
-			product.set("accq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+			product.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		}
 
 		if (product.getInsp() == 3) {
 			product.set("funq_uid", JBoltUserKit.getUserId());
-			product.set("funq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+			product.set("funq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		}
 
 		if (product.getInsp() == 4) {
 			product.set("appq_uid", JBoltUserKit.getUserId());
-			product.set("appq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+			product.set("appq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		}
 
 		if (product.getInsp() == 5) {
 			product.set("allq_uid", JBoltUserKit.getUserId());
-			product.set("allq_time", SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+			product.set("allq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		}
 
 		return ret(product.update());
@@ -344,7 +343,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	public Ret delete(Long id) {
 		Product product = new Product().findById(id);
 
-		product.set("delete_time",SiargoUtil.getDateString(SiargoUtil.PATTERN_DATE_TIME));
+		product.set("delete_time",DateUtil.getDateString(DateUtil.YMDHMS));
 		product.set("vd", 0);
 
 		return ret(product.save());
@@ -437,7 +436,6 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
 	    		+ "WHERE "
 	    		+ "  YEAR(sq.create_time) = YEAR(CURDATE()) "
-	    		+ "  AND MONTH(sq.create_time) = MONTH(CURDATE()) "
 	    		+ "  AND sp.vd = 1 AND sq.rep_type = 2  "
 	    		+ "GROUP BY "
 	    		+ "  MONTH(sq.create_time) "
@@ -481,7 +479,6 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
 	    		+ "WHERE "
 	    		+ "  YEAR(sq.create_time) = YEAR(CURDATE()) "
-	    		+ "  AND MONTH(sq.create_time) = MONTH(CURDATE()) "
 	    		+ "  AND sp.vd = 1 "
 	    		+ "GROUP BY "
 	    		+ "  MONTH(sq.create_time) "
