@@ -188,7 +188,7 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * @param newName 新的文件名（包含扩展名）
 	 * @return 新文件的完整路径，如果重命名失败则返回 null
 	 */
-	public String getRenameFilePath(String oldFilePath, String newName, String supplierId) {
+	public String getRenameFilePath(String oldFilePath, String newName) {
 	    try {
 	        // 构建原文件的绝对路径
 	        File oldFile = new File(webRootPath + oldFilePath);
@@ -197,8 +197,7 @@ public class ImageService extends JBoltBaseService<Image> {
 	        String extension = getExtensionWithDotApacheCommons(oldFile);
 	        
 	        // 构建新文件的绝对路径
-	        String newAbsolutePath = localPath + dicIdFindBySn(supplierId) + 
-					File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator + newName + extension;
+	        String newAbsolutePath = oldFile.getParent() + File.separator + newName + extension;
 	        File newFile = new File(newAbsolutePath);
 	        
 	        // 检查新文件是否已存在
@@ -257,8 +256,9 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * 
 	 * @param image
 	 * @return
+	 * @throws IOException 
 	 */
-	public Ret update(Image image) {
+	public Ret update(Image image) throws IOException {
 		if (image == null || notOk(image.getId())) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
@@ -284,16 +284,12 @@ public class ImageService extends JBoltBaseService<Image> {
 		boolean sameSupplier = image.getSupplierId().equals(dbImage.getSupplierId());
 		
 		if (!sameSupplier) {
-			try {
-				Files.move(
-						Paths.get(webRootPath, dbImage.getFilePath()),
-						Paths.get(webRootPath, path + tempFile.getName()),
-				        StandardCopyOption.REPLACE_EXISTING  
-				    );
-			} catch (IOException e) {
-				// TODO 自动生成的 catch 块
-				e.printStackTrace();
-			}
+			Files.move(
+					Paths.get(webRootPath, dbImage.getFilePath()),
+					Paths.get(webRootPath, path + tempFile.getName()),
+			        StandardCopyOption.REPLACE_EXISTING  
+			    );
+
 			image.set("file_path", FileUtil.normalize(path + tempFile.getName()));
 		}
 		
@@ -306,13 +302,8 @@ public class ImageService extends JBoltBaseService<Image> {
 			 	}
 			} 
 			image.set("file_path", FileUtil.normalize(
-					getRenameFilePath(dbImage.getFilePath(),image.getStorageName(),image.getSupplierId())));
-		} else {
-			if (!sameFilePath) {
-			 	image.set("file_path", FileUtil.normalize(
-						getRenameFilePath(dbImage.getFilePath(),image.getStorageName(),image.getSupplierId())));	
-			} 
-		}
+					getRenameFilePath(dbImage.getFilePath(),image.getStorageName())));
+		} 
 		
 
 		if (image.getStatus() == STATUS_DELETED) {

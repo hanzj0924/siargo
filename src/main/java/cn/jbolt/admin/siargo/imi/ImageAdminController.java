@@ -11,6 +11,7 @@ import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -168,9 +169,10 @@ public class ImageAdminController extends JBoltBaseController {
 
 	/**
 	 * 更新
+	 * @throws IOException 
 	 */
 	@Before(Tx.class)
-	public void update() {
+	public void update() throws IOException {
 		renderJson(service.update(getModel(Image.class, "image")));
 	}
 	
