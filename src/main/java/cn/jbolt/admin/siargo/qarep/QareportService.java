@@ -47,10 +47,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    Sql sql = Sql.mysql()
 	            .select("sp.id")
 	            .from("siargo_product", "sp")
-	            .leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
 	            .eq("sp.vd", 1)
 	            .eq("sp.insp", 5)
-	            .bwDate("sq.create_time",
+	            .bwDate("sp.allq_time",
 	                    DateUtil.lastMonthFirstDay(DateUtil.getNow()),
 	                    DateUtil.lastMonthLastDay(DateUtil.getNow()));
 

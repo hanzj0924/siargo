@@ -502,12 +502,14 @@
 		</div>
 		<div class="col-md-auto">
 			<div class="btn-group " role="group" aria-label="btn-group">
+				#if(approval)
 				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
 					data-confirm="确定批准选中数据？" 
 					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 批准
 				</button>
+				#end
 				<button data-openpage="dialog" data-area="530,325"
 					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"

@@ -4,7 +4,9 @@ import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.permission.CheckPermission;
+import cn.jbolt.core.permission.JBoltUserAuthKit;
 import cn.jbolt._admin.permission.PermissionKey;
+import cn.jbolt._admin.role.RoleService;
 import cn.jbolt.admin.siargo.customer.CustomerService;
 import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.common.util.StringUtil;
@@ -13,6 +15,7 @@ import com.jfinal.core.Path;
 import com.jfinal.kit.StrKit;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,13 +52,18 @@ public class QareportAdminController extends JBoltBaseController {
 	private ProductService proservice;
 	@Inject
 	private CustomerService custservice;
-
+	@Inject
+	private RoleService roleService;
 	
    /**
 	* 首页
 	*/
 	public void index() {
-				
+		//批准权限
+		BigInteger bigInt = new BigInteger("2031938046041903104");
+		boolean has = JBoltUserAuthKit.hasRole(JBoltUserKit.getUserId(), true, bigInt.longValue());
+		
+		set("approval", has);
 		render("index.html");
 	}
 

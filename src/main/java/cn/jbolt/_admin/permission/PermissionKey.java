@@ -194,4 +194,5 @@ public class PermissionKey {
 	 * 客户管理
 	 */
 	public static final String CUSTOMER = "customer";
+
 }

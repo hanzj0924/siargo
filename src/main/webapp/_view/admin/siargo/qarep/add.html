@@ -1,7 +1,7 @@
 #@jboltLayout() #define main()
+
 <div class="jbolt_page">
 	<div class="jbolt_page_content">
-
 		<form onsubmit="return false;" id="qareportForm"
 			action="admin/siargo/qarep/save" method="post">
 			<input type="hidden" name="qareport.id" value="#(qareport.id??)" />
@@ -233,6 +233,7 @@
 		</form>
 		#define js()
 		<script>
+		
 			function uploadSuccessHandler(uploader, type, fileInput, result) {
 				var data = result.data;
 
