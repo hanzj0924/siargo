@@ -233,7 +233,18 @@
 		</form>
 		#define js()
 		<script>
-		
+			$(function() {
+				setTimeout(function() {
+					try {
+						var $btnContainer = $(parent.document).find('.layui-layer-btn:last');
+						if ($btnContainer.length > 0 && $btnContainer.find('.mindray-notice').length === 0) {
+							$btnContainer.css('position', 'relative');
+							$btnContainer.append('<span class="mindray-notice" style="position:absolute;left:40%;top:50%;transform:translateY(-50%);color:red;font-size:30px;line-height:42px;pointer-events:none;">注意编号!</span>');
+						}
+					} catch (e) {}
+				}, 300);
+			});
+
 			function uploadSuccessHandler(uploader, type, fileInput, result) {
 				var data = result.data;
 

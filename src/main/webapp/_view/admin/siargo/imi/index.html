@@ -10,14 +10,15 @@
 				<form class="form-inline" id="imageForm_#(pageId)"
 					onsubmit="return false;" method="post">
 					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-						placeholder="输入到货单号搜索" name="keywords" value="" />
+						placeholder="输入到单据号搜索" name="keywords" value="" />
 					<select class="form-control" data-autoload 
 						data-url="admin/dictionary/options?key=siargo_supplier"
 						data-refresh="true"
 						name="supplierId" 
-						data-text="=请选择=" 
+						data-value-attr="sn"
+						data-text="=请选择搜索=" 
 						data-with-clearbtn="true"
-						data-width="200px"
+						data-width="600px"
 						data-select-type="select2">
 					</select>
 					<button type="submit" class="btn btn-outline-secondary">

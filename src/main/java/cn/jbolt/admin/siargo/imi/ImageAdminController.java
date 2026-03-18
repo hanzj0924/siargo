@@ -152,19 +152,14 @@ public class ImageAdminController extends JBoltBaseController {
 	/**
 	 * 保存
 	 */
-	@Before(Tx.class)
 	public void save() {
 		Image image = getModel(Image.class, "image");
 		String uploadPathJson = getPara("imgUploadUrl");
 		List<String> uploadPaths = Arrays.stream(uploadPathJson.split(","))
 				.map(String::trim)
-				.map(String::valueOf)
 				.collect(Collectors.toList());
 		
-		for (int i = 0; i < uploadPaths.size() && i < uploadPaths.size(); i++) {
-			service.save(image,uploadPaths.get(i));
-		}
-		renderJsonSuccess();
+		renderJson(service.saveBatch(image, uploadPaths));
 	}
 
 	/**
