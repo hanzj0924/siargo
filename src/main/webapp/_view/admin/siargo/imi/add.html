@@ -10,10 +10,9 @@
 						<label class="col-sm-1 col-form-label">供应商</label>
 						<div class="col-sm-4">
 							<select class="form-control " data-autoload data-refresh="true"
-								data-url="admin/dictionary/options?key=siargo_supplier"
-								name="image.supplierId" data-text="=请选择/搜索="
-								data-value-attr="sn" data-select="#(image.supplierId ??)"
-								data-notnull="false" data-rule="select"
+								data-url="admin/siargo/supplier/getSupplierName" name="image.supplierId"
+								data-text="=请选择/搜索=" data-value-attr="id" data-rule="select"
+								data-text-attr="name" data-select="#(image.supplierId ??)"
 								data-select-type="select2">
 							</select>
 						</div>

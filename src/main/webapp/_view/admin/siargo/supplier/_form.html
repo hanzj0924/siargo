@@ -1,0 +1,35 @@
+<form onsubmit="return false;" id="supplierForm" action="#(action)"
+	method="post">
+	<input type="hidden" name="supplier.id" value="#(supplier.id??)" />
+	<div class="row">
+		<div class="col">
+			<div class="form-group row">
+				<label class="col-sm-2 col-form-label">名称</label>
+				<div class="col">
+					<input type="text" data-with-clearbtn="true" autocomplete="off" data-rule="required"
+						class="form-control" placeholder="请输入名称" maxlength="255"
+						name="supplier.name" value="#(supplier.name??)" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-2 col-form-label">供应商类型</label>
+				<div class="col">
+					<select class="form-control" data-autoload
+						name="supplier.type" data-select="#(supplier.type??)"
+						data-url="admin/dictionary/options?key=siargo_sup_type"
+						data-rule="select" data-tips="请选择供应商类型" data-text="=请选择="
+						data-value="" data-value-attr="sn"
+					>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</form>
+#define js()
+<script>
+	
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="supplierForm") #end
+

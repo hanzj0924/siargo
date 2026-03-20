@@ -17,6 +17,7 @@ import java.util.List;
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
+import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -63,14 +64,15 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * @param endTime
 	 * @return
 	 */
-	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, String supplierId) {
+	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, String supplierId, String yearMonth) {
 		Sql sql = Sql.mysql()
 				.select("si.id" ,"si.supplier_id" , "si.storage_name", "si.file_path", "si.md5_hash",
 						"si.description", "si.upload_time","si.updated_time", "si.status", "si.deleted_time", 
-						"jd.name AS supplier_name",
+						"jd.name AS supplier_name","ss.name AS supplierName",
 						"ju_uploader.name AS uploader_name", "ju_update.name AS update_name")
 				.page(pageNumber, pageSize)
 				.from("siargo_image", "si")
+				.leftJoin("siargo_supplier", "ss", "ss.id = si.supplier_id")
 				.leftJoin("jb_user", "ju_uploader", "ju_uploader.id = si.uploader_id")
 				.leftJoin("jb_user", "ju_update", "ju_update.id = si.update_id")
 				.leftJoin("jb_dictionary", "jd", "jd.type_key = 'siargo_supplier'  "
@@ -78,9 +80,18 @@ public class ImageService extends JBoltBaseService<Image> {
 						+ "AND jd.enable = '1' ")
 				.like("si.supplier_id", supplierId)
 				.like("si.storage_name", keywords)
-				.eq("si.status", STATUS_NORMAL)
-				.orderBy("si.upload_time", true);
-		;
+				.eq("si.status", STATUS_NORMAL);
+		if (StrKit.notBlank(yearMonth)) {
+			// yearMonth 格式为 "yyyy-MM"
+			String startTime = yearMonth + "-01 00:00:00";
+			// 计算该月最后一天
+			java.time.YearMonth ym = java.time.YearMonth.parse(yearMonth);
+			int lastDay = ym.lengthOfMonth();
+			String endTime = yearMonth + "-" + String.format("%02d", lastDay) + " 23:59:59";
+			sql.ge("si.upload_time", startTime);
+			sql.le("si.upload_time", endTime);
+		}
+		sql.orderBy("si.upload_time", true);
 		return paginateRecord(sql, true);
 	}
 
@@ -93,7 +104,7 @@ public class ImageService extends JBoltBaseService<Image> {
 	public Ret save(Image image, String tempPath) {
 		Image dbImage = new Image();
 		File tempFile = new File(webRootPath + tempPath);
-		String path = localPath + dicIdFindBySn(image.getSupplierId()).getStr("id") + 
+		String path = localPath + image.getSupplierId() + 
 						File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator;
 		
 		File locaFolder = new File(webRootPath + path);
@@ -335,7 +346,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			}
 			
 			// 确定目标目录：localPath + 供应商字典ID + / + YYYYMM + /
-			String targetDir = localPath + dicIdFindBySn(image.getSupplierId()).getStr("id") + 
+			String targetDir = localPath + image.getSupplierId() + 
 					File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator;
 			File targetFolder = new File(webRootPath + targetDir);
 			if (!targetFolder.exists()) {
@@ -377,7 +388,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			String targetDir;
 			if (supplierChanged) {
 				// 供应商变了 → 新供应商目录
-				targetDir = localPath + dicIdFindBySn(image.getSupplierId()).getStr("id") + 
+				targetDir = localPath + image.getSupplierId() + 
 						File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator;
 			} else {
 				// 供应商没变 → 保持旧文件所在目录

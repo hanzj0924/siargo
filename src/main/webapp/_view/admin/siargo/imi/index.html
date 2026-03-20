@@ -9,18 +9,22 @@
 			<div class="col-sm-8">
 				<form class="form-inline" id="imageForm_#(pageId)"
 					onsubmit="return false;" method="post">
+					<input type="text" data-with-clearbtn="true" class="form-control" 
+						data-date data-type="month" placeholder="选择年月" data-width="100px"
+						name="yearMonth" data-max="0"  value="#(yearMonth??)">
 					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 						placeholder="输入到单据号搜索" name="keywords" value="" />
 					<select class="form-control" data-autoload 
-						data-url="admin/dictionary/options?key=siargo_supplier"
+						data-url="admin/siargo/supplier/getSupplierName"
 						data-refresh="true"
 						name="supplierId" 
-						data-value-attr="sn"
+						data-value-attr="id"
 						data-text="=请选择搜索=" 
 						data-with-clearbtn="true"
-						data-width="600px"
+						data-width="400px"
 						data-select-type="select2">
 					</select>
+					
 					<button type="submit" class="btn btn-outline-secondary">
 						<i class="fa fa-search"></i> 查询
 					</button>
@@ -36,7 +40,7 @@
 <tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>${data.storageName}</td>
-<td>${data.supplierName}</td>
+<td>${data.suppliername}</td>
 <td>
 	<img data-imgviewer src="${data.filePath}"  class="m-1"  style="height: 50px;" tooltip data-title="点击查看大图" />	
 </td>

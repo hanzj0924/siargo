@@ -55,7 +55,7 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 供应商ID
 	 */
-	public M setSupplierId(java.lang.String supplierId) {
+	public M setSupplierId(java.lang.Long supplierId) {
 		set("supplier_id", supplierId);
 		return (M)this;
 	}
@@ -63,9 +63,10 @@ public abstract class BaseImage<M extends BaseImage<M>> extends JBoltBaseModel<M
 	/**
 	 * 供应商ID
 	 */
-	@JBoltField(name="supplierId" ,columnName="supplier_id",type="String", remark="供应商ID", required=false, maxLength=255, fixed=0, order=2)
-	public java.lang.String getSupplierId() {
-		return getStr("supplier_id");
+	@JBoltField(name="supplierId" ,columnName="supplier_id",type="Long", remark="供应商ID", required=false, maxLength=19, fixed=0, order=2)
+	@JSONField(serializeUsing= ToStringSerializer.class)
+	public java.lang.Long getSupplierId() {
+		return getLong("supplier_id");
 	}
 
 	/**

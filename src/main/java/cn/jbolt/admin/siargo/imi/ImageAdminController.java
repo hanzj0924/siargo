@@ -126,7 +126,7 @@ public class ImageAdminController extends JBoltBaseController {
 	 * 数据源
 	 */
 	public void datas() {
-		renderJsonData(service.paginateAdminDatas(getPageNumber(), getPageSize(), getKeywords(), getPara("supplierId")));
+		renderJsonData(service.paginateAdminDatas(getPageNumber(), getPageSize(), getKeywords(), getPara("supplierId"), getPara("yearMonth")));
 	}
 
 	/**
