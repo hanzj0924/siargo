@@ -3,14 +3,15 @@
 	<div class="jbolt_page_content">
 		<form onsubmit="return false;" id="imageUpdateForm"
 			action="admin/siargo/imi/update" method="post">
-			<input type="hidden" name="image.id" value="#(image.id??)" />
-			<input type="hidden" name="image.status" value="#(image.status??)" />
+			<input type="hidden" name="image.id" value="#(image.id??)" /> <input
+				type="hidden" name="image.status" value="#(image.status??)" />
 			<div class="row">
 				<div class="col">
 					<div class="form-group row">
 						<label class="col-sm-1 col-form-label">文件名</label>
 						<div class="col-sm-4">
-							<input type="text" class="form-control" name="image.storageName" value="#(image.storageName??)" data-with-clearbtn="true" />
+							<input type="text" class="form-control" name="image.storageName"
+								value="#(image.storageName??)" data-with-clearbtn="true" />
 						</div>
 					</div>
 				</div>
@@ -21,10 +22,10 @@
 						<label class="col-sm-1 col-form-label">供应商</label>
 						<div class="col-sm-4">
 							<select class="form-control " data-autoload data-refresh="true"
-								data-url="admin/siargo/supplier/getSupplierName" name="image.supplierId"
-								data-text="=请选择/搜索=" data-value-attr="id" data-rule="select"
-								data-text-attr="name" data-select="#(image.supplierId ??)"
-								data-select-type="select2">
+								data-url="admin/siargo/supplier/getSupplierName"
+								name="image.supplierId" data-text="=请选择/搜索="
+								data-value-attr="id" data-rule="select" data-text-attr="name"
+								data-select="#(image.supplierId ??)" data-select-type="select2">
 							</select>
 						</div>
 					</div>
@@ -47,8 +48,8 @@
 			<div class="row">
 				<div class="col">
 					<input type="text" data-rule="required" data-tips="请在下方选择图片上传"
-						name="image.filePath" id="imgUploadUrl" value="#(image.filePath??)"
-						class="form-control" />
+						name="image.filePath" id="imgUploadUrl"
+						value="#(image.filePath??)" class="form-control" />
 				</div>
 			</div>
 		</form>
@@ -62,13 +63,11 @@
 					<fieldset class="form-page-fieldset">
 						<legend>修改图片</legend>
 						<div class="form-group text-center">
-							<div class="j_img_uploder" 
-								data-handler="uploadFile"
+							<div class="j_img_uploder" data-handler="uploadFile"
 								data-url="/admin/siargo/imi/uploadImages?save=false"
 								data-upload-success-handler="uploadHandler"
 								data-value="#realImage(image.filePath??)"
-								data-hiddeninput="imgUploadUrl" 
-								data-area="300,300"
+								data-hiddeninput="imgUploadUrl" data-area="300,300"
 								data-maxsize="102400"></div>
 						</div>
 					</fieldset>
@@ -77,18 +76,21 @@
 		</div>
 		#define js()
 		<script>
+	
 		function uploadHandler(uploader, type, fileInput, result) {
 			var data = result.data;
-			
+
 			if ($('input[name="image.storageName"]').length) {
 			    $('input[name="image.storageName"]').val(data.filesName);
 			}
-			
+
 			if ($('input[name="image.filePath"]').length) {
 			    $('input[name="image.filePath"]').val(data.files);
 			}
-			
+
 		}
+
+		
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="imageUpdateForm")
 		#end

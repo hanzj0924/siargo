@@ -10,10 +10,10 @@
 						<label class="col-sm-1 col-form-label">供应商</label>
 						<div class="col-sm-4">
 							<select class="form-control " data-autoload data-refresh="true"
-								data-url="admin/siargo/supplier/getSupplierName" name="image.supplierId"
-								data-text="=请选择/搜索=" data-value-attr="id" data-rule="select"
-								data-text-attr="name" data-select="#(image.supplierId ??)"
-								data-select-type="select2">
+								data-url="admin/siargo/supplier/getSupplierName"
+								name="image.supplierId" data-text="=请选择/搜索="
+								data-value-attr="id" data-rule="select" data-text-attr="name"
+								data-select="#(image.supplierId ??)" data-select-type="select2">
 							</select>
 						</div>
 					</div>
@@ -55,26 +55,51 @@
 							data-imgstyle="width:100px;height:100px;"></ul>
 					</div>
 					<div class="col-md-auto col-12">
-						<div class="j_img_uploder" 
-							data-multi="true" 
-							data-imgbox="imgbox"
+						<div class="j_img_uploder" data-multi="true" data-imgbox="imgbox"
 							data-upload-success-handler="uploadHandler"
 							data-url="/admin/siargo/imi/uploadImages?save=true"
-							data-handler="uploadMultipleFile" 
-							data-hiddeninput="imgUploadUrl"
-							data-limit="20"
-							data-area="80,80" data-maxsize="102400"></div>
+							data-handler="uploadMultipleFile" data-hiddeninput="imgUploadUrl"
+							data-remove-url="/admin/siargo/imi/deleteTempFile?filePath=[file]"
+							data-limit="20" data-area="80,80" data-maxsize="102400"></div>
 					</div>
 				</div>
 			</div>
 		</fieldset>
 		#define js()
 		<script>
+		
+		// 上传成功回调
 		function uploadHandler(uploader, type, fileInput, result) {
-			var data = result.data;
-
-			
+			console.log('upload success:', result);
 		}
+		
+		// ── 页面关闭时清理所有未保存的 temp 文件 ──────────────────
+		var _imiFormSaved = false;
+		
+		// 表单提交成功后标记，避免清理已入库的文件
+		function afterFormSubmit(ret, callback) {
+			_imiFormSaved = true;
+			if (callback) callback();
+		}
+		
+		$(window).on('beforeunload', function() {
+			if (_imiFormSaved) return;
+			var remaining = $.trim($('#imgUploadUrl').val());
+			if (!remaining) return;
+			var paths = remaining.split(',').filter(function(p) { return $.trim(p) !== ''; });
+			if (paths.length === 0) return;
+			// sendBeacon 能在页面卸载时可靠发送请求
+			var url = actionUrl('/admin/siargo/imi/deleteTempFiles?filePaths='
+					+ encodeURIComponent(paths.join(',')));
+			if (navigator.sendBeacon) {
+				navigator.sendBeacon(url);
+			} else {
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', url, false);
+				xhr.send();
+			}
+		});
+		
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="imageForm") #end
 	</div>

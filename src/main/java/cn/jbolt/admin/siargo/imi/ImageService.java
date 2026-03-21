@@ -2,7 +2,6 @@ package cn.jbolt.admin.siargo.imi;
 
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.upload.UploadFile;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
 import java.io.File;
@@ -13,6 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.PathKit;
@@ -29,11 +29,10 @@ import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
 import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.siargo.model.Image;
-import cn.jbolt.siargo.model.Product;
 
 /**
  * 来料到货单管理 Service
- * 
+ *
  * @ClassName: ImageService
  * @author: hanzj
  * @date: 2026-01-30 16:19
@@ -49,42 +48,47 @@ public class ImageService extends JBoltBaseService<Image> {
 	public static final int STATUS_NORMAL = 1;
 	public static final int STATUS_DELETED = 0;
 	public static final String webRootPath = PathKit.getWebRootPath();
-	public static final String localPath = File.separator + "upload" + 
-			File.separator + JBoltUploadFolder.SIARGO_UPLOAD_IMI +  File.separator ;
+	/** 统一使用 "/" 作为路径分隔符，避免 Windows File.separator 存入数据库后 Web 访问异常 */
+	public static final String localPath = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_IMI + "/";
+
+	/**
+	 * 获取 Web 根目录路径（供 Controller 调用）
+	 */
+	public String getWebRootPath() {
+		return webRootPath;
+	}
+
+	// -------------------------------------------------------------------------
+	// 查询
+	// -------------------------------------------------------------------------
 
 	/**
 	 * 后台管理分页查询
-	 * 
-	 * @param pageNumber
-	 * @param pageSize
-	 * @param keywords
-	 * @param prodType
-	 * @param insp
-	 * @param startTime
-	 * @param endTime
-	 * @return
+	 *
+	 * @param pageNumber  页码
+	 * @param pageSize    每页条数
+	 * @param keywords    文件名关键字
+	 * @param supplierId  供应商ID
+	 * @param yearMonth   年月（yyyy-MM）
 	 */
-	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, String supplierId, String yearMonth) {
+	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize,
+			String keywords, String supplierId, String yearMonth) {
 		Sql sql = Sql.mysql()
-				.select("si.id" ,"si.supplier_id" , "si.storage_name", "si.file_path", "si.md5_hash",
-						"si.description", "si.upload_time","si.updated_time", "si.status", "si.deleted_time", 
-						"jd.name AS supplier_name","ss.name AS supplierName",
+				.select("si.id", "si.supplier_id", "si.storage_name", "si.file_path", "si.md5_hash",
+						"si.description", "si.upload_time", "si.updated_time", "si.status", "si.deleted_time",
+						"ss.name AS supplier_name",
 						"ju_uploader.name AS uploader_name", "ju_update.name AS update_name")
 				.page(pageNumber, pageSize)
 				.from("siargo_image", "si")
 				.leftJoin("siargo_supplier", "ss", "ss.id = si.supplier_id")
 				.leftJoin("jb_user", "ju_uploader", "ju_uploader.id = si.uploader_id")
 				.leftJoin("jb_user", "ju_update", "ju_update.id = si.update_id")
-				.leftJoin("jb_dictionary", "jd", "jd.type_key = 'siargo_supplier'  "
-						+ "AND jd.sn COLLATE utf8mb4_general_ci = CAST(si.supplier_id AS CHAR) "
-						+ "AND jd.enable = '1' ")
 				.like("si.supplier_id", supplierId)
 				.like("si.storage_name", keywords)
 				.eq("si.status", STATUS_NORMAL);
 		if (StrKit.notBlank(yearMonth)) {
 			// yearMonth 格式为 "yyyy-MM"
 			String startTime = yearMonth + "-01 00:00:00";
-			// 计算该月最后一天
 			java.time.YearMonth ym = java.time.YearMonth.parse(yearMonth);
 			int lastDay = ym.lengthOfMonth();
 			String endTime = yearMonth + "-" + String.format("%02d", lastDay) + " 23:59:59";
@@ -95,36 +99,59 @@ public class ImageService extends JBoltBaseService<Image> {
 		return paginateRecord(sql, true);
 	}
 
+	// -------------------------------------------------------------------------
+	// 保存
+	// -------------------------------------------------------------------------
+
 	/**
-	 * 保存
-	 * 
-	 * @param image
-	 * @return
+	 * 保存单张图片（先移动文件，再写数据库，保证一致性）。
+	 * <p>
+	 * 调用方须保证此方法在同一个数据库事务内执行，以便文件移动失败时可整体回滚。
+	 *
+	 * @param image    包含 supplierId、description 等元数据
+	 * @param tempPath 临时文件相对路径（相对于 webRootPath）
+	 * @return Ret，成功时携带 filePath（相对路径，以 "/" 开头）
 	 */
 	public Ret save(Image image, String tempPath) {
-		Image dbImage = new Image();
 		File tempFile = new File(webRootPath + tempPath);
-		String path = localPath + image.getSupplierId() + 
-						File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator;
-		
-		File locaFolder = new File(webRootPath + path);
-		if (!locaFolder.exists()) {
-			locaFolder.mkdirs();
+		if (!tempFile.exists() || !tempFile.isFile()) {
+			return fail("临时文件不存在：" + tempPath);
 		}
 
-		// 计算MD5（用于去重）
+		// 目标目录：localPath + supplierId + / + YYYYMM + /
+		String targetDir = localPath + image.getSupplierId() + "/"
+				+ DateUtil.getNowStr(DateUtil.YM) + "/";
+		File targetFolder = new File(webRootPath + targetDir);
+		if (!targetFolder.exists()) {
+			targetFolder.mkdirs();
+		}
+
+		// 计算 MD5（用于去重）
 		String md5 = getMd5(tempFile);
-
-		// 检查图片是否已存在
-		Image existImage = findByMd5(md5); 
-		if (existImage != null){ 
-			return fail("图片 " + existImage.getStorageName() + " 已经存在！"); 
+		Image existImage = findByMd5(md5);
+		if (existImage != null) {
+			// 临时文件已无用，清理掉
+			tempFile.delete();
+			return fail("图片 " + existImage.getStorageName() + " 已经存在！");
 		}
-		 
-		String filePath = FileUtil.normalize(path + tempFile.getName());
+
+		// 目标路径（统一 "/"）
+		String targetPath = FileUtil.normalize(targetDir + tempFile.getName());
+		File targetFile = new File(webRootPath + targetPath);
+
+		// ① 先移动文件
+		try {
+			Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return fail("文件移动失败：" + e.getMessage());
+		}
+
+		// ② 再写数据库
+		Image dbImage = new Image();
 		dbImage.set("supplier_id", image.getSupplierId());
 		dbImage.set("storage_name", getFileName(tempFile));
-		dbImage.set("file_path", filePath);
+		dbImage.set("file_path", targetPath);
 		dbImage.set("md5_hash", md5);
 		dbImage.set("description", image.getDescription());
 		dbImage.set("upload_time", DateUtil.getDateString(DateUtil.YMDHMS));
@@ -133,31 +160,32 @@ public class ImageService extends JBoltBaseService<Image> {
 
 		boolean success = dbImage.save();
 		if (!success) {
+			// 数据库写入失败，回滚文件（将文件移回临时位置）
+			try {
+				Files.move(targetFile.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				// 回滚文件失败时直接删除目标文件，避免孤立文件
+				targetFile.delete();
+			}
 			return fail("数据保存失败");
 		}
-		
-		try {
-			Files.move(
-					tempFile.toPath(),
-					Paths.get(webRootPath, path + tempFile.getName()),
-					StandardCopyOption.REPLACE_EXISTING
-				);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return fail("文件移动失败：" + e.getMessage());
-		}
-		
-		return ret(true).set("filePath", filePath);
+
+		return ret(true).set("filePath", targetPath);
 	}
 
 	/**
-	 * 批量保存（带事务和文件清理）
-	 * 上传过程中任一图片报错，回滚数据库并删除本次已上传的所有图片
+	 * 批量保存（带事务和文件清理）。
+	 * <p>
+	 * 任一图片保存失败时，回滚数据库事务，并删除本次已移动到目标位置的所有文件及剩余临时文件。
+	 *
+	 * @param image     公共元数据（supplierId、description）
+	 * @param tempPaths 临时文件相对路径列表
 	 */
 	public Ret saveBatch(Image image, List<String> tempPaths) {
 		List<String> movedFilePaths = new ArrayList<>();
 		final String[] errorMsg = {null};
-		
+
 		boolean txSuccess = Db.tx(() -> {
 			for (int i = 0; i < tempPaths.size(); i++) {
 				Ret ret;
@@ -173,7 +201,8 @@ public class ImageService extends JBoltBaseService<Image> {
 						File f = new File(webRootPath + filePath);
 						if (f.exists()) f.delete();
 					}
-					// 清理当前及剩余的临时文件
+					// 清理当前及剩余的临时文件（save() 内部已清理 MD5 重复的临时文件，
+					// 这里处理文件移动失败后仍留在 temp 目录的情况）
 					for (int j = i; j < tempPaths.size(); j++) {
 						File tempFile = new File(webRootPath + tempPaths.get(j));
 						if (tempFile.exists()) tempFile.delete();
@@ -184,18 +213,227 @@ public class ImageService extends JBoltBaseService<Image> {
 			}
 			return true; // 提交事务
 		});
-		
+
 		if (!txSuccess) {
 			return fail(errorMsg[0] != null ? errorMsg[0] : "保存失败");
 		}
 		return ret(true);
 	}
 
+	// -------------------------------------------------------------------------
+	// 更新
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 更新图片记录。
+	 * <p>
+	 * 文件操作策略：先完成所有文件操作，再更新数据库，保证一致性。
+	 * 若数据库更新失败，尝试将文件回滚到原路径。
+	 *
+	 * @param image 前端传入的更新数据
+	 */
+	public Ret update(Image image) {
+		if (image == null || notOk(image.getId())) {
+			return fail(JBoltMsg.PARAM_ERROR);
+		}
+
+		Image dbImage = findById(image.getId());
+		if (dbImage == null) {
+			return fail(JBoltMsg.DATA_NOT_EXIST);
+		}
+
+		// 使用 Objects.equals 防止 NPE（#9）
+		boolean supplierChanged   = !Objects.equals(image.getSupplierId(),   dbImage.getSupplierId());
+		boolean storageNameChanged = !Objects.equals(image.getStorageName(), dbImage.getStorageName());
+		// fileChanged：前端传来的路径与数据库不同，说明上传了新的临时文件
+		boolean fileChanged = !Objects.equals(image.getFilePath(), dbImage.getFilePath());
+
+		String finalFilePath = dbImage.getFilePath();
+		String finalMd5      = dbImage.getMd5Hash();
+
+		// 用于回滚：记录文件操作前的旧路径
+		String rollbackOldPath = null;
+		String rollbackNewPath = null;
+
+		if (fileChanged) {
+			// ── 场景A：上传了新文件 ──────────────────────────────────────────
+			File newFile = new File(webRootPath + image.getFilePath());
+			if (!newFile.exists() || !newFile.isFile()) {
+				return fail("新文件不存在，请重新上传");
+			}
+
+			// 计算新文件 MD5，检查重复（排除自身）
+			String newMd5 = getMd5(newFile);
+			Image existImage = dao.findFirst(
+					"SELECT * FROM siargo_image WHERE md5_hash = ? AND status = ? AND id != ?",
+					newMd5, STATUS_NORMAL, image.getId());
+			if (existImage != null) {
+				return fail("图片 " + existImage.getStorageName() + " 已经存在！");
+			}
+
+			// 目标目录
+			String targetDir = localPath + image.getSupplierId() + "/"
+					+ DateUtil.getNowStr(DateUtil.YM) + "/";
+			File targetFolder = new File(webRootPath + targetDir);
+			if (!targetFolder.exists()) {
+				targetFolder.mkdirs();
+			}
+
+			// 目标文件名：storageName + 新文件扩展名
+			String extension     = getExtensionWithDotApacheCommons(newFile);
+			String targetFileName = image.getStorageName() + extension;
+			String targetPath    = FileUtil.normalize(targetDir + targetFileName);
+
+			// ① 先移动新文件
+			try {
+				Files.move(newFile.toPath(), Paths.get(webRootPath + targetPath),
+						StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return fail("文件移动失败：" + e.getMessage());
+			}
+
+			// ② 删除旧文件
+			File oldFile = new File(webRootPath + dbImage.getFilePath());
+			if (oldFile.exists()) {
+				oldFile.delete();
+			}
+
+			rollbackOldPath = targetPath;
+			rollbackNewPath = dbImage.getFilePath(); // 旧文件已删，回滚时只能删新文件
+			finalFilePath   = targetPath;
+			finalMd5        = newMd5;
+
+		} else if (supplierChanged || storageNameChanged) {
+			// ── 场景B：未换文件，但供应商或文件名变了 ──────────────────────
+			File oldFile = new File(webRootPath + dbImage.getFilePath());
+			if (!oldFile.exists()) {
+				return fail("原始文件不存在，无法重命名/移动");
+			}
+			String oldExtension = getExtensionWithDotApacheCommons(oldFile);
+
+			// 目标目录
+			String targetDir;
+			if (supplierChanged) {
+				targetDir = localPath + image.getSupplierId() + "/"
+						+ DateUtil.getNowStr(DateUtil.YM) + "/";
+			} else {
+				// 供应商未变，保持原目录（统一为 "/" 分隔符，修复 #10）
+				String parentAbs = oldFile.getParentFile().getAbsolutePath();
+				String parentRel = parentAbs.substring(webRootPath.length())
+						.replace(File.separator, "/");
+				if (!parentRel.endsWith("/")) parentRel += "/";
+				targetDir = parentRel;
+			}
+
+			File targetFolder = new File(webRootPath + targetDir);
+			if (!targetFolder.exists()) {
+				targetFolder.mkdirs();
+			}
+
+			// 目标文件名
+			String targetFileName = storageNameChanged
+					? image.getStorageName() + oldExtension
+					: oldFile.getName();
+			String targetPath = FileUtil.normalize(targetDir + targetFileName);
+
+			// ① 先移动文件
+			try {
+				Files.move(oldFile.toPath(), Paths.get(webRootPath + targetPath),
+						StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return fail("文件移动失败：" + e.getMessage());
+			}
+
+			rollbackOldPath = targetPath;
+			rollbackNewPath = dbImage.getFilePath();
+			finalFilePath   = targetPath;
+			// MD5 不变，保留 dbImage 的 md5_hash
+		}
+		// ── 场景C：仅改备注，不做文件操作 ──────────────────────────────────
+
+		// 处理软删除时间
+		if (image.getStatus() == STATUS_DELETED) {
+			image.set("deleted_time", DateUtil.getDateString(DateUtil.YMDHMS));
+		}
+
+		// ② 再更新数据库
+		image.set("file_path",     FileUtil.normalize(finalFilePath));
+		image.set("md5_hash",      finalMd5);
+		image.set("description",   image.getDescription());
+		image.set("updated_time",  DateUtil.getDateString(DateUtil.YMDHMS));
+		image.set("update_id",     JBoltUserKit.getUserId());
+
+		boolean success = image.update();
+		if (!success && rollbackOldPath != null) {
+			// 数据库更新失败，尝试将文件回滚到原路径
+			try {
+				Files.move(Paths.get(webRootPath + rollbackOldPath),
+						Paths.get(webRootPath + rollbackNewPath),
+						StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				// 回滚失败时记录日志，人工介入
+				System.err.println("[ImageService] 文件回滚失败，需人工处理: "
+						+ rollbackOldPath + " -> " + rollbackNewPath);
+			}
+			return fail("数据更新失败");
+		}
+		return ret(success);
+	}
+
+	// -------------------------------------------------------------------------
+	// 删除
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 软删除单条记录：先更新数据库状态，再删除文件，避免文件删除失败导致数据不一致。
+	 *
+	 * @param id 图片ID
+	 */
+	public Ret delete(Long id) {
+		Image dbImage = findById(id);
+		if (dbImage == null) {
+			return fail(JBoltMsg.DATA_NOT_EXIST);
+		}
+
+		// ① 先更新数据库状态
+		dbImage.set("deleted_time", DateUtil.getDateString(DateUtil.YMDHMS));
+		dbImage.set("status", STATUS_DELETED);
+		boolean success = dbImage.update();
+		if (!success) {
+			return fail("删除失败");
+		}
+
+		// ② 再删除文件（失败时记录日志，不影响业务返回）
+		File oldFile = new File(webRootPath + dbImage.getFilePath());
+		if (oldFile.exists()) {
+			boolean deleted = oldFile.delete();
+			if (!deleted) {
+				System.err.println("[ImageService] 文件删除失败，需人工清理: " + dbImage.getFilePath());
+			}
+		}
+
+		return ret(true);
+	}
+
+	/**
+	 * 批量删除（逗号分隔的 ID 字符串）
+	 */
+	public Ret deleteByBatchIds(String ids) {
+		return deleteByIds(ids, true);
+	}
+
+	// -------------------------------------------------------------------------
+	// 工具方法
+	// -------------------------------------------------------------------------
+
 	/**
 	 * 计算文件的 MD5 值
-	 * 
+	 *
 	 * @param file 文件对象
-	 * @return MD5 字符串
+	 * @return MD5 十六进制字符串
 	 */
 	public String getMd5(File file) {
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -204,322 +442,92 @@ public class ImageService extends JBoltBaseService<Image> {
 			throw new RuntimeException("计算文件MD5失败", e);
 		}
 	}
-	
+
 	/**
-	 * 获取文件名
-	 * 
+	 * 获取文件名（不含扩展名）
+	 *
 	 * @param file 文件对象
-	 * @return MD5 字符串
+	 * @return 不含扩展名的文件名
 	 */
 	public String getFileName(File file) {
-		//去文件名掉后缀
-		 String fileName = file.getName();
-		 String fileNameWithoutExtension;
-
-		 int dotIndex = fileName.lastIndexOf('.');
-		 if (dotIndex > 0) {
-		     fileNameWithoutExtension = fileName.substring(0, dotIndex);
-		 } else {
-		     fileNameWithoutExtension = fileName; // 没有后缀的情况
-		 }
-		 return fileNameWithoutExtension;
+		String fileName = file.getName();
+		int dotIndex = fileName.lastIndexOf('.');
+		return dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
 	}
-	
+
 	/**
-	 * 使用 Apache Commons IO 获取带点的扩展名
+	 * 获取文件扩展名（含点，如 ".jpg"）
+	 *
 	 * @param file 文件对象
-	 * @return 带点的扩展名
+	 * @return 带点的扩展名，无扩展名时返回空字符串
 	 */
 	public String getExtensionWithDotApacheCommons(File file) {
-	    if (file == null) {
-	        return "";
-	    }
-	    String extension = FilenameUtils.getExtension(file.getName());
-	    return extension.isEmpty() ? "" : "." + extension;
+		if (file == null) return "";
+		String extension = FilenameUtils.getExtension(file.getName());
+		return extension.isEmpty() ? "" : "." + extension;
 	}
-	
+
 	/**
-	 * 重命名文件
-	 * @param oldFilePath 原文件完整路径（相对路径）
-	 * @param newName 新的文件名（包含扩展名）
-	 * @return 新文件的完整路径，如果重命名失败则返回 null
+	 * 重命名文件，返回新的相对路径（以 "/" 分隔）
+	 *
+	 * @param oldFilePath 原文件相对路径（相对于 webRootPath）
+	 * @param newName     新文件名（不含扩展名）
+	 * @return 新文件相对路径；重命名失败返回 null
 	 */
 	public String getRenameFilePath(String oldFilePath, String newName) {
-	    try {
-	        // 构建原文件的绝对路径
-	        File oldFile = new File(webRootPath + oldFilePath);
-	        
-	        // 获取原文件扩展名
-	        String extension = getExtensionWithDotApacheCommons(oldFile);
-	        
-	        // 构建新文件的绝对路径
-	        String newAbsolutePath = oldFile.getParent() + File.separator + newName + extension;
-	        File newFile = new File(newAbsolutePath);
-	        
-	        // 检查新文件是否已存在
-	        if (newFile.exists()) {
-	            throw new RuntimeException("目标文件已存在: " + newAbsolutePath);
-	        }
-	        
-	        // 执行重命名
-	        boolean success = oldFile.renameTo(newFile);
-	        
-	        if (success) {
-	            // 构建并返回相对于 web 根目录的路径 从绝对路径中去除 webRootPath 部分
-	            String relativePath = newAbsolutePath.substring(webRootPath.length());
-	            
-	            // 将路径分隔符统一为 "/"（适用于 Web 路径）
-	            relativePath = relativePath.replace(File.separator, "/");
-	            
-	            return relativePath;
-	        } else {
-	            return null;
-	        }
-	    } catch (Exception e) {
-	        System.err.println("重命名文件时发生异常: " + e.getMessage());
-	        e.printStackTrace();
-	        return null;
-	    }
+		try {
+			File oldFile = new File(webRootPath + oldFilePath);
+			String extension = getExtensionWithDotApacheCommons(oldFile);
+			String newAbsolutePath = oldFile.getParent() + File.separator + newName + extension;
+			File newFile = new File(newAbsolutePath);
+
+			if (newFile.exists()) {
+				throw new RuntimeException("目标文件已存在: " + newAbsolutePath);
+			}
+
+			boolean success = oldFile.renameTo(newFile);
+			if (success) {
+				// 统一为 "/" 分隔符
+				return newAbsolutePath.substring(webRootPath.length()).replace(File.separator, "/");
+			}
+			return null;
+		} catch (Exception e) {
+			System.err.println("重命名文件时发生异常: " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
-	 * 根据MD5查找已存在的图片
-	 * 
-	 * @param md5 字符串
-	 * @return Image Image
+	 * 根据 MD5 查找已存在的图片（仅查正常状态）
+	 *
+	 * @param md5 MD5 字符串
+	 * @return 已存在的 Image，不存在返回 null
 	 */
 	public Image findByMd5(String md5) {
-		return dao.findFirst("SELECT * FROM siargo_image WHERE md5_hash = ? AND status = ?", md5, STATUS_NORMAL);
-	}
-	
-	/**
-	 * 根据Sn查找dictionary ID
-	 * 
-	 * @param sn 字符串
-	 * @return Record Record
-	 */
-	public Record dicIdFindBySn(String sn) {
-		Sql sql = Sql.mysql().select("jd.id")
-				.from("jb_dictionary", "jd")
-				.eq("jd.type_key", "siargo_supplier")
-				.eq("jd.ENABLE", STATUS_NORMAL )
-				.eq("jd.sn", sn);
-		return findFirstRecord(sql);
+		return dao.findFirst(
+				"SELECT * FROM siargo_image WHERE md5_hash = ? AND status = ?",
+				md5, STATUS_NORMAL);
 	}
 
-	/**
-	 * 更新
-	 * 
-	 * @param image
-	 * @return
-	 * @throws IOException 
-	 */
-	public Ret update(Image image) throws IOException {
-		if (image == null || notOk(image.getId())) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-		
-		Image dbImage = findById(image.getId());
-		if (dbImage == null) {
-			return fail(JBoltMsg.DATA_NOT_EXIST);
-		}
 
-		// 变更检测
-		boolean supplierChanged = !image.getSupplierId().equals(dbImage.getSupplierId());
-		boolean storageNameChanged = !image.getStorageName().equals(dbImage.getStorageName());
-		boolean fileChanged = !image.getFilePath().equals(dbImage.getFilePath()); // 是否上传了新文件
-		
-		String finalFilePath = dbImage.getFilePath();
-		String finalMd5 = dbImage.getMd5Hash();
-		
-		if (fileChanged) {
-			// 场景A：上传了新文件（fileChanged=true）
-			File newFile = new File(webRootPath + image.getFilePath());
-			
-			// 计算新文件MD5，检查重复（排除自身ID）
-			String newMd5 = getMd5(newFile);
-			Image existImage = dao.findFirst(
-				"SELECT * FROM siargo_image WHERE md5_hash = ? AND status = ? AND id != ?", 
-				newMd5, STATUS_NORMAL, image.getId());
-			if (existImage != null) {
-				return fail("图片 " + existImage.getStorageName() + " 已经存在！");
-			}
-			
-			// 确定目标目录：localPath + 供应商字典ID + / + YYYYMM + /
-			String targetDir = localPath + image.getSupplierId() + 
-					File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator;
-			File targetFolder = new File(webRootPath + targetDir);
-			if (!targetFolder.exists()) {
-				targetFolder.mkdirs();
-			}
-			
-			// 确定目标文件名：storageName + 新文件扩展名
-			String extension = getExtensionWithDotApacheCommons(newFile);
-			String targetFileName = image.getStorageName() + extension;
-			String targetPath = targetDir + targetFileName;
-			
-			// 移动新文件到目标路径
-			try {
-				Files.move(
-						newFile.toPath(),
-						Paths.get(webRootPath + targetPath),
-						StandardCopyOption.REPLACE_EXISTING
-				);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return fail("文件移动失败：" + e.getMessage());
-			}
-			
-			// 删除旧文件（如果旧文件存在）
-			File oldFile = new File(webRootPath + dbImage.getFilePath());
-			if (oldFile.exists()) {
-				oldFile.delete();
-			}
-			
-			finalFilePath = targetPath;
-			finalMd5 = newMd5;
-			
-		} else if (supplierChanged || storageNameChanged) {
-			// 场景B：没有上传新文件，但供应商或storageName变了
-			File oldFile = new File(webRootPath + dbImage.getFilePath());
-			String oldExtension = getExtensionWithDotApacheCommons(oldFile);
-			
-			// 确定目标目录
-			String targetDir;
-			if (supplierChanged) {
-				// 供应商变了 → 新供应商目录
-				targetDir = localPath + image.getSupplierId() + 
-						File.separator + DateUtil.getNowStr(DateUtil.YM) + File.separator;
-			} else {
-				// 供应商没变 → 保持旧文件所在目录
-				targetDir = oldFile.getParent().substring(webRootPath.length()) + File.separator;
-			}
-			
-			// 确保目标目录存在
-			File targetFolder = new File(webRootPath + targetDir);
-			if (!targetFolder.exists()) {
-				targetFolder.mkdirs();
-			}
-			
-			// 确定目标文件名
-			String targetFileName;
-			if (storageNameChanged) {
-				// storageName变了 → 新storageName + 旧文件扩展名
-				targetFileName = image.getStorageName() + oldExtension;
-			} else {
-				// storageName没变 → 保持旧文件名
-				targetFileName = oldFile.getName();
-			}
-			
-			String targetPath = targetDir + targetFileName;
-			
-			// 只做一次 Files.move（从旧路径到新路径）
-			try {
-				Files.move(
-						oldFile.toPath(),
-						Paths.get(webRootPath + targetPath),
-						StandardCopyOption.REPLACE_EXISTING
-				);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return fail("文件移动失败：" + e.getMessage());
-			}
-			
-			// 确保源文件已删除
-			if (oldFile.exists()) {
-				oldFile.delete();
-			}
-			
-			finalFilePath = targetPath;
-			// MD5不变，保留dbImage的md5_hash
-		}
-		// 场景C：什么都没变（仅改备注） - 不做文件操作，finalFilePath和finalMd5保持原值
+	// -------------------------------------------------------------------------
+	// 框架回调
+	// -------------------------------------------------------------------------
 
-		// 处理删除状态
-		if (image.getStatus() == STATUS_DELETED) {
-			image.set("deleted_time", DateUtil.getDateString(DateUtil.YMDHMS));
-		}
-		
-		// 更新数据库记录
-		image.set("file_path", FileUtil.normalize(finalFilePath));
-		image.set("md5_hash", finalMd5);
-		image.set("description", image.getDescription());
-		image.set("updated_time", DateUtil.getDateString(DateUtil.YMDHMS));
-		image.set("update_id", JBoltUserKit.getUserId());
-		
-		boolean success = image.update();
-		if (success) {
-			// 添加日志
-			// addUpdateSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
-		}
-		return ret(success);
-	}
-	
-	/**
-	 * 删除
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public Ret delete(Long id) {
-		Image dbImage = findById(id);
-		if (dbImage == null) {
-			return fail(JBoltMsg.DATA_NOT_EXIST);
-		}
-		
-		File oldFile = new File(webRootPath + dbImage.getFilePath());
-		oldFile.delete();
-		
-		dbImage.set("deleted_time",DateUtil.getDateString(DateUtil.YMDHMS));
-		dbImage.set("status", STATUS_DELETED);
-
-		return ret(dbImage.update());
-	}
-
-	/**
-	 * 删除 指定多个ID
-	 * 
-	 * @param ids
-	 * @return
-	 */
-	public Ret deleteByBatchIds(String ids) {
-		return deleteByIds(ids, true);
-	}
-
-	/**
-	 * 删除数据后执行的回调
-	 * 
-	 * @param image 要删除的model
-	 * @param kv    携带额外参数一般用不上
-	 * @return
-	 */
 	@Override
 	protected String afterDelete(Image image, Kv kv) {
-		// addDeleteSystemLog(image.getId(), JBoltUserKit.getUserId(),image.getName());
+		// addDeleteSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
 		return null;
 	}
 
-	/**
-	 * 检测是否可以删除
-	 * 
-	 * @param image 要删除的model
-	 * @param kv    携带额外参数一般用不上
-	 * @return
-	 */
 	@Override
 	public String checkCanDelete(Image image, Kv kv) {
-		// 如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
 		return checkInUse(image, kv);
 	}
 
-	/**
-	 * 设置返回二开业务所属的关键systemLog的targetType
-	 * 
-	 * @return
-	 */
 	@Override
 	protected int systemLogTargetType() {
 		return ProjectSystemLogTargetType.NONE.getValue();
 	}
-
 }
