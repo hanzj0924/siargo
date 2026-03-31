@@ -9003,7 +9003,8 @@ var ImgUploadUtil={
 				var handler=uploder.data("handler");
 				
 				if(fileValue){
-					if(!validateFileDatas(fileDatas,"img",maxSize)){
+					var accept = uploder.data("accept") || "img";
+					if(!validateFileDatas(fileDatas,accept,maxSize)){
 						fileInput.val("");
 						return false;
 					}
@@ -9133,7 +9134,8 @@ var ImgUploadUtil={
 				}
 				
 				if(fileValue){
-					if(validateFile(fileInput,"img",maxSize)){
+					var accept = uploder.data("accept") || "img";
+					if(validateFile(fileInput,accept,maxSize)){
 						var arr=fileValue.split('\\');
 						var fileName=arr[arr.length-1];
 						if(handler&&handler!="uploadMultipleFile"){

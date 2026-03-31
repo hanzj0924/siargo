@@ -1,0 +1,20 @@
+<form onsubmit="return false;" id="dmsCategoryForm" action="#(action)" method="post">
+<input type="hidden" name="dmsCategory.id" value="#(dmsCategory.id??)" />
+<div class="row">
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">类别名称</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入类别名称" maxlength="100" name="dmsCategory.name" value="#(dmsCategory.name??)"/>
+		</div>
+	</div>
+	</div>
+</div>
+
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="dmsCategoryForm")
+#end
+

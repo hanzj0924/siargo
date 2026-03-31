@@ -318,7 +318,7 @@ public class ImageService extends JBoltBaseService<Image> {
 				targetDir = localPath + image.getSupplierId() + "/"
 						+ DateUtil.getNowStr(DateUtil.YM) + "/";
 			} else {
-				// 供应商未变，保持原目录（统一为 "/" 分隔符，修复 #10）
+				// 供应商未变，保持原目录（统一为 "/" 分隔符）
 				String parentAbs = oldFile.getParentFile().getAbsolutePath();
 				String parentRel = parentAbs.substring(webRootPath.length())
 						.replace(File.separator, "/");
@@ -337,7 +337,7 @@ public class ImageService extends JBoltBaseService<Image> {
 					: oldFile.getName();
 			String targetPath = FileUtil.normalize(targetDir + targetFileName);
 
-			// ① 先移动文件
+			// 先移动文件
 			try {
 				Files.move(oldFile.toPath(), Paths.get(webRootPath + targetPath),
 						StandardCopyOption.REPLACE_EXISTING);
@@ -358,7 +358,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			image.set("deleted_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		}
 
-		// ② 再更新数据库
+		// 再更新数据库
 		image.set("file_path",     FileUtil.normalize(finalFilePath));
 		image.set("md5_hash",      finalMd5);
 		image.set("description",   image.getDescription());
@@ -398,7 +398,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
 		}
 
-		// ① 先更新数据库状态
+		// 先更新数据库状态
 		dbImage.set("deleted_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		dbImage.set("status", STATUS_DELETED);
 		boolean success = dbImage.update();
@@ -406,7 +406,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			return fail("删除失败");
 		}
 
-		// ② 再删除文件（失败时记录日志，不影响业务返回）
+		// 再删除文件（失败时记录日志，不影响业务返回）
 		File oldFile = new File(webRootPath + dbImage.getFilePath());
 		if (oldFile.exists()) {
 			boolean deleted = oldFile.delete();

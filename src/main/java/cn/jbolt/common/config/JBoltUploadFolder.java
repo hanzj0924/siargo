@@ -49,5 +49,6 @@ public class JBoltUploadFolder {
 	public static final String SYSNOTICE_FILES = "sysnotice" + SEPARATOR + "files";
 	public static final String IMPORT_EXCEL_TEMP_FOLDER = "exceltemps";
 	public static final String SIARGO_UPLOAD_IMI = "imi" ;
+	public static final String SIARGO_UPLOAD_DMS = "dms";
 	
 }

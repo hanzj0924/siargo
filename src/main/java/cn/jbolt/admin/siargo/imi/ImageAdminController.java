@@ -68,7 +68,7 @@ public class ImageAdminController extends JBoltBaseController {
 		}
 
 		List<String> retFiles = new ArrayList<>();
-		// 修复 #11：收集所有文件名，而非只保留最后一个
+		//收集所有文件名，而非只保留最后一个
 		List<String> fileNames = new ArrayList<>();
 		StringBuilder errormsg = new StringBuilder();
 		String tempPathPrefix = "/upload/";
@@ -105,7 +105,7 @@ public class ImageAdminController extends JBoltBaseController {
 			renderJsonData(retFiles, errormsg.toString());
 		} else {
 			Map<String, Object> result = new HashMap<>();
-			result.put("filesName", fileNames);   // 修复 #11：返回所有文件名列表
+			result.put("filesName", fileNames);   // 返回所有文件名列表
 			result.put("files",     retFiles);
 			result.put("message",   errormsg.toString());
 			renderJsonData(result);
@@ -161,7 +161,7 @@ public class ImageAdminController extends JBoltBaseController {
 	/**
 	 * 批量删除（逗号分隔的 ID）。
 	 * <p>
-	 * 修复 #6：检查每条删除结果，任一失败则整体返回失败。
+	 * 检查每条删除结果，任一失败则整体返回失败。
 	 */
 	@Before(Tx.class)
 	public void deleteByIds() {

@@ -75,30 +75,45 @@
 		
 		// ── 页面关闭时清理所有未保存的 temp 文件 ──────────────────
 		var _imiFormSaved = false;
-		
+		var _imiCleaned = false;
+
 		// 表单提交成功后标记，避免清理已入库的文件
 		function afterFormSubmit(ret, callback) {
 			_imiFormSaved = true;
 			if (callback) callback();
 		}
-		
-		$(window).on('beforeunload', function() {
-			if (_imiFormSaved) return;
+
+		// 清理所有未保存的 temp 文件
+		function cleanupTempFiles() {
+			if (_imiFormSaved || _imiCleaned) return;
 			var remaining = $.trim($('#imgUploadUrl').val());
 			if (!remaining) return;
 			var paths = remaining.split(',').filter(function(p) { return $.trim(p) !== ''; });
 			if (paths.length === 0) return;
-			// sendBeacon 能在页面卸载时可靠发送请求
+			_imiCleaned = true;
 			var url = actionUrl('/admin/siargo/imi/deleteTempFiles?filePaths='
 					+ encodeURIComponent(paths.join(',')));
 			if (navigator.sendBeacon) {
 				navigator.sendBeacon(url);
 			} else {
-				var xhr = new XMLHttpRequest();
-				xhr.open('POST', url, false);
-				xhr.send();
+				$.ajax({ url: url, async: false });
+			}
+		}
+
+		// 拦截父窗口 layer 弹窗的关闭按钮（右上角X、右下角关闭）
+		$(function() {
+			try {
+				var idx = parent.layer.getFrameIndex(window.name);
+				var $layer = parent.$('#layui-layer' + idx);
+				$layer.find('.layui-layer-close, .layui-layer-btn1')
+					.on('mousedown.imiCleanup', cleanupTempFiles);
+			} catch(e) {
+				console.warn('无法绑定 layer 关闭事件', e);
 			}
 		});
+
+		// 兜底：页面卸载时也尝试清理
+		$(window).on('beforeunload', cleanupTempFiles);
 		
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="imageForm") #end

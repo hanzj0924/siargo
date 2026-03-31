@@ -1,0 +1,60 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-auto">
+	<h1>#(pageData.totalRow?? 0) 条记录</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="inactiveForm" action="admin/siargo/dms/file/inactiveDatas" data-pjaxsubmit method="get">
+		<input type="text" autocomplete="off" class="form-control" placeholder="输入文件名搜索" name="keywords" value="#(keywords??)" />
+		<button type="submit" class="btn btn-light"><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+	
+	<!-- JBoltTable -->
+	 <table cellspacing="0" cellpadding="0" border="0" class="table_striped thead_font_normal"
+	  data-jbolttable
+	  data-page="inactivePage"
+	  data-conditions-form="inactiveForm"
+	  data-sortable-columns="file_name,modify_date,active_date,upload_time"
+	  data-sort="#((sortColumn&&sortType)?(sortColumn+':'+sortType):'')"
+	  data-default-sort-column="upload_time"
+	 >
+<thead>
+<tr><th data-width="60">序号</th><th data-min-width="180" data-column="file_name">文件名</th><th data-width="80">扩展名</th><th data-width="120">所属类别</th><th data-width="110" data-column="modify_date">修改日期</th><th data-width="110" data-column="active_date">生效日期</th><th data-width="160" data-column="upload_time">上传时间</th><th data-width="100">操作</th></tr>
+</thead>
+<tbody>
+#for(data:pageData.list??)
+<tr>
+<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+<td>#(data.fileName??)</td>
+<td>#(data.fileExt??)</td>
+<td>#(data.categoryName??)</td>
+<td>#(data.modifyDate??)</td>
+<td>#(data.activeDate??)</td>
+<td>#date(data.uploadTime??,"yyyy-MM-dd HH:mm:ss")</td>
+<td>
+<a tooltip title="恢复生效" href="admin/siargo/dms/file/toggleActive/#(data.id)" data-handler="refreshPjaxContainer" data-confirm="确定恢复此文件为生效状态？" class="text-success"><i class="fa fa-check-circle"></i></a>
+<a tooltip title="删除" href="admin/siargo/dms/file/deleteByIds?ids=#(data.id)" data-handler="refreshPjaxContainer" data-confirm="确定删除此文件？" class="jbolt_table_delbtn ml-2"><i class="fa fa-remove c-danger"></i></a>
+</td>
+</tr>
+#end
+</tbody>
+ </table>
+	#include("/_view/_admin/common/_jbolt_table_page.html",pageEleId="inactivePage")
+</div>
+</div>
+#end
+
+#define js()
+<script>
+$(function(){
+	initPage("inactivePage",#(pageData.totalPage??),#(pageData.pageNumber??),"inactiveForm");
+})
+</script>
+#end

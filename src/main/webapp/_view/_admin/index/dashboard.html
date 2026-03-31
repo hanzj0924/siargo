@@ -54,7 +54,7 @@
 			<div class="row mt-2">
 				<div class="col-lg-12 col-sm-12 px-2">
 					<div class="card border-0  mb-2">
-						<div class="card-body" style="height:400px">
+						<div class="card-body" style="height:350px">
 							<h5 class="card-title"><span>送检总量(包含退修)/只</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
 							<div id="morris-bar_#(pageId)" style="height:90%;"></div>
 						</div>
@@ -119,6 +119,33 @@ var DashBoardUtil_#(pageId)={
 		        });
 		    },
 		      createBarChart :function (element, data, xkey, ykeys, labels, lineColors) {
+		            // 动态计算合理的 Y 轴最大值
+		            var maxValue = 0;
+		            for (var i = 0; i < data.length; i++) {
+		                for (var j = 0; j < ykeys.length; j++) {
+		                    var val = data[i][ykeys[j]];
+		                    if (val > maxValue) {
+		                        maxValue = val;
+		                    }
+		                }
+		            }
+		            // 根据最大值选择合适的取整粒度
+		            var granularity;
+		            if (maxValue <= 100) {
+		                granularity = 20;
+		            } else if (maxValue <= 500) {
+		                granularity = 100;
+		            } else if (maxValue <= 1000) {
+		                granularity = 200;
+		            } else if (maxValue <= 5000) {
+		                granularity = 1000;
+		            } else if (maxValue <= 20000) {
+		                granularity = 5000;
+		            } else {
+		                granularity = 10000;
+		            }
+		            var ymax = Math.ceil(maxValue / granularity) * granularity;
+		                  
 		            Morris.Bar({
 		                element: element,
 		                data: data,
@@ -130,7 +157,8 @@ var DashBoardUtil_#(pageId)={
 		                resize: true,
 		                hideHover: 'auto',
 		                barColors: lineColors,
-		                stacked: false
+		                stacked: false,
+		                ymax: ymax
 		            });
 		        },
 		        

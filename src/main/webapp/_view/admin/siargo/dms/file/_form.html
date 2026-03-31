@@ -1,0 +1,231 @@
+<form onsubmit="return false;" id="dmsFileForm" action="#(action)"
+	method="post">
+	<input type="hidden" name="dmsFile.id" value="#(dmsFile.id??)" />
+	<div class="row">
+		<!-- 第一列 -->
+		<div class="col">
+			<div class="form-group row">
+				<label class="col-sm-2 col-form-label">文件类别</label>
+				<div class="col">
+					<select class="form-control" data-autoload data-refresh="true"
+						data-url="admin/siargo/dms/category/getCategoryListWithCount"
+						name="dmsFile.categoryId" data-text="=请选择类别=" data-value-attr="id"
+						data-rule="select" data-text-attr="name" data-tips="请选择文件类别"
+						data-select="#(dmsFile.categoryId ?? categoryId)"
+						data-select-type="select2">
+					</select>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-2 col-form-label">生效日期</label>
+				<div class="col">
+					<input type="text" 
+						data-date 
+						data-type="date" 
+						data-fmt="yyyy-MM-dd" 
+						readonly="readonly" 
+						autocomplete="off" 
+						class="form-control"
+						placeholder="请选择生效日期" 
+						maxlength="10" 
+						name="dmsFile.activeDate" 
+						value="#datetime(dmsFile.activeDate??,'yyyy-MM-dd')">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-2 col-form-label">文件备注</label>
+				<div class="col">
+					<textarea class="form-control" style="height: 50px;"
+						placeholder="请输入文件描述" maxlength="1000" name="dmsFile.description">#(dmsFile.description??)</textarea>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-2 col-form-label">关键字</label>
+				<div class="col">
+					<input type="hidden" name="keywords" id="keywordsHidden"
+						value="#(keywords??)" /> <input type="text" autocomplete="off"
+						class="form-control mb-2" id="keywordInput"
+						placeholder="输入关键字后按回车添加" />
+					<div id="keywordTags" class="d-flex flex-wrap"></div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-2 col-form-label">文件上传</label>
+				<div class="col">
+					<input type="hidden" name="tempFilePath" id="tempFilePath" value=""
+						#if(!dmsFile.id)data-rule="required" data-tips="请上传文件" #end />
+					<div class="j_upload_file_box"
+						data-name="file"
+						data-btn-class="btn btn-outline-primary"
+						data-placeholder="选择文件上传"
+						data-url="/admin/siargo/dms/file/uploadFile"
+						data-handler="uploadFile"
+						data-hidden-input="tempFilePath"
+						data-upload-success-handler="dmsFileUploadHandler"
+						data-maxsize="102400"
+						data-accept="doc,docx,xls,xlsx,ppt,pptx,pdf,jpg,jpeg,png,gif,bmp"
+					></div>
+					<small class="text-muted mt-2 d-block">支持 doc/docx/xls/xlsx/ppt/pptx/pdf/jpg/png/gif/bmp，最大100MB</small>
+				</div>
+			</div>
+		</div>
+		<!-- 第二列 -->
+		<div></div>
+	</div>
+
+</form>
+#define js()
+<script>
+	// ── 生效日期默认值 ──────────────────────────────────
+	// 新增模式下，生效日期默认为今天
+	(function() {
+		var $dateInput = $('input[name="dmsFile.activeDate"]');
+		if (!$.trim($dateInput.val())) {
+			var today = new Date();
+			var y = today.getFullYear();
+			var m = ('0' + (today.getMonth() + 1)).slice(-2);
+			var d = ('0' + today.getDate()).slice(-2);
+			$dateInput.val(y + '-' + m + '-' + d);
+		}
+	})();
+
+	// ── 关键字标签管理 ──────────────────────────────────
+	(function() {
+		var $input = $('#keywordInput');
+		var $hidden = $('#keywordsHidden');
+		var $tags = $('#keywordTags');
+
+		// 初始化已有关键字
+		function initKeywords() {
+			var keywords = $.trim($hidden.val());
+			if (keywords) {
+				var arr = keywords.split(',');
+				for (var i = 0; i < arr.length; i++) {
+					var kw = $.trim(arr[i]);
+					if (kw) {
+						addTag(kw, false);
+					}
+				}
+			}
+		}
+
+		// 添加标签
+		function addTag(keyword, updateHidden) {
+			keyword = $.trim(keyword);
+			if (!keyword)
+				return;
+
+			// 检查是否已存在
+			var exists = false;
+			$tags.find('.keyword-tag').each(function() {
+				if ($(this).data('keyword') === keyword) {
+					exists = true;
+					return false;
+				}
+			});
+			if (exists)
+				return;
+
+			var $tag = $('<span class="badge badge-primary mr-1 mb-1 keyword-tag" style="font-size: 14px; padding: 5px 10px;">'
+					+ '<span class="keyword-text">'
+					+ keyword
+					+ '</span>'
+					+ '<span class="ml-1 keyword-remove" style="cursor: pointer;">&times;</span>'
+					+ '</span>');
+			$tag.data('keyword', keyword);
+			$tags.append($tag);
+
+			if (updateHidden !== false) {
+				syncHiddenField();
+			}
+		}
+
+		// 同步隐藏字段
+		function syncHiddenField() {
+			var keywords = [];
+			$tags.find('.keyword-tag').each(function() {
+				keywords.push($(this).data('keyword'));
+			});
+			$hidden.val(keywords.join(','));
+		}
+
+		// 回车添加标签
+		$input.on('keydown', function(e) {
+			if (e.keyCode === 13) {
+				e.preventDefault();
+				var keyword = $.trim($(this).val());
+				if (keyword) {
+					addTag(keyword);
+					$(this).val('');
+				}
+			}
+		});
+
+		// 点击删除标签
+		$tags.on('click', '.keyword-remove', function() {
+			$(this).closest('.keyword-tag').remove();
+			syncHiddenField();
+		});
+
+		// 页面加载时初始化
+		initKeywords();
+	})();
+
+	// ── 文件上传成功回调 ──────────────────────────────────
+	function dmsFileUploadHandler(uploader, type, fileInput, result) {
+		console.log('DMS file upload success:', result);
+		if (result && result.data) {
+			// 提取文件名并填充到文件名字段
+			var filePath = result.data;
+			var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+			$('#dmsFileName').val(fileName);
+		}
+	}
+
+	// ── 页面关闭时清理临时文件 ──────────────────────────────────
+	var _dmsFormSaved = false;
+	var _dmsCleaned = false;
+
+	// 表单提交成功后标记
+	function afterFormSubmit(ret, callback) {
+		_dmsFormSaved = true;
+		if (callback)
+			callback();
+	}
+
+	// 清理临时文件
+	function cleanupTempFiles() {
+		if (_dmsFormSaved || _dmsCleaned)
+			return;
+		var tempPath = $.trim($('#tempFilePath').val());
+		if (!tempPath)
+			return;
+		_dmsCleaned = true;
+		var url = actionUrl('/admin/siargo/dms/file/deleteTempFile?filePath='
+				+ encodeURIComponent(tempPath));
+		if (navigator.sendBeacon) {
+			navigator.sendBeacon(url);
+		} else {
+			$.ajax({
+				url : url,
+				async : false
+			});
+		}
+	}
+
+	// 拦截 layer 弹窗关闭
+	$(function() {
+		try {
+			var idx = parent.layer.getFrameIndex(window.name);
+			var $layer = parent.$('#layui-layer' + idx);
+			$layer.find('.layui-layer-close, .layui-layer-btn1').on(
+					'mousedown.dmsCleanup', cleanupTempFiles);
+		} catch (e) {
+			console.warn('无法绑定 layer 关闭事件', e);
+		}
+	});
+
+	// 页面卸载时清理
+	$(window).on('beforeunload', cleanupTempFiles);
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="dmsFileForm") #end

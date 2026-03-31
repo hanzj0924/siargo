@@ -1,73 +1,73 @@
-#@jboltLayout()
-#define main()
-#set(pageId=RandomUtil.random(6))
-<div class="jbolt_page" data-key="#(pmkey)" >
+#@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
 
-<div class="jbolt_page_title">
-	<div class="row">
-	<div class="col-md-auto">
-	<h1>客户管理</h1>
+	<div class="jbolt_page_title">
+		<div class="row">
+			<div class="col-md-auto">
+				<h1>客户管理</h1>
+			</div>
+			<div class="col">
+				<form class="form-inline" id="customerForm_#(pageId)"
+					onsubmit="return false;" method="post">
+					<input type="text" data-with-clearbtn="true" autocomplete="off"
+						class="form-control" placeholder="输入关键字搜索" name="keywords"
+						value="" />
+					<button type="submit" class="btn btn-outline-secondary">
+						<i class="fa fa-search"></i> 查询
+					</button>
+				</form>
+			</div>
+			<div class="col-md-auto">
+				<button data-dialogbtn data-area="350,250"
+					data-handler="refreshJBoltTable" data-title="新增"
+					data-url="admin/siargo/customer/add"
+					class="btn btn-outline-primary btn-sm">
+					<i class="fa fa-plus"></i> 新增
+				</button>
+			</div>
+		</div>
 	</div>
-	<div class="col">
-		<form class="form-inline" id="customerForm_#(pageId)"   onsubmit="return false;" method="post">
-		<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
-		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
-		</form>
-	</div>
-	<div class="col-md-auto">
-	<button data-dialogbtn data-area="350,250" data-handler="refreshJBoltTable" data-title="新增"  data-url="admin/siargo/customer/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
-	</div>
-	</div>
-</div>
-<div class="jbolt_page_content">
-<!-- JBoltTable的数据模板定义-->
-<textarea class="jb_tpl_box" id="customerRowtpl_#(pageId)">
+	<div class="jbolt_page_content">
+		<!-- JBoltTable的数据模板定义-->
+		<textarea class="jb_tpl_box" id="customerRowtpl_#(pageId)">
 {@each datas as data,index}
-<tr data-id="${data.id}" >
+<tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>${data.name}</td>
 <td>
-	<a href="admin/siargo/customer/edit/${data.id}" data-area="350,250"  tooltip data-title="修改"  data-handler="refreshJBoltTable" data-dialog-title="修改" class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
-    <a href="admin/siargo/customer/delete/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="删除" data-handler="refreshJBoltTable" data-confirm="确定删除此数据？" class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
+	<a href="admin/siargo/customer/edit/${data.id}" data-area="350,250"
+					tooltip data-title="修改" data-handler="refreshJBoltTable"
+					data-dialog-title="修改" class="jbolt_table_editbtn"><i
+						class="fa fa-pencil"></i></a>
+    <a href="admin/siargo/customer/delete/${data.id}" data-ajaxbtn
+					data-loading="执行中 " tooltip data-title="删除"
+					data-handler="refreshJBoltTable" data-confirm="确定删除此数据？"
+					class="jbolt_table_delbtn"><i class="fa fa-remove  c-danger"></i></a>
 </td>
 </tr>
 {@/each}
 </textarea>
-
-
-
-
-<table class="jbolt_table jbolt_main_table table-center"
-data-jbolttable
-data-height="fill"
-data-ajax="true"
-data-url="admin/siargo/customer/datas"
-data-column-resize="true"
-data-conditions-form="customerForm_#(pageId)"
-data-rowtpl="customerRowtpl_#(pageId)"
-data-page="customerPage_#(pageId)"
-
-
-
-
-
-data-fixed-columns-left="1,2"
-data-fixed-columns-right="-1"
->
-<thead class="fw-normal">
-<tr>
-	<th data-width="60">序号</th>
-	<th data-min-width="150" data-column="name">客户名称</th>
-	<th data-width="150">操作</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
-
-
-	
-</div>
+		<table class="jbolt_table jbolt_main_table table-center"
+			data-jbolttable data-height="fill" 
+			data-ajax="true"
+			data-url="admin/siargo/customer/datas" 
+			data-column-resize="true"
+			data-conditions-form="customerForm_#(pageId)"
+			data-rowtpl="customerRowtpl_#(pageId)"
+			data-page="customerPage_#(pageId)" 
+			data-fixed-columns-left="1,2"
+			data-fixed-columns-right="-1">
+			<thead class="fw-normal">
+				<tr>
+					<th data-width="60">序号</th>
+					<th data-min-width="150" data-column="name">客户名称</th>
+					<th data-width="150">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
 </div>
 #end
 
