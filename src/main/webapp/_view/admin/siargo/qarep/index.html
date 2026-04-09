@@ -45,7 +45,21 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.inspName}</td>
+<td>
+	{@if data.insp==1}
+		<span class="badge badge-secondary">${data.inspName}</span>
+	{@else if data.insp==2}
+		<span class="badge badge-info">${data.inspName}</span>
+	{@else if data.insp==3}
+		<span class="badge badge-warning ">${data.inspName}</span>
+	{@else if data.insp==4}
+		<span class="badge badge-danger">${data.inspName}</span>
+	{@else if data.insp==5}
+		<span class="badge badge-success">${data.inspName}</span>
+	{@else}
+		<span class="badge badge-secondary">${data.inspName}</span>
+	{@/if}
+</td>
 <td>${data.createTime}</td>
 </tr>
 {@/each}
@@ -114,13 +128,15 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.accqName}</td>
-<td>${data.accqTime}</td>
+<td>
+	<span class="badge badge-info">${data.accqName}</span>
+	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
 </tr>
 {@/each}
 </script>
 
-<!-- 功能外观 表单数据 -->
+<!-- 包装待检 表单数据 -->
 <script type="text/template" id="funqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
@@ -149,20 +165,16 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.accqName}</td>
-<td>${data.accqTime}</td>
 <td>
-	{@if data.funqName==null}
-		无
-	{@else}
-		${data.funqName}
-	{@/if}
+	<span class="badge badge-info">${data.accqName}</span>
+	<small class="text-muted d-block">${data.accqTime}</small>
 </td>
 <td>
-	{@if data.funqTime==null}
-		无
+	{@if data.funqName==null}
+		<span class="text-muted">无</span>
 	{@else}
-		${data.funqTime}
+		<span class="badge badge-info">${data.funqName}</span>
+		<small class="text-muted d-block">${data.funqTime}</small>
 	{@/if}
 </td>
 </tr>
@@ -199,24 +211,26 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.accqName}</td>
-<td>${data.accqTime}</td>
+<td>
+	<span class="badge badge-info">${data.accqName}</span>
+	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
 <td>
 	{@if data.funqName==null}
-		无
+		<span class="text-muted">无</span>
 	{@else}
-		${data.funqName}
+		<span class="badge badge-info">${data.funqName}</span>
+		<small class="text-muted d-block">${data.funqTime}</small>
 	{@/if}
 </td>
 <td>
-	{@if data.funqTime==null}
-		无
+	{@if data.appqName==null}
+		<span class="text-muted">无</span>
 	{@else}
-		${data.funqTime}
+		<span class="badge badge-info">${data.appqName}</span>
+		<small class="text-muted d-block">${data.appqTime}</small>
 	{@/if}
 </td>
-<td>${data.appqName}</td>
-<td>${data.appqTime}</td>
 </tr>
 {@/each}
 </script>
@@ -260,26 +274,26 @@
 <td>${data.spModle}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
-<td>${data.accqName}</td>
-<td>${data.accqTime}</td>
+<td>
+	<span class="badge badge-info">${data.accqName}</span>
+	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
 <td>
 	{@if data.funqName==null}
-		无
+		<span class="text-muted">无</span>
 	{@else}
-		${data.funqName}
+		<span class="badge badge-info">${data.funqName}</span>
+		<small class="text-muted d-block">${data.funqTime}</small>
 	{@/if}
 </td>
 <td>
-	{@if data.funqTime==null}
-		无
-	{@else}
-		${data.funqTime}
-	{@/if}
+	<span class="badge badge-info">${data.appqName}</span>
+	<small class="text-muted d-block">${data.appqTime}</small>
 </td>
-<td>${data.appqName}</td>
-<td>${data.appqTime}</td>
-<td>${data.allqName}</td>
-<td>${data.allqTime}</td>
+<td>
+	<span class="badge badge-danger">${data.allqName}</span>
+	<small class="text-muted d-block">${data.allqTime}</small>
+</td>
 </tr>
 {@/each}
 </script>
@@ -287,24 +301,7 @@
 <!-- 全部 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="allreport_toolbar_#(pageId)">
 	<div class="row">
-		<div class="col-md-auto">
-		<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-				placeholder="输入订单号" name="keywords" value="" /> 
-			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/dictionary/options?key=siargo_prod_type"
-				data-value-attr="sn" 
-				data-text="=产品类型=" data-value=""></select>
-			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" id="qadatepicker"  
-				placeholder="日期范围" data-range="~" name="dateRange" data-max="0"  value="#(dateRange??)">
-			<button type="submit" class="btn btn-outline-secondary">
-				<i class="fa fa-search"></i> 查询
-			</button>
-		</form>
-		</div>
-		<div class="col text-left">
-		</div>
-		<div class="col-md-auto">
+		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button data-openpage="dialog" data-area="1100,850"
 					data-handler="jboltTablePageToFirst" data-title="新建报告单"
@@ -325,42 +322,61 @@
 				</button>
 			</div>
 		</div>
+		<div class="col-sm-4 text-center">
+			<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
+				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+					placeholder="输入订单号" name="keywords" value="" /> 
+				<!-- <select class="form-control" name="prodType" data-autoload
+					data-url="admin/dictionary/options?key=siargo_prod_type"
+					data-value-attr="sn" 
+					data-text="=产品类型=" data-value=""></select>
+				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date"  
+					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)"> -->
+				<button type="submit" class="btn btn-outline-secondary">
+					<i class="fa fa-search"></i> 查询
+				</button>
+			</form>
+		</div>
+		<div class="col-sm-4">
+			
+		</div>
 	</div>
-	<div class="clearfix"></div>
 </div>
 
-<!-- 未检验 工具条 toolbar -->
+<!-- 精度待检 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="noq_toolbar_#(pageId)">
+	<!-- 审批流程进度条 -->
+	<div class="approval-flow-bar mb-2">
+		<div class="approval-flow-steps">
+			<div class="approval-step active">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-linechart"></i></div>
+				<div class="approval-step-label"><strong>精度待检</strong></div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="fa fa-eye"></i></div>
+				<div class="approval-step-label">外观待检</div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-gift"></i></div>
+				<div class="approval-step-label">包装待检</div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
+				<div class="approval-step-label">待批准</div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
+				<div class="approval-step-label">已完成</div>
+			</div>
+		</div>
+	</div>
 	<div class="row">
-		<div class="col-md-auto">
-		<form class="form-inline d-inline-block" id="noqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-				placeholder="输入订单号" name="keywords" value="" /> 
-			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/dictionary/options?key=siargo_prod_type"
-				data-value-attr="sn" 
-				data-text="=产品类型=" data-value=""></select>
-			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date"  
-				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-			<button type="submit" class="btn btn-outline-secondary">
-				<i class="fa fa-search"></i> 查询
-			</button>
-		</form>
-		</div>
-		<div class="col text-center">
-			<!-- <button  class="btn btn-info" data-dialogbtn data-area="1000,750" data-btn-align="center"
-				data-title="查看检验项目" data-btn="close"  
-				data-url="/admin/siargo/qarep/accqHtml"><i class="fa fa-info mr-1"></i> 查看检验项目
-			</button> -->
-		</div>
-		<div class="col-md-auto">
+		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
-					data-confirm="选中数据确定检验合格？" 
-					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 精度合格
-				</button>
 				<button data-openpage="dialog" data-area="1100,850"
 					data-handler="jboltTablePageToFirst" data-title="新建报告单"
 					data-url="admin/siargo/qarep/add"
@@ -386,38 +402,69 @@
 				</button>
 			</div>
 		</div>
+		<div class="col-sm-4 text-center">
+			<form class="form-inline d-inline-block" id="noqForm_#(pageId)" onsubmit="return false;" method="post">
+				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+					placeholder="输入订单号" name="keywords" value="" /> 
+				<!-- <select class="form-control" name="prodType" data-autoload
+					data-url="admin/dictionary/options?key=siargo_prod_type"
+					data-value-attr="sn" 
+					data-text="=产品类型=" data-value=""></select>
+				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date"  
+					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)"> -->
+				<button type="submit" class="btn btn-outline-secondary">
+					<i class="fa fa-search"></i> 查询
+				</button>
+			</form>
+		</div>
+		<div class="col-sm-4 text-right">
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
+					data-confirm="确定精度检验合格？" 
+					class="btn btn-success "><i class="fa fa-check"></i> 精度合格
+				</button>
+			</div>
+		</div>
 	</div>
 	<div class="clearfix"></div>
 </div>
 
 <!-- 精度合格 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
+	<!-- 审批流程进度条 -->
+	<div class="approval-flow-bar mb-2">
+		<div class="approval-flow-steps">
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">精度检验</div>
+			</div>
+			<div class="approval-step-line active"></div>
+			<div class="approval-step active">
+				<div class="approval-step-icon"><i class="fa fa-eye"></i></div>
+				<div class="approval-step-label"><strong>外观待检</strong></div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-gift"></i></div>
+				<div class="approval-step-label">包装待检</div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
+				<div class="approval-step-label">待批准</div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
+				<div class="approval-step-label">已完成</div>
+			</div>
+		</div>
+	</div>
 	<div class="row">
-		<div class="col-md-auto">
-		<form class="form-inline d-inline-block" id="accqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-				placeholder="输入订单号" name="keywords" value="" /> 
-			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/dictionary/options?key=siargo_prod_type"
-				data-value-attr="sn"
-				data-text="=产品类型=" data-value=""></select>
-			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-			<button type="submit" class="btn btn-outline-secondary">
-				<i class="fa fa-search"></i> 查询
-			</button>
-		</form>
-		</div>
-		<div class="col text-left">
-		</div>
-		<div class="col-md-auto">
+		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
-					data-confirm="选中数据确定检验合格？" 
-					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 外观合格
-				</button>
 				<button data-openpage="dialog" data-area="530,325"
 					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
@@ -430,39 +477,70 @@
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
+		</div>
+		<div class="col-sm-4 text-center">
+			<form class="form-inline d-inline-block" id="accqForm_#(pageId)" onsubmit="return false;" method="post">
+				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+					placeholder="输入订单号" name="keywords" value="" /> 
+				<!-- <select class="form-control" name="prodType" data-autoload
+					data-url="admin/dictionary/options?key=siargo_prod_type"
+					data-value-attr="sn"
+					data-text="=产品类型=" data-value=""></select>
+				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+					 -->
+				<button type="submit" class="btn btn-outline-secondary">
+					<i class="fa fa-search"></i> 查询
+				</button>
+			</form>
+		</div>
+		<div class="col-sm-4 text-right">
+			<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+				data-check-handler="jboltTableGetCheckedIds" 
+				data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
+				data-confirm="确定外观检验合格？" 
+				class="btn btn-success "><i class="fa fa-check"></i> 外观合格
+			</button>
 		</div>
 	</div>
 	<div class="clearfix"></div>
 </div>
 
-<!-- 功能/外观合格 工具条 toolbar -->
+<!-- 包装待检 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="funq_toolbar_#(pageId)">
+	<!-- 审批流程进度条 -->
+	<div class="approval-flow-bar mb-2">
+		<div class="approval-flow-steps">
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">精度检验</div>
+			</div>
+			<div class="approval-step-line done"></div>
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">外观检验</div>
+			</div>
+			<div class="approval-step-line active"></div>
+			<div class="approval-step active">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-gift"></i></div>
+				<div class="approval-step-label"><strong>包装待检</strong></div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
+				<div class="approval-step-label">待批准</div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
+				<div class="approval-step-label">已完成</div>
+			</div>
+		</div>
+	</div>
 	<div class="row">
-		<div class="col-md-auto">
-		<form class="form-inline d-inline-block" id="funqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-				placeholder="输入订单号" name="keywords" value="" /> 
-			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/dictionary/options?key=siargo_prod_type"
-				data-value-attr="sn"
-				data-text="=产品类型=" data-value=""></select>
-			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-			<button type="submit" class="btn btn-outline-secondary">
-				<i class="fa fa-search"></i> 查询
-			</button>
-		</form>
-		</div>
-		<div class="col text-left">
-		</div>
-		<div class="col-md-auto">
+		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
-					data-confirm="选中数据确定检验合格？" 
-					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 包装合格
-				</button>
+				
 				<button data-openpage="dialog" data-area="530,325"
 					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
@@ -475,6 +553,30 @@
 					<i class="fa fa-refresh"></i> 刷新
 				</button>
 			</div>
+		</div>
+		<div class="col-sm-4 text-center">
+			<form class="form-inline d-inline-block" id="funqForm_#(pageId)" onsubmit="return false;" method="post">
+				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+					placeholder="输入订单号" name="keywords" value="" /> 
+				<!-- <select class="form-control" name="prodType" data-autoload
+					data-url="admin/dictionary/options?key=siargo_prod_type"
+					data-value-attr="sn"
+					data-text="=产品类型=" data-value=""></select>
+				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+				 -->
+				<button type="submit" class="btn btn-outline-secondary">
+					<i class="fa fa-search"></i> 查询
+				</button>
+			</form>
+		</div>
+		<div class="col-sm-4 text-right">
+			<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
+					data-confirm="确定包装检验合格？" 
+					class="btn btn-success "><i class="fa fa-check"></i> 包装合格
+			</button>
 		</div>
 	</div>
 	<div class="clearfix"></div>
@@ -482,34 +584,39 @@
 
 <!-- 待批准 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="appq_toolbar_#(pageId)">
+	<!-- 审批流程进度条 -->
+	<div class="approval-flow-bar mb-2">
+		<div class="approval-flow-steps">
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">精度检验</div>
+			</div>
+			<div class="approval-step-line done"></div>
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">外观检验</div>
+			</div>
+			<div class="approval-step-line done"></div>
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">包装检验</div>
+			</div>
+			<div class="approval-step-line active"></div>
+			<div class="approval-step active">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
+				<div class="approval-step-label"><strong>待批准</strong></div>
+			</div>
+			<div class="approval-step-line"></div>
+			<div class="approval-step">
+				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
+				<div class="approval-step-label">已完成</div>
+			</div>
+		</div>
+	</div>
 	<div class="row">
-		<div class="col-md-auto">
-		<form class="form-inline d-inline-block" id="appqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-				placeholder="输入订单号" name="keywords" value="" /> 
-			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/dictionary/options?key=siargo_prod_type"
-				data-value-attr="sn" 
-				data-text="=产品类型=" data-value=""></select>
-			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-			<button type="submit" class="btn btn-outline-secondary">
-				<i class="fa fa-search"></i> 查询
-			</button>
-		</form>
-		</div>
-		<div class="col text-left">
-		</div>
-		<div class="col-md-auto">
+		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				#if(approval)
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
-					data-confirm="确定批准选中数据？" 
-					class="btn btn-outline-success " ><i class="jbicon jb-chenggong1"></i> 批准
-				</button>
-				#end
+				
 				<button data-openpage="dialog" data-area="530,325"
 					data-handler="refreshJBoltTable" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
@@ -523,32 +630,99 @@
 				</button>
 			</div>
 		</div>
+		<div class="col-sm-4 text-center">
+			<form class="form-inline d-inline-block" id="appqForm_#(pageId)" onsubmit="return false;" method="post">
+				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+					placeholder="输入订单号" name="keywords" value="" /> 
+				<!-- <select class="form-control" name="prodType" data-autoload
+					data-url="admin/dictionary/options?key=siargo_prod_type"
+					data-value-attr="sn" 
+					data-text="=产品类型=" data-value=""></select>
+				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+				 -->
+				<button type="submit" class="btn btn-outline-secondary">
+					<i class="fa fa-search"></i> 查询
+				</button>
+			</form>
+		</div>
+		<div class="col-sm-4 text-right">
+			#if(approval)
+				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+					data-check-handler="jboltTableGetCheckedIds" 
+					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
+					data-confirm="确定批准选中数据？" 
+					class="btn btn-danger"><i class="fa fa-check"></i> 批准
+				</button>
+			#end
+		</div>
 	</div>
 	<div class="clearfix"></div>
 </div>
 
 <!-- 已完成 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="allq_toolbar_#(pageId)">
+	<!-- 审批流程进度条 -->
+	<div class="approval-flow-bar mb-2">
+		<div class="approval-flow-steps">
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">精度检验</div>
+			</div>
+			<div class="approval-step-line done"></div>
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">外观检验</div>
+			</div>
+			<div class="approval-step-line done"></div>
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">包装检验</div>
+			</div>
+			<div class="approval-step-line done"></div>
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label">待批准</div>
+			</div>
+			<div class="approval-step-line done"></div>
+			<div class="approval-step done">
+				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
+				<div class="approval-step-label"><strong>已完成</strong></div>
+			</div>
+		</div>
+	</div>
 	<div class="row">
-		<div class="col-md-auto">
-		<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
-			<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-				placeholder="输入订单号" name="keywords" value="" /> 
-			<select class="form-control" name="prodType" data-autoload
-				data-url="admin/dictionary/options?key=siargo_prod_type"
-				data-value-attr="sn" 
-				data-text="=产品类型=" data-value=""></select>
-			<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-				placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-			<button type="submit" class="btn btn-outline-secondary">
-				<i class="fa fa-search"></i> 查询
-			</button>
-		</form>
+		<div class="col-sm-3 text-left">
+			<div class="btn-group " role="group" aria-label="btn-group">
+				<button data-openpage="dialog" data-area="530,325"
+					data-handler="refreshJBoltTable" data-title="修改产品备注"
+					data-check-handler="jboltTableGetCheckedId"
+					data-url="admin/siargo/qarep/editDes/"
+					class="btn btn-outline-info ">
+					<i class="fa fa-edit"></i> 修改产品备注
+				</button>
+				<button onclick="jboltTableRefresh(this)"
+					class="btn btn-outline-secondary ">
+					<i class="fa fa-refresh"></i> 刷新
+				</button>
+			</div>
 		</div>
-		<div class="col text-left">
+		<div class="col-sm-6 text-center">
+			<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
+				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+					placeholder="输入订单号" name="keywords" value="" /> 
+				<select class="form-control" name="prodType" data-autoload
+					data-url="admin/dictionary/options?key=siargo_prod_type"
+					data-value-attr="sn" 
+					data-text="=产品类型=" data-value=""></select>
+				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+				<button type="submit" class="btn btn-outline-secondary">
+					<i class="fa fa-search"></i> 查询
+				</button>
+			</form>
 		</div>
-		<div class="col-md-auto">
-			
+		<div class="col-sm-3 text-right">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
 					data-url="/admin/siargo/qarep/toPdfs" 
@@ -561,17 +735,6 @@
 					data-confirm="确定生成选中数据？" 
 					class="btn btn-outline-primary " ><i class="fa fa-download"></i> 生成PDF
 				</button>
-				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改产品备注"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/qarep/editDes/"
-					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改产品备注
-				</button>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary ">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
 			</div>
 		</div>
 	</div>
@@ -581,10 +744,10 @@
 <div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)">
 	<div class="jbolt_tab_links jb_vheader">
 		<a class="jbolt_tab_link"  href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
-		<a class="jbolt_tab_link"  href="#noq_tabcontent"><i class="jbicon jb-21shuru"></i> 精度待检</a>
-		<a class="jbolt_tab_link"  href="#accq_tabcontent"><i class="jbicon jb-21shuru"></i> 外观待检</a>
-		<a class="jbolt_tab_link"  href="#funq_tabcontent"><i class="jbicon jb-21shuru"></i> 包装待检</a>
-		<a class="jbolt_tab_link"  href="#appq_tabcontent"><i class="jbicon jb-21shuru"></i> 全部合格/<strong>待批准</strong></a>
+		<a class="jbolt_tab_link"  href="#noq_tabcontent"><i class="jbicon2 jbi-linechart"></i> 精度待检</a>
+		<a class="jbolt_tab_link"  href="#accq_tabcontent"><i class="fa fa-eye"></i> 外观待检</a>
+		<a class="jbolt_tab_link"  href="#funq_tabcontent"><i class="jbicon2 jbi-gift"></i> 包装待检</a>
+		<a class="jbolt_tab_link"  href="#appq_tabcontent"><i class="jbicon2 jbi-edit-fill"></i> 待批准</a>
 		<a class="jbolt_tab_link"  href="#allq_tabcontent"><i class="jbicon jb-xiangmushouxubeian"></i> 已完成</a>
 	</div>
 	<div class="jbolt_tab_contents jb_vbody">
@@ -689,8 +852,7 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="150" data-column="accq_uid">精度检验人</th>
-						<th data-width="150" data-column="accq_time">精度检验日期</th>
+						<th data-width="170" data-column="accq_uid">精度检验</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -726,10 +888,8 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="150" data-column="accq_uid">精度检验人员</th>
-						<th data-width="150" data-column="accq_time">精度检验日期</th>
-						<th data-width="150" data-column="funq_uid">外观检验人员</th>
-						<th data-width="150" data-column="funq_time">外观检验日期</th>
+						<th data-width="170" data-column="accq_uid">精度检验</th>
+						<th data-width="170" data-column="funq_uid">外观检验</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -765,12 +925,9 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="150" data-column="accq_uid">精度检验人员</th>
-						<th data-width="150" data-column="accq_time">精度检验日期</th>
-						<th data-width="150" data-column="funq_uid">外观检验人员</th>
-						<th data-width="150" data-column="funq_time">外观检验日期</th>
-						<th data-width="150" data-column="appq_uid"> 包装检验人员</th>
-						<th data-width="150" data-column="appq_time">包装检验日期</th>
+						<th data-width="170" data-column="accq_uid">精度检验</th>
+						<th data-width="170" data-column="funq_uid">外观检验</th>
+						<th data-width="170" data-column="appq_uid">包装检验</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -807,14 +964,10 @@
 						<th data-min-width="200" data-column="sp_modle">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="150" data-column="accq_uid">精度检验人员</th>
-						<th data-width="150" data-column="accq_time">精度检验日期</th>
-						<th data-width="150" data-column="funq_uid">外观检验人员</th>
-						<th data-width="150" data-column="funq_time">外观检验日期</th>
-						<th data-width="150" data-column="appq_uid">包装检验人员</th>
-						<th data-width="150" data-column="appq_time">包装检验日期</th>
-						<th data-width="150" data-column="allq_uid">批准人员</th>
-						<th data-width="150" data-column="allq_time">批准日期</th>
+						<th data-width="170" data-column="accq_uid">精度检验</th>
+						<th data-width="170" data-column="funq_uid">外观检验</th>
+						<th data-width="170" data-column="appq_uid">包装检验</th>
+						<th data-width="170" data-column="allq_uid">批准</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -828,6 +981,73 @@
 #end
 
 #define js()
+<style>
+/* ===== 审批流程进度条 ===== */
+.approval-flow-bar {
+	padding: 10px 16px 6px 16px;
+	background: #f8f9fa;
+	border-radius: 6px;
+	border: 1px solid #e9ecef;
+}
+.approval-flow-steps {
+	display: flex;
+	align-items: center;
+}
+.approval-step {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex-shrink: 0;
+}
+.approval-step-icon {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: #dee2e6;
+	color: #adb5bd;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 13px;
+	border: 2px solid #dee2e6;
+}
+.approval-step.done .approval-step-icon {
+	background: #28a745;
+	border-color: #28a745;
+	color: #fff;
+}
+.approval-step.active .approval-step-icon {
+	background: #fff;
+	border-color: #fd7e14;
+	color: #fd7e14;
+}
+.approval-step-label {
+	margin-top: 4px;
+	font-size: 12px;
+	color: #6c757d;
+	white-space: nowrap;
+}
+.approval-step.done .approval-step-label {
+	color: #28a745;
+}
+.approval-step.active .approval-step-label {
+	color: #fd7e14;
+	font-weight: 600;
+}
+.approval-step-line {
+	flex: 1;
+	height: 2px;
+	background: #dee2e6;
+	margin-bottom: 18px;
+	min-width: 30px;
+}
+.approval-step-line.done {
+	background: #28a745;
+}
+.approval-step-line.active {
+	background: linear-gradient(to right, #28a745, #fd7e14);
+}
+</style>
 <script type="text/javascript">
 function afterAJaxCallback(res){
 	AjaxPortalUtil.refresh(portal);

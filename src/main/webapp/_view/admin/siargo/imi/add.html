@@ -8,13 +8,22 @@
 				<div class="col">
 					<div class="form-group row">
 						<label class="col-sm-1 col-form-label">供应商</label>
-						<div class="col-sm-4">
+						<div class="col-sm-4 input-group">
 							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/siargo/supplier/getSupplierName"
 								name="image.supplierId" data-text="=请选择/搜索="
 								data-value-attr="id" data-rule="select" data-text-attr="name"
-								data-select="#(image.supplierId ??)" data-select-type="select2">
+								data-select="#(image.supplierId ??)" data-select-type="select2"
+								id="supplierSelect">
 							</select>
+							<div class="input-group-append">
+								<button class="btn btn-outline-secondary" type="button"
+									data-dialogbtn data-area="400,350"
+									data-handler="refreshSupplierSelect" data-title="新增供应商"
+									data-url="admin/siargo/supplier/add">
+									<i class="fa fa-plus"></i>
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -67,6 +76,11 @@
 		</fieldset>
 		#define js()
 		<script>
+		
+		// 新增供应商后刷新下拉列表
+		function refreshSupplierSelect(){
+			SelectUtil.refresh($('#supplierSelect'));
+		}
 		
 		// 上传成功回调
 		function uploadHandler(uploader, type, fileInput, result) {

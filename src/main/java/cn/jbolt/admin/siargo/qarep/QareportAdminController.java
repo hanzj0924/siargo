@@ -15,7 +15,6 @@ import com.jfinal.core.Path;
 import com.jfinal.kit.StrKit;
 
 import java.io.File;
-import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,8 +59,8 @@ public class QareportAdminController extends JBoltBaseController {
 	*/
 	public void index() {
 		//批准权限
-		BigInteger bigInt = new BigInteger("2031938046041903104");
-		boolean has = JBoltUserAuthKit.hasRole(JBoltUserKit.getUserId(), true, bigInt.longValue());
+		Long approvalRoleId = roleService.findIdByName("批准");
+		boolean has = approvalRoleId != null && JBoltUserAuthKit.hasRole(JBoltUserKit.getUserId(), approvalRoleId);
 		
 		set("approval", has);
 		render("index.html");

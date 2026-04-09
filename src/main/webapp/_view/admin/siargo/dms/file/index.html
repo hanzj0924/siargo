@@ -42,15 +42,15 @@
 
 /* 文件夹图标 */
 .category-card .folder-icon {
-	font-size: 50px; /* 图标大小 */
+	font-size: 40px; /* 图标大小 */
 	color: #f0ad4e; /* 橙黄色 */
 	margin-bottom: 10px; /* 图标与名称间距 */
 }
 
 /* 类别名称 */
 .category-card .category-name {
-	font-size: 14px; /* 字号 */
-	font-weight: 500; /* 中等粗细 */
+	font-size: 18px; /* 字号 */
+	font-weight: 545; /* 中等粗细 */
 	color: #333; /* 深灰色字体 */
 	margin-bottom: 5px; /* 名称与计数间距 */
 	word-break: break-all; /* 长名称自动换行 */
@@ -90,6 +90,10 @@
 	font-weight: 500; /* 中等粗细 */
 }
 
+/* ========== 所属类别列显示控制 ========== */
+.category-col { display: none; }
+.show-category .category-col { display: table-cell; }
+
 /* ========== 关键字标签样式 ========== */
 .keyword-badge {
 	display: inline-block; /* 行内块级元素 */
@@ -100,24 +104,6 @@
 	border-radius: 10px; /* 圆角药丸形状 */
 	font-size: 12px; /* 小字号 */
 }
-
-/* ========== 生效状态开关样式 ========== */
-.active-switch {
-	cursor: pointer; /* 鼠标变手型 */
-}
-
-/* 开关-已生效（绿色） */
-.active-switch .fa-toggle-on {
-	color: #28a745; /* 绿色 */
-	font-size: 20px; /* 图标大小 */
-}
-
-/* 开关-未生效（红色） */
-.active-switch .fa-toggle-off {
-	color: #dc3545; /* 红色 */
-	font-size: 20px; /* 图标大小 */
-}
-
 </style>
 
 <div class="jbolt_page" data-key="#(pmkey)">
@@ -136,7 +122,7 @@
 							style="width: 250px;" data-with-clearbtn="true" />
 						<button type="button" class="btn btn-outline-secondary"
 							onclick="globalSearch_#(pageId)()">
-							<i class="fa fa-search"></i> 搜索
+							<i class="fa fa-search"></i> 全局搜索
 						</button>
 					</div>
 				</div>
@@ -145,7 +131,7 @@
 						class="btn btn-outline-primary btn-sm"> <i class="fa fa-cog"></i>
 						管理技术通知单类别
 					</a>
-					<button data-dialogbtn data-area="900,600" data-title="失效文件列表"
+					<button data-dialogbtn data-area="1300,800" data-title="失效文件列表"
 						data-url="admin/siargo/dms/file/inactiveList"
 						class="btn btn-outline-danger btn-sm ml-2">
 						<i class="fa fa-eye-slash"></i> 查看失效通知单
@@ -162,7 +148,8 @@
 
 	<!-- ==================== 第二层：文件列表视图 ==================== -->
 	<!-- 添加 jbolt_page 类，让 JBolt 的 getFillHeight 能在此视图内正确查找 .jbolt_page_title -->
-	<div id="fileListView_#(pageId)" class="jbolt_page jb_vflex" style="display: none;">
+	<div id="fileListView_#(pageId)" class="jbolt_page jb_vflex"
+		style="display: none;">
 		<div class="jbolt_page_title jb_vheader">
 			<div class="row">
 				<div class="col-md-auto">
@@ -175,17 +162,19 @@
 				<div class="col">
 					<form class="form-inline" id="dmsFileForm_#(pageId)"
 						onsubmit="return false;" method="get" action="">
-						<input type="hidden" name="categoryId" id="categoryIdInput_#(pageId)" value="" /> 
-						<input type="hidden" name="isGlobalSearch" id="isGlobalSearchInput_#(pageId)" value="" />
+						<input type="hidden" name="categoryId"
+							id="categoryIdInput_#(pageId)" value="" /> <input type="hidden"
+							name="isGlobalSearch" id="isGlobalSearchInput_#(pageId)" value="" />
 						<input type="text" data-with-clearbtn="true" autocomplete="off"
 							class="form-control" placeholder="搜索文件名或关键字" name="keywords"
 							value="" style="width: 150px;" /> <select class="form-control"
 							name="isActive" style="width: 100px;">
 							<option value="">全部状态</option>
-							<option value="1">已生效</option>	
+							<option value="1">已生效</option>
 							<option value="0">未生效</option>
-						</select> <input type="text" data-date class="form-control"
-							placeholder="生效年月" name="activeDate" style="width: 130px;" />
+						</select> <input type="text" data-with-clearbtn="true" class="form-control"
+							data-date data-type="month" placeholder="选择年月" data-width="130px"
+							name="activeDate" />
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
@@ -215,9 +204,10 @@
 {@each datas as data,index}
 <tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
-<td style="text-align:left">
-	<a  id="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
-		href="${data.filepath}" onclick="loadPDF(this, '${data.filepath}')">
+<td style="text-align: left">
+	<a id="pdfFrame" data-openpage="jboltlayer" data-resize="true"
+						data-load-type="iframe" href="${data.filepath}"
+						onclick="loadPDF(this, '${data.filepath}')">
 	${data.filename}
 	</a>
 </td>
@@ -228,14 +218,16 @@
 		{@/each}
 	{@/if}
 </td>
+<td class="category-col">${data.categoryname}</td>
 <td>
 	{@if data.description==null || data.description==""}
 		无
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close"
-				data-title="文件备注" class="btn btn-outline-info btn-sm"
-				data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'> ${data.description.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')} </div>"> 
-				<i class="fa fa-eye"></i> 查看
+			data-title="文件备注" class="btn btn-outline-info btn-sm"
+			data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'> ${data.description.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')} 
+		</div>
+		"> <i class="fa fa-eye"></i> 查看
 		</button>
 		{@/if}
 		</td>
@@ -258,21 +250,17 @@
 		{@/each}
 		</textarea>
 		<table class="jbolt_table jbolt_main_table table-center"
-			data-jbolttable 
-			data-ajax="true" 
-			data-url="admin/siargo/dms/file/datas" 
-			data-column-resize="true"
-			data-paginate="false" 
-			data-conditions-form="dmsFileForm_#(pageId)"
-			data-rowtpl="dmsFileRowtpl_#(pageId)" 
-			data-fixed-columns-left="1,2"
-			data-fixed-columns-right="-1,-2" 
-			data-height="fill_box">
+			data-jbolttable data-ajax="true"
+			data-url="admin/siargo/dms/file/datas" data-column-resize="true"
+			data-paginate="false" data-conditions-form="dmsFileForm_#(pageId)"
+			data-rowtpl="dmsFileRowtpl_#(pageId)" data-fixed-columns-left="1,2"
+			data-fixed-columns-right="-1,-2" data-height="fill_box">
 			<thead class="fw-normal">
 				<tr>
 					<th data-width="60">序号</th>
-					<th data-min-width="600" data-column="file_name">文件名</th>
+					<th data-min-width="500" data-column="file_name">文件名</th>
 					<th data-min-width="400">关键字</th>
+					<th data-width="120" class="category-col">所属类别</th>
 					<th data-width="80" data-column="description">备注</th>
 					<th data-width="120" data-column="active_date">生效日期</th>
 					<th data-width="120" data-column="uploaderName">上传人员</th>
@@ -310,6 +298,18 @@ $(function() {
     $('#globalSearchInput_#(pageId)').on('keypress', function(e) {
         if (e.which === 13) {
             globalSearch_#(pageId)();
+        }
+    });
+    
+    // 新增按钮点击前，动态刷新 data-url，防止 JBolt 对话框框架缓存旧的 categoryId
+    $('#addFileBtn_#(pageId)').on('mousedown', function() {
+        if (_currentCategoryId_#(pageId)) {
+            var freshUrl = 'admin/siargo/dms/file/add?categoryId=' + _currentCategoryId_#(pageId);
+            $(this).attr('data-url', freshUrl);
+            // 清除 JBolt dialogbtn 可能缓存的旧 URL（存储在 jQuery data 中）
+            $(this).data('url', freshUrl);
+            $(this).data('dialog-url', freshUrl);
+            $(this).removeData('jboltDialogInited');
         }
     });
     
@@ -397,9 +397,19 @@ function enterCategory_#(pageId)(id, name) {
     var $table = $('#fileListView_#(pageId) .jbolt_table');
     $table.attr('data-url', 'admin/siargo/dms/file/datas').data('url', 'admin/siargo/dms/file/datas');
     
+    // 隐藏"所属类别"列（分类文件列表不显示）
+    $('#fileListView_#(pageId)').removeClass('show-category');
+    
     // 切换视图（MutationObserver 会自动检测并刷新表格）
     $('#categoryView_#(pageId)').hide();
     $('#fileListView_#(pageId)').show();
+    
+    // 对未初始化的清除按钮重新初始化（视图初始隐藏导致页面加载时未正确初始化）
+    $('#fileListView_#(pageId)').find('input[data-with-clearbtn]').each(function() {
+        if (!$(this).parent().hasClass('ac_input_box')) {
+            JBoltInputWithClearBtnUtil.initInput($(this));
+        }
+    });
 }
 
 // 返回类别视图
@@ -443,21 +453,17 @@ function globalSearch_#(pageId)() {
     var $table = $('#fileListView_#(pageId) .jbolt_table');
     $table.attr('data-url', 'admin/siargo/dms/file/globalSearch').data('url', 'admin/siargo/dms/file/globalSearch');
     
+    // 显示"所属类别"列（全局搜索结果需要显示）
+    $('#fileListView_#(pageId)').addClass('show-category');
+    
     // 切换视图（MutationObserver 会自动检测并刷新表格）
     $('#categoryView_#(pageId)').hide();
     $('#fileListView_#(pageId)').show();
-}
-
-// 切换生效状态
-function toggleActive_#(pageId)(id, element) {
-    $.post(actionUrl('admin/siargo/dms/file/toggleActive/' + id), function(ret) {
-        if (ret.state === 'ok') {
-            jboltTip('操作成功');
-            // 刷新表格
-            var $table = $('#fileListView_#(pageId) .jbolt_table');
-            jboltTableRefresh($table[0]);
-        } else {
-            jboltTip(ret.msg || '操作失败', 'error');
+    
+    // 对未初始化的清除按钮重新初始化（视图初始隐藏导致页面加载时未正确初始化）
+    $('#fileListView_#(pageId)').find('input[data-with-clearbtn]').each(function() {
+        if (!$(this).parent().hasClass('ac_input_box')) {
+            JBoltInputWithClearBtnUtil.initInput($(this));
         }
     });
 }
@@ -483,13 +489,6 @@ function getUrlParam(name) {
         return decodeURIComponent(r[2]);
     }
     return null;
-}
-
-// 查看DMS文件（添加时间戳防止缓存）
-function viewDmsFile_#(pageId)(element, originalUrl) {
-    event.preventDefault ? event.preventDefault() : (event.returnValue = false);
-    var timestamp = new Date().getTime();
-    element.href = originalUrl + '?t=' + timestamp;
 }
 
 //将PDF原本的href属性替换为带有时间戳的URL，以避免缓存

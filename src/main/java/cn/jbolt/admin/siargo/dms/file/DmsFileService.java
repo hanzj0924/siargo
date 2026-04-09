@@ -3,9 +3,13 @@ package cn.jbolt.admin.siargo.dms.file;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.jfinal.kit.PathKit;
+import com.jfinal.log.Log;
 
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
@@ -26,6 +30,7 @@ import cn.jbolt.siargo.model.DmsFileKeyword;
  * @date: 2026-03-23 13:45  
  */
 public class DmsFileService extends JBoltBaseService<DmsFile> {
+	private static final Log LOG = Log.getLog(DmsFileService.class);
 	private final DmsFile dao=new DmsFile().dao();
 	private final DmsFileKeyword keywordDao = new DmsFileKeyword().dao();
 	
@@ -236,6 +241,29 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	@Override
 	protected String afterDelete(DmsFile dmsFile, Kv kv) {
 		//addDeleteSystemLog(dmsFile.getId(), JBoltUserKit.getUserId(),dmsFile.getName());
+		
+		// 删除关联的关键字记录
+		deleteKeywordsByFileId(dmsFile.getId());
+		
+		// 删除物理文件
+		String filePath = dmsFile.getFilePath();
+		if (StrKit.notBlank(filePath)) {
+			try {
+				String physicalPath = PathKit.getWebRootPath() + filePath;
+				File file = new File(physicalPath);
+				if (file.exists() && file.isFile()) {
+					boolean deleted = file.delete();
+					if (deleted) {
+						LOG.info("物理文件删除成功: " + physicalPath);
+					} else {
+						LOG.warn("物理文件删除失败: " + physicalPath);
+					}
+				}
+			} catch (Exception e) {
+				LOG.error("删除物理文件异常: " + filePath, e);
+			}
+		}
+		
 		return null;
 	}
 	
@@ -336,6 +364,7 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 		// 切换状态：1->0, 0->1
 		Integer currentActive = dmsFile.getIsActive();
 		dmsFile.setIsActive(currentActive != null && currentActive == 1 ? 0 : 1);
+		dmsFile.setModifyDate(new java.util.Date());
 		boolean success = dmsFile.update();
 		return ret(success);
 	}

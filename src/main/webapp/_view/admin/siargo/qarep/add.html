@@ -18,13 +18,21 @@
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">客户名称</label>
-						<div class="col">
+						<div class="col input-group">
 							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/siargo/qarep/getCustName" name="qareport.custId"
 								data-text="=请选择/搜索=" data-value-attr="id" data-rule="select"
 								data-text-attr="name" data-select="#(qareport.custId ??)"
-								data-select-type="select2">
+								data-select-type="select2" id="custSelect">
 							</select>
+							<div class="input-group-append">
+								<button class="btn btn-outline-secondary" type="button"
+									data-dialogbtn data-area="350,250"
+									data-handler="refreshCustSelect" data-title="新增客户"
+									data-url="admin/siargo/customer/add">
+									<i class="fa fa-plus"></i>
+								</button>
+							</div>
 						</div>
 					</div>
 					<div class="form-group row">
@@ -245,6 +253,10 @@
 				}, 300);
 			});
 
+			function refreshCustSelect(){
+				SelectUtil.refresh($('#custSelect'));
+			}
+					
 			function uploadSuccessHandler(uploader, type, fileInput, result) {
 				var data = result.data;
 

@@ -1,6 +1,8 @@
 package cn.jbolt.admin.siargo.dms.file;
 
 import com.jfinal.aop.Inject;
+import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.Record;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
@@ -23,8 +25,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 /**
  * 文件类别表管理 Controller
@@ -85,11 +89,13 @@ public class DmsFileAdminController extends JBoltBaseController {
 	 * 失效文件列表页面
 	 */
 	public void inactiveList() {
+		Page<Record> pageData = service.paginateInactiveDatas(getPageNumber(), getPageSize(), getKeywords());
+		set("pageData", pageData);
 		render("inactiveList.html");
 	}
 	
 	/**
-	 * 失效文件数据源
+	 * 失效文件数据源（返回JSON）
 	 */
 	public void inactiveDatas() {
 		renderJsonData(service.paginateInactiveDatas(getPageNumber(), getPageSize(), getKeywords()));
@@ -263,56 +269,102 @@ public class DmsFileAdminController extends JBoltBaseController {
 	}
 	
   /**
-	* 保存
+	* 保存（支持批量文件保存）
 	*/
     @Before(Tx.class)
 	public void save() {
-		DmsFile dmsFile = getModel(DmsFile.class, "dmsFile");
+		DmsFile dmsFileTemplate = getModel(DmsFile.class, "dmsFile");
 		String keywordsStr = getPara("keywords");
 		String tempFilePath = getPara("tempFilePath");
 		
-		// 临时文件到正式目录
-		if (StrKit.notBlank(tempFilePath)) {
-			String normalizedPath = tempFilePath.replace("\\", "/");
-			File tempFile = new File(webRootPath + normalizedPath);
-			if (!tempFile.exists() || !tempFile.isFile()) {
-				renderJsonFail("临时文件不存在");
-				return;
-			}
-			
-			// 目标目录：/upload/dms/{categoryId}/{YYYYMM}/
-			String targetDir = UPLOAD_PATH_PREFIX + JBoltUploadFolder.SIARGO_UPLOAD_DMS + "/" 
-					+ dmsFile.getCategoryId() + "/" ;
-			File targetFolder = new File(webRootPath + targetDir);
-			if (!targetFolder.exists()) {
-				targetFolder.mkdirs();
-			}
-			
-			String targetPath = targetDir + tempFile.getName();
-			File targetFile = new File(webRootPath + targetPath);
-			
-			try {
-				Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				e.printStackTrace();
-				renderJsonFail("文件移动失败: " + e.getMessage());
-				return;
-			}
-			
-			// 设置文件路径和扩展名
-			dmsFile.setFilePath(targetPath);
-			dmsFile.setFileExt(getFileExtension(tempFile.getName()));
-			// 文件名去掉后缀
-			String originalName = tempFile.getName();
-			String nameWithoutExt = originalName.contains(".") ? originalName.substring(0, originalName.lastIndexOf(".")) : originalName;
-			dmsFile.setFileName(nameWithoutExt);
+		if (StrKit.isBlank(tempFilePath)) {
+			renderJsonFail("请上传文件");
+			return;
 		}
 		
-		// 设置上传时间和上传者
-		dmsFile.set("upload_time", DateUtil.getDateString(DateUtil.YMDHMS));
-		dmsFile.set("uploader_id", JBoltUserKit.getUserId());
+		// 支持多文件：逗号分隔
+		String[] tempPaths = tempFilePath.split(",");
+		// 记录已移动的文件，异常时尝试回滚（移回 temp 目录）
+		List<File[]> movedFiles = new ArrayList<>();
 		
-		renderJson(service.save(dmsFile, keywordsStr));
+		try {
+			for (String path : tempPaths) {
+				String singlePath = path.trim();
+				if (StrKit.isBlank(singlePath)) continue;
+				
+				String normalizedPath = singlePath.replace("\\", "/");
+				File tempFile = new File(webRootPath + normalizedPath);
+				if (!tempFile.exists() || !tempFile.isFile()) {
+					throw new RuntimeException("临时文件不存在: " + tempFile.getName());
+				}
+				
+				// 目标目录
+				String targetDir = UPLOAD_PATH_PREFIX + JBoltUploadFolder.SIARGO_UPLOAD_DMS + "/"
+						+ dmsFileTemplate.getCategoryId() + "/";
+				File targetFolder = new File(webRootPath + targetDir);
+				if (!targetFolder.exists()) {
+					targetFolder.mkdirs();
+				}
+				
+				String targetPath = targetDir + tempFile.getName();
+				File targetFile = new File(webRootPath + targetPath);
+				
+				try {
+					Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					movedFiles.add(new File[]{targetFile, tempFile});
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new RuntimeException("文件移动失败: " + e.getMessage());
+				}
+				
+				// 创建新的 DmsFile 记录
+				DmsFile dmsFile = new DmsFile();
+				dmsFile.setCategoryId(dmsFileTemplate.getCategoryId());
+				dmsFile.setActiveDate(dmsFileTemplate.getActiveDate());
+				dmsFile.setDescription(dmsFileTemplate.getDescription());
+				Integer isActive = dmsFileTemplate.getIsActive();
+				dmsFile.setIsActive(isActive != null ? isActive : 1);
+				dmsFile.setFilePath(targetPath);
+				dmsFile.setFileExt(getFileExtension(tempFile.getName()));
+				
+				// 文件名去掉后缀
+				String originalName = tempFile.getName();
+				String nameWithoutExt = originalName.contains(".")
+						? originalName.substring(0, originalName.lastIndexOf("."))
+						: originalName;
+				dmsFile.setFileName(nameWithoutExt);
+				
+				// 设置上传时间和上传者
+				dmsFile.setUploadTime(new java.util.Date());
+				dmsFile.setUploaderId(JBoltUserKit.getUserId());
+				dmsFile.setStatus(1);
+				
+				boolean success = dmsFile.save();
+				if (!success) {
+					throw new RuntimeException("数据库保存失败");
+				}
+				
+				// 保存关键字
+				service.saveKeywords(dmsFile.getId(), keywordsStr);
+			}
+		} catch (RuntimeException e) {
+			// 尝试将已移动的文件回滚到 temp 目录
+			for (File[] pair : movedFiles) {
+				File moved = pair[0];
+				File original = pair[1];
+				try {
+					if (moved.exists()) {
+						Files.move(moved.toPath(), original.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					}
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
+			renderJsonFail(e.getMessage());
+			return;
+		}
+		
+		renderJsonSuccess();
 	}
 	
    /**

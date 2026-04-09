@@ -52,8 +52,21 @@
 			<div class="form-group row">
 				<label class="col-sm-2 col-form-label">文件上传</label>
 				<div class="col">
-					<input type="hidden" name="tempFilePath" id="tempFilePath" value=""
-						#if(!dmsFile.id)data-rule="required" data-tips="请上传文件" #end />
+					<input type="hidden" name="tempFilePath" id="tempFilePath" value="" />
+					#if(!dmsFile.id)
+					<!-- 新增模式：批量上传 -->
+					<div id="multiUploadArea">
+						<input type="file" id="multiFileInput" multiple style="display:none"
+							accept=".pdf" />
+						<button type="button" class="btn btn-outline-primary" id="multiUploadBtn">
+							<i class="fa fa-upload mr-1"></i>选择文件上传
+						</button>
+						<span class="ml-2 text-muted" id="uploadProgress"></span>
+					</div>
+					<div id="uploadedFileList" class="mt-2"></div>
+					<small class="text-muted mt-2 d-block">提示：仅支持pdf批量上传，最多10个文件，每个最大100MB</small>
+					#else
+					<!-- 编辑模式：单文件上传 -->
 					<div class="j_upload_file_box"
 						data-name="file"
 						data-btn-class="btn btn-outline-primary"
@@ -63,9 +76,10 @@
 						data-hidden-input="tempFilePath"
 						data-upload-success-handler="dmsFileUploadHandler"
 						data-maxsize="102400"
-						data-accept="doc,docx,xls,xlsx,ppt,pptx,pdf,jpg,jpeg,png,gif,bmp"
+						data-accept="pdf"
 					></div>
-					<small class="text-muted mt-2 d-block">支持 doc/docx/xls/xlsx/ppt/pptx/pdf/jpg/png/gif/bmp，最大100MB</small>
+					<small class="text-muted mt-2 d-block">提示：仅支持pdf，最大100MB</small>
+					#end
 				</div>
 			</div>
 		</div>
@@ -171,7 +185,7 @@
 		initKeywords();
 	})();
 
-	// ── 文件上传成功回调 ──────────────────────────────────
+	// ── 文件上传成功回调（仅编辑模式使用） ──────────────────────────────────
 	function dmsFileUploadHandler(uploader, type, fileInput, result) {
 		console.log('DMS file upload success:', result);
 		if (result && result.data) {
@@ -181,6 +195,137 @@
 			$('#dmsFileName').val(fileName);
 		}
 	}
+
+	// ── 新增模式：批量上传功能 ──────────────────────────────────
+	(function() {
+		// 检查是否为新增模式
+		if (!$('#multiUploadArea').length) return;
+		
+		// 存储已上传文件信息 [{name, path}]
+		var uploadedFiles = [];
+		// 上传状态标记
+		var isUploading = false;
+		
+		// 点击按钮触发文件选择
+		$('#multiUploadBtn').click(function() {
+			$('#multiFileInput').click();
+		});
+		
+		// 选择文件后处理
+		$('#multiFileInput').change(function() {
+			var files = this.files;
+			var totalCount = uploadedFiles.length + files.length;
+			if (totalCount > 10) {
+				layer.msg('最多上传10个文件', {icon: 2});
+				return;
+			}
+			// 逐个上传
+			isUploading = true;
+			uploadFilesSequentially(files, 0);
+			// 清空 input 以便再次选择
+			$(this).val('');
+		});
+		
+		// 顺序上传文件
+		function uploadFilesSequentially(files, index) {
+			if (index >= files.length) {
+				isUploading = false;
+				return;
+			}
+			var file = files[index];
+			// 检查文件名中点号数量
+			if ((file.name.match(/\./g) || []).length > 1) {
+				layer.msg('【'+ file.name + ' 】文件名不合规，不允许包含"."', {icon: 2, time: 5000});
+				uploadFilesSequentially(files, index + 1);
+				return;
+			}
+			// 检查文件大小 (100MB = 102400KB)
+			if (file.size > 102400 * 1024) {
+				layer.msg(file.name + ' 超过100MB限制', {icon: 2});
+				uploadFilesSequentially(files, index + 1);
+				return;
+			}
+			var formData = new FormData();
+			formData.append('file', file);
+			$('#uploadProgress').text('正在上传 ' + (index + 1) + '/' + files.length + '...');
+			$.ajax({
+				url: actionUrl('/admin/siargo/dms/file/uploadFile'),
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function(res) {
+					if (res.state == 'ok' && res.data) {
+						uploadedFiles.push({name: file.name, path: res.data});
+						refreshFileList();
+						syncTempFilePath();
+					} else {
+						layer.msg(file.name + ' 上传失败: ' + (res.msg || '未知错误'), {icon: 2});
+					}
+					uploadFilesSequentially(files, index + 1);
+				},
+				error: function() {
+					layer.msg(file.name + ' 上传失败', {icon: 2});
+					uploadFilesSequentially(files, index + 1);
+				}
+			});
+		}
+		
+		// 刷新文件列表显示
+		function refreshFileList() {
+			var $list = $('#uploadedFileList');
+			$list.empty();
+			for (var i = 0; i < uploadedFiles.length; i++) {
+				var f = uploadedFiles[i];
+				var $item = $('<div class="d-flex align-items-center mb-1">'
+					+ '<i class="fa fa-file mr-2"></i>'
+					+ '<span class="mr-2">' + f.name + '</span>'
+					+ '<button type="button" class="btn btn-sm btn-outline-danger" data-index="' + i + '">'
+					+ '<i class="fa fa-times"></i></button>'
+					+ '</div>');
+				$list.append($item);
+			}
+			$('#uploadProgress').text(uploadedFiles.length > 0 ? '已上传 ' + uploadedFiles.length + ' 个文件' : '');
+		}
+		
+		// 同步隐藏字段
+		function syncTempFilePath() {
+			var paths = [];
+			for (var i = 0; i < uploadedFiles.length; i++) {
+				paths.push(uploadedFiles[i].path);
+			}
+			$('#tempFilePath').val(paths.join(','));
+		}
+		
+		// 删除已上传文件
+		$('#uploadedFileList').on('click', '.btn-outline-danger', function() {
+			var idx = $(this).data('index');
+			var removed = uploadedFiles.splice(idx, 1)[0];
+			// 清理临时文件
+			if (removed && removed.path) {
+				var url = actionUrl('/admin/siargo/dms/file/deleteTempFile?filePath=' + encodeURIComponent(removed.path));
+				$.ajax({ url: url, async: true });
+			}
+			refreshFileList();
+			syncTempFilePath();
+		});
+		
+		// 表单提交前拦截：检查是否仍在上传中
+		window.beforeFormSubmit = function() {
+			if (isUploading) {
+				layer.msg('文件正在上传中，请等待上传完成', {icon: 2});
+				return false;
+			}
+			if (!$('#multiUploadArea').length) {
+				return true;
+			}
+			if ($.trim($('#tempFilePath').val()) === '') {
+				layer.msg('请上传文件', {icon: 2});
+				return false;
+			}
+			return true;
+		};
+	})();
 
 	// ── 页面关闭时清理临时文件 ──────────────────────────────────
 	var _dmsFormSaved = false;
@@ -193,7 +338,7 @@
 			callback();
 	}
 
-	// 清理临时文件
+	// 清理临时文件（支持多文件路径）
 	function cleanupTempFiles() {
 		if (_dmsFormSaved || _dmsCleaned)
 			return;
@@ -201,15 +346,17 @@
 		if (!tempPath)
 			return;
 		_dmsCleaned = true;
-		var url = actionUrl('/admin/siargo/dms/file/deleteTempFile?filePath='
-				+ encodeURIComponent(tempPath));
-		if (navigator.sendBeacon) {
-			navigator.sendBeacon(url);
-		} else {
-			$.ajax({
-				url : url,
-				async : false
-			});
+		// 支持多路径清理
+		var paths = tempPath.split(',');
+		for (var i = 0; i < paths.length; i++) {
+			var p = $.trim(paths[i]);
+			if (!p) continue;
+			var url = actionUrl('/admin/siargo/dms/file/deleteTempFile?filePath=' + encodeURIComponent(p));
+			if (navigator.sendBeacon) {
+				navigator.sendBeacon(url);
+			} else {
+				$.ajax({ url: url, async: false });
+			}
 		}
 	}
 

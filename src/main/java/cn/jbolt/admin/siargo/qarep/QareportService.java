@@ -70,7 +70,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, int prodType, int insp, Date startTime, Date endTime) {
 		Sql sql = Sql.mysql()
-				.select("sq.id", "sq.order_id", "sc.name AS sc_name", "sq.formnum",
+				.select("sq.id", "sq.order_id", "sc.name AS sc_name", "sq.formnum","sp.insp",
 						"sp.accq_time", "sp.funq_time", "sp.appq_time", "sp.allq_time",
 						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",

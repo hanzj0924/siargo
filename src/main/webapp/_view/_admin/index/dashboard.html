@@ -129,22 +129,9 @@ var DashBoardUtil_#(pageId)={
 		                    }
 		                }
 		            }
-		            // 根据最大值选择合适的取整粒度
-		            var granularity;
-		            if (maxValue <= 100) {
-		                granularity = 20;
-		            } else if (maxValue <= 500) {
-		                granularity = 100;
-		            } else if (maxValue <= 1000) {
-		                granularity = 200;
-		            } else if (maxValue <= 5000) {
-		                granularity = 1000;
-		            } else if (maxValue <= 20000) {
-		                granularity = 5000;
-		            } else {
-		                granularity = 10000;
-		            }
-		            var ymax = Math.ceil(maxValue / granularity) * granularity;
+		            // 统一按 1000 粒度向上取整，最小保证 ymax >= 1000
+		            var ymax = Math.ceil(maxValue / 1000) * 1000;
+		            if (ymax < 1000) { ymax = 1000; }
 		                  
 		            Morris.Bar({
 		                element: element,
