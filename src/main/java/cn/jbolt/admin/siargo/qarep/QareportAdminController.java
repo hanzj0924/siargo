@@ -41,16 +41,22 @@ import cn.jbolt.siargo.model.Qareport;
 
 public class QareportAdminController extends JBoltBaseController {
 
+	/** 检验报告单服务 */
 	@Inject
 	private QareportService service;
+	/** PDF生成服务 */
 	@Inject
 	private PDFService pdfservice;
+	/** Excel解析服务 */
 	@Inject
 	private ExcelService excelservice;
+	/** 产品服务 */
 	@Inject
 	private ProductService proservice;
+	/** 客户服务 */
 	@Inject
 	private CustomerService custservice;
+	/** 角色服务 */
 	@Inject
 	private RoleService roleService;
 	
@@ -67,8 +73,17 @@ public class QareportAdminController extends JBoltBaseController {
 	}
 
 	/**
-     * 处理Excel导入
-     */
+	 * 处理Excel导入
+	 * URL: /admin/siargo/qarep/importExcel
+	 * <p>Excel导入流程：</p>
+	 * <ol>
+	 *   <li>接收上传的Excel文件</li>
+	 *   <li>验证文件格式为xls或xlsx</li>
+	 *   <li>读取Excel内容并解析为数据列表</li>
+	 *   <li>提取订单号、型号、编号等关键信息</li>
+	 *   <li>返回处理结果供前端表单使用</li>
+	 * </ol>
+	 */
     public void importExcel() {
         try {
             // 获取上传的文件
@@ -103,8 +118,10 @@ public class QareportAdminController extends JBoltBaseController {
     }
     
 	/**
-	 * 生成上个月PDF
-	 * Last month
+	 * 批量生成上个月已放行报告单的PDF
+	 * URL: /admin/siargo/qarep/toPdfs
+	 * <p>用于月度归档，将上个月已完成最终放行的报告单批量生成PDF文件</p>
+	 * @throws Exception PDF生成异常
 	 */
 	public void toPdfs() throws Exception {
 	    String pdfsrc = "export/LastMonthPDF";
@@ -122,10 +139,15 @@ public class QareportAdminController extends JBoltBaseController {
     }
     
 	/**
-	 * 生成PDF
+	 * 批量生成选中报告单的PDF
+	 * URL: /admin/siargo/qarep/toPdf
+	 * <p>用于日常操作中批量导出选中报告单的PDF文件</p>
+	 * @throws Exception PDF生成异常
 	 */
 	public void toPdf() throws Exception {
+		// PDF输出目录：正式PDF目录
 	    String pdfsrc = "export/PDF";
+		// 解析前端传入的产品ID列表（逗号分隔）
 		String idsJson = getPara("ids");
 	    List<Long> ids = Arrays.stream(idsJson.split(","))
 	            .map(String::trim)
@@ -140,20 +162,26 @@ public class QareportAdminController extends JBoltBaseController {
     }
 	
 	/**
-	* 查询所有客户名称
-	*/
+	 * 查询所有客户名称列表
+	 * URL: /admin/siargo/qarep/getCustName
+	 * <p>用于新增报告单时选择客户</p>
+	 */
 	public void getCustName() {	
 		renderJsonData(custservice.findAll());
 	}
 	
   	/**
-	* 数据源
-	*/
-	public void datas() {
+	 * 获取报告单列表数据（分页）
+	 * URL: /admin/siargo/qarep/datas
+	 * <p>支持按日期范围、产品类型、检验进度筛选</p>
+	 */
+ 	public void datas() {
 		Date startTime = null;
 		Date endTime = null;
 		
+		// ========== 解析日期范围参数 ==========
 		if (isOk(getPara("dateRange"))) {
+			// 日期范围格式：开始日期~结束日期
 			String[] dates = getPara("dateRange").split("~");
 		    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			if (dates.length == 2) {
@@ -167,6 +195,7 @@ public class QareportAdminController extends JBoltBaseController {
 			}
 		}
 		
+		// 获取产品类型和检验进度筛选条件
 		int prodType = getInt("prodType") == null? 0 : getInt("prodType");
 		int insp = getInt("insp") == null? 0 : getInt("insp");
 		
@@ -195,8 +224,10 @@ public class QareportAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	* 编辑Des
-	*/
+	 * 编辑产品描述页面
+	 * URL: /admin/siargo/qarep/editDes
+	 * @param id 产品ID（URL路径参数）
+	 */
 	public void editDes() {
 		Product product = getModel(Product.class, "product").findById(getLong(0));
 		if(product == null){
@@ -209,8 +240,10 @@ public class QareportAdminController extends JBoltBaseController {
 	
 	
 	/**
-	* 报告单详情
-	*/
+	 * 报告单详情页面
+	 * URL: /admin/siargo/qarep/details
+	 * @param id 产品ID（请求参数）
+	 */
 	public void details() {
 		Qareport qareport=service.qareportFindByProId(Long.parseLong(getPara("id"))); 
 		if(qareport == null){
@@ -222,8 +255,16 @@ public class QareportAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	* 检验批准
-	*/
+	 * 批量检验批准操作
+	 * URL: /admin/siargo/qarep/batchInspection
+	 * <p>根据检验进度更新不同级别的批准信息：</p>
+	 * <ul>
+	 *   <li>insp=2：精度检验批准</li>
+	 *   <li>insp=3：功能检验批准</li>
+	 *   <li>insp=4：批准检验</li>
+	 *   <li>insp=5：最终放行</li>
+	 * </ul>
+	 */
 	public void batchInspection() {
         Integer insp = getParaToInt("insp");
         String idsJson = getPara("ids");

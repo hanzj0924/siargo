@@ -36,6 +36,7 @@ import cn.jbolt.siargo.model.Image;
 @Path(value = "/admin/siargo/imi", viewPath = "/_view/admin/siargo/imi")
 public class ImageAdminController extends JBoltBaseController {
 
+	/** 图片管理 Service */
 	@Inject
 	private ImageService service;
 
@@ -44,6 +45,9 @@ public class ImageAdminController extends JBoltBaseController {
 	 * <p>
 	 * 不做实际保存，仅将文件重命名为原始文件名并返回路径，
 	 * 由前端确认后再调用 save() 正式入库。
+	 * URL路径: POST /admin/siargo/imi/uploadImages
+	 * @param save 是否直接保存标志（前端传参）
+	 * @return JSON 结果，包含临时文件路径列表和文件名列表
 	 */
 	public void uploadImages() {
 		boolean save = getParaToBoolean("save");
@@ -112,24 +116,37 @@ public class ImageAdminController extends JBoltBaseController {
 		}
 	}
 
-	/** 首页 */
+	/**
+	 * 首页
+	 * URL路径: GET /admin/siargo/imi
+	 */
 	public void index() {
 		render("index.html");
 	}
 
-	/** 数据源 */
+	/**
+	 * 数据源分页查询
+	 * URL路径: GET /admin/siargo/imi/datas
+	 */
 	public void datas() {
 		renderJsonData(service.paginateAdminDatas(
 				getPageNumber(), getPageSize(), getKeywords(),
 				getPara("supplierId"), getPara("yearMonth")));
 	}
 
-	/** 新增页面 */
+	/**
+	 * 新增页面
+	 * URL路径: GET /admin/siargo/imi/add
+	 */
 	public void add() {
 		render("add.html");
 	}
 
-	/** 编辑页面 */
+	/**
+	 * 编辑页面
+	 * URL路径: GET /admin/siargo/imi/edit/{id}
+	 * @param id 图片ID（路径参数）
+	 */
 	public void edit() {
 		Image image = service.findById(getLong(0));
 		if (image == null) {
@@ -140,7 +157,13 @@ public class ImageAdminController extends JBoltBaseController {
 		render("edit.html");
 	}
 
-	/** 保存（批量） */
+	/**
+	 * 批量保存图片记录，将临时目录的文件移动到正式目录并写入数据库。
+	 * URL路径: POST /admin/siargo/imi/save
+	 * @param image 图片元数据（包含 supplierId、description）
+	 * @param imgUploadUrl 逗号分隔的临时文件路径列表
+	 * @return JSON 操作结果
+	 */
 	public void save() {
 		Image image = getModel(Image.class, "image");
 		String uploadPathJson = getPara("imgUploadUrl");
@@ -152,7 +175,12 @@ public class ImageAdminController extends JBoltBaseController {
 		renderJson(service.saveBatch(image, uploadPaths));
 	}
 
-	/** 更新 */
+	/**
+	 * 更新图片记录，支持修改供应商、文件名、备注或更换图片文件。
+	 * URL路径: POST /admin/siargo/imi/update
+	 * @param image 图片更新数据
+	 * @return JSON 操作结果
+	 */
 	@Before(Tx.class)
 	public void update() {
 		renderJson(service.update(getModel(Image.class, "image")));
@@ -162,6 +190,9 @@ public class ImageAdminController extends JBoltBaseController {
 	 * 批量删除（逗号分隔的 ID）。
 	 * <p>
 	 * 检查每条删除结果，任一失败则整体返回失败。
+	 * URL路径: POST /admin/siargo/imi/deleteByIds
+	 * @param ids 逗号分隔的图片ID列表
+	 * @return JSON 操作结果
 	 */
 	@Before(Tx.class)
 	public void deleteByIds() {
@@ -184,6 +215,9 @@ public class ImageAdminController extends JBoltBaseController {
 
 	/**
 	 * 批量删除（框架 deleteByIds 方式）
+	 * URL路径: POST /admin/siargo/imi/deleteByIds1
+	 * @param ids 逗号分隔的图片ID列表
+	 * @return JSON 操作结果
 	 */
 	@Before(Tx.class)
 	public void deleteByIds1() {
@@ -195,6 +229,9 @@ public class ImageAdminController extends JBoltBaseController {
 	 * <p>
 	 * 当前端上传组件删除某个文件时，同步删除 temp 目录中的临时文件。
 	 * 前端传参示例：/admin/siargo/imi/deleteTempFile?filePath=/upload/siargo_imi/temp/xxx.jpg
+	 * URL路径: POST /admin/siargo/imi/deleteTempFile
+	 * @param filePath 待删除的临时文件相对路径
+	 * @return JSON 操作结果
 	 */
 	public void deleteTempFile() {
 		String filePath = getPara("filePath");
@@ -231,6 +268,9 @@ public class ImageAdminController extends JBoltBaseController {
 	 * 批量删除临时文件。
 	 * <p>
 	 * 接收逗号分隔的多个文件路径，同时删除多个 temp 目录下的临时文件。
+	 * URL路径: POST /admin/siargo/imi/deleteTempFiles
+	 * @param filePaths 逗号分隔的临时文件相对路径列表
+	 * @return JSON 操作结果，包含成功/失败计数及失败文件列表
 	 */
 	public void deleteTempFiles() {
 		String filePathsJson = getPara("filePaths");

@@ -18,6 +18,7 @@ import com.jfinal.plugin.activerecord.Record;
  * @date: 2026-03-23 13:31  
  */
 public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
+	/** 数据访问对象 */
 	private final DmsCategory dao=new DmsCategory().dao();
 	@Override
 	protected DmsCategory dao() {
@@ -118,9 +119,10 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	}
 	
 	/**
-	 * 上移
-	 * @param id
-	 * @return
+	 * 类别排序上移
+	 * 业务逻辑：将当前类别与排序序号比它小1的类别交换序号
+	 * @param id 类别ID
+	 * @return 操作结果
 	 */
 	public Ret up(Long id) {
 		DmsCategory dmsCategory=findById(id);
@@ -131,13 +133,16 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 		if(rank==null||rank<=0){
 			return fail("顺序需要初始化");
 		}
+		// 已经是第一个，无法上移
 		if(rank==1){
 			return fail("已经是第一个");
 		}
+		// 找到上一个类别（排序序号比当前小1）
 		DmsCategory upDmsCategory=findFirst(Okv.by("sort_rank", rank-1));
 		if(upDmsCategory==null){
 			return fail("顺序需要初始化");
 		}
+		// 交换两个类别的排序序号
 		upDmsCategory.setSortRank(rank);
 		dmsCategory.setSortRank(rank-1);
 		
@@ -147,9 +152,10 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	}
 	
 	/**
-	 * 下移
-	 * @param id
-	 * @return
+	 * 类别排序下移
+	 * 业务逻辑：将当前类别与排序序号比它大1的类别交换序号
+	 * @param id 类别ID
+	 * @return 操作结果
 	 */
 	public Ret down(Long id) {
 		DmsCategory dmsCategory=findById(id);
@@ -160,14 +166,18 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 		if(rank==null||rank<=0){
 			return fail("顺序需要初始化");
 		}
+		// 获取类别总数，判断是否已经是最后一个
 		int max=getCount();
+		// 已经是最后一个，无法下移
 		if(rank==max){
 			return fail("已经是最后已一个");
 		}
+		// 找到下一个类别（排序序号比当前大1）
 		DmsCategory upDmsCategory=findFirst(Okv.by("sort_rank", rank+1));
 		if(upDmsCategory==null){
 			return fail("顺序需要初始化");
 		}
+		// 交换两个类别的排序序号
 		upDmsCategory.setSortRank(rank);
 		dmsCategory.setSortRank(rank+1);
 		
@@ -177,10 +187,12 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	}
 	
 	/**
-	 * 移动
-	 * @param id
-	 * @param otherId
-	 * @return
+	 * 灵活移动类别排序位置
+	 * 业务场景：将类别移动到另一个类别的位置，中间的类别相应调整
+	 * 注意：当前方法尚未完整实现，待后续补充移动逻辑
+	 * @param id 要移动的类别ID
+	 * @param otherId 目标位置的类别ID
+	 * @return 操作结果
 	 */
 	public Ret move(Long id,Long otherId) {
 	//TODO 未完整实现 有待底层实现
@@ -225,7 +237,8 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	
 	/**
 	 * 获取所有类别列表，附带每个类别下的文件数量
-	 * @return 类别列表，每项包含 id, name, sortRank, fileCount
+	 * 用于前端展示类别选择器或统计信息
+	 * @return 类别列表（Record格式），每项包含 id, name, sortRank, fileCount
 	 */
 	public List<Record> getCategoryListWithCount() {
 		// 使用驼峰风格别名，与前端 JavaScript 保持一致

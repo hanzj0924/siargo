@@ -42,30 +42,38 @@ import java.util.Set;
 //true
 public class DmsFileAdminController extends JBoltBaseController {
 
+	/** 文件管理服务 */
 	@Inject
 	private DmsFileService service;
 	
 	/** Web 根目录路径 */
 	private static final String webRootPath = PathKit.getWebRootPath();
-	/** 允许的文件扩展名 */
+	/** 允许上传的文件扩展名集合（文档和图片类型） */
 	private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<>(Arrays.asList(
 			"doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",
 			"jpg", "jpeg", "png", "gif", "bmp"
 	));
-	/** 上传路径前缀 */
+	/** 文件上传路径前缀 */
 	private static final String UPLOAD_PATH_PREFIX = "/upload/";
 	
-   /**
-	* 首页
-	*/
+	/**
+	 * 进入文件管理首页
+	 * URL: GET /admin/siargo/dms/file
+	 */
 	public void index() {
 		render("index.html");
 	}
   	
-  	/**
-	* 数据源（按类别查询）
-	* 注：取消分页，返回全部数据（使用极大 pageSize 保持 Page 格式兼容性）
-	*/
+	/**
+	 * 获取文件数据源（按类别查询）
+	 * URL: GET /admin/siargo/dms/file/datas
+	 * 注：取消分页，返回全部数据（使用极大 pageSize 保持 Page 格式兼容性）
+	 * @param categoryId 类别ID
+	 * @param keywords 关键字（搜索文件名或关键字）
+	 * @param isActive 生效状态筛选
+	 * @param activeDate 生效日期筛选
+	 * @return 文件列表数据JSON
+	 */
 	public void datas() {
 		Long categoryId = getLong("categoryId");
 		String keywords = getPara("keywords");
@@ -77,8 +85,12 @@ public class DmsFileAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	 * 全局搜索（跨所有类别）
-	 * 注：取消分页，返回全部数据（使用极大 pageSize 保持 Page 格式兼容性）
+	 * 全局搜索文件（跨所有类别）
+	 * URL: GET /admin/siargo/dms/file/globalSearch
+	 * 业务场景：用户在首页搜索框输入关键字，检索所有类别下的匹配文件
+	 * 注：取消分页，返回全部数据
+	 * @param keywords 搜索关键字
+	 * @return 匹配的文件列表JSON
 	 */
 	public void globalSearch() {
 		String keywords = getPara("keywords");
@@ -86,7 +98,9 @@ public class DmsFileAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	 * 失效文件列表页面
+	 * 进入失效文件列表页面
+	 * URL: GET /admin/siargo/dms/file/inactiveList
+	 * 失效文件：is_active = 0 且 status = 1 的文件记录
 	 */
 	public void inactiveList() {
 		Page<Record> pageData = service.paginateInactiveDatas(getPageNumber(), getPageSize(), getKeywords());
@@ -95,15 +109,19 @@ public class DmsFileAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	 * 失效文件数据源（返回JSON）
+	 * 获取失效文件数据源（返回JSON）
+	 * URL: GET /admin/siargo/dms/file/inactiveDatas
+	 * @return 失效文件分页数据JSON
 	 */
 	public void inactiveDatas() {
 		renderJsonData(service.paginateInactiveDatas(getPageNumber(), getPageSize(), getKeywords()));
 	}
 	
-   /**
-	* 新增
-	*/
+	/**
+	 * 进入新增文件页面
+	 * URL: GET /admin/siargo/dms/file/add
+	 * @param categoryId 所属类别ID
+	 */
 	public void add() {
 		Long categoryId = getLong("categoryId");
 		set("categoryId", categoryId);
@@ -112,9 +130,11 @@ public class DmsFileAdminController extends JBoltBaseController {
 		render("add.html");
 	}
 	
-   /**
-	* 编辑
-	*/
+	/**
+	 * 进入编辑文件页面
+	 * URL: GET /admin/siargo/dms/file/edit/{id}
+	 * @param id 文件ID（从URL路径获取）
+	 */
 	public void edit() {
 		DmsFile dmsFile=service.findById(getLong(0)); 
 		if(dmsFile == null){
@@ -130,6 +150,10 @@ public class DmsFileAdminController extends JBoltBaseController {
 	
 	/**
 	 * 上传文件到临时目录
+	 * URL: POST /admin/siargo/dms/file/uploadFile
+	 * 业务流程：接收上传文件 -> 校验文件类型 -> 保存到临时目录 -> 返回临时路径
+	 * 临时目录：/upload/siargo/dms/temp/
+	 * @return 临时文件路径JSON
 	 */
 	public void uploadFile() {
 		String tempUploadPath = JBoltUploadFolder.SIARGO_UPLOAD_DMS + "/temp/";
@@ -163,7 +187,11 @@ public class DmsFileAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	 * 删除临时文件
+	 * 删除临时目录中的文件
+	 * URL: POST /admin/siargo/dms/file/deleteTempFile
+	 * 安全策略：仅允许删除临时目录下的文件，防止路径遍历攻击
+	 * @param filePath 要删除的文件路径
+	 * @return 操作结果JSON
 	 */
 	public void deleteTempFile() {
 		String filePath = getPara("filePath");
@@ -202,6 +230,9 @@ public class DmsFileAdminController extends JBoltBaseController {
 	
 	/**
 	 * 文件下载
+	 * URL: GET /admin/siargo/dms/file/download/{id}
+	 * 业务流程：根据ID查找文件记录 -> 读取物理文件 -> 设置响应头 -> 输出文件流
+	 * @param id 文件ID（从URL路径获取）
 	 */
 	public void download() {
 		Long id = getLong(0);
@@ -254,6 +285,9 @@ public class DmsFileAdminController extends JBoltBaseController {
 	
 	/**
 	 * 切换文件生效状态
+	 * URL: POST /admin/siargo/dms/file/toggleActive/{id}
+	 * @param id 文件ID（从URL路径获取）
+	 * @return 操作结果JSON
 	 */
 	@Before(Tx.class)
 	public void toggleActive() {
@@ -262,15 +296,26 @@ public class DmsFileAdminController extends JBoltBaseController {
 	
 	/**
 	 * 切换文件是否生效（前端开关按钮调用）
+	 * URL: POST /admin/siargo/dms/file/changeActive/{id}
+	 * @param id 文件ID（从URL路径获取）
+	 * @return 操作结果JSON
 	 */
 	@Before(Tx.class)
 	public void changeActive() {
 		renderJson(service.toggleActive(getLong(0)));
 	}
 	
-  /**
-	* 保存（支持批量文件保存）
-	*/
+	/**
+	 * 保存文件记录（支持批量文件保存）
+	 * URL: POST /admin/siargo/dms/file/save
+	 * 业务流程：
+	 * 1. 解析临时文件路径（支持多个文件，逗号分隔）
+	 * 2. 将临时文件移动到正式目录（/upload/siargo/dms/{categoryId}/）
+	 * 3. 创建文件记录并保存到数据库
+	 * 4. 保存文件关键字关联
+	 * 5. 异常时回滚：将已移动的文件移回临时目录
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void save() {
 		DmsFile dmsFileTemplate = getModel(DmsFile.class, "dmsFile");
@@ -367,9 +412,13 @@ public class DmsFileAdminController extends JBoltBaseController {
 		renderJsonSuccess();
 	}
 	
-   /**
-	* 更新
-	*/
+	/**
+	 * 更新文件信息
+	 * URL: POST /admin/siargo/dms/file/update
+	 * @param dmsFile 文件信息模型
+	 * @param keywords 关键字（逗号分隔）
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void update() {
 		DmsFile dmsFile = getModel(DmsFile.class, "dmsFile");
@@ -377,9 +426,12 @@ public class DmsFileAdminController extends JBoltBaseController {
 		renderJson(service.update(dmsFile, keywordsStr));
 	}
 	
-   /**
-	* 批量删除
-	*/
+	/**
+	 * 批量删除文件
+	 * URL: POST /admin/siargo/dms/file/deleteByIds
+	 * @param ids 文件ID列表（逗号分隔）
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void deleteByIds() {
 		renderJson(service.deleteByBatchIds(get("ids")));
@@ -387,6 +439,8 @@ public class DmsFileAdminController extends JBoltBaseController {
 	
 	/**
 	 * 获取文件扩展名（不带点）
+	 * @param fileName 文件名
+	 * @return 扩展名（小写，不含点）
 	 */
 	private String getFileExtension(String fileName) {
 		if (StrKit.isBlank(fileName)) {

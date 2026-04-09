@@ -24,9 +24,16 @@ import cn.jbolt.siargo.model.Qareport;
  * @date: 2025-12-02 14:14
  */
 public class PDFService {
+	/** 检验报告单服务，用于查询报告单数据 */
 	@Inject
 	private QareportService qaservice;
 	
+	/**
+	 * 根据产品ID生成检验报告单PDF文件
+	 * <p>根据产品类型和型号选择对应的PDF模板，填充数据后生成PDF文件</p>
+	 * @param id 产品ID
+	 * @param pdfsrc PDF输出目录（如：export/PDF 或 export/LastMonthPDF）
+	 */
 	public void generateReportPdf(Long id,String pdfsrc) {
 		// 查询数据
 		Qareport report = qaservice.qareportFindByProId(id);
@@ -63,12 +70,13 @@ public class PDFService {
 			PdfFolder.mkdirs();
 		}
 		
+		// ========== 清理旧文件 ==========
 		//如果目标PDF文件已存在，先删除
 		File oldPdfFile = new File(webRootPath + report.getStr("sp_pdfstr"));
 	    if (oldPdfFile.exists()) {
 	        boolean oldFileScuess= oldPdfFile.delete();
 	        
-	        // 如果删除失败，尝试强制删除
+	        // 如果删除失败，尝试强制删除（释放文件句柄）
 	        if (!oldFileScuess) {
 	        	
 	            System.gc(); // 触发垃圾回收，释放文件句柄
@@ -82,29 +90,31 @@ public class PDFService {
             }
 	    }
         
-	    try {
+		// ========== 生成PDF文件 ==========
+    	try {
             os = new FileOutputStream(new File(outputFileName));
             
-            // 读入pdf表单
+            // 读入PDF表单模板
             reader = new PdfReader(inputFileName);
             
-            // 根据表单生成一个新的pdf
+            // 根据表单生成一个新的PDF
             ps = new PdfStamper(reader, os);
             
-            // 获取pdf表单
+            // 获取PDF表单字段
             AcroFields form = ps.getAcroFields();
             
-            // 给表单添加中文字体
+            // 给表单添加中文字体（宋体）
             BaseFont bf = BaseFont.createFont(webRootPath + "/assets/fonts/SIMSUN.TTC,0", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
             form.addSubstitutionFont(bf);
             
-            // 映射数据
+            // 构建数据映射并填充表单
             Map<String, String> dataMap = buildDataMap(report);
             
-            // 遍历data 给pdf表单表格赋值
+            // 遍历数据映射，给PDF表单字段赋值
             for (String key : dataMap.keySet()) {
                 form.setField(key, dataMap.get(key).toString());
             }
+            // 设置表单为只读（扁平化）
             ps.setFormFlattening(true);
             
             // 更新 PDF 地址
@@ -130,68 +140,93 @@ public class PDFService {
 
 
 	/**
-	 * 构建数据映射
+	 * 构建PDF表单字段与报告单数据的映射关系
+	 * <p>根据产品类型和型号，映射不同的检验参数到PDF表单字段</p>
+	 * <p>字段映射规则：</p>
+	 * <ul>
+	 *   <li>基础信息：报告单编号、客户名称、订单号、型号、编号等</li>
+	 *   <li>检验人员信息：精度检验、功能检验、批准检验、最终放行的姓名、时间、邮箱</li>
+	 *   <li>产品类型特定参数：小流量(para2/para6/para7)、大流量(cuc/thv/zp/fl等)</li>
+	 * </ul>
+	 * @param report 检验报告单数据
+	 * @return PDF表单字段名与值的映射Map
 	 */
 	private Map<String, String> buildDataMap(Qareport report) {
 		Map<String, String> map = new HashMap<String, String>();
 		String proModle = report.getStr("sp_modle");
 		
+		// ========== 基础信息映射 ==========
 		map.put("formnum", report.getFormnum().toString());
 		map.put("sp_qsi", report.getStr("sp_qsi"));
 		map.put("sp_qi", report.getStr("sp_qi"));
 		map.put("sc_name", report.getStr("sc_name"));
 		map.put("order_id", report.getOrderId().toString());
 		map.put("sp_modle", report.getStr("sp_modle"));
+		
+		// 报告类型：1=产成品，2=退修品
 		if (report.getStr("rep_type").equals("1")) {
 			map.put("rep_type_name", "■ 产成品 □退修品");
 		} else if (report.getStr("rep_type").equals("2")) {
 			map.put("rep_type_name", "□产成品 ■退修品");
 		}
 
+		// ========== 检验人员信息映射 ==========
 		map.put("c_time", report.getStr("c_time"));
 		map.put("sp_number", report.getStr("sp_number"));
+		// 精度检验人员
 		map.put("accq_name", report.getStr("accq_name"));
 		map.put("accq_time", report.getStr("accq_time"));
 		map.put("accq_email", report.getStr("accq_email") == null? "" : report.getStr("accq_email"));
+		// 功能检验人员
 		map.put("funq_name", report.getStr("funq_name"));
 		map.put("funq_time", report.getStr("funq_time"));
 		map.put("funq_email", report.getStr("funq_email") == null? "" : report.getStr("funq_email"));
+		// 批准检验人员
 		map.put("appq_name", report.getStr("appq_name"));
 		map.put("appq_time", report.getStr("appq_time"));
 		map.put("appq_email", report.getStr("appq_email") == null? "" : report.getStr("appq_email"));
+		// 最终放行人员
 		map.put("allq_name", report.getStr("allq_name"));
 		map.put("allq_time", report.getStr("allq_time"));
 		map.put("allq_email", report.getStr("allq_email") == null? "" : report.getStr("allq_email"));
 		
+		// ========== 小流量产品类型参数映射（prod_type=2）==========
 		//小流量
 		if (report.getStr("prod_type").equals("2")) {
+			// MF66型号：para2标记为不适用
 			if (proModle.contains("MF66")) {
 				map.put("para2", "/");
 			} else {
 				map.put("para2", "ok");
 			}
+			// MF52型号：para6标记为合格
 			if (proModle.contains("MF52")) {
 				map.put("para6", "ok");
 			} else {
 				map.put("para6", "/");
 			}
+			// MF57型号：para7标记为合格
 			if (proModle.contains("MF57")) {
 				map.put("para7", "ok");
 			} else {
 				map.put("para7", "/");
 			}
 		} 
+		// ========== 大流量产品类型参数映射（prod_type=3）==========
 		//大流量
 		else if (report.getStr("prod_type").equals("3")) {
 			map.put("flow_range", report.getStr("flow_name")  == null? "" : report.getStr("flow_name"));
 			
+			// GD型号（中低压）：整机电流、热头电压、零点内码、故障电平
 			if (proModle.contains("GD")) {
 				map.put("cuc", report.getStr("sp_cuc"));
 				map.put("thv", report.getStr("sp_thv"));
 				map.put("zp", report.getStr("sp_zp"));
 				map.put("fl", report.getStr("sp_fl"));
 				
-			}if (proModle.contains("FD-E")) {
+			}
+			// FD-E型号（工业表-脉冲型）：整机电流范围、脉冲电压、本地地址
+			if (proModle.contains("FD-E")) {
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
 				map.put("pv", report.getStr("sp_pv"));
@@ -202,7 +237,9 @@ public class PDFService {
 				map.put("fl", "/");
 				map.put("bv", "/");
 				
-			}else if (proModle.contains("FD-D"))  { 
+			}
+			// FD-D型号（工业表-普通型）：无脉冲电压参数，有故障电平和电池电压
+			else if (proModle.contains("FD-D"))  { 
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
 				map.put("pv", report.getStr("sp_pv"));
@@ -219,11 +256,25 @@ public class PDFService {
 
 	
 	/**
-	 * 构建模板路径
+	 * 根据产品类型和型号构建PDF模板路径
+	 * <p>模板选择规则：</p>
+	 * <ul>
+	 *   <li>产品类型1（传感器）：使用传感器模板</li>
+	 *   <li>产品类型2（小流量）：MFC/BC型号使用控制器模板，其他使用小流量计模板</li>
+	 *   <li>产品类型3（大流量）：GD型号使用中低压模板，FD型号使用工业表模板</li>
+	 * </ul>
+	 * @param webRootPath Web应用根目录
+	 * @param prodType 产品类型（1=传感器，2=小流量，3=大流量）
+	 * @param pdfver PDF版本号
+	 * @param proModle 产品型号
+	 * @return PDF模板文件的完整路径
+	 * @throws RuntimeException 未找到对应模板时抛出异常
 	 */
 	public String getInputFile(String webRootPath, String prodType, String pdfver , String proModle) {
+		// 基础模板目录路径
 		String inputFileName = webRootPath + "/reporttemplates/G" + pdfver;
 		
+		// ========== 传感器产品类型（prod_type=1）==========
 		if (prodType.equals("1")) {
 			switch(pdfver){
 	         case "2":
@@ -239,6 +290,8 @@ public class PDFService {
 			
 		}else if(prodType.equals("2")){
 			
+			// ========== 小流量产品类型（prod_type=2）==========
+			// MFC/BC型号使用控制器模板
 			if (proModle.contains("MFC") || proModle.contains("BC")) {
 				switch(pdfver){
 		         case "2":
@@ -252,6 +305,7 @@ public class PDFService {
 		        	 throw new RuntimeException("未找到控制器对应版号模板，请联系开发者");
 		      }
 			} else {
+				// 其他小流量型号使用小流量计模板
 				switch(pdfver){
 		         case "2":
 		        	 inputFileName = inputFileName + "/小流量计模板.pdf";
@@ -267,6 +321,8 @@ public class PDFService {
 			
 		}else if(prodType.equals("3")){
 			
+			// ========== 大流量产品类型（prod_type=3）==========
+			// GD型号使用中低压模板
 			if (proModle.contains("GD")) {
 				switch(pdfver){
 		         case "2":
@@ -281,6 +337,7 @@ public class PDFService {
 		      }
 				
 			}else if (proModle.contains("FD")) {
+				// FD型号使用工业表模板
 				switch(pdfver){
 		         case "2":
 		        	 inputFileName = inputFileName + "/工业表模板.pdf";

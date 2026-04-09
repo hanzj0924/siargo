@@ -20,28 +20,31 @@ import cn.jbolt.siargo.model.Customer;
  * @date: 2025-11-27 11:06  
  */
 public class CustomerService extends JBoltBaseService<Customer> {
+
+	/** Customer数据访问对象 */
 	private final Customer dao=new Customer().dao();
+	
 	@Override
 	protected Customer dao() {
 		return dao;
 	}
 	
-		
 	/**
-	 * 后台管理分页查询
-	 * @param pageNumber
-	 * @param pageSize
-	 * @param keywords
-	 * @return
+	 * 后台管理分页查询客户数据
+	 * @param pageNumber 页码
+	 * @param pageSize 每页条数
+	 * @param keywords 搜索关键词
+	 * @return 客户分页数据
 	 */
 	public Page<Customer> paginateAdminDatas(int pageNumber, int pageSize, String keywords) {
 		return paginateByKeywords("id","desc", pageNumber, pageSize, keywords, "name");
 	}
 	
 	/**
-	 * 保存
-	 * @param customer
-	 * @return
+	 * 保存新增客户信息
+	 * 校验参数有效性后执行保存操作
+	 * @param customer 客户实体对象
+	 * @return 操作结果，成功返回成功信息，失败返回错误信息
 	 */
 	public Ret save(Customer customer) {
 		if(customer==null || isOk(customer.getId())) {
@@ -57,9 +60,10 @@ public class CustomerService extends JBoltBaseService<Customer> {
 	}
 	
 	/**
-	 * 更新
-	 * @param customer
-	 * @return
+	 * 更新客户信息
+	 * 校验参数有效性和数据存在性后执行更新操作
+	 * @param customer 客户实体对象
+	 * @return 操作结果，成功返回成功信息，失败返回错误信息
 	 */
 	public Ret update(Customer customer) {
 		if(customer==null || notOk(customer.getId())) {
@@ -78,19 +82,21 @@ public class CustomerService extends JBoltBaseService<Customer> {
 	}
 	
 	/**
-	 * 删除
-	 * @param id
-	 * @return
+	 * 删除指定客户
+	 * 执行删除前会检查数据是否可被删除
+	 * @param id 客户ID
+	 * @return 操作结果
 	 */
 	public Ret delete(Long id) {
 		return deleteById(id,true);
 	}
 	
 	/**
-	 * 删除数据后执行的回调
+	 * 删除数据后执行的回调方法
+	 * 用于执行删除后的额外业务逻辑，如记录系统日志
 	 * @param customer 要删除的model
 	 * @param kv 携带额外参数一般用不上
-	 * @return
+	 * @return 返回null表示正常执行，返回错误信息则阻止删除
 	 */
 	@Override
 	protected String afterDelete(Customer customer, Kv kv) {
@@ -99,10 +105,11 @@ public class CustomerService extends JBoltBaseService<Customer> {
 	}
 	
 	/**
-	 * 检测是否可以删除
+	 * 检测客户数据是否可以删除
+	 * 检查客户是否被其他业务引用，若被引用则阻止删除
 	 * @param customer 要删除的model
 	 * @param kv 携带额外参数一般用不上
-	 * @return
+	 * @return 返回null表示可删除，返回错误信息则阻止删除
 	 */
 	@Override
 	public String checkCanDelete(Customer customer, Kv kv) {
@@ -112,7 +119,7 @@ public class CustomerService extends JBoltBaseService<Customer> {
 	
 	/**
 	 * 设置返回二开业务所属的关键systemLog的targetType 
-	 * @return
+	 * @return 系统日志目标类型
 	 */
 	@Override
 	protected int systemLogTargetType() {

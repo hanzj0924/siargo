@@ -22,35 +22,40 @@ import cn.jbolt.siargo.model.Customer;
 //true
 public class CustomerAdminController extends JBoltBaseController {
 
+	/** 客户管理服务 */
 	@Inject
 	private CustomerService service;
 	
-   /**
-	* 首页
-	*/
+	/**
+	 * 跳转到客户管理首页
+	 * URL: GET /admin/siargo/customer
+	 */
 	public void index() {
 		render("index.html");
 	}
 	
-
-  	
-  	/**
-	* 数据源
-	*/
+	/**
+	 * 获取客户分页数据列表
+	 * URL: GET /admin/siargo/customer/datas
+	 * @return 客户分页数据JSON
+	 */
 	public void datas() {
 		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords()));
 	}
 	
-   /**
-	* 新增
-	*/
+	/**
+	 * 跳转到新增客户页面
+	 * URL: GET /admin/siargo/customer/add
+	 */
 	public void add() {
 		render("add.html");
 	}
 	
-   /**
-	* 编辑
-	*/
+	/**
+	 * 跳转到编辑客户页面
+	 * URL: GET /admin/siargo/customer/edit/{id}
+	 * @param id 客户ID，从URL路径获取
+	 */
 	public void edit() {
 		Customer customer=service.findById(getLong(0)); 
 		if(customer == null){
@@ -61,29 +66,36 @@ public class CustomerAdminController extends JBoltBaseController {
 		render("edit.html");
 	}
 	
-  /**
-	* 保存
-	*/
+	/**
+	 * 保存新增的客户信息
+	 * URL: POST /admin/siargo/customer/save
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void save() {
 		renderJson(service.save(getModel(Customer.class, "customer")));
 	}
 	
-   /**
-	* 更新
-	*/
+	/**
+	 * 更新客户信息
+	 * URL: POST /admin/siargo/customer/update
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void update() {
 		renderJson(service.update(getModel(Customer.class, "customer")));
 	}
 	
-   /**
-	* 删除
-	*/
+	/**
+	 * 删除指定客户
+	 * URL: POST /admin/siargo/customer/delete/{id}
+	 * @param id 客户ID，从URL路径获取
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void delete() {
 		renderJson(service.delete(getLong(0)));
 	}
 	
-	
+
 }

@@ -45,8 +45,11 @@ public class ImageService extends JBoltBaseService<Image> {
 		return dao;
 	}
 
+	/** 正常状态 */
 	public static final int STATUS_NORMAL = 1;
+	/** 已删除状态 */
 	public static final int STATUS_DELETED = 0;
+	/** Web 根目录绝对路径 */
 	public static final String webRootPath = PathKit.getWebRootPath();
 	/** 统一使用 "/" 作为路径分隔符，避免 Windows File.separator 存入数据库后 Web 访问异常 */
 	public static final String localPath = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_IMI + "/";
@@ -107,6 +110,15 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * 保存单张图片（先移动文件，再写数据库，保证一致性）。
 	 * <p>
 	 * 调用方须保证此方法在同一个数据库事务内执行，以便文件移动失败时可整体回滚。
+	 * <p>
+	 * 业务流程：
+	 * <ol>
+	 *   <li>校验临时文件是否存在</li>
+     *   <li>计算文件 MD5，检查是否已存在（去重）</li>
+     *   <li>移动文件到目标目录（按供应商ID和年月组织）</li>
+     *   <li>写入数据库记录</li>
+     *   <li>若数据库写入失败，回滚文件（移回临时位置或删除）</li>
+	 * </ol>
 	 *
 	 * @param image    包含 supplierId、description 等元数据
 	 * @param tempPath 临时文件相对路径（相对于 webRootPath）
@@ -178,9 +190,17 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * 批量保存（带事务和文件清理）。
 	 * <p>
 	 * 任一图片保存失败时，回滚数据库事务，并删除本次已移动到目标位置的所有文件及剩余临时文件。
+	 * <p>
+	 * 异常回滚逻辑：
+	 * <ol>
+     *   <li>事务回滚：通过 Db.tx() 自动回滚数据库操作</li>
+     *   <li>文件回滚：删除已移动到目标位置的文件</li>
+     *   <li>临时文件清理：删除当前及剩余未处理的临时文件</li>
+	 * </ol>
 	 *
 	 * @param image     公共元数据（supplierId、description）
 	 * @param tempPaths 临时文件相对路径列表
+	 * @return Ret 操作结果，失败时携带错误信息
 	 */
 	public Ret saveBatch(Image image, List<String> tempPaths) {
 		List<String> movedFilePaths = new ArrayList<>();
@@ -229,8 +249,16 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * <p>
 	 * 文件操作策略：先完成所有文件操作，再更新数据库，保证一致性。
 	 * 若数据库更新失败，尝试将文件回滚到原路径。
+	 * <p>
+	 * 支持三种业务场景：
+	 * <ul>
+     *   <li>场景A：上传了新文件 - 移动新文件、删除旧文件、更新 MD5</li>
+     *   <li>场景B：未换文件但供应商或文件名变更 - 移动/重命名文件</li>
+     *   <li>场景C：仅改备注 - 不做文件操作</li>
+	 * </ul>
 	 *
 	 * @param image 前端传入的更新数据
+	 * @return Ret 操作结果
 	 */
 	public Ret update(Image image) {
 		if (image == null || notOk(image.getId())) {
@@ -389,8 +417,15 @@ public class ImageService extends JBoltBaseService<Image> {
 
 	/**
 	 * 软删除单条记录：先更新数据库状态，再删除文件，避免文件删除失败导致数据不一致。
+	 * <p>
+	 * 业务场景：
+	 * <ol>
+     *   <li>将记录状态更新为已删除（STATUS_DELETED），记录删除时间</li>
+     *   <li>删除物理文件（失败时仅记录日志，不影响业务返回）</li>
+	 * </ol>
 	 *
 	 * @param id 图片ID
+	 * @return Ret 操作结果
 	 */
 	public Ret delete(Long id) {
 		Image dbImage = findById(id);
@@ -434,6 +469,7 @@ public class ImageService extends JBoltBaseService<Image> {
 	 *
 	 * @param file 文件对象
 	 * @return MD5 十六进制字符串
+	 * @throws RuntimeException 文件读取失败时抛出
 	 */
 	public String getMd5(File file) {
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -473,6 +509,7 @@ public class ImageService extends JBoltBaseService<Image> {
 	 * @param oldFilePath 原文件相对路径（相对于 webRootPath）
 	 * @param newName     新文件名（不含扩展名）
 	 * @return 新文件相对路径；重命名失败返回 null
+	 * @throws RuntimeException 目标文件已存在时抛出
 	 */
 	public String getRenameFilePath(String oldFilePath, String newName) {
 		try {

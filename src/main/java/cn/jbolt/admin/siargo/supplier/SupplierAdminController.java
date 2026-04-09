@@ -22,40 +22,49 @@ import cn.jbolt.siargo.model.Supplier;
 //true
 public class SupplierAdminController extends JBoltBaseController {
 
+	/** 供应商管理服务 */
 	@Inject
 	private SupplierService service;
 	
-   /**
-	* 首页
-	*/
+	/**
+	 * 跳转到供应商管理首页
+	 * URL: GET /admin/siargo/supplier
+	 */
 	public void index() {
 		render("index.html");
 	}
-  	
-  	/**
-	* 数据源
-	*/
+  
+	/**
+	 * 获取供应商分页数据列表
+	 * URL: GET /admin/siargo/supplier/datas
+	 * @return 供应商分页数据JSON
+	 */
 	public void datas() {
 		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords()));
 	}
 	
 	/**
-	* 查询所有供应商
-	*/
+	 * 查询所有供应商列表
+	 * URL: GET /admin/siargo/supplier/getSupplierName
+	 * @return 所有供应商数据JSON
+	 */
 	public void getSupplierName() {	
 		renderJsonData(service.findAll());
 	}
 	
-   /**
-	* 新增
-	*/
+	/**
+	 * 跳转到新增供应商页面
+	 * URL: GET /admin/siargo/supplier/add
+	 */
 	public void add() {
 		render("add.html");
 	}
 	
-   /**
-	* 编辑
-	*/
+	/**
+	 * 跳转到编辑供应商页面
+	 * URL: GET /admin/siargo/supplier/edit/{id}
+	 * @param id 供应商ID，从URL路径获取
+	 */
 	public void edit() {
 		Supplier supplier=service.findById(getLong(0)); 
 		if(supplier == null){
@@ -66,61 +75,80 @@ public class SupplierAdminController extends JBoltBaseController {
 		render("edit.html");
 	}
 	
-  /**
-	* 保存
-	*/
+	/**
+	 * 保存新增的供应商信息
+	 * URL: POST /admin/siargo/supplier/save
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void save() {
 		renderJson(service.save(getModel(Supplier.class, "supplier")));
 	}
 	
-   /**
-	* 更新
-	*/
+	/**
+	 * 更新供应商信息
+	 * URL: POST /admin/siargo/supplier/update
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void update() {
 		renderJson(service.update(getModel(Supplier.class, "supplier")));
 	}
 	
-   /**
-	* 批量删除
-	*/
+	/**
+	 * 批量删除供应商
+	 * URL: POST /admin/siargo/supplier/deleteByIds
+	 * @param ids 供应商ID列表，多个ID用逗号分隔
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void deleteByIds() {
 		renderJson(service.deleteByBatchIds(get("ids")));
 	}
 	
-  /**
-	* 排序 上移
-	*/
+	/**
+	 * 供应商排序上移
+	 * URL: POST /admin/siargo/supplier/up/{id}
+	 * @param id 供应商ID，从URL路径获取
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void up() {
 		renderJson(service.up(getLong(0)));
 	}
 	
-  /**
-	* 排序 下移
-	*/
+	/**
+	 * 供应商排序下移
+	 * URL: POST /admin/siargo/supplier/down/{id}
+	 * @param id 供应商ID，从URL路径获取
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void down() {
 		renderJson(service.down(getLong(0)));
 	}
 	
-  /**
-	*  灵活移动排序
-	*/
+	/**
+	 * 供应商灵活移动排序
+	 * URL: POST /admin/siargo/supplier/move
+	 * @param id 当前供应商ID
+	 * @param otherId 目标位置供应商ID
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void move() {
 		renderJson(service.move(getLong("id"),getLong("otherId")));
 	}
 	
-  /**
-	* 排序 初始化
-	*/
+	/**
+	 * 初始化供应商排序
+	 * URL: POST /admin/siargo/supplier/initRank
+	 * @return 操作结果JSON
+	 */
     @Before(Tx.class)
 	public void initRank() {
 		renderJson(service.initRank());
 	}
 	
-	
+
 }

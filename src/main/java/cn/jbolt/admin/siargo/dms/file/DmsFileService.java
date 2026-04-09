@@ -30,11 +30,16 @@ import cn.jbolt.siargo.model.DmsFileKeyword;
  * @date: 2026-03-23 13:45  
  */
 public class DmsFileService extends JBoltBaseService<DmsFile> {
+	/** 日志对象 */
 	private static final Log LOG = Log.getLog(DmsFileService.class);
+	/** 文件数据访问对象 */
 	private final DmsFile dao=new DmsFile().dao();
+	/** 文件关键字数据访问对象 */
 	private final DmsFileKeyword keywordDao = new DmsFileKeyword().dao();
 	
+	/** 正常状态：文件有效 */
 	public static final int STATUS_NORMAL = 1;
+	/** 删除状态：文件已标记删除 */
 	public static final int STATUS_DELETED = 0;
 	
 	@Override
@@ -44,13 +49,14 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 		
 	/**
 	 * 后台管理分页查询
+	 * 搜索逻辑：同时匹配文件名(file_name)和关键字表(keyword)中的内容
 	 * @param pageNumber 页码
 	 * @param pageSize 每页条数
 	 * @param categoryId 类别ID（必传）
 	 * @param keywords 关键字（同时搜索 file_name 和 keyword）
 	 * @param isActive 生效状态（可选）
-	 * @param activeDate 生效日期（可选）
-	 * @return
+	 * @param activeDate 生效日期（可选，格式：yyyy-MM）
+	 * @return 分页数据
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, Long categoryId,
 			String keywords, Integer isActive, String activeDate) {
@@ -75,7 +81,7 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 		params.add(categoryId);
 		params.add(STATUS_NORMAL);
 		
-		// 关键字搜索：同时匹配 file_name 和 keyword
+		// 关键字搜索逻辑：同时匹配文件名和关键字表
 		if (StrKit.notBlank(keywords)) {
 			fromSql.append(" AND (f.file_name LIKE ? OR k.keyword LIKE ?)");
 			params.add("%" + keywords + "%");
@@ -104,10 +110,12 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	
 	/**
 	 * 全局搜索（跨所有类别）
+	 * 业务场景：用户在首页搜索框输入关键字，检索所有类别下的匹配文件
+	 * 搜索逻辑：同时匹配文件名(file_name)和关键字表(keyword)中的内容
 	 * @param pageNumber 页码
 	 * @param pageSize 每页条数
-	 * @param keywords 关键字
-	 * @return
+	 * @param keywords 搜索关键字
+	 * @return 分页数据，额外包含 categoryName 字段
 	 */
 	public Page<Record> paginateGlobalSearch(int pageNumber, int pageSize, String keywords) {
 		StringBuilder selectSql = new StringBuilder();
@@ -129,7 +137,7 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 		List<Object> params = new ArrayList<>();
 		params.add(STATUS_NORMAL);
 		
-		// 关键字搜索：同时匹配 file_name 和 keyword
+		// 全局搜索关键字逻辑：同时匹配文件名和关键字表
 		if (StrKit.notBlank(keywords)) {
 			fromSql.append(" AND (f.file_name LIKE ? OR k.keyword LIKE ?)");
 			params.add("%" + keywords + "%");
@@ -146,11 +154,13 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	}
 	
 	/**
-	 * 失效文件分页查询（is_active = 0 且 status = 1）
+	 * 失效文件分页查询
+	 * 失效文件定义：is_active = 0（未生效）且 status = 1（未删除）的文件记录
+	 * 业务场景：管理员查看所有已标记为失效的文件，便于管理或重新激活
 	 * @param pageNumber 页码
 	 * @param pageSize 每页条数
 	 * @param keywords 关键字（搜索文件名）
-	 * @return
+	 * @return 失效文件分页数据
 	 */
 	public Page<Record> paginateInactiveDatas(int pageNumber, int pageSize, String keywords) {
 		StringBuilder selectSql = new StringBuilder();
@@ -182,10 +192,11 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	}
 	
 	/**
-	 * 保存
-	 * @param dmsFile
+	 * 保存文件记录
+	 * 业务场景：Controller层完成文件物理移动后，调用此方法保存文件元数据
+	 * @param dmsFile 文件信息模型
 	 * @param keywordsStr 逗号分隔的关键字字符串
-	 * @return
+	 * @return 操作结果
 	 */
 	public Ret save(DmsFile dmsFile, String keywordsStr) {
 		if(dmsFile==null || isOk(dmsFile.getId())) {
@@ -201,10 +212,11 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	}
 	
 	/**
-	 * 更新
-	 * @param dmsFile
+	 * 更新文件信息
+	 * 业务场景：编辑文件基本信息，同时更新关键字关联（先删后插）
+	 * @param dmsFile 文件信息模型
 	 * @param keywordsStr 逗号分隔的关键字字符串
-	 * @return
+	 * @return 操作结果
 	 */
 	public Ret update(DmsFile dmsFile, String keywordsStr) {
 		if(dmsFile==null || notOk(dmsFile.getId())) {
@@ -234,9 +246,12 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	
 	/**
 	 * 删除数据后执行的回调
+	 * 删除策略：
+	 * 1. 删除关联的关键字记录
+	 * 2. 删除物理文件（同步删除，失败仅记录日志不阻止数据库删除）
 	 * @param dmsFile 要删除的model
 	 * @param kv 携带额外参数一般用不上
-	 * @return
+	 * @return null表示正常完成
 	 */
 	@Override
 	protected String afterDelete(DmsFile dmsFile, Kv kv) {
@@ -350,8 +365,9 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	
 	/**
 	 * 切换文件的生效状态
+	 * 状态切换规则：is_active = 1 时切换为 0，is_active = 0 或 null 时切换为 1
 	 * @param id 文件ID
-	 * @return
+	 * @return 操作结果
 	 */
 	public Ret toggleActive(Long id) {
 		if (id == null) {
@@ -361,7 +377,7 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 		if (dmsFile == null) {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
 		}
-		// 切换状态：1->0, 0->1
+		// 状态切换：1->0, 0或null->1
 		Integer currentActive = dmsFile.getIsActive();
 		dmsFile.setIsActive(currentActive != null && currentActive == 1 ? 0 : 1);
 		dmsFile.setModifyDate(new java.util.Date());
