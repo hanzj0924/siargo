@@ -1,0 +1,104 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_title">
+		<div class="row">
+			<div class="col">
+				<form class="form-inline" id="inactiveForm_#(pageId)" onsubmit="return false;" method="post">
+					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+						placeholder="输入订单号搜索" name="keywords" value="" style="width: 130px;" />
+					<button type="submit" class="btn btn-outline-secondary">
+					<i class="fa fa-search"></i> 查询
+				</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="jbolt_page_content">
+
+		<!-- JBolt表格行模板 -->
+		<script type="text/template" id="inactiveRowTpl_#(pageId)">
+		{@each datas as data,index}
+		<tr data-id="${data.spid}">
+			<td>${pageNumber,pageSize,index | rownum}</td>
+			<td>
+				<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+					href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} </a>
+			</td>
+			<td>${data.orderId}</td>
+			<td>${data.typeName}</td>
+			<td>${data.spModle}</td>
+			<td>${data.spNumber}</td>
+			<td>
+				{@if data.insp==1}
+					<span class="badge badge-secondary">${data.inspName}</span>
+				{@else if data.insp==2}
+					<span class="badge badge-info">${data.inspName}</span>
+				{@else if data.insp==3}
+					<span class="badge badge-warning">${data.inspName}</span>
+				{@else if data.insp==4}
+					<span class="badge badge-danger">${data.inspName}</span>
+				{@else if data.insp==5}
+					<span class="badge badge-success">${data.inspName}</span>
+				{@else}
+					<span class="badge badge-secondary">${data.inspName}</span>
+				{@/if}
+			</td>
+			<td>${data.deleteTime}</td>
+			<td style="text-align:left">${data.deleteDes}</td>
+			<td>
+				<a tooltip title="恢复"
+					href="admin/siargo/qarep/restore/${data.spid}"
+					data-ajaxbtn data-handler="refreshJBoltTable" data-confirm="确定恢复此报告单？"
+					class="text-success"><i class="fa fa-check-circle"></i></a>
+				<a tooltip title="永久删除"
+					href="admin/siargo/qarep/permanentDelete?ids=${data.spid}"
+					data-ajaxbtn data-handler="refreshJBoltTable" data-confirm="确定永久删除此报告单？此操作不可恢复！"
+					class="jbolt_table_delbtn ml-2"><i class="fa fa-remove c-danger"></i></a>
+			</td>
+		</tr>
+		{@/each}
+		</script>
+
+		<!-- JBolt表格主体 -->
+		<table id="inactiveTable_#(pageId)" cellspacing="0" cellpadding="0" border="0"
+			class="jbolt_table table_striped thead_font_normal table-center"
+			data-jbolttable
+			data-ajax="true"
+			data-url="admin/siargo/qarep/inactiveDatas"
+			data-conditions-form="inactiveForm_#(pageId)"
+			data-rowtpl="inactiveRowTpl_#(pageId)"
+			data-page="inactivePage_#(pageId)"
+			data-pagesize="10" 
+			data-fixed-columns-left="1,2,3" 
+			data-fixed-columns-right="-1,-2"
+			
+			>
+			<thead>
+				<tr>
+					<th data-width="60">序号</th>
+					<th data-width="120">报告单编号</th>
+					<th data-width="70">订单号</th>
+					<th data-width="80">产品类型</th>
+					<th data-min-width="200">产品型号</th>
+					<th data-width="190">产品编号</th>
+					<th data-width="80">检验进度</th>
+					<th data-width="130">删除时间</th>
+					<th data-min-width="100">删除原因</th>
+					<th data-width="100">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+</div>
+#end
+
+#define js()
+<script type="text/javascript">
+$(function(){
+});
+</script>
+#end

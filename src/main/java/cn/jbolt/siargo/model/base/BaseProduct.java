@@ -73,7 +73,8 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String BV = "bv";
     /**本地地址(Local Address)*/
     public static final String LA = "la";
-    
+    /**删除原因*/
+    public static final String DELETE_DES = "delete_des";
     
 	/**
 	 * 产品ID
@@ -569,6 +570,22 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	@JBoltField(name="la" ,columnName="la",type="Integer", remark="本地地址(Local Address)", required=false, maxLength=2, fixed=0, order=31)
 	public java.lang.Integer getLa() {
 		return getInt("la");
+	}
+	
+	/**
+	 * 删除原因
+	 */
+	public M setDeleteDes(java.lang.String des) {
+		set("delete_des", des);
+		return (M)this;
+	}
+	
+	/**
+	 * 删除原因
+	 */
+	@JBoltField(name="delete_des" ,columnName="delete_des",type="String", remark="删除原因", required=false, maxLength=255, fixed=0, order=32)
+	public java.lang.String getDeleteDes() {
+		return getStr("delete_des");
 	}
 
 }

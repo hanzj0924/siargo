@@ -78,7 +78,7 @@ function searchInactiveFiles(pageNumber) {
 	$.ajax({
 		url: 'admin/siargo/dms/file/inactiveDatas',
 		type: 'GET',
-		data: { pageNumber: pn, pageSize: 15, keywords: keywords },
+		data: { page: pn, pageSize: 15, keywords: keywords },
 		dataType: 'json',
 		success: function(res) {
 			if (res.state === 'ok' && res.data) {
@@ -128,13 +128,14 @@ function renderInactiveTable(pageData) {
 		tbody.append(tr);
 	}
 	
-	// 更新分页
+	// 更新分页信息显示
+	var pagerParent = $('#inactivePage').closest('.pages');
+	pagerParent.find('#totalRow').text(pageData.totalRow || 0);
+	pagerParent.find('#totalPage').text(pageData.totalPage || 1);
+	pagerParent.find('#gonu').val(pageData.pageNumber || 1).attr('max', pageData.totalPage || 1);
+
+	// 更新分页组件
 	initPage("inactivePage", pageData.totalPage || 0, pageData.pageNumber || 1, "inactiveForm");
-	
-	// 重新绑定JBolt事件（动态元素需要重新初始化）
-	if (typeof JBolt !== 'undefined' && JBolt.initAjaxBtn) {
-		JBolt.initAjaxBtn($('#inactiveTable'));
-	}
 }
 
 // 自定义刷新处理器（恢复生效/删除后刷新列表）

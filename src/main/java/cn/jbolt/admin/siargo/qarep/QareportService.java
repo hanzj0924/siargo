@@ -291,8 +291,8 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  LEFT JOIN jb_user AS accq_user ON accq_user.id = sp.accq_uid\n"
 				+ "  LEFT JOIN jb_user AS funq_user ON funq_user.id = sp.funq_uid\n"
 				+ "  LEFT JOIN jb_user AS appq_user ON appq_user.id = sp.appq_uid\n"
-				+ "  LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid\n" + "WHERE\n" + "  sp.vd = 1\n"
-				+ "  AND sp.id = ? ";
+				+ "  LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid\n" + "WHERE\n" 
+				+ "  sp.id = ? ";
 
 		return dao.findFirst(sql, id);
 	}
@@ -374,6 +374,36 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 
 	/**
+	 * 回收站分页查询（已软删除的报告单）
+	 * <p>查询 vd=0 的产品记录，关联报告单、客户、字典表获取完整信息</p>
+	 * @param pageNumber 页码
+	 * @param pageSize 每页数量
+	 * @param keywords 搜索关键字（订单号模糊匹配）
+	 * @return 分页数据
+	 */
+	public Page<Record> paginateInactiveDatas(int pageNumber, int pageSize, String keywords) {
+		Sql sql = Sql.mysql()
+				.select("sp.id AS spid", "sq.order_id", "sc.name AS sc_name",
+						"d_type.name AS type_name",
+						"sp.delete_des",
+						"DATE_FORMAT(sp.delete_time, '%Y-%m-%d %H:%i') AS delete_time")
+				.page(pageNumber, pageSize)
+				.from("siargo_product", "sp")
+				.leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
+				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
+				.leftJoin("jb_dictionary", "d_type",
+						"d_type.type_key = 'siargo_prod_type' "
+						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+						+ "AND d_type.enable = '1 '")
+				.eq("sp.vd", 0);
+
+		sql.like("sq.order_id", keywords);
+		sql.orderBy("sp.delete_time", true);
+
+		return paginateRecord(sql, true);
+	}
+
+	/**
 	 * 逻辑删除报告单
 	 * <p>将产品记录标记为已删除（vd=0），记录删除时间</p>
 	 * @param id 产品ID
@@ -403,6 +433,16 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	}
 
 	/**
+	 * 记录删除操作的系统日志（供Controller调用）
+	 * @param id 被删除记录的ID
+	 * @param userId 操作用户ID
+	 * @param name 日志描述信息
+	 */
+	public void logDelete(Object id, Long userId, String name) {
+		addDeleteSystemLog(id, userId, name);
+	}
+
+	/**
 	 * 检测是否可以删除
 	 * 
 	 * @param qareport 要删除的model
@@ -422,7 +462,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	@Override
 	protected int systemLogTargetType() {
-		return ProjectSystemLogTargetType.NONE.getValue();
+		return ProjectSystemLogTargetType.QAREPORT.getValue();
 	}
 	
 	/**
@@ -549,6 +589,77 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	        result.add(item);
 	    }
 	    return result;
+	}
+	
+	/**
+	 * 分页查询回收站中的报告单列表
+	 * <p>查询条件：vd=0（已删除）</p>
+	 * <p>关联查询产品表、客户表、用户表和字典表，获取完整展示信息</p>
+	 * @param pageNumber 页码
+	 * @param pageSize 每页数量
+	 * @param keywords 搜索关键字（订单号模糊匹配）
+	 * @return 回收站数据分页
+	 */
+	public Page<Record> paginateInactiveListDatas(int pageNumber, int pageSize, String keywords) {
+		Sql sql = Sql.mysql()
+				// 选择字段：报告单基础信息
+				.select("sq.id", "sq.order_id", "sc.name AS sc_name", "sq.formnum", "sp.insp",
+						// 检验时间信息
+						"sp.accq_time", "sp.funq_time", "sp.appq_time", "sp.allq_time",
+						// 检验人员姓名
+						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
+						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
+						// 产品信息字段
+						"sp.id as spid", "sp.modle as sp_modle", "sp.number as sp_number", "sp.type as sp_type",
+						"sp.flow_range as sp_flow_range",
+						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv",
+						"sp.thv as sp_thv", "sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax",
+						"sp.cucmin as sp_cucmin", "sp.bv as sp_bv", "sp.la as sp_la",
+						// 字典翻译字段
+						"d_type.name AS type_name","d_insp.name AS insp_name","d_flow.name AS flow_name",
+						"d_pdfver.name AS pdfver_name","d_retype.name AS retype_name",
+						// 删除信息
+						"sp.delete_des", "DATE_FORMAT(sp.delete_time, '%Y-%m-%d %H:%i') as delete_time"
+						)
+				.page(pageNumber, pageSize).from("siargo_product", "sp")
+				// ========== 关联报告单表 ==========
+				.leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
+				// ========== 关联客户表 ==========
+				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
+				// ========== 关联字典表获取产品类型名称 ==========
+				.leftJoin("jb_dictionary", "d_type", "d_type.type_key = 'siargo_prod_type' "
+						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+						+ "AND d_type.enable = '1 '")
+				// ========== 关联字典表获取报告类型名称 ==========
+				.leftJoin("jb_dictionary", "d_retype", "d_retype.type_key = 'siargo_rep_type' "
+						+ "AND d_retype.sn COLLATE utf8mb4_general_ci = CAST(sq.rep_type AS CHAR) "
+						+ "AND d_retype.enable = '1 '")
+				// ========== 关联字典表获取检验进度名称 ==========
+				.leftJoin("jb_dictionary", "d_insp", "d_insp.type_key = 'siargo_insp' "
+						+ "AND d_insp.sn COLLATE utf8mb4_general_ci = CAST(sp.insp AS CHAR) "
+						+ "AND d_insp.enable = '1 '")
+				// ========== 关联字典表获取PDF版本名称 ==========
+				.leftJoin("jb_dictionary", "d_pdfver", "d_pdfver.type_key = 'siargo_pdfver' "
+						+ "AND d_pdfver.sn COLLATE utf8mb4_general_ci = CAST(sp.pdfver AS CHAR) "
+						+ "AND d_pdfver.enable = '1 '")
+				// ========== 关联字典表获取流量范围名称 ==========
+				.leftJoin("jb_dictionary", "d_flow", "d_flow.type_key = 'siargo_flow_range' "
+						+ "AND d_flow.sn COLLATE utf8mb4_general_ci = sp.flow_range "
+						+ "AND d_flow.enable = '1 '")
+				// ========== 关联用户表获取各阶段检验人员信息 ==========
+				.leftJoin("jb_user", "accq_user", "accq_user.id = sp.accq_uid")
+				.leftJoin("jb_user", "funq_user", "funq_user.id = sp.funq_uid")
+				.leftJoin("jb_user", "appq_user", "appq_user.id = sp.appq_uid")
+				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid")
+				// ========== 查询回收站数据（vd=0）==========
+				.eq("sp.vd", 0);
+	
+		// ========== 应用搜索条件 ==========
+		sql.like("sq.order_id", keywords);
+				
+		sql.orderBy("sp.delete_time", true);
+				
+		return paginateRecord(sql, true);
 	}
 	
 	/**

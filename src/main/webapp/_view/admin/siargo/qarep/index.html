@@ -22,7 +22,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -71,7 +71,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -105,7 +105,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -142,7 +142,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -188,7 +188,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -241,7 +241,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="查看报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -316,6 +316,9 @@
 					class="btn btn-outline-info ">
 					<i class="fa fa-edit"></i> 修改产品备注
 				</button>
+				<button onclick="openDeleteDialog_#(pageId)('allreport_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
+					<i class="fa fa-trash"></i> 删除
+				</button>
 				<button onclick="jboltTableRefresh(this)"
 					class="btn btn-outline-secondary ">
 					<i class="fa fa-refresh"></i> 刷新
@@ -325,8 +328,8 @@
 		<div class="col-sm-4 text-center">
 			<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
 				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-					placeholder="输入订单号" name="keywords" value="" style="width: 130px;""/> 
-				 <select class="form-control" name="prodType" data-autoload style="width: 130px;""
+					placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
+				 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
 					data-url="admin/dictionary/options?key=siargo_prod_type"
 					data-value-attr="sn" 
 					data-text="=产品类型=" data-value=""></select>
@@ -340,7 +343,12 @@
 				</button>
 			</form>
 		</div>
-		<div class="col-sm-4">
+		<div class="col-sm-4 text-right">
+			<button data-dialogbtn data-area="1300,700" data-title="已删除报告单列表"
+				data-url="admin/siargo/qarep/inactiveList"  type="button"
+				class="btn btn-outline-danger">
+				<i class="fa fa-trash"></i> 回收站
+			</button>
 			
 		</div>
 	</div>
@@ -393,10 +401,7 @@
 					class="btn btn-outline-info ">
 					<i class="fa fa-edit"></i> 修改
 				</button>
-				<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
-					data-check-handler="jboltTableGetCheckedIds"
-					data-url="admin/siargo/qarep/deleteByIds?ids="
-					data-confirm="确定删除选中数据？" class="btn btn-outline-danger ">
+				<button onclick="openDeleteDialog_#(pageId)('noq_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
 					<i class="fa fa-trash"></i> 删除
 				</button>
 				<button onclick="jboltTableRefresh(this)"
@@ -757,6 +762,7 @@
 		<div class="jbolt_tab_content"  id="allreport_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
+				data-pagesize="15" 
 				id="allreport_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -772,15 +778,15 @@
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="100" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
 						<th data-width="80" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="200" data-column="sp_modle">产品型号</th>
-						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-min-width="220" data-column="sp_modle">产品型号</th>
+						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="100" data-column="insp">检验进度</th>
 						<th data-width="150" data-column="create_time">创建时间</th>
@@ -794,6 +800,7 @@
 		<div class="jbolt_tab_content"  id="noq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
+				data-pagesize="10" 
 				id="noq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -809,15 +816,15 @@
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="100" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
 						<th data-width="80" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="200" data-column="sp_modle">产品型号</th>
-						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-min-width="220" data-column="sp_modle">产品型号</th>
+						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="150" data-column="create_time">创建时间</th>
 					</tr>
@@ -830,6 +837,7 @@
 		<div class="jbolt_tab_content"  id="accq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
+				data-pagesize="10" 
 				id="accq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -845,15 +853,15 @@
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="100" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
 						<th data-width="80" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="200" data-column="sp_modle">产品型号</th>
-						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-min-width="220" data-column="sp_modle">产品型号</th>
+						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="170" data-column="accq_uid">精度检验</th>
 					</tr>
@@ -866,6 +874,7 @@
 		<div class="jbolt_tab_content"  id="funq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
+				data-pagesize="10" 
 				id="funq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -881,15 +890,15 @@
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="100" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
 						<th data-width="80" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="200" data-column="sp_modle">产品型号</th>
-						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-min-width="220" data-column="sp_modle">产品型号</th>
+						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="170" data-column="accq_uid">精度检验</th>
 						<th data-width="170" data-column="funq_uid">外观检验</th>
@@ -903,6 +912,7 @@
 		<div class="jbolt_tab_content"  id="appq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
+				data-pagesize="10" 
 				id="appq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -918,15 +928,15 @@
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="100" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
 						<th data-width="80" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="200" data-column="sp_modle">产品型号</th>
-						<th data-width="190" data-column="sp_number">产品编号</th>
+						<th data-min-width="220" data-column="sp_modle">产品型号</th>
+						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="170" data-column="accq_uid">精度检验</th>
 						<th data-width="170" data-column="funq_uid">外观检验</th>
@@ -941,6 +951,7 @@
 		<div class="jbolt_tab_content"  id="allq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
+				data-pagesize="20" 
 				id="allq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -951,12 +962,13 @@
 				data-rowtpl="allqRowtpl_#(pageId)"
 				data-page="allqPage_#(pageId)"
 				data-toolbar="allq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3,4"
+				data-fixed-columns-left="1,2,3,4" 
+				data-fixed-columns-right="-1"
 				>
 				<thead class="fw-normal">
 					<tr>
 						<th data-width="60">序号</th>
-						<th data-width="120" data-column="formnum">报告单编号</th>
+						<th data-width="100" data-column="formnum">报告单编号</th>
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
@@ -1052,10 +1064,6 @@
 }
 </style>
 <script type="text/javascript">
-function afterAJaxCallback(res){
-	AjaxPortalUtil.refresh(portal);
-}
-
 //点击时处理订单备注格式
 $(document).on('click', '[data-dialogbtn]', function() {
     var $btn = $(this);
@@ -1078,6 +1086,55 @@ function loadPDF (element, originalPdfUrl) {
     const pdfUrl = originalPdfUrl + '?t=' + timestamp;
     
     element.href = pdfUrl;
+}
+
+// 打开删除确认弹窗
+function openDeleteDialog_#(pageId)(tableId) {
+    // 获取选中的ID
+    var ids = jboltTableGetCheckedIds(tableId);
+    if (!ids || ids.length === 0) {
+        LayerMsgBox.alert('请先选择要删除的数据', 2);
+        return;
+    }
+    
+    // 打开layer弹窗
+    layer.open({
+        type: 1,
+        title: '删除确认',
+        area: ['450px', '320px'],
+        content: '<div class="p-3">' +
+            '<div class="form-group">' +
+            '<label class="mb-2"><i class="fa fa-question-circle text-warning mr-1"></i>确定把选中数据放入回收站？</label>' +
+            '<textarea id="deleteReason_#(pageId)" class="form-control" rows="4" placeholder="请输入删除原因（选填）..."></textarea>' +
+            '</div></div>',
+        btn: ['确定', '取消'],
+        yes: function(index) {
+            var reason = $('#deleteReason_#(pageId)').val();
+            var idsStr = $.isArray(ids) ? ids.join(',') : ids;
+            LayerMsgBox.loading('正在处理...', 10000);
+            $.ajax({
+                url: 'admin/siargo/qarep/deleteByIds',
+                type: 'post',
+                data: { ids: idsStr, delete_des: reason },
+                success: function(res) {
+                    LayerMsgBox.closeLoading();
+                    layer.close(index);
+                    if (res.state == 'ok') {
+                        LayerMsgBox.success('删除成功', 800, function() {
+                            refreshJBoltTableById(tableId);
+                        });
+                    } else {
+                        LayerMsgBox.alert(res.msg || '删除失败', 2);
+                    }
+                },
+                error: function() {
+                    LayerMsgBox.closeLoading();
+                    layer.close(index);
+                    LayerMsgBox.error('请求失败，请重试');
+                }
+            });
+        }
+    });
 }
 
 </script>

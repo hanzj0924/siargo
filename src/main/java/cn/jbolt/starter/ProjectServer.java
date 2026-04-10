@@ -19,7 +19,7 @@ public class ProjectServer extends JBoltServer {
 
 	@Override
 	public String getProjectVersion() {
-		return "5.3.5";
+		return "1.7.0";
 	}
 
 	@Override

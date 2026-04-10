@@ -28,6 +28,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 import cn.jbolt.core.base.JBoltMsg;
+import cn.jbolt.siargo.model.Customer;
 import cn.jbolt.siargo.model.Product;
 import cn.jbolt.siargo.model.Qareport;
 /**
@@ -437,27 +438,119 @@ public class QareportAdminController extends JBoltBaseController {
 	}
     
    /**
-	* 删除
+	* 删除（软删除到回收站）
 	*/
     @Before(Tx.class)
 	public void deleteByIds() {
     	String idsJson = getPara("ids");
+    	if (StrKit.isBlank(idsJson)) {
+    		renderFail("请选择要删除的数据");
+    		return;
+    	}
+    	String deleteDes = getPara("delete_des"); // 删除原因，可为空
 
         List<Long> ids = Arrays.stream(idsJson.split(","))
+                .filter(s -> !s.trim().isEmpty())
                 .map(String::trim)
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
 
-            for (Long id : ids) {
-            	Product product = proservice.findById(id); 
-                if (product != null) {
-                	product.set("delete_time", DateUtil.getDateString(DateUtil.YMDHMS));
-                	product.set("vd", 0);
-                	product.update();
-                }
+        if (ids.isEmpty()) {
+        	renderFail("请选择要删除的数据");
+        	return;
+        }
+
+        for (Long id : ids) {
+        	Product product = proservice.findById(id); 
+            if (product != null) {
+            	product.set("delete_time", DateUtil.getDateString(DateUtil.YMDHMS));
+            	product.set("vd", 0);
+            	product.set("delete_des", deleteDes);
+            	product.update();
             }
-            renderJsonSuccess();
+        }
+        renderJsonSuccess();
 	}
-	
-	
+
+	/**
+	 * 回收站列表页面（服务端渲染 + JBolt原生分页）
+	 * URL: /admin/siargo/qarep/inactiveList
+	 */
+	public void inactiveList() {
+		render("inactiveList.html");
+	}
+
+	/**
+	 * 回收站列表AJAX数据接口（用于dialog弹窗内搜索和分页）
+	 * URL: /admin/siargo/qarep/inactiveDatas
+	 */
+	public void inactiveDatas() {
+		renderJsonData(service.paginateInactiveListDatas(getPageNumber(), getPageSize(), getKeywords()));
+	}
+
+	/**
+	 * 恢复报告单（从回收站还原）
+	 * URL: /admin/siargo/qarep/restore/:id
+	 */
+	public void restore() {
+		Long id = getLong(0);
+		if (id == null) {
+			renderFail("参数错误");
+			return;
+		}
+		Product product = proservice.findById(id);
+		if (product == null) {
+			renderFail("数据不存在");
+			return;
+		}
+		product.set("vd", 1);
+		product.set("delete_time", null);
+		product.set("delete_des", null);
+		renderJsonData(product.update());
+	}
+
+	/**
+	 * 永久删除报告单（物理删除）
+	 * URL: /admin/siargo/qarep/permanentDelete
+	 */
+	@Before(Tx.class)
+	public void permanentDelete() {
+		String idsJson = getPara("ids");
+		if (StrKit.isBlank(idsJson)) {
+			renderFail("参数错误");
+			return;
+		}
+		List<Long> ids = Arrays.stream(idsJson.split(","))
+				.map(String::trim)
+				.map(Long::parseLong)
+				.collect(Collectors.toList());
+		for (Long id : ids) {
+			Product product = proservice.findById(id);
+			if (product != null) {
+				// 删除前获取关联信息用于日志记录
+				String logDesc = "";
+				Qareport qareport = service.findById(product.getReportId());
+				if (qareport != null) {
+					String formnum = qareport.getFormnum() != null ? String.valueOf(qareport.getFormnum()) : "";
+					String orderId = qareport.getOrderId() != null ? String.valueOf(qareport.getOrderId()) : "";
+					String modle = product.getModle() != null ? product.getModle() : "";
+					String number = product.getNumber() != null ? product.getNumber() : "";
+					String customerName = "";
+					if (qareport.getCustId() != null) {
+						Customer customer = custservice.findById(qareport.getCustId());
+						if (customer != null) {
+							customerName = customer.getName();
+						}
+					}
+					String deleteDes = product.getDeleteDes() != null ? product.getDeleteDes() : "";
+					logDesc = " 报告单编号：" + formnum + " ==订单号：" + orderId + " ==型号：" + modle + " ==编号：" + number + " ==客户：" + customerName + " ==删除原因：" + deleteDes;
+				}
+				product.delete();
+				// 记录永久删除操作日志
+				service.logDelete(id, JBoltUserKit.getUserId(), logDesc);
+			}
+		}
+		renderJsonSuccess();
+	}
+
 }
