@@ -1,85 +1,98 @@
-#@jboltLayout()
-#define main()
-#set(pageId=RandomUtil.random(6))
-<div class="jbolt_page" data-key="#(pmkey)" >
-
-<div class="jbolt_page_title">
-	<div class="row">
-	<div class="col-md-auto">
-	<h1>通知单别表管理</h1>
-	</div>
-	<div class="col">
-		<form class="form-inline" id="dmsCategoryForm_#(pageId)"   onsubmit="return false;" method="post">
-		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
-		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
-		</form>
-	</div>
-	<div class="col-md-auto">
-	</div>
-	</div>
-</div>
-<div class="jbolt_page_content">
-<!-- JBoltTable的数据模板定义-->
-<textarea class="jb_tpl_box" id="dmsCategoryRowtpl_#(pageId)">
+#@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)">
+	<div class="jbolt_page_content">
+		<!-- JBoltTable的数据模板定义-->
+		<textarea class="jb_tpl_box" id="dmsCategoryRowtpl_#(pageId)">
 {@each datas as data,index}
-<tr data-id="${data.id}" >
+<tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>${data.name}</td>
 <td>
-    <a href="admin/siargo/dms/category/up/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
-    <a href="admin/siargo/dms/category/down/${data.id}" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"  class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+    <a href="admin/siargo/dms/category/up/${data.id}" data-ajaxbtn
+					data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"
+					class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+    <a href="admin/siargo/dms/category/down/${data.id}" data-ajaxbtn
+					data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"
+					class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
 </td>
 </tr>
 {@/each}
 </textarea>
 
-<!-- 工具条 toolbar -->
-<div class="jbolt_table_toolbar" id="dmsCategory_toolbar_#(pageId)">
-	<div class="btn-group" role="group" aria-label="btn-group">
-		<button data-openpage="dialog" data-area="350,250"  data-handler="jboltTablePageToFirst" data-title="新增"  data-url="admin/siargo/dms/category/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
-		<button data-openpage="dialog" data-area="350,250"  data-handler="refreshJBoltTable" data-title="修改" data-check-handler="jboltTableGetCheckedId" data-url="admin/siargo/dms/category/edit/" class="btn btn-outline-info btn-sm"><i class="fa fa-edit"></i> 修改</button>
-		<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/dms/category/deleteByIds?ids=" data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm" ><i class="fa fa-trash"></i> 删除</button>
-		<button data-ajaxbtn data-confirm="确认初始化顺序吗？" data-handler="jboltTablePageToFirst" data-title="初始化排序" data-url="admin/siargo/dms/category/initRank" class="btn btn-outline-info btn-sm" ><i class="fa fa-sort"></i> 初始化排序</button>
-		<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+		<!-- 工具条 toolbar -->
+		<div class="jbolt_table_toolbar" id="dmsCategory_toolbar_#(pageId)">
+			<div class="row">
+				<div class="col-sm-4 text-left">
+					<div class="btn-group" role="group" aria-label="btn-group">
+						<button data-openpage="dialog" data-area="350,250"
+							data-handler="jboltTablePageToFirst" data-title="新增"
+							data-url="admin/siargo/dms/category/add"
+							class="btn btn-outline-primary btn-sm">
+							<i class="fa fa-plus"></i> 新增
+						</button>
+						<button data-openpage="dialog" data-area="350,250"
+							data-handler="refreshJBoltTable" data-title="修改"
+							data-check-handler="jboltTableGetCheckedId"
+							data-url="admin/siargo/dms/category/edit/"
+							class="btn btn-outline-info btn-sm">
+							<i class="fa fa-edit"></i> 修改
+						</button>
+						<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+							data-check-handler="jboltTableGetCheckedIds"
+							data-url="admin/siargo/dms/category/deleteByIds?ids="
+							data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm">
+							<i class="fa fa-trash"></i> 删除
+						</button>
+						<button data-ajaxbtn data-confirm="确认初始化顺序吗？"
+							data-handler="jboltTablePageToFirst" data-title="初始化排序"
+							data-url="admin/siargo/dms/category/initRank"
+							class="btn btn-outline-info btn-sm">
+							<i class="fa fa-sort"></i> 初始化排序
+						</button>
+						<button onclick="jboltTableRefresh(this)"
+							class="btn btn-outline-info btn-sm">
+							<i class="fa fa-refresh"></i> 刷新
+						</button>
+					</div>
+				</div>
+				<div class="col-sm-4 text-center">
+					<form class="form-inline" id="dmsCategoryForm_#(pageId)"
+						onsubmit="return false;" method="post">
+						<input type="text" autocomplete="off" class="form-control"
+							placeholder="输入关键字搜索" name="keywords" value="" />
+						<button type="submit" class="btn btn-outline-secondary">
+							<i class="fa fa-search"></i> 查询
+						</button>
+					</form>
+				</div>
+				<div class="col-sm-4 text-right"></div>
+			</div>
+		</div>
+
+
+		<table class="jbolt_table jbolt_main_table table-center"
+			data-jbolttable data-height="fill" data-ajax="true"
+			data-url="admin/siargo/dms/category/datas" data-column-resize="true"
+			data-column-prepend="1:checkbox"
+			data-conditions-form="dmsCategoryForm_#(pageId)"
+			data-rowtpl="dmsCategoryRowtpl_#(pageId)"
+			data-page="dmsCategoryPage_#(pageId)"
+			data-toolbar="dmsCategory_toolbar_#(pageId)"
+			data-fixed-columns-left="1,2,3" data-fixed-columns-right="-1">
+			<thead class="fw-normal">
+				<tr>
+					<th data-width="60">序号</th>
+					<th data-min-width="150" data-column="name">类别名称</th>
+					<th data-width="100">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+
+
+
 	</div>
-	
-	<div class="clearfix"></div>
-</div>
-
-
-
-<table class="jbolt_table jbolt_main_table table-center"
-data-jbolttable
-data-height="fill"
-data-ajax="true"
-data-url="admin/siargo/dms/category/datas"
-data-column-resize="true"
-data-column-prepend="1:checkbox"
-data-conditions-form="dmsCategoryForm_#(pageId)"
-data-rowtpl="dmsCategoryRowtpl_#(pageId)"
-data-page="dmsCategoryPage_#(pageId)"
-data-toolbar="dmsCategory_toolbar_#(pageId)"
-
-
-
-
-data-fixed-columns-left="1,2,3"
-data-fixed-columns-right="-1"
->
-<thead class="fw-normal">
-<tr>
-	<th data-width="60">序号</th>
-	<th data-min-width="150" data-column="name">类别名称</th>
-	<th data-width="100">操作</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
-
-
-	
-</div>
 </div>
 #end
 

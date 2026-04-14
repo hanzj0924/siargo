@@ -1,20 +1,8 @@
-#@jboltLayout()
+﻿#@jboltLayout()
 #define main()
 #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page jb_vflex" data-key="#(pmkey)">
-<div class="jbolt_page_title jb_vheader">
-	<div class="row">
-	<div class="col-md-auto">
-	<h1><i class="jbicon jb-myreport"></i> 检验报告单管理</h1>
-	</div>
-	<div class="col">
-		
-	</div>
-	<div class="col-md-auto">
-	</div>
-	</div>
-	
-</div>
+
 <div class="jbolt_page_content jb_vbody">
 <!-- 全部 表单数据 -->
 <script type="text/template" id="allreportRowtpl_#(pageId)">
@@ -304,13 +292,13 @@
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button data-openpage="dialog" data-area="1100,850"
-					data-handler="jboltTablePageToFirst" data-title="新建报告单"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
 					data-url="admin/siargo/qarep/add"
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
 				</button>
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改产品备注"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
@@ -389,13 +377,13 @@
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button data-openpage="dialog" data-area="1100,850"
-					data-handler="jboltTablePageToFirst" data-title="新建报告单"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
 					data-url="admin/siargo/qarep/add"
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
 				</button>
 				<button data-openpage="dialog" data-area="1100,850"
-					data-handler="refreshJBoltTable" data-title="修改"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/edit/"
 					class="btn btn-outline-info ">
@@ -427,7 +415,7 @@
 		</div>
 		<div class="col-sm-4 text-right">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
 					data-confirm="确定精度检验合格？" 
@@ -474,7 +462,7 @@
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改产品备注"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
@@ -503,7 +491,7 @@
 			</form>
 		</div>
 		<div class="col-sm-4 text-right">
-			<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+			<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 				data-check-handler="jboltTableGetCheckedIds" 
 				data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
 				data-confirm="确定外观检验合格？" 
@@ -550,7 +538,7 @@
 			<div class="btn-group " role="group" aria-label="btn-group">
 				
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改产品备注"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
@@ -579,7 +567,7 @@
 			</form>
 		</div>
 		<div class="col-sm-4 text-right">
-			<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+			<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
 					data-confirm="确定包装检验合格？" 
@@ -626,7 +614,7 @@
 			<div class="btn-group " role="group" aria-label="btn-group">
 				
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改产品备注"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
@@ -656,7 +644,7 @@
 		</div>
 		<div class="col-sm-4 text-right">
 			#if(approval)
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
 					data-confirm="确定批准选中数据？" 
@@ -703,7 +691,7 @@
 		<div class="col-sm-3 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button data-openpage="dialog" data-area="530,325"
-					data-handler="refreshJBoltTable" data-title="修改产品备注"
+					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
 					class="btn btn-outline-info ">
@@ -732,12 +720,12 @@
 		</div>
 		<div class="col-sm-3 text-right">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-url="/admin/siargo/qarep/toPdfs" 
 					data-confirm="确定生成上月PDF？" 
 					class="btn btn-outline-danger " ><i class="jbicon2 jbi-file-pdf-fill"></i> 生成上个月PDF
 				</button>
-				<button type="button" data-ajaxbtn data-handler="refreshJBoltTable" 
+				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="/admin/siargo/qarep/toPdf?ids=" 
 					data-confirm="确定生成选中数据？" 
@@ -1121,7 +1109,7 @@ function openDeleteDialog_#(pageId)(tableId) {
                     layer.close(index);
                     if (res.state == 'ok') {
                         LayerMsgBox.success('删除成功', 800, function() {
-                            refreshJBoltTableById(tableId);
+                            refreshAllQarepTables_#(pageId)();
                         });
                     } else {
                         LayerMsgBox.alert(res.msg || '删除失败', 2);
@@ -1135,6 +1123,16 @@ function openDeleteDialog_#(pageId)(tableId) {
             });
         }
     });
+}
+
+// 刷新所有Tab表格数据
+function refreshAllQarepTables_#(pageId)() {
+    refreshJBoltTableById('allreport_mgrtable_#(pageId)');
+    refreshJBoltTableById('noq_mgrtable_#(pageId)');
+    refreshJBoltTableById('accq_mgrtable_#(pageId)');
+    refreshJBoltTableById('funq_mgrtable_#(pageId)');
+    refreshJBoltTableById('appq_mgrtable_#(pageId)');
+    refreshJBoltTableById('allq_mgrtable_#(pageId)');
 }
 
 </script>

@@ -8,6 +8,26 @@
 			<div class="row">
 				<div class="col">
 					<div class="form-group row">
+						<label class="col-sm-3 col-form-label">报告单类型</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload
+								name="qareport.repType" style="width: 130px;"
+								data-url="admin/dictionary/options?key=siargo_rep_type"
+								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
+								data-value="" data-value-attr="sn"
+								data-select="#(qareport.repType ??)">
+							</select>
+						</div>
+						<label class="col-sm-3 col-form-label">报告单版号</label>
+						<div class="col input-group">
+							<select class="form-control" data-autoload name="product.pdfver"
+								data-url="admin/dictionary/options?key=siargo_pdfver"
+								data-rule="select" data-tips="请选择版号" data-value=""
+								data-value-attr="sn" data-select="#(qareport.pdfver ??)">
+							</select>
+						</div>
+					</div>
+					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">订单号</label>
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
@@ -36,26 +56,6 @@
 						</div>
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">报告单类型</label>
-						<div class="col input-group">
-							<select class="form-control" data-autoload
-								name="qareport.repType" style="width: 130px;"
-								data-url="admin/dictionary/options?key=siargo_rep_type"
-								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
-								data-value="" data-value-attr="sn"
-								data-select="#(qareport.repType ??)">
-							</select>
-						</div>
-						<label class="col-sm-3 col-form-label">报告单版号</label>
-						<div class="col input-group">
-							<select class="form-control" data-autoload name="product.pdfver"
-								data-url="admin/dictionary/options?key=siargo_pdfver"
-								data-rule="select" data-tips="请选择版号" data-value=""
-								data-value-attr="sn" data-select="#(qareport.pdfver ??)">
-							</select>
-						</div>
-					</div>
-					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">产品类型</label>
 						<div class="col input-group">
 							<select class="form-control" data-autoload name="product.type"
@@ -70,24 +70,22 @@
 
 						<label class="col-sm-3 col-form-label">检验进度</label>
 						<div class="col input-group">
-							<select class="form-control" name="product.insp"
+							<select class="form-control" data-autoload name="product.insp"
 								data-rule="select" data-tips="请选择检验进度" data-text="=请选择="
+								data-value="" data-options="未检精度:1,已检精度:2"
 								data-select="#(qareport.insp ??)">
-								<option value="1">未检精度</option>
-								<option value="2">已检精度</option>
 							</select>
 						</div>
 					</div>
 
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">流量范围</label>
-						<div class="col">
-							<select class="form-control " data-autoload data-refresh="true"
+						<div class="col input-group">
+							<select class="form-control" data-autoload
 								data-url="admin/dictionary/options?key=siargo_flow_range"
-								name="product.flow_range" data-text="=请选择/搜索="
-								data-value-attr="sn" data-select="#(qareport.spFlowRange ??)"
-								data-notnull="false" data-rule="select"
-								data-select-type="select2">
+								name="product.flow_range" data-text="=请选择="
+								data-value="" data-value-attr="sn" data-select="#(qareport.spFlowRange ??)"
+								data-notnull="false" data-rule="select" data-tips="请选择流量范围">
 							</select>
 						</div>
 					</div>

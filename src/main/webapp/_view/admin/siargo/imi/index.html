@@ -1,40 +1,5 @@
 #@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page" data-key="#(pmkey)">
-
-	<div class="jbolt_page_title">
-		<div class="row">
-			<div class="col-sm-2">
-				<h1>来料到货单管理</h1>
-			</div>
-			<div class="col-sm-8">
-				<form class="form-inline" id="imageForm_#(pageId)"
-					onsubmit="return false;" method="post">
-					<input type="text" data-with-clearbtn="true" class="form-control" 
-						data-date data-type="month" placeholder="选择年月" data-width="100px"
-						name="yearMonth" data-max="0"  value="#(yearMonth??)">
-					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-						placeholder="输入到单据号搜索" name="keywords" value="" />
-					<select class="form-control" data-autoload 
-						data-url="admin/siargo/supplier/getSupplierName"
-						data-refresh="true"
-						name="supplierId" 
-						data-value-attr="id"
-						data-text="=请选择搜索=" 
-						data-with-clearbtn="true"
-						data-width="400px"
-						data-select-type="select2">
-					</select>
-					
-					<button type="submit" class="btn btn-outline-secondary">
-						<i class="fa fa-search"></i> 查询
-					</button>
-				</form>
-			</div>
-			<div class="col-sm-2">
-			
-			</div>
-		</div>
-	</div>
 	<div class="jbolt_page_content">
 		<!-- JBoltTable的数据模板定义-->
 		<textarea class="jb_tpl_box" id="imageRowtpl_#(pageId)">
@@ -44,7 +9,8 @@
 <td>${data.storageName}</td>
 <td>${data.supplierName}</td>
 <td>
-	<img data-photobtn src="${data.filePath}"  class="m-1 hand"  style="height: 50px;" tooltip data-title="点击查看大图" />	
+	<img data-photobtn src="${data.filePath}" class="m-1 hand"
+					style="height: 50px;" tooltip data-title="点击查看大图" />	
 </td>
 <td>${data.description}</td>
 <td>${data.uploaderName}</td>
@@ -54,40 +20,63 @@
 </tr>
 {@/each}
 </textarea>
-
 		<!-- 工具条 toolbar -->
 		<div class="jbolt_table_toolbar" id="image_toolbar_#(pageId)">
-			<div class="btn-group" role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="1100,560"
-					data-handler="jboltTablePageToFirst" data-title="上传到货单"
-					data-url="admin/siargo/imi/add"
-					class="btn btn-outline-primary btn-sm">
-					<i class="fa fa-plus"></i> 新增
-				</button>
-				<button data-openpage="dialog" data-area="1100,900"
-					data-handler="refreshJBoltTable" data-title="修改到货单信息"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/imi/edit/"
-					class="btn btn-outline-info btn-sm">
-					<i class="fa fa-edit"></i> 修改
-				</button>
-				<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
-					data-check-handler="jboltTableGetCheckedIds"
-					data-url="admin/siargo/imi/deleteByIds?ids="
-					data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm">
-					<i class="fa fa-trash"></i> 删除
-				</button>
-				<a href="admin/siargo/supplier" data-openpage
-					class="btn btn-outline-success btn-sm"> <i class="fa fa-cog"></i>
-					管理供应商
-				</a>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary btn-sm">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
+
+			<div class="row">
+				<div class="col-sm-4 text-left">
+					<div class="btn-group" role="group" aria-label="btn-group">
+						<button data-openpage="dialog" data-area="1100,560"
+							data-handler="jboltTablePageToFirst" data-title="上传到货单"
+							data-url="admin/siargo/imi/add"
+							class="btn btn-outline-primary btn-sm">
+							<i class="fa fa-plus"></i> 新增
+						</button>
+						<button data-openpage="dialog" data-area="1100,900"
+							data-handler="refreshJBoltTable" data-title="修改到货单信息"
+							data-check-handler="jboltTableGetCheckedId"
+							data-url="admin/siargo/imi/edit/"
+							class="btn btn-outline-info btn-sm">
+							<i class="fa fa-edit"></i> 修改
+						</button>
+						<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+							data-check-handler="jboltTableGetCheckedIds"
+							data-url="admin/siargo/imi/deleteByIds?ids="
+							data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm">
+							<i class="fa fa-trash"></i> 删除
+						</button>
+						<a href="admin/siargo/supplier" data-openpage
+							class="btn btn-outline-success btn-sm"> <i class="fa fa-cog"></i>
+							管理供应商
+						</a>
+						<button onclick="jboltTableRefresh(this)"
+							class="btn btn-outline-secondary btn-sm">
+							<i class="fa fa-refresh"></i> 刷新
+						</button>
+					</div>
+				</div>
+				<div class="col-sm-8 text-center">
+					<form class="form-inline" id="imageForm_#(pageId)"
+						onsubmit="return false;" method="post">
+						<input type="text" data-with-clearbtn="true" class="form-control"
+							data-date data-type="month" placeholder="选择年月" data-width="100px"
+							name="yearMonth" data-max="0" value="#(yearMonth??)"> <input
+							type="text" autocomplete="off" class="form-control"
+							data-with-clearbtn="true" placeholder="输入到单据号搜索" name="keywords"
+							value="" /> <select class="form-control" data-autoload
+							data-url="admin/siargo/supplier/getSupplierName"
+							data-refresh="true" name="supplierId" data-value-attr="id"
+							data-text="=请选择搜索=" data-with-clearbtn="true" data-width="400px"
+							data-select-type="select2">
+						</select>
+
+						<button type="submit" class="btn btn-outline-secondary">
+							<i class="fa fa-search"></i> 查询
+						</button>
+					</form>
+				</div>
 			</div>
-			
-			
+			<div class="btn-group" role="group" aria-label="btn-group"></div>
 		</div>
 
 		<table class="jbolt_table jbolt_main_table table-center"
@@ -117,23 +106,22 @@
 
 	</div>
 </div>
-#end
-#define js()
+#end #define js()
 <script type="text/javascript">
-function afterAJaxCallback(res){
-	AjaxPortalUtil.refresh(portal);
-}
+	function afterAJaxCallback(res) {
+		AjaxPortalUtil.refresh(portal);
+	}
 
-//将原本的href属性替换为带有时间戳的URL，以避免缓存
-function loadfile (element, originalPdfUrl) {
-    // 阻止默认行为（如果链接已有默认行为）
-    event.preventDefault ? event.preventDefault() : (event.returnValue = false);
-    
-    const timestamp = new Date().getTime();
-    const fileUrl = originalPdfUrl + '?t=' + timestamp;
-    
-    element.href = fileUrl;
-}
+	//将原本的href属性替换为带有时间戳的URL，以避免缓存
+	function loadfile(element, originalPdfUrl) {
+		// 阻止默认行为（如果链接已有默认行为）
+		event.preventDefault ? event.preventDefault()
+				: (event.returnValue = false);
 
+		const timestamp = new Date().getTime();
+		const fileUrl = originalPdfUrl + '?t=' + timestamp;
+
+		element.href = fileUrl;
+	}
 </script>
 #end
