@@ -77,15 +77,15 @@
 							</select>
 						</div>
 					</div>
-
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">流量范围</label>
 						<div class="col input-group">
-							<select class="form-control" data-autoload
+							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/dictionary/options?key=siargo_flow_range"
-								name="product.flow_range" data-text="=请选择="
-								data-value="" data-value-attr="sn" data-select="#(qareport.spFlowRange ??)"
-								data-notnull="false" data-rule="select" data-tips="请选择流量范围">
+								name="product.flow_range" data-text="=请选择/搜索="
+								data-value-attr="sn" data-select="#(qareport.spFlowRange ??)"
+								data-notnull="false" data-rule="select" 
+								data-select-type="select2">
 							</select>
 						</div>
 					</div>

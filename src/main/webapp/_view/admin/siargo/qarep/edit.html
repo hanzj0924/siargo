@@ -41,13 +41,21 @@
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">客户名称</label>
-						<div class="col">
-							<select class="form-control" data-autoload data-refresh="true"
-								data-url="admin/siargo/qarep/getCustName"
-								name="qareport.cust_id" data-rule="select" data-tips="=请选择/搜索="
-								data-text="=请选择=" data-value="" data-value-attr="id"
-								data-select-type="select2" data-select="#(qapro.cust_id??)">
+						<div class="col input-group">
+							<select class="form-control " data-autoload data-refresh="true"
+								data-url="admin/siargo/qarep/getCustName" name="qareport.cust_id"
+								data-text="=请选择/搜索=" data-value-attr="id" data-rule="select"
+								data-text-attr="name" data-select="#(qapro.cust_id ??)"
+								data-select-type="select2" id="custSelect">
 							</select>
+							<div class="input-group-append">
+								<button class="btn btn-outline-secondary" type="button"
+									data-dialogbtn data-area="350,250"
+									data-handler="refreshCustSelect" data-title="新增客户"
+									data-url="admin/siargo/customer/add">
+									<i class="fa fa-plus"></i>
+								</button>
+							</div>
 						</div>
 					</div>
 					<div class="form-group row">
@@ -74,13 +82,12 @@
 					<div class="form-group row">
 						<label class="col-sm-3 col-form-label">流量范围</label>
 						<div class="col input-group">
-							<select class="form-control" data-autoload
-								name="product.flow_range"
+							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/dictionary/options?key=siargo_flow_range"
-								data-rule="select" data-tips="请选择流量范围" data-text="=请选择="
-								data-value="" data-value-attr="sn"
-								data-notnull="false"
-								data-select="#(qapro.sp_flow_range ??)">
+								name="product.flow_range" data-text="=请选择/搜索="
+								data-value-attr="sn" data-select="#(qapro.sp_flow_range ??)"
+								data-notnull="false" data-rule="select"
+								data-select-type="select2">
 							</select>
 						</div>
 					</div>

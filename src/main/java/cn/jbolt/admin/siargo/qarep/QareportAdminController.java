@@ -12,7 +12,9 @@ import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.common.util.StringUtil;
 
 import com.jfinal.core.Path;
+import com.jfinal.kit.PathKit;
 import com.jfinal.kit.StrKit;
+import java.time.LocalDate;
 
 import java.io.File;
 import java.text.ParseException;
@@ -136,7 +138,35 @@ public class QareportAdminController extends JBoltBaseController {
 	        pdfservice.generateReportPdf(id,pdfsrc);
 	    }
 	    
-	    renderJsonSuccess("已完成，前往服务器桌面查看！");
+	    // 压缩PDF文件
+	    int lastMonth = LocalDate.now().minusMonths(1).getMonthValue();
+	    String rarName = lastMonth + "月报告单.rar";
+	    String exportDir = PathKit.getWebRootPath() + "/export/";
+	    String rarPath = exportDir + rarName;
+	    String srcDir = PathKit.getWebRootPath() + "/export/LastMonthPDF/*";
+	    String winrarExe = "C:\\Program Files\\WinRAR\\WinRAR.exe";
+	    
+	    try {
+	    	String[] cmd = { winrarExe, "a", "-r", rarPath, srcDir };
+	    	ProcessBuilder pb = new ProcessBuilder(cmd);
+	    	pb.redirectErrorStream(true);
+	    	Process process = pb.start();
+	    	try (java.io.BufferedReader reader = new java.io.BufferedReader(
+	    	        new java.io.InputStreamReader(process.getInputStream(), "GBK"))) {
+	    	    while (reader.readLine() != null) { }
+	    	}
+	    	int exitCode = process.waitFor();
+	    	if (exitCode != 0) {
+	    		renderFail("压缩失败，WinRAR 返回码：" + exitCode);
+	    		return;
+	    	}
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    	renderFail("压缩失败：" + e.getMessage());
+	    	return;
+	    }
+	    
+	    renderJsonSuccess("已完成，PDF已打包为 " + rarName + "，请前往服务器 export 目录查看！");
     }
     
 	/**

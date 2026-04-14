@@ -721,15 +721,16 @@
 		<div class="col-sm-3 text-right">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-					data-url="/admin/siargo/qarep/toPdfs" 
-					data-confirm="确定生成上月PDF？" 
-					class="btn btn-outline-danger " ><i class="jbicon2 jbi-file-pdf-fill"></i> 生成上个月PDF
-				</button>
-				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="/admin/siargo/qarep/toPdf?ids=" 
 					data-confirm="确定生成选中数据？" 
-					class="btn btn-outline-primary " ><i class="fa fa-download"></i> 生成PDF
+					class="btn btn-outline-primary " ><i class="jbicon2 jbi-file-pdf-fill "></i>生成PDF
+				</button>
+				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
+					data-url="/admin/siargo/qarep/toPdfs" 
+					data-confirm="确定生成上月PDF？" 
+					data-success-time="15000"
+					class="btn btn-outline-danger " ><i class="fa fa-download"></i>一键导出上个月PDF
 				</button>
 			</div>
 		</div>
