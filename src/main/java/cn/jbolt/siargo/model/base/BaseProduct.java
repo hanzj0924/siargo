@@ -18,7 +18,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     /**产品类型: 1传感器,  2小流量, 3大流量*/
     public static final String TYPE = "type";
     /**产品型号*/
-    public static final String MODLE = "modle";
+    public static final String MODEL = "model";
     /**送检数量 (Quantity Submitted for Inspection)*/
     public static final String QSI = "qsi";
     /**检验数量 (Quantity Inspected)*/
@@ -126,17 +126,17 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 产品型号
 	 */
-	public M setModle(java.lang.String modle) {
-		set("modle", modle);
+	public M setModel(java.lang.String model) {
+		set("model", model);
 		return (M)this;
 	}
 	
 	/**
 	 * 产品型号
 	 */
-	@JBoltField(name="modle" ,columnName="modle",type="String", remark="产品型号", required=false, maxLength=255, fixed=0, order=4)
-	public java.lang.String getModle() {
-		return getStr("modle");
+	@JBoltField(name="model" ,columnName="model",type="String", remark="产品型号", required=false, maxLength=255, fixed=0, order=4)
+	public java.lang.String getModel() {
+		return getStr("model");
 	}
 
 	/**

@@ -214,7 +214,7 @@
 						<div class="col">
 							<textarea class="form-control" style="height: 50px"
 								data-rule="required" placeholder="如果多型号，英文逗号分割"
-								data-tips="如果多型号，英文逗号分割" maxlength="500" name="modles"
+								data-tips="如果多型号，英文逗号分割" maxlength="500" name="models"
 								data-with-clearbtn="true"></textarea>
 						</div>
 					</div>
@@ -264,8 +264,8 @@
 				if (data.orderId) {
 					$('input[name="qareport.orderId"]').val(data.orderId);
 				}
-				if (data.modles) {
-					$('textarea[name="modles"]').val(data.modles);
+				if (data.models) {
+					$('textarea[name="models"]').val(data.models);
 				}
 				if (data.numbers) {
 					$('textarea[name="numbers"]').val(data.numbers);
@@ -273,6 +273,9 @@
 				if (data.qsis) {
 					$('textarea[name="qsis"]').val(data.qsis);
 					$('textarea[name="qis"]').val(data.qsis);
+				}
+				if (data.repType) {
+					$('select[name="qareport.repType"]').val(data.repType);
 				}
 			}
 		</script>

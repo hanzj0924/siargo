@@ -81,7 +81,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						// 产品信息字段
-						"sp.id as spid", "sp.modle as sp_modle", "sp.number as sp_number", "sp.type as sp_type",
+						"sp.id as spid", "sp.model as sp_model", "sp.number as sp_number", "sp.type as sp_type",
 						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.flow_range as sp_flow_range", "sp.des as sp_des", 
 						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", 
 						"sp.thv as sp_thv", "sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", 
@@ -204,7 +204,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			// 复制产品属性
 			pro.set("insp", product.getInsp());
 			pro.set("type", product.getType());
-			pro.set("modle", product.getModle());
+			pro.set("model", product.getModel());
 			pro.set("qsi", product.getQsi());
 			pro.set("qi", product.getQi());
 			pro.set("number", product.getNumber());
@@ -262,7 +262,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  appq_user.email AS appq_email,\n allq_user.email AS allq_email,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') AS create_time,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y.%m.%d') AS c_time,\n" + "  sp.id AS spid,\n"
-				+ "  sp.modle AS sp_modle,\n" + "  sp.number AS sp_number,\n" + "  sp.type AS sp_type,\n"
+				+ "  sp.model AS sp_model,\n" + "  sp.number AS sp_number,\n" + "  sp.type AS sp_type,\n"
 				+ "  sp.qsi AS sp_qsi,\n" + "  sp.qi AS sp_qi,\n" + "  sp.flow_range AS sp_flow_range,\n"
 				+ "  sp.des AS sp_des,\n" + "  sp.pdfstr AS sp_pdfstr,\n" + " sp.pdfver AS sp_pdfver,\n" + "  sp.cuc AS sp_cuc,\n" 
 				+ "  sp.pv AS sp_pv,\n" + "  sp.thv AS sp_thv,\n" + "  sp.zp AS sp_zp,\n" + "  sp.fl AS sp_fl,\n" 
@@ -610,7 +610,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						// 产品信息字段
-						"sp.id as spid", "sp.modle as sp_modle", "sp.number as sp_number", "sp.type as sp_type",
+						"sp.id as spid", "sp.model as sp_model", "sp.number as sp_number", "sp.type as sp_type",
 						"sp.flow_range as sp_flow_range",
 						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv",
 						"sp.thv as sp_thv", "sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax",
@@ -662,6 +662,37 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		return paginateRecord(sql, true);
 	}
 	
+	/**
+	 * 根据订单号查询订单检验状态（对外API使用）
+	 * <p>查询指定订单下所有有效产品的检验状态信息，包括检验进度、各阶段检验时间和检验人员</p>
+	 * @param orderId 订单号
+	 * @return 产品检验状态列表，如无数据返回null
+	 */
+	public List<Record> queryOrderStatusByOrderId(String orderId) {
+		String sql = "SELECT " 
+				+ "sp.model, "
+				+ "sp.number, "
+				+ "sp.insp, "
+				+ "sp.accq_time, "
+				+ "sp.funq_time, "
+				+ "sp.appq_time, "
+				+ "sp.allq_time, "
+				+ "u1.name AS accq_name, "
+				+ "u2.name AS funq_name, "
+				+ "u3.name AS appq_name, "
+				+ "u4.name AS allq_name "
+				+ "FROM siargo_product sp "
+				+ "LEFT JOIN siargo_qareport sq ON sp.report_id = sq.id "
+				+ "LEFT JOIN jb_user u1 ON sp.accq_uid = u1.id "
+				+ "LEFT JOIN jb_user u2 ON sp.funq_uid = u2.id "
+				+ "LEFT JOIN jb_user u3 ON sp.appq_uid = u3.id "
+				+ "LEFT JOIN jb_user u4 ON sp.allq_uid = u4.id "
+				+ "WHERE sq.order_id = ? AND sp.vd = 1";
+
+		List<Record> list = Db.find(sql, orderId);
+		return (list == null || list.isEmpty()) ? null : list;
+	}
+
 	/**
 	 * 获取本年度产品类型分布统计数据
 	 * <p>用于生成首页饼图，展示各类产品报告单数量占比</p>

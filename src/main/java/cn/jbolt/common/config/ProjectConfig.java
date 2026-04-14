@@ -135,6 +135,14 @@ public class ProjectConfig extends JBoltProjectConfig {
 				this.scan("cn.jbolt.admin.siargo");
 			}
 		});
+        // Siargo 对外API路由（无登录认证）
+		me.add(new Routes() {
+			@Override
+			public void config() {
+				this.setMappingSuperClass(true);
+				this.scan("cn.jbolt.admin.siargo.api");
+			}
+		});
     }
 
     /**

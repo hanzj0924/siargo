@@ -42,7 +42,7 @@ public class PDFService {
 		}
 		
 		// 初始化数据
-		String proModle = report.getStr("sp_modle");
+		String proModel = report.getStr("sp_model");
 		String prodType = report.getStr("prod_type");
 		String pdfver = report.getStr("sp_pdfver");
 		OutputStream os = null;
@@ -56,7 +56,7 @@ public class PDFService {
         // 生成的文件路径
         String outputFileName = webRootPath + "/"+ pdfsrc + folderVer +"/" + report.getOrderId().toString() + "_" + id.toString() + ".pdf";
         // 获取完整模板路径
-        String inputFileName = getInputFile(webRootPath,prodType,pdfver,proModle);
+        String inputFileName = getInputFile(webRootPath,prodType,pdfver,proModel);
         
         //模板文件夹是否存在
     	File inputPdfFolder = new File(webRootPath + "/reporttemplates" + folderVer);
@@ -153,7 +153,7 @@ public class PDFService {
 	 */
 	private Map<String, String> buildDataMap(Qareport report) {
 		Map<String, String> map = new HashMap<String, String>();
-		String proModle = report.getStr("sp_modle");
+		String proModel = report.getStr("sp_model");
 		
 		// ========== 基础信息映射 ==========
 		map.put("formnum", report.getFormnum().toString());
@@ -161,7 +161,7 @@ public class PDFService {
 		map.put("sp_qi", report.getStr("sp_qi"));
 		map.put("sc_name", report.getStr("sc_name"));
 		map.put("order_id", report.getOrderId().toString());
-		map.put("sp_modle", report.getStr("sp_modle"));
+		map.put("sp_model", report.getStr("sp_model"));
 		
 		// 报告类型：1=产成品，2=退修品
 		if (report.getStr("rep_type").equals("1")) {
@@ -177,15 +177,15 @@ public class PDFService {
 		map.put("accq_name", report.getStr("accq_name"));
 		map.put("accq_time", report.getStr("accq_time"));
 		map.put("accq_email", report.getStr("accq_email") == null? "" : report.getStr("accq_email"));
-		// 功能检验人员
+		// 外观检验人员
 		map.put("funq_name", report.getStr("funq_name"));
 		map.put("funq_time", report.getStr("funq_time"));
 		map.put("funq_email", report.getStr("funq_email") == null? "" : report.getStr("funq_email"));
-		// 批准检验人员
+		// 包装检验人员
 		map.put("appq_name", report.getStr("appq_name"));
 		map.put("appq_time", report.getStr("appq_time"));
 		map.put("appq_email", report.getStr("appq_email") == null? "" : report.getStr("appq_email"));
-		// 最终放行人员
+		// 最终批准人员
 		map.put("allq_name", report.getStr("allq_name"));
 		map.put("allq_time", report.getStr("allq_time"));
 		map.put("allq_email", report.getStr("allq_email") == null? "" : report.getStr("allq_email"));
@@ -194,19 +194,19 @@ public class PDFService {
 		//小流量
 		if (report.getStr("prod_type").equals("2")) {
 			// MF66型号：para2标记为不适用
-			if (proModle.contains("MF66")) {
+			if (proModel.contains("MF66")) {
 				map.put("para2", "/");
 			} else {
 				map.put("para2", "ok");
 			}
 			// MF52型号：para6标记为合格
-			if (proModle.contains("MF52")) {
+			if (proModel.contains("MF52")) {
 				map.put("para6", "ok");
 			} else {
 				map.put("para6", "/");
 			}
 			// MF57型号：para7标记为合格
-			if (proModle.contains("MF57")) {
+			if (proModel.contains("MF57")) {
 				map.put("para7", "ok");
 			} else {
 				map.put("para7", "/");
@@ -218,7 +218,7 @@ public class PDFService {
 			map.put("flow_range", report.getStr("flow_name")  == null? "" : report.getStr("flow_name"));
 			
 			// GD型号（中低压）：整机电流、热头电压、零点内码、故障电平
-			if (proModle.contains("GD")) {
+			if (proModel.contains("GD")) {
 				map.put("cuc", report.getStr("sp_cuc"));
 				map.put("thv", report.getStr("sp_thv"));
 				map.put("zp", report.getStr("sp_zp"));
@@ -226,7 +226,7 @@ public class PDFService {
 				
 			}
 			// FD-E型号（工业表-脉冲型）：整机电流范围、脉冲电压、本地地址
-			if (proModle.contains("FD-E")) {
+			if (proModel.contains("FD-E")) {
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
 				map.put("pv", report.getStr("sp_pv"));
@@ -239,7 +239,7 @@ public class PDFService {
 				
 			}
 			// FD-D型号（工业表-普通型）：无脉冲电压参数，有故障电平和电池电压
-			else if (proModle.contains("FD-D"))  { 
+			else if (proModel.contains("FD-D"))  { 
 				map.put("cucmax", report.getStr("sp_cucmax"));
 				map.put("cucmin", report.getStr("sp_cucmin"));
 				map.put("pv", report.getStr("sp_pv"));
@@ -266,11 +266,11 @@ public class PDFService {
 	 * @param webRootPath Web应用根目录
 	 * @param prodType 产品类型（1=传感器，2=小流量，3=大流量）
 	 * @param pdfver PDF版本号
-	 * @param proModle 产品型号
+	 * @param proModel 产品型号
 	 * @return PDF模板文件的完整路径
 	 * @throws RuntimeException 未找到对应模板时抛出异常
 	 */
-	public String getInputFile(String webRootPath, String prodType, String pdfver , String proModle) {
+	public String getInputFile(String webRootPath, String prodType, String pdfver , String proModel) {
 		// 基础模板目录路径
 		String inputFileName = webRootPath + "/reporttemplates/G" + pdfver;
 		
@@ -292,7 +292,7 @@ public class PDFService {
 			
 			// ========== 小流量产品类型（prod_type=2）==========
 			// MFC/BC型号使用控制器模板
-			if (proModle.contains("MFC") || proModle.contains("BC")) {
+			if (proModel.contains("MFC") || proModel.contains("BC")) {
 				switch(pdfver){
 		         case "2":
 		        	 inputFileName = inputFileName + "/控制器模板.pdf";
@@ -323,7 +323,7 @@ public class PDFService {
 			
 			// ========== 大流量产品类型（prod_type=3）==========
 			// GD型号使用中低压模板
-			if (proModle.contains("GD")) {
+			if (proModel.contains("GD")) {
 				switch(pdfver){
 		         case "2":
 		        	 inputFileName = inputFileName + "/中低压模板.pdf";
@@ -336,7 +336,7 @@ public class PDFService {
 		        	 throw new RuntimeException("未找到中低压对应版号模板，请联系开发者");
 		      }
 				
-			}else if (proModle.contains("FD")) {
+			}else if (proModel.contains("FD")) {
 				// FD型号使用工业表模板
 				switch(pdfver){
 		         case "2":
@@ -349,7 +349,7 @@ public class PDFService {
 		         default:
 		        	 throw new RuntimeException("未找到工业表对应版号模板，请联系开发者");
 		      }
-			}else if (proModle.contains("MF2032") || proModle.contains("MF2025")){
+			}else if (proModel.contains("MF2032") || proModel.contains("MF2025")){
 				switch(pdfver){
 		         case "2":
 		        	 inputFileName = inputFileName + "/小流量计模板.pdf";
@@ -362,7 +362,7 @@ public class PDFService {
 		        	 throw new RuntimeException("未找到工业表对应版号模板，请联系开发者");
 		      }
 			}else{
-				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModle);
+				throw new RuntimeException("未找到对应大流量计模板，请检查型号是否有错(区分大小写)： " + proModel);
 			}
 		}else {
 			throw new RuntimeException("未找到对应模板，请联系开发者");

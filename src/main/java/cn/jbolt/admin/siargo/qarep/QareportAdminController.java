@@ -309,7 +309,7 @@ public class QareportAdminController extends JBoltBaseController {
     	String qisJson = getPara("qis");
     	String qsisJson = getPara("qsis");
     	String dessJson = getPara("dess");
-    	String modlesJson = getPara("modles");
+    	String modelsJson = getPara("models");
     	String numbersJson = getPara("numbers");
 
     	if (!qisJson.matches("^[0-9,]*$")) {
@@ -339,7 +339,7 @@ public class QareportAdminController extends JBoltBaseController {
                     .collect(Collectors.toList());
 		}
 
-    	List<String> modles = Arrays.stream(modlesJson.split(","))
+    	List<String> models = Arrays.stream(modelsJson.split(","))
                 .map(String::trim)
                 .map(String::valueOf)
                 .collect(Collectors.toList());
@@ -392,7 +392,7 @@ public class QareportAdminController extends JBoltBaseController {
 			return;
 		}
 
-    	for (int i = 0; i < modles.size() && i < numbers.size(); i++) {
+    	for (int i = 0; i < models.size() && i < numbers.size(); i++) {
     		
     		if (qsis.get(i) < qis.get(i)) {
     			renderFail("送检数量小于检验数量，重新输入！");
@@ -401,7 +401,7 @@ public class QareportAdminController extends JBoltBaseController {
     		
     		product.setQi(qis.get(i));
     		product.setQsi(qsis.get(i));
-    		product.setModle(modles.get(i));
+    		product.setModel(models.get(i));
     		product.setNumber(numbers.get(i));
     		
     		if (i>= 0 && i < dess.size()) {
@@ -533,7 +533,7 @@ public class QareportAdminController extends JBoltBaseController {
 				if (qareport != null) {
 					String formnum = qareport.getFormnum() != null ? String.valueOf(qareport.getFormnum()) : "";
 					String orderId = qareport.getOrderId() != null ? String.valueOf(qareport.getOrderId()) : "";
-					String modle = product.getModle() != null ? product.getModle() : "";
+					String model = product.getModel() != null ? product.getModel() : "";
 					String number = product.getNumber() != null ? product.getNumber() : "";
 					String customerName = "";
 					if (qareport.getCustId() != null) {
@@ -543,7 +543,7 @@ public class QareportAdminController extends JBoltBaseController {
 						}
 					}
 					String deleteDes = product.getDeleteDes() != null ? product.getDeleteDes() : "";
-					logDesc = " 报告单编号：" + formnum + " ==订单号：" + orderId + " ==型号：" + modle + " ==编号：" + number + " ==客户：" + customerName + " ==删除原因：" + deleteDes;
+					logDesc = " 报告单编号：" + formnum + " ==订单号：" + orderId + " ==型号：" + model + " ==编号：" + number + " ==客户：" + customerName + " ==删除原因：" + deleteDes;
 				}
 				product.delete();
 				// 记录永久删除操作日志

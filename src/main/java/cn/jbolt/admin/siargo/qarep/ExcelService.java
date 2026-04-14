@@ -165,7 +165,7 @@ public class ExcelService {
      * <p>从Excel数据中提取：订单号、型号列表、编号范围、数量统计</p>
      * <p>编号格式：同型号连续编号合并为"起始编号-结束编号"格式</p>
      * @param dataList 从Excel读取的原始数据列表
-     * @return 包含orderId、modles、numbers、qsis的处理结果
+     * @return 包含orderId、models、numbers、qsis的处理结果
      */
     Map<String, Object> processExcelData(List<Map<String, Object>> dataList) {
         Map<String, Object> result = new HashMap<>();
@@ -178,6 +178,12 @@ public class ExcelService {
         // 提取订单号（取第一个数据的订单号）
         String orderId = (String) dataList.get(0).get("订单号");
         result.put("orderId", orderId != null ? orderId : "");
+        
+        // 提取报告单类型（返修表列，对应Excel K列）
+        // YES → repType=2（退修品），NO或其他 → repType=1（产成品）
+        String repTypeStr = (String) dataList.get(0).get("返修表");
+        int repType = (repTypeStr != null && repTypeStr.trim().equalsIgnoreCase("YES")) ? 2 : 1;
+        result.put("repType", repType);
         		
         // ========== 提取型号信息并去重 ==========
         // 使用LinkedHashSet保持原表格顺序，避免型号重复
@@ -190,7 +196,7 @@ public class ExcelService {
         }
         
         String models = String.join(",", modelSet);
-        result.put("modles", models);
+        result.put("models", models);
         		
         // ========== 按型号分组提取编号 ==========
         // 将每个型号对应的编号收集到列表中
