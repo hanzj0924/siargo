@@ -50,5 +50,6 @@ public class JBoltUploadFolder {
 	public static final String IMPORT_EXCEL_TEMP_FOLDER = "exceltemps";
 	public static final String SIARGO_UPLOAD_IMI = "imi" ;
 	public static final String SIARGO_UPLOAD_DMS = "dms";
+	public static final String SIARGO_UPLOAD_EQUIPMENT_CERTIFICATE = "equipment_certificate";
 	
 }

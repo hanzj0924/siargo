@@ -10,7 +10,11 @@ import cn.jbolt.core.enumutil.JBoltEnum;
 public enum ProjectSystemLogTargetType {
 	NONE("NONE",0),
 	CUSTOM_BUSINESS("系统业务定义",10001),
-	QAREPORT("检验报告单",20001)
+	QAREPORT("检验报告单",20001),
+	
+	EQUIPMENT("设备",20002),
+	EQUIPMENTCERTIFICATERECORD("设备证书记录",20004),
+	EQUIPMENTRECORD("设备记录",20003)
 	;
 	private String text;
 	private int value;

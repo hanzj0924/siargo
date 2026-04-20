@@ -1,0 +1,267 @@
+<style>
+.equip-section-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.8rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid #e9ecef;
+}
+.equip-section-header i {
+	font-size: 1.1rem;
+	color: #667eea;
+	margin-right: 0.5rem;
+}
+.equip-section-header span {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #343a40;
+	letter-spacing: 0.5px;
+}
+.equip-section-header::after {
+	content: '';
+	flex: 1;
+	height: 2px;
+	background: linear-gradient(to right, #e9ecef, transparent);
+	margin-left: 0.8rem;
+}
+.equip-form-group {
+	margin-bottom: 0.6rem;
+}
+.equip-form-group label {
+	font-size: 0.85rem;
+	color: #495057;
+}
+.equip-form-group .form-control {
+	font-size: 0.85rem;
+}
+/* 缩小日期选择器面板，避免弹窗出现滚动条 */
+.layui-laydate {
+	transform: scale(0.4);
+	transform-origin: top left;
+}
+</style>
+<form onsubmit="return false;" id="equipmentForm" action="#(action)" method="post">
+<input type="hidden" name="equipment.id" value="#(equipment.id??)" />
+
+<!-- 基本信息 -->
+<div class="equip-section-header">
+	<i class="fa fa-cube"></i>
+	<span>基本信息</span>
+</div>
+<div class="row">
+	<div class="col">
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">设备分类</label>
+			<div class="col input-group">
+				<select class="form-control" data-autoload
+					name="equipment.category"
+					data-url="admin/dictionary/options?key=siargo_equipment_category"
+					data-rule="select" data-tips="请选择设备分类" data-text="=请选择="
+					data-value="" data-value-attr="sn"
+					data-select="#(equipment.category??)">
+				</select>
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">计量器具名称</label>
+			<div class="col">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" data-rule="required" placeholder="请输入计量器具名称"
+					maxlength="100" name="equipment.name" value="#(equipment.name??)" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">规格型号</label>
+			<div class="col">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" placeholder="请输入规格型号"
+					maxlength="100" name="equipment.model" value="#(equipment.model??)" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">责任人</label>
+			<div class="col">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" placeholder="请输入责任人"
+					maxlength="30" name="equipment.responsiblePerson" value="#(equipment.responsiblePerson??)" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">生产厂家</label>
+			<div class="col">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" placeholder="请输入生产厂家"
+					maxlength="100" name="equipment.manufacturer" value="#(equipment.manufacturer??)" />
+			</div>
+		</div>
+	</div>
+	<div class="col">
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">设备状态</label>
+			<div class="col input-group">
+				<select class="form-control" data-autoload
+					name="equipment.status"
+					data-rule="select" data-tips="请选择设备状态"
+					data-text="=请选择=" data-value=""
+					data-options="合格:1,维修中:2,已封存:3,报废:4"
+					data-select="#(equipment.status??)">
+				</select>
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">器具编号</label>
+			<div class="col">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" data-rule="required" placeholder="如 SIAR/ET-CL-001"
+					data-tips="请输入器具编号"
+					maxlength="50" name="equipment.equipmentNo" value="#(equipment.equipmentNo??)" />
+			</div>
+		</div>
+		
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">使用地点</label>
+			<div class="col">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" placeholder="请输入使用地点"
+					maxlength="50" name="equipment.location" value="#(equipment.location??)" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">出厂编号</label>
+			<div class="col">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" placeholder="请输入出厂编号"
+					maxlength="100" name="equipment.factoryNo" value="#(equipment.factoryNo??)" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">购入日期</label>
+			<div class="col">
+				<input type="text" data-date data-type="date" data-fmt="yyyy-MM-dd"
+					readonly="readonly" autocomplete="off" class="form-control"
+					placeholder="请设置购入日期"
+					maxlength="10" name="equipment.purchaseDate"
+					value="#date(equipment.purchaseDate,'yyyy-MM-dd')" />
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+<!-- 检校信息 -->
+<div class="equip-section-header" style="margin-top:0.5rem;">
+	<i class="fa fa-wrench"></i>
+	<span>检校信息</span>
+</div>
+<div class="row">
+	<div class="col">
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">检定方式</label>
+			<div class="col input-group">
+				<select class="form-control" data-autoload
+					name="equipment.inspectionMethod"
+					data-rule="select" data-tips="请选择检定方式"
+					data-text="=请选择=" data-value=""
+					data-options="外检:外检,自校:自校,自检:自检"
+					data-select="#(equipment.inspectionMethod??)">
+				</select>
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">检校周期</label>
+			<div class="col input-group">
+				<input type="text" data-with-clearbtn="true" autocomplete="off"
+					class="form-control" data-rule="pnumber" data-notnull="false"
+					placeholder="请输入周期数值" maxlength="10"
+					name="equipment.inspectionCycle" value="#(equipment.inspectionCycle??)" />
+				<div class="input-group-append">
+					<select class="form-control" data-autoload
+						style="width:80px;"
+						name="equipment.inspectionCycleUnit"
+						data-options="月:月,年:年"
+						data-value=""
+						data-select="#(equipment.inspectionCycleUnit??)">
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col">
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">最近检校日期</label>
+			<div class="col">
+				<input type="text" data-date data-type="date" data-fmt="yyyy-MM-dd"
+					readonly="readonly" autocomplete="off" class="form-control"
+					placeholder="请设置最近检校日期" data-tips="请设置最近检校日期"
+					maxlength="10" name="equipment.lastInspectionDate"
+					value="#date(equipment.lastInspectionDate,'yyyy-MM-dd')" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">下次检校日期</label>
+			<div class="col">
+				<input type="text" data-date data-type="date" data-fmt="yyyy-MM-dd"
+					readonly="readonly" autocomplete="off" class="form-control"
+					placeholder="请设置下次检校日期" data-tips="请设置下次检校日期"
+					maxlength="10" name="equipment.nextInspectionDate"
+					value="#date(equipment.nextInspectionDate,'yyyy-MM-dd')" />
+			</div>
+		</div>
+	</div>
+</div>
+
+
+</form>
+#define js()
+<script>
+
+// 证书图片上传成功回调
+function certUploadHandler(uploader, type, fileInput, result) {
+	console.log('cert upload success:', result);
+}
+
+// ── 页面关闭时清理所有未保存的证书 temp 文件 ─────────────────
+var _certFormSaved = false;
+var _certCleaned = false;
+
+// 表单提交成功后标记，避免清理已入库的文件
+function afterFormSubmit(ret, callback) {
+	_certFormSaved = true;
+	if (callback) callback();
+}
+
+// 清理所有未保存的证书 temp 文件
+function cleanupCertTempFiles() {
+	if (_certFormSaved || _certCleaned) return;
+	var remaining = $.trim($('#certificateImageUrls').val());
+	if (!remaining) return;
+	var paths = remaining.split(',').filter(function(p) { return $.trim(p) !== ''; });
+	if (paths.length === 0) return;
+	_certCleaned = true;
+	var url = actionUrl('/admin/siargo/equipment/certificate/deleteTempFiles?filePaths='
+			+ encodeURIComponent(paths.join(',')));
+	if (navigator.sendBeacon) {
+		navigator.sendBeacon(url);
+	} else {
+		$.ajax({ url: url, async: false });
+	}
+}
+
+// 拦截父窗口 layer 弹窗的关闭按钮（右上角X、右下角关闭）
+$(function() {
+	try {
+		var idx = parent.layer.getFrameIndex(window.name);
+		var $layer = parent.$('#layui-layer' + idx);
+		$layer.find('.layui-layer-close, .layui-layer-btn1')
+			.on('mousedown.certCleanup', cleanupCertTempFiles);
+	} catch(e) {
+		console.warn('无法绑定 layer 关闭事件', e);
+	}
+});
+
+// 兜底：页面卸载时也尝试清理
+$(window).on('beforeunload', cleanupCertTempFiles);
+
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="equipmentForm")
+#end

@@ -1,0 +1,38 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_content" style="padding:10px;">
+#if(certs ?? != null && certs.size() > 0)
+<div class="row">
+#for(cert : certs)
+<div class="col-md-6 col-lg-4" style="margin-bottom:12px;">
+  <div style="border:1px solid #e9ecef;border-radius:6px;padding:8px;background:#fff;">
+    #if(cert.imageUrl ?? != null && cert.imageUrl != '')
+    <img src="#(cert.imageUrl)" alt="证书图片" style="width:100%;border-radius:4px;cursor:pointer;"
+         onclick="layer.photos({photos:{data:[{src:'#(cert.imageUrl)',alt:'证书图片'}]},anim:5});" />
+    #else
+    <div style="height:120px;background:#f8f9fa;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#adb5bd;">
+      <i class="fa fa-image" style="font-size:32px;"></i>
+    </div>
+    #end
+    <div style="margin-top:6px;font-size:12px;color:#868e96;">
+      #if(cert.certificateDate ?? != null)
+      <span><i class="fa fa-calendar"></i> #date(cert.certificateDate)</span>
+      #end
+      #if(cert.remark ?? != null && cert.remark != '')
+      <span style="margin-left:8px;">#(cert.remark)</span>
+      #end
+    </div>
+  </div>
+</div>
+#end
+</div>
+#else
+<div style="text-align:center;padding:30px;color:#adb5bd;">
+  <i class="fa fa-folder-open" style="font-size:36px;display:block;margin-bottom:8px;"></i>
+  暂无证书
+</div>
+#end
+</div>
+</div>
+#end

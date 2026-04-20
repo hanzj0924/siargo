@@ -68,13 +68,22 @@ public class QareportAdminController extends JBoltBaseController {
 	*/
 	public void index() {
 		//批准权限
-		Long approvalRoleId = roleService.findIdByName("批准");
+		Long approvalRoleId = roleService.findIdByName("报告单批准");
 		boolean has = approvalRoleId != null && JBoltUserAuthKit.hasRole(JBoltUserKit.getUserId(), approvalRoleId);
 		
 		set("approval", has);
 		render("index.html");
 	}
 
+	/**
+	 * 获取各流程阶段的数量统计
+	 * URL: /admin/siargo/qarep/getFlowCounts
+	 * @return 各阶段数量统计
+	 */
+	public void getFlowCounts() {
+		renderJsonData(service.getFlowCounts());
+	}
+	
 	/**
 	 * 处理Excel导入
 	 * URL: /admin/siargo/qarep/importExcel
@@ -326,6 +335,7 @@ public class QareportAdminController extends JBoltBaseController {
                 	product.update();
                 }
             }
+            service.clearFlowCountsCache();
             renderJsonSuccess();
 	}
 	
@@ -499,6 +509,7 @@ public class QareportAdminController extends JBoltBaseController {
             	product.update();
             }
         }
+        service.clearFlowCountsCache();
         renderJsonSuccess();
 	}
 
@@ -536,7 +547,11 @@ public class QareportAdminController extends JBoltBaseController {
 		product.set("vd", 1);
 		product.set("delete_time", null);
 		product.set("delete_des", null);
-		renderJsonData(product.update());
+		boolean success = product.update();
+		if (success) {
+			service.clearFlowCountsCache();
+		}
+		renderJsonData(success);
 	}
 
 	/**
@@ -580,6 +595,7 @@ public class QareportAdminController extends JBoltBaseController {
 				service.logDelete(id, JBoltUserKit.getUserId(), logDesc);
 			}
 		}
+		service.clearFlowCountsCache();
 		renderJsonSuccess();
 	}
 

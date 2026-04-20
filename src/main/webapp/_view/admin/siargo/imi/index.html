@@ -13,10 +13,8 @@
 					style="height: 50px;" tooltip data-title="点击查看大图" />	
 </td>
 <td>${data.description}</td>
-<td>${data.uploaderName}</td>
-<td>${data.uploadTime}</td>
-<td>${data.updateName}</td>
-<td>${data.updatedTime}</td>
+<td><span class="badge badge-primary">${data.uploaderName}</span><br/><span class="text-muted small">${data.uploadTime}</span></td>
+<td><span class="badge badge-primary">${data.updateName}</span><br/><span class="text-muted small">${data.updatedTime}</span></td>
 </tr>
 {@/each}
 </textarea>
@@ -82,7 +80,7 @@
 		<table class="jbolt_table jbolt_main_table table-center"
 			data-jbolttable data-height="fill" data-ajax="true"
 			data-url="admin/siargo/imi/datas" data-column-resize="true"
-			data-column-prepend="1:checkbox"
+			data-column-prepend="1:checkbox" data-pagesize="10" 
 			data-conditions-form="imageForm_#(pageId)"
 			data-rowtpl="imageRowtpl_#(pageId)" data-page="imagePage_#(pageId)"
 			data-toolbar="image_toolbar_#(pageId)" data-fixed-columns-left="1,2">
@@ -92,18 +90,14 @@
 					<th data-width="150" data-column="storage_name">到货单号</th>
 					<th data-min-width="150" data-column="supplier_id">供应商</th>
 					<th data-width="150" data-column="file_path">图片</th>
-					<th data-width="150" data-column="description">描述</th>
-					<th data-width="150" data-column="uploader_id">上传者</th>
-					<th data-width="150" data-column="upload_time">上传时间</th>
-					<th data-width="150" data-column="update_id">更新者</th>
-					<th data-width="150" data-column="updated_time">更新时间</th>
+					<th data-width="250" data-column="description">描述</th>
+					<th data-width="150" data-column="uploader_id">上传</th>
+					<th data-width="150" data-column="update_id">更新</th>
 				</tr>
 			</thead>
 			<tbody>
 			</tbody>
 		</table>
-
-
 	</div>
 </div>
 #end #define js()

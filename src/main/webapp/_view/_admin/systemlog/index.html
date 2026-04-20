@@ -16,7 +16,7 @@
 						<div class="input-group-prepend">
 							<input type="text" data-date class="form-control"
 								placeholder="开始日期" maxlength="20" name="startTime"
-								value="#date((startTime?? DateUtil.getNow()),'yyyy-MM-dd')">
+								value="#(startTime??)">
 						</div>
 						<div class="input-group-append">
 							<span class="input-group-text">至</span>
@@ -24,7 +24,7 @@
 						<div class="input-group-append">
 							<input type="text" data-date class="form-control rounded-left-0"
 								placeholder="截止日期" maxlength="20" name="endTime"
-								value="#date((endTime?? DateUtil.getNow()),'yyyy-MM-dd')">
+								value="#(endTime??)">
 						</div>
 					</div>
 					<button type="submit" class="btn btn-outline-secondary">

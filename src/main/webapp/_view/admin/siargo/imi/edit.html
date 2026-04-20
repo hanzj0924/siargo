@@ -68,7 +68,8 @@
 								data-upload-success-handler="uploadHandler"
 								data-value="#realImage(image.filePath??)"
 								data-hiddeninput="imgUploadUrl" data-area="300,300"
-								data-maxsize="102400"></div>
+								data-maxsize="102400"
+								data-remove-url="/admin/siargo/imi/deleteTempFile?filePath=[file]"></div>
 						</div>
 					</fieldset>
 				</div>
@@ -76,21 +77,67 @@
 		</div>
 		#define js()
 		<script>
-	
-		function uploadHandler(uploader, type, fileInput, result) {
-			var data = result.data;
-
-			if ($('input[name="image.storageName"]').length) {
-			    $('input[name="image.storageName"]').val(data.filesName);
-			}
-
-			if ($('input[name="image.filePath"]').length) {
-			    $('input[name="image.filePath"]').val(data.files);
-			}
-
-		}
-
+		// ── 编辑页临时文件管理 ──────────────────────────────────
+		var _editFormSubmitted = false;
+		var _editCleaned = false;
+		var _originalFilePath = '';
 		
+		$(function() {
+		    _originalFilePath = $.trim($('#imgUploadUrl').val());
+		});
+		
+		// 上传成功回调
+		function uploadHandler(uploader, type, fileInput, result) {
+		    var data = result.data;
+		
+		    if ($('input[name="image.storageName"]').length) {
+		        $('input[name="image.storageName"]').val(data.filesName);
+		    }
+		
+		    if ($('input[name="image.filePath"]').length) {
+		        $('input[name="image.filePath"]').val(data.files);
+		    }
+		}
+		
+		// 清理 temp 目录中的残留文件
+		function cleanupTempFiles() {
+		    if (_editCleaned) return;
+		    var current = $.trim($('#imgUploadUrl').val());
+		    if (!current || current === _originalFilePath) return;
+		    // 只清理 temp 目录的文件
+		    if (current.indexOf('/temp/') === -1) return;
+		    _editCleaned = true;
+		    var url = actionUrl('/admin/siargo/imi/deleteTempFiles?filePaths='
+		            + encodeURIComponent(current));
+		    if (navigator.sendBeacon) {
+		        navigator.sendBeacon(url);
+		    } else {
+		        $.ajax({ url: url, async: false });
+		    }
+		}
+		
+		// 表单提交后回调（JBolt _formjs.html 框架会调用此函数）
+		// 无论后端返回成功/失败，都清理 temp
+		function afterFormSubmit(ret, callback) {
+		    cleanupTempFiles();
+		    _editFormSubmitted = true;
+		    if (callback) callback();
+		}
+		
+		// 拦截父窗口 layer 弹窗的关闭按钮（右上角X、右下角关闭）
+		$(function() {
+		    try {
+		        var idx = parent.layer.getFrameIndex(window.name);
+		        var $layer = parent.$('#layui-layer' + idx);
+		        $layer.find('.layui-layer-close, .layui-layer-btn1')
+		            .on('mousedown.editCleanup', cleanupTempFiles);
+		    } catch(e) {
+		        console.warn('无法绑定 layer 关闭事件', e);
+		    }
+		});
+		
+		// 兜底：页面卸载时也尝试清理
+		$(window).on('beforeunload', cleanupTempFiles);
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="imageUpdateForm")
 		#end

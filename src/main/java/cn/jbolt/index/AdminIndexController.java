@@ -173,6 +173,56 @@ public class AdminIndexController extends JBoltBaseController {
 		String username=get("username");
 		//创建登录日志
 		LoginLog log=JBoltLoginLogUtil.createLoginLog(getRequest());
+		// 修正 Windows 11 检测（UA Freeze 策略导致 Win11 UA 与 Win10 相同，通过 Client Hints 修正）
+		String osName = log.getOsName();
+		if (osName != null && osName.contains("Windows 10")) {
+			// 优先从前端 JS 主动传递的参数获取，其次从浏览器自动发送的请求头获取
+			String platformVersion = getPara("_platformVersion");
+			if (platformVersion == null || platformVersion.isEmpty()) {
+				platformVersion = getRequest().getHeader("Sec-CH-UA-Platform-Version");
+			}
+			if (platformVersion != null && !platformVersion.isEmpty()) {
+				try {
+					String cleanVersion = platformVersion.replace("\"", "").trim();
+					String majorStr = cleanVersion.contains(".") ? cleanVersion.substring(0, cleanVersion.indexOf(".")) : cleanVersion;
+					int majorVersion = Integer.parseInt(majorStr);
+					if (majorVersion >= 13) {
+						// 根据主版本号映射 Windows 11 的发行版本
+						String release;
+						switch (majorVersion) {
+							case 13: release = "22H2"; break;
+							case 14: release = "23H2"; break;
+							case 15:
+							case 16:
+							case 17:
+							case 18: release = "24H2"; break;
+							case 19: release = "25H2"; break;
+							default: release = ""; break;
+						}
+						// 获取 CPU 架构信息
+						String architecture = getPara("_architecture");
+						String bitness = getPara("_bitness");
+						String arch = "";
+						if (bitness != null && !bitness.isEmpty()) {
+							arch = " x" + bitness; // 如 " x64"
+						} else if (architecture != null && !architecture.isEmpty()) {
+							arch = " " + architecture; // 如 " x86"
+						}
+						// 组装完整的 OS 名称：Windows 11 [发行版本] [架构]
+						StringBuilder osBuilder = new StringBuilder("Windows 11");
+						if (!release.isEmpty()) {
+							osBuilder.append(" ").append(release);
+						}
+						if (!arch.isEmpty()) {
+							osBuilder.append(arch);
+						}
+						log.setOsName(osBuilder.toString());
+					}
+				} catch (NumberFormatException e) {
+					// 解析失败，保持原值不影响登录流程
+				}
+			}
+		}
 		log.setUsername(username);
 
 		//根据全局配置判断是否需要验证码 默认需要

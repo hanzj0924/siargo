@@ -1,0 +1,188 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
+
+<!-- 设备概要信息 -->
+<div class="jbolt_page_content jb_vbody" style="padding-top:0;">
+<div style="padding:0 15px 10px;">
+	<div class="equip-summary-card">
+		<div class="row" style="margin:0;">
+			<div class="col-md-3" style="padding:6px 12px;">
+				<span class="equip-summary-label">器具编号</span>
+				<div class="equip-summary-value">#(equipment.equipmentNo ??)</div>
+			</div>
+			<div class="col-md-3" style="padding:6px 12px;">
+				<span class="equip-summary-label">名称</span>
+				<div class="equip-summary-value">#(equipment.name ??)</div>
+			</div>
+			<div class="col-md-3" style="padding:6px 12px;">
+				<span class="equip-summary-label">规格型号</span>
+				<div class="equip-summary-value">#(equipment.model ??)</div>
+			</div>
+			<div class="col-md-3" style="padding:6px 12px;">
+				<span class="equip-summary-label">状态</span>
+				<div>
+				#if(equipment.status ?? == 1)
+					<span class="badge badge-success equip-status-badge"><i class="fa fa-check-circle"></i> 合格</span>
+				#elseif(equipment.status ?? == 2)
+					<span class="badge badge-warning equip-status-badge"><i class="fa fa-wrench"></i> 维修中</span>
+				#elseif(equipment.status ?? == 3)
+					<span class="badge badge-secondary equip-status-badge"><i class="fa fa-archive"></i> 已封存</span>
+				#elseif(equipment.status ?? == 4)
+					<span class="badge badge-danger equip-status-badge"><i class="fa fa-times-circle"></i> 报废</span>
+				#else
+					<span class="badge badge-secondary equip-status-badge">未知</span>
+				#end
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 记录表格行模板 -->
+<script type="text/template" id="recordRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+	<td>${pageNumber,pageSize,index | rownum}</td>
+	<td>
+		{@if data.record_type_name != null}
+			<span class="badge badge-info">${data.record_type_name}</span>
+		{@else if data.record_type != null}
+			<span class="badge badge-secondary">${data.record_type}</span>
+		{@else}
+			<span class="text-muted">-</span>
+		{@/if}
+	</td>
+	<td>${data.record_date ? data.record_date.substring(0, 10) : '-'}</td>
+	<td style="text-align:left">${data.description ?? '-'}</td>
+	<td>${data.user_name ?? '-'}</td>
+	<td>
+		{@if data.creator_name}
+			<span class="badge badge-info">${data.creator_name}</span>
+			<small class="text-muted d-block">${data.creator_time ? data.creator_time.substring(0, 16) : ''}</small>
+		{@else}
+			<span class="text-muted">-</span>
+		{@/if}
+	</td>
+	<td>
+		{@if data.audit_status==2}
+			<span class="badge badge-success">${data.auditor_name}</span>
+			<small class="text-muted d-block">${data.auditor_time ? data.auditor_time.substring(0, 16) : ''}</small>
+		{@else if data.audit_status==1}
+			<span class="badge badge-danger">待审核</span>
+		{@else}
+			<span class="text-muted">未审核</span>
+		{@/if}
+	</td>
+	<td>
+		{@if data.cert_image_url}
+			<img data-photobtn src="${data.cert_image_url}" class="m-1 hand"
+				style="height: 50px;" tooltip data-title="点击查看大图" />
+		{@else}
+			<span class="text-muted">-</span>
+		{@/if}
+	</td>
+</tr>
+{@/each}
+</script>
+
+<!-- 工具条 -->
+<div class="jbolt_table_toolbar" id="record_toolbar_#(pageId)">
+	<div class="btn-group" role="group" aria-label="btn-group">
+		<button data-openpage="dialog" data-area="800,470"
+			data-handler="jboltTablePageToFirst" data-title="新增"
+			data-url="admin/siargo/equipment/record/add?equipmentId=#(equipmentId)"
+			class="btn btn-outline-primary">
+			<i class="fa fa-plus"></i> 新增
+		</button>
+		<button data-openpage="dialog" data-area="800,470"
+			data-handler="refreshJBoltTable"
+			data-check-handler="jboltTableGetCheckedId"
+			data-url="admin/siargo/equipment/record/edit/"
+			class="btn btn-outline-info">
+			<i class="fa fa-edit"></i> 编辑
+		</button>
+		<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+			data-check-handler="jboltTableGetCheckedIds"
+			data-url="admin/siargo/equipment/record/deleteByIds?ids="
+			data-confirm="确定删除选中数据？" class="btn btn-outline-danger">
+			<i class="fa fa-trash"></i> 删除
+		</button>
+		<button onclick="jboltTableRefresh(this)" class="btn btn-outline-secondary btn-sm">
+			<i class="fa fa-refresh"></i> 刷新
+		</button>
+	</div>
+	<div class="clearfix"></div>
+</div>
+
+<!-- 记录列表表格 -->
+<table class="jbolt_table jbolt_main_table table_striped thead_font_normal table-center"
+	data-jbolttable
+	data-pagesize="5"
+	id="record_mgrtable_#(pageId)"
+	data-ajax="true"
+	data-url="admin/siargo/equipment/recordDatas?equipmentId=#(equipmentId)"
+	data-column-resize="true"
+	data-column-prepend="1:checkbox"
+	data-rowtpl="recordRowtpl_#(pageId)"
+	data-page="recordPage_#(pageId)"
+	data-toolbar="record_toolbar_#(pageId)"
+	data-fixed-columns-left="1,2,3"
+	data-height="fill_box"
+	>
+	<thead class="fw-normal">
+		<tr>
+			<th data-width="50">序号</th>
+			<th data-width="80" data-column="record_type">记录类型</th>
+			<th data-width="100" data-column="record_date">事件日期</th>
+			<th data-min-width="180" data-column="description">事件描述</th>
+			<th data-width="80" data-column="user_id">处理人</th>
+			<th data-width="120" data-column="creator_id">编制</th>
+			<th data-width="120" data-column="auditor_id">审核</th>
+			<th data-width="80">证书</th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+
+</div>
+</div>
+#end
+
+#define js()
+<style>
+.equip-summary-card {
+	background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+	border-radius: 8px;
+	padding: 16px 20px;
+	border: 1px solid #e3e6e8;
+	border-left: 3px solid #4e73df;
+	box-shadow: 0 2px 8px rgba(78,115,223,0.08);
+}
+.equip-summary-label {
+	color: #868e96;
+	font-size: 11px;
+	letter-spacing: 0.5px;
+	font-weight: 500;
+	display: block;
+	margin-bottom: 3px;
+}
+.equip-summary-value {
+	font-weight: 600;
+	color: #2d3748;
+	font-size: 14px;
+}
+.equip-status-badge {
+	border-radius: 12px;
+	padding: 4px 10px !important;
+	font-size: 12px;
+	font-weight: 500;
+}
+</style>
+<script type="text/javascript">
+$(function(){
+});
+</script>
+#end

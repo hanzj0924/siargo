@@ -34,7 +34,7 @@
 						<label class="col-sm-3 col-form-label">订单号</label>
 						<div class="col">
 							<input type="number" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="pint" placeholder="请输入订单号"
+								class="form-control" data-rule="pint" placeholder="=请填写="
 								maxlength="10" name="qareport.order_id"
 								value="#(qapro.order_id ??)" />
 						</div>
@@ -44,7 +44,7 @@
 						<div class="col input-group">
 							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/siargo/qarep/getCustName" name="qareport.cust_id"
-								data-text="=请选择/搜索=" data-value-attr="id" data-rule="select"
+								data-text="=请选择=" data-value-attr="id" data-rule="select"
 								data-text-attr="name" data-select="#(qapro.cust_id ??)"
 								data-select-type="select2" id="custSelect">
 							</select>
@@ -84,7 +84,7 @@
 						<div class="col input-group">
 							<select class="form-control " data-autoload data-refresh="true"
 								data-url="admin/dictionary/options?key=siargo_flow_range"
-								name="product.flow_range" data-text="=请选择/搜索="
+								name="product.flow_range" data-text="（选填）..."
 								data-value-attr="sn" data-select="#(qapro.sp_flow_range ??)"
 								data-notnull="false" data-rule="select"
 								data-select-type="select2">
@@ -97,7 +97,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="siargo_tofixed_4"
-								class="form-control" placeholder="3.2505-3.3495V" maxlength="6"
+								class="form-control" placeholder="（选填）3.2505-3.3495V" maxlength="6"
 								name="product.bv" value="#(qapro.sp_bv??)" />
 						</div>
 					</div>
@@ -106,7 +106,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="siargo_tofixed_2"
-								class="form-control" placeholder="≧2.7V" maxlength="5"
+								class="form-control" placeholder="（选填）≧2.7V" maxlength="5"
 								name="product.fl" value="#(qapro.sp_fl??)" />
 						</div>
 					</div>
@@ -117,7 +117,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="siargo_tofixed_2"
-								class="form-control" placeholder="≤0.5mA/10~20mA" maxlength="5"
+								class="form-control" placeholder="（选填）≤0.5mA/10~20mA" maxlength="5"
 								name="product.cucmax" value="#(qapro.sp_cucmax??)" />
 						</div>
 					</div>
@@ -126,7 +126,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="siargo_tofixed_2"
-								class="form-control" placeholder="≤0.5mA/10~30mA" maxlength="5"
+								class="form-control" placeholder="（选填）≤0.5mA/10~30mA" maxlength="5"
 								name="product.cucmin" value="#(qapro.sp_cucmin??)" />
 						</div>
 					</div>
@@ -135,7 +135,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="siargo_tofixed_2"
-								class="form-control" placeholder="6-24mA" maxlength="5" 
+								class="form-control" placeholder="（选填）6-24mA" maxlength="5" 
 								name="product.cuc" value="#(qapro.sp_cuc??)" />
 						</div>
 					</div>
@@ -144,7 +144,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="siargo_tofixed_3"
-								class="form-control" placeholder="≧2.7V/≧4.75V" maxlength="6"
+								class="form-control" placeholder="（选填）≧2.7V/≧4.75V" maxlength="6"
 								name="product.pv" value="#(qapro.sp_pv ??)" />
 						</div>
 					</div>
@@ -153,7 +153,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="pint"
-								class="form-control" placeholder="≤50" maxlength="2"
+								class="form-control" placeholder="（选填）≤50" maxlength="2"
 								name="product.la" value="#(qapro.sp_la ??)" />
 						</div>
 					</div>
@@ -162,7 +162,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="pint"
-								class="form-control" placeholder="≤1690" maxlength="4"
+								class="form-control" placeholder="（选填）≤1690" maxlength="4"
 								name="product.thv" value="#(qapro.sp_thv??)" />
 						</div>
 					</div>
@@ -171,7 +171,7 @@
 						<div class="col">
 							<input type="text" data-with-clearbtn="true" autocomplete="off"
 								data-notnull="false"  data-rule="pint"
-								class="form-control" placeholder="≤30" maxlength="2"
+								class="form-control" placeholder="（选填）≤30" maxlength="2"
 								name="product.zp" value="#(qapro.sp_zp??)" />
 						</div>
 					</div>

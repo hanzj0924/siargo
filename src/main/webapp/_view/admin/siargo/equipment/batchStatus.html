@@ -1,0 +1,25 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_content p-3">
+	<form onsubmit="return false;" id="batchStatusForm" action="admin/siargo/equipment/batchStatus" method="post">
+		<input type="hidden" name="ids" value="#(ids ??)" />
+		<div class="form-group row">
+			<label class="col-sm-4 col-form-label">设备状态</label>
+			<div class="col-sm-8">
+				<select class="form-control" data-autoload name="status"
+					data-rule="select" data-tips="请选择设备状态"
+					data-text="=请选择=" data-value=""
+					data-options="合格:1,维修中:2,已封存:3,报废:4">
+				</select>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+#end
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="batchStatusForm")
+#end

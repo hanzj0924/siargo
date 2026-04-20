@@ -258,6 +258,8 @@ public class ProjectConfig extends JBoltProjectConfig {
     public void configInterceptors(Interceptors me) {
         me.addGlobalActionInterceptor(new SessionInViewInterceptor());
         me.addGlobalActionInterceptor(new JBoltOnlineUserGlobalInterceptor());
+        // 增强版异常处理全局拦截器（用于增强renderFail的日志记录）
+        me.addGlobalActionInterceptor(new cn.jbolt.common.interceptor.EnhancedExceptionGlobalInterceptor());
         //二开配置扩展全局拦截器
         ExtendProjectConfig.configInterceptor(me);
     }

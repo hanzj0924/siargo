@@ -283,6 +283,9 @@ public class ImageService extends JBoltBaseService<Image> {
 		String rollbackOldPath = null;
 		String rollbackNewPath = null;
 
+		// 缓存前端传入的临时文件路径，用于末尾兜底清理
+		String tempNewFilePath = fileChanged ? image.getFilePath() : null;
+
 		if (fileChanged) {
 			// ── 场景A：上传了新文件 ──────────────────────────────────────────
 			File newFile = new File(webRootPath + image.getFilePath());
@@ -296,6 +299,7 @@ public class ImageService extends JBoltBaseService<Image> {
 					"SELECT * FROM siargo_image WHERE md5_hash = ? AND status = ? AND id != ?",
 					newMd5, STATUS_NORMAL, image.getId());
 			if (existImage != null) {
+				newFile.delete();
 				return fail("图片 " + existImage.getStorageName() + " 已经存在！");
 			}
 
@@ -408,6 +412,16 @@ public class ImageService extends JBoltBaseService<Image> {
 			}
 			return fail("数据更新失败");
 		}
+
+		// 兜底清理：确保 temp 目录中不残留文件
+		if (fileChanged && StrKit.notBlank(tempNewFilePath)) {
+			File tempFile = new File(webRootPath + tempNewFilePath);
+			String tempAbsPath = tempFile.getAbsolutePath().replace("\\", "/");
+			if (tempAbsPath.contains("/temp/") && tempFile.exists()) {
+				tempFile.delete();
+			}
+		}
+
 		return ret(success);
 	}
 
@@ -554,7 +568,8 @@ public class ImageService extends JBoltBaseService<Image> {
 
 	@Override
 	protected String afterDelete(Image image, Kv kv) {
-		// addDeleteSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getName());
+		// 记录永久删除操作日志
+		addDeleteSystemLog(image.getId(), JBoltUserKit.getUserId(), image.getStorageName());
 		return null;
 	}
 

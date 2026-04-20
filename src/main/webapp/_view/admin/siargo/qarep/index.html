@@ -143,7 +143,7 @@
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
+			${data.spDes.replace(/\\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
 	{@/if}
@@ -161,7 +161,7 @@
 	{@if data.funqName==null}
 		<span class="text-muted">无</span>
 	{@else}
-		<span class="badge badge-info">${data.funqName}</span>
+		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
 	{@/if}
 </td>
@@ -189,7 +189,7 @@
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
+			${data.spDes.replace(/\\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
 	{@/if}
@@ -207,7 +207,7 @@
 	{@if data.funqName==null}
 		<span class="text-muted">无</span>
 	{@else}
-		<span class="badge badge-info">${data.funqName}</span>
+		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
 	{@/if}
 </td>
@@ -215,7 +215,7 @@
 	{@if data.appqName==null}
 		<span class="text-muted">无</span>
 	{@else}
-		<span class="badge badge-info">${data.appqName}</span>
+		<span class="badge badge-warning">${data.appqName}</span>
 		<small class="text-muted d-block">${data.appqTime}</small>
 	{@/if}
 </td>
@@ -242,7 +242,7 @@
 	{@else}
 		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
             data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
+			${data.spDes.replace(/\\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
         	<i class="fa fa-eye"></i> 查看
 		</button>
 	{@/if}
@@ -270,12 +270,12 @@
 	{@if data.funqName==null}
 		<span class="text-muted">无</span>
 	{@else}
-		<span class="badge badge-info">${data.funqName}</span>
+		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
 	{@/if}
 </td>
 <td>
-	<span class="badge badge-info">${data.appqName}</span>
+	<span class="badge badge-warning">${data.appqName}</span>
 	<small class="text-muted d-block">${data.appqTime}</small>
 </td>
 <td>
@@ -344,35 +344,6 @@
 
 <!-- 精度待检 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="noq_toolbar_#(pageId)">
-	<!-- 审批流程进度条 -->
-	<div class="approval-flow-bar mb-2">
-		<div class="approval-flow-steps">
-			<div class="approval-step active">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-linechart"></i></div>
-				<div class="approval-step-label"><strong>精度待检</strong></div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="fa fa-eye"></i></div>
-				<div class="approval-step-label">外观待检</div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-gift"></i></div>
-				<div class="approval-step-label">包装待检</div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
-				<div class="approval-step-label">待批准</div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
-				<div class="approval-step-label">已完成</div>
-			</div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
@@ -419,7 +390,7 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
 					data-confirm="确定精度检验合格？" 
-					class="btn btn-success "><i class="fa fa-check"></i> 精度合格
+					class="btn flow-action-btn flow-action-accq"><i class="fa fa-check-circle"></i> 精度合格 <i class="fa fa-chevron-right"></i>
 				</button>
 			</div>
 		</div>
@@ -429,35 +400,6 @@
 
 <!-- 精度合格 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
-	<!-- 审批流程进度条 -->
-	<div class="approval-flow-bar mb-2">
-		<div class="approval-flow-steps">
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">精度检验</div>
-			</div>
-			<div class="approval-step-line active"></div>
-			<div class="approval-step active">
-				<div class="approval-step-icon"><i class="fa fa-eye"></i></div>
-				<div class="approval-step-label"><strong>外观待检</strong></div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-gift"></i></div>
-				<div class="approval-step-label">包装待检</div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
-				<div class="approval-step-label">待批准</div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
-				<div class="approval-step-label">已完成</div>
-			</div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
@@ -495,7 +437,7 @@
 				data-check-handler="jboltTableGetCheckedIds" 
 				data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
 				data-confirm="确定外观检验合格？" 
-				class="btn btn-success "><i class="fa fa-check"></i> 外观合格
+				class="btn flow-action-btn flow-action-funq"><i class="fa fa-check-circle"></i> 外观合格 <i class="fa fa-chevron-right"></i>
 			</button>
 		</div>
 	</div>
@@ -504,35 +446,6 @@
 
 <!-- 包装待检 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="funq_toolbar_#(pageId)">
-	<!-- 审批流程进度条 -->
-	<div class="approval-flow-bar mb-2">
-		<div class="approval-flow-steps">
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">精度检验</div>
-			</div>
-			<div class="approval-step-line done"></div>
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">外观检验</div>
-			</div>
-			<div class="approval-step-line active"></div>
-			<div class="approval-step active">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-gift"></i></div>
-				<div class="approval-step-label"><strong>包装待检</strong></div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
-				<div class="approval-step-label">待批准</div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
-				<div class="approval-step-label">已完成</div>
-			</div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
@@ -571,7 +484,7 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
 					data-confirm="确定包装检验合格？" 
-					class="btn btn-success "><i class="fa fa-check"></i> 包装合格
+					class="btn flow-action-btn flow-action-appq"><i class="fa fa-check-circle"></i> 包装合格 <i class="fa fa-chevron-right"></i>
 			</button>
 		</div>
 	</div>
@@ -580,35 +493,6 @@
 
 <!-- 待批准 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="appq_toolbar_#(pageId)">
-	<!-- 审批流程进度条 -->
-	<div class="approval-flow-bar mb-2">
-		<div class="approval-flow-steps">
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">精度检验</div>
-			</div>
-			<div class="approval-step-line done"></div>
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">外观检验</div>
-			</div>
-			<div class="approval-step-line done"></div>
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">包装检验</div>
-			</div>
-			<div class="approval-step-line active"></div>
-			<div class="approval-step active">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-edit-fill"></i></div>
-				<div class="approval-step-label"><strong>待批准</strong></div>
-			</div>
-			<div class="approval-step-line"></div>
-			<div class="approval-step">
-				<div class="approval-step-icon"><i class="jbicon2 jbi-check"></i></div>
-				<div class="approval-step-label">已完成</div>
-			</div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
@@ -648,7 +532,7 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
 					data-confirm="确定批准选中数据？" 
-					class="btn btn-danger"><i class="fa fa-check"></i> 批准
+					class="btn flow-action-btn flow-action-allq"><i class="fa fa-check-circle"></i> 批准 <i class="fa fa-chevron-right"></i>
 				</button>
 			#end
 		</div>
@@ -658,35 +542,6 @@
 
 <!-- 已完成 工具条 toolbar -->
 <div class="jbolt_table_toolbar" id="allq_toolbar_#(pageId)">
-	<!-- 审批流程进度条 -->
-	<div class="approval-flow-bar mb-2">
-		<div class="approval-flow-steps">
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">精度检验</div>
-			</div>
-			<div class="approval-step-line done"></div>
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">外观检验</div>
-			</div>
-			<div class="approval-step-line done"></div>
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">包装检验</div>
-			</div>
-			<div class="approval-step-line done"></div>
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label">待批准</div>
-			</div>
-			<div class="approval-step-line done"></div>
-			<div class="approval-step done">
-				<div class="approval-step-icon"><i class="fa fa-check"></i></div>
-				<div class="approval-step-label"><strong>已完成</strong></div>
-			</div>
-		</div>
-	</div>
 	<div class="row">
 		<div class="col-sm-3 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
@@ -724,13 +579,13 @@
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="/admin/siargo/qarep/toPdf?ids=" 
 					data-confirm="确定生成选中数据？" 
-					class="btn btn-outline-primary " ><i class="jbicon2 jbi-file-pdf-fill "></i>生成PDF
+					class="btn flow-action-btn flow-action-pdf"><i class="jbicon2 jbi-file-pdf-fill"></i> 生成PDF
 				</button>
 				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-url="/admin/siargo/qarep/toPdfs" 
 					data-confirm="确定生成上月PDF？" 
 					data-success-time="15000"
-					class="btn btn-outline-danger " ><i class="fa fa-download"></i>一键导出上个月PDF
+					class="btn flow-action-btn flow-action-pdf-batch"><i class="fa fa-download"></i> 一键导出上个月PDF
 				</button>
 			</div>
 		</div>
@@ -738,7 +593,7 @@
 	<div class="clearfix"></div>
 </div>
 
-<div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)">
+<div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)" id="qarepTabView">
 	<div class="jbolt_tab_links jb_vheader">
 		<a class="jbolt_tab_link"  href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
 		<a class="jbolt_tab_link"  href="#noq_tabcontent"><i class="jbicon2 jbi-linechart"></i> 精度待检</a>
@@ -746,6 +601,46 @@
 		<a class="jbolt_tab_link"  href="#funq_tabcontent"><i class="jbicon2 jbi-gift"></i> 包装待检</a>
 		<a class="jbolt_tab_link"  href="#appq_tabcontent"><i class="jbicon2 jbi-edit-fill"></i> 待批准</a>
 		<a class="jbolt_tab_link"  href="#allq_tabcontent"><i class="jbicon jb-xiangmushouxubeian"></i> 已完成</a>
+	</div>
+	<!-- 流程状态导航 - 步骤条样式 -->
+	<div class="flow-stepper-nav">
+		<!-- 左侧汇总徽章 -->
+		<div class="flow-summary-badge active" onclick="switchTabByIndex(0)">
+			<i class="jbicon jb-liebiao3"></i>
+			<span class="flow-summary-text">全部报告单</span>
+		</div>
+		<!-- 右侧步骤条 -->
+		<div class="flow-stepper">
+			<div class="flow-stepper-item" data-color="#17a2b8" onclick="switchTabByIndex(1)">
+				<div class="flow-node"><i class="jbicon2 jbi-linechart"></i></div>
+				<div class="flow-node-label">精度待检</div>
+				<div class="flow-node-count" id="count-noq">-</div>
+			</div>
+			<div class="flow-connector"></div>
+			<div class="flow-stepper-item" data-color="#5b8def" onclick="switchTabByIndex(2)">
+				<div class="flow-node"><i class="fa fa-eye"></i></div>
+				<div class="flow-node-label">外观待检</div>
+				<div class="flow-node-count" id="count-accq">-</div>
+			</div>
+			<div class="flow-connector"></div>
+			<div class="flow-stepper-item" data-color="#f5a962" onclick="switchTabByIndex(3)">
+				<div class="flow-node"><i class="jbicon2 jbi-gift"></i></div>
+				<div class="flow-node-label">包装待检</div>
+				<div class="flow-node-count" id="count-funq">-</div>
+			</div>
+			<div class="flow-connector"></div>
+			<div class="flow-stepper-item" data-color="#e86a78" onclick="switchTabByIndex(4)">
+				<div class="flow-node"><i class="jbicon2 jbi-edit-fill"></i></div>
+				<div class="flow-node-label">待批准</div>
+				<div class="flow-node-count" id="count-appq">-</div>
+			</div>
+			<div class="flow-connector"></div>
+			<div class="flow-stepper-item" data-color="#28a745" onclick="switchTabByIndex(5)">
+				<div class="flow-node"><i class="jbicon jb-xiangmushouxubeian"></i></div>
+				<div class="flow-node-label">已完成</div>
+				<div class="flow-node-count" id="count-allq">-</div>
+			</div>
+		</div>
 	</div>
 	<div class="jbolt_tab_contents jb_vbody">
 		<div class="jbolt_tab_content"  id="allreport_tabcontent">
@@ -774,11 +669,11 @@
 						<th data-width="80" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="220" data-column="sp_model">产品型号</th>
+						<th data-min-width="200" data-column="sp_model">产品型号</th>
 						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="100" data-column="insp">检验进度</th>
-						<th data-width="150" data-column="create_time">创建时间</th>
+						<th data-width="130" data-column="create_time">创建时间</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -815,7 +710,7 @@
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
 						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="150" data-column="create_time">创建时间</th>
+						<th data-width="130" data-column="create_time">创建时间</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -850,9 +745,9 @@
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
-						<th data-width="200" data-column="sp_number">产品编号</th>
+						<th data-width="210" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="170" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="accq_uid">精度检验</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -887,10 +782,10 @@
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
-						<th data-width="200" data-column="sp_number">产品编号</th>
+						<th data-width="210" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="170" data-column="accq_uid">精度检验</th>
-						<th data-width="170" data-column="funq_uid">外观检验</th>
+						<th data-width="130" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="funq_uid">外观检验</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -913,6 +808,7 @@
 				data-page="appqPage_#(pageId)"
 				data-toolbar="appq_toolbar_#(pageId)"
 				data-fixed-columns-left="1,2,3,4"
+				data-fixed-columns-right="-1,-2,-3"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -924,12 +820,12 @@
 						<th data-width="80" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="220" data-column="sp_model">产品型号</th>
+						<th data-min-width="250" data-column="sp_model">产品型号</th>
 						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="170" data-column="accq_uid">精度检验</th>
-						<th data-width="170" data-column="funq_uid">外观检验</th>
-						<th data-width="170" data-column="appq_uid">包装检验</th>
+						<th data-width="130" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="funq_uid">外观检验</th>
+						<th data-width="130" data-column="appq_uid">包装检验</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -952,7 +848,7 @@
 				data-page="allqPage_#(pageId)"
 				data-toolbar="allq_toolbar_#(pageId)"
 				data-fixed-columns-left="1,2,3,4" 
-				data-fixed-columns-right="-1"
+				data-fixed-columns-right="-1,-2,-3,-4"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -965,13 +861,13 @@
 						<th data-width="120" data-column="pdfstr">查看PDF</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="200" data-column="sp_model">产品型号</th>
+						<th data-min-width="250" data-column="sp_model">产品型号</th>
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="170" data-column="accq_uid">精度检验</th>
-						<th data-width="170" data-column="funq_uid">外观检验</th>
-						<th data-width="170" data-column="appq_uid">包装检验</th>
-						<th data-width="170" data-column="allq_uid">批准</th>
+						<th data-width="130" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="funq_uid">外观检验</th>
+						<th data-width="130" data-column="appq_uid">包装检验</th>
+						<th data-width="130" data-column="allq_uid">批准</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -986,73 +882,280 @@
 
 #define js()
 <style>
-/* ===== 审批流程进度条 ===== */
-.approval-flow-bar {
-	padding: 10px 16px 6px 16px;
-	background: #f8f9fa;
-	border-radius: 6px;
-	border: 1px solid #e9ecef;
+/* ===== 流程步骤条导航 ===== */
+#qarepTabView > .jbolt_tab_links { display: none !important; }
+
+.flow-stepper-nav {
+	display: flex;
+	align-items: flex-start;
+	gap: 20px;
+	padding: 5px 15px;
+	background: #fff;
+	border-bottom: 1px solid #e9ecef;
 }
-.approval-flow-steps {
+
+/* 左侧汇总徽章 */
+.flow-summary-badge {
 	display: flex;
 	align-items: center;
+	gap: 8px;
+	padding: 10px 18px;
+	background: #f8f9fa;
+	border-radius: 24px;
+	cursor: pointer;
+	transition: all 0.25s;
+	border: 2px solid #e9ecef;
+	white-space: nowrap;
+	flex-shrink: 0;
 }
-.approval-step {
+.flow-summary-badge:hover {
+	background: #e9ecef;
+	border-color: #dee2e6;
+}
+.flow-summary-badge.active {
+	background: #fff;
+	border-color: #6c757d;
+	box-shadow: 0 2px 8px rgba(108,117,125,0.2);
+}
+.flow-summary-badge i {
+	font-size: 16px;
+	color: #6c757d;
+}
+.flow-summary-text {
+	font-size: 13px;
+	font-weight: 500;
+	color: #495057;
+}
+.flow-summary-count {
+	font-size: 18px;
+	font-weight: 700;
+	color: #6c757d;
+	margin-left: 4px;
+}
+
+/* 右侧步骤条 */
+.flow-stepper {
+	display: flex;
+	align-items: flex-start;
+	flex: 1;
+	padding-top: 2px;
+}
+
+/* 步骤项 */
+.flow-stepper-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	cursor: pointer;
 	flex-shrink: 0;
+	min-width: 72px;
 }
-.approval-step-icon {
-	width: 30px;
-	height: 30px;
+
+/* 圆形节点 */
+.flow-node {
+	width: 42px;
+	height: 42px;
 	border-radius: 50%;
-	background: #dee2e6;
-	color: #adb5bd;
+	background: #fff;
+	border: 2.5px solid #dee2e6;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 13px;
-	border: 2px solid #dee2e6;
+	font-size: 16px;
+	color: #adb5bd;
+	transition: all 0.3s;
+	position: relative;
 }
-.approval-step.done .approval-step-icon {
-	background: #28a745;
-	border-color: #28a745;
-	color: #fff;
+.flow-stepper-item:hover .flow-node {
+	transform: scale(1.1);
 }
-.approval-step.active .approval-step-icon {
-	background: #fff;
-	border-color: #fd7e14;
-	color: #fd7e14;
-}
-.approval-step-label {
-	margin-top: 4px;
-	font-size: 12px;
-	color: #6c757d;
+
+/* 节点下方标签 */
+.flow-node-label {
+	font-size: 11px;
+	color: #868e96;
+	margin-top: 6px;
+	text-align: center;
+	transition: all 0.25s;
 	white-space: nowrap;
 }
-.approval-step.done .approval-step-label {
-	color: #28a745;
-}
-.approval-step.active .approval-step-label {
-	color: #fd7e14;
+
+/* 节点数量 */
+.flow-node-count {
+	font-size: 13px;
 	font-weight: 600;
+	color: #adb5bd;
+	margin-top: 2px;
+	transition: all 0.25s;
 }
-.approval-step-line {
+
+/* 连接线 */
+.flow-connector {
 	flex: 1;
-	height: 2px;
-	background: #dee2e6;
-	margin-bottom: 18px;
-	min-width: 30px;
+	height: 3px;
+	background: #bbb;
+	margin-top: 20px;
+	min-width: 20px;
+	position: relative;
 }
-.approval-step-line.done {
-	background: #28a745;
+.flow-connector::after {
+	content: '';
+	position: absolute;
+	right: -5px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border-top: 7px solid transparent;
+	border-bottom: 7px solid transparent;
+	border-left: 9px solid #bbb;
 }
-.approval-step-line.active {
-	background: linear-gradient(to right, #28a745, #fd7e14);
+
+/* ===== 各步骤主题色 ===== */
+/* 精度待检 */
+.flow-stepper-item:nth-of-type(1) .flow-node { border-color: #17a2b8; color: #17a2b8; }
+.flow-stepper-item:nth-of-type(1).active .flow-node { background: #17a2b8; color: #fff; box-shadow: 0 0 0 4px rgba(23,162,184,0.2); }
+.flow-stepper-item:nth-of-type(1).active .flow-node-count { color: #17a2b8; }
+
+/* 外观待检 */
+.flow-stepper-item:nth-of-type(3) .flow-node { border-color: #5b8def; color: #5b8def; }
+.flow-stepper-item:nth-of-type(3).active .flow-node { background: #5b8def; color: #fff; box-shadow: 0 0 0 4px rgba(91,141,239,0.2); }
+.flow-stepper-item:nth-of-type(3).active .flow-node-count { color: #5b8def; }
+
+/* 包装待检 */
+.flow-stepper-item:nth-of-type(5) .flow-node { border-color: #f5a962; color: #f5a962; }
+.flow-stepper-item:nth-of-type(5).active .flow-node { background: #f5a962; color: #fff; box-shadow: 0 0 0 4px rgba(245,169,98,0.2); }
+.flow-stepper-item:nth-of-type(5).active .flow-node-count { color: #d39e00; }
+
+/* 待批准 */
+.flow-stepper-item:nth-of-type(7) .flow-node { border-color: #e86a78; color: #e86a78; }
+.flow-stepper-item:nth-of-type(7).active .flow-node { background: #e86a78; color: #fff; box-shadow: 0 0 0 4px rgba(232,106,120,0.2); }
+.flow-stepper-item:nth-of-type(7).active .flow-node-count { color: #e86a78; }
+
+/* 已完成 */
+.flow-stepper-item:nth-of-type(9) .flow-node { border-color: #28a745; color: #28a745; }
+.flow-stepper-item:nth-of-type(9).active .flow-node { background: #28a745; color: #fff; box-shadow: 0 0 0 4px rgba(40,167,69,0.2); }
+.flow-stepper-item:nth-of-type(9).active .flow-node-count { color: #28a745; }
+
+/* 选中态通用 */
+.flow-stepper-item.active .flow-node {
+	transform: scale(1.15);
 }
+.flow-stepper-item.active .flow-node-label {
+	font-weight: 600;
+	color: #495057;
+}
+.flow-stepper-item.active .flow-node-count {
+	font-size: 15px;
+	font-weight: 700;
+}
+
+/* ===== 流程推进按钮 ===== */
+.flow-action-btn {
+	border-radius: 20px;
+	padding: 6px 18px;
+	font-weight: 500;
+	font-size: 13px;
+	color: #fff;
+	border: none;
+	transition: all 0.25s;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.flow-action-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+	color: #fff;
+}
+.flow-action-btn .fa-chevron-right {
+	font-size: 11px;
+	margin-left: 4px;
+}
+.flow-action-btn .fa-check-circle {
+	margin-right: 2px;
+}
+/* 精度合格 */
+.flow-action-accq {
+	background: linear-gradient(135deg, #1fc8e0, #0e8a9e);
+}
+.flow-action-accq:hover { background: linear-gradient(135deg, #18b5cc, #0a7a8e); }
+/* 外观合格 */
+.flow-action-funq {
+	background: linear-gradient(135deg, #4a90f5, #1a60cc);
+}
+.flow-action-funq:hover { background: linear-gradient(135deg, #3a80e5, #1050bc); }
+/* 外观检验badge柔蓝色 */
+.badge-primary { background-color: #5b8def !important; }
+/* 包装合格 */
+.flow-action-appq {
+	background: linear-gradient(135deg, #ffa030, #d07010);
+}
+.flow-action-appq:hover { background: linear-gradient(135deg, #ef9020, #c06000); }
+/* 批准 */
+.flow-action-allq {
+	background: linear-gradient(135deg, #ef4050, #c02030);
+}
+.flow-action-allq:hover { background: linear-gradient(135deg, #df3040, #b01020); }
+/* 生成PDF */
+.flow-action-pdf {
+	background: #6f42c1;
+}
+.flow-action-pdf:hover { background: #5a32a3; }
+/* 批量导出PDF */
+.flow-action-pdf-batch {
+	background: #e83e8c;
+}
+.flow-action-pdf-batch:hover { background: #d63384; }
+
+/* 包装检验badge浅黄色背景 */
+.badge-warning { background-color: #f5a962 !important; color: #fff !important; }
+/* 批准badge柔红色 */
+.badge-danger { background-color: #e86a78 !important; }
 </style>
 <script type="text/javascript">
+// 切换Tab
+function switchTabByIndex(index) {
+	// 更新导航active状态
+	$('.flow-summary-badge').removeClass('active');
+	$('.flow-stepper-item').removeClass('active');
+	if (index === 0) {
+		$('.flow-summary-badge').addClass('active');
+	} else {
+		$('.flow-stepper-item').eq(index - 1).addClass('active');
+	}
+	// 切换底层JBolt Tab
+	$('#qarepTabView .jbolt_tab_link').eq(index).trigger('click');
+}
+
+// 获取各流程阶段数量
+function loadFlowCounts() {
+	$.ajax({
+		url: 'admin/siargo/qarep/getFlowCounts',
+		type: 'get',
+		success: function(res) {
+			if (res.state == 'ok') {
+				$('#count-all').text(res.data.all || 0);
+				$('#count-noq').text(res.data.noq || 0);
+				$('#count-accq').text(res.data.accq || 0);
+				$('#count-funq').text(res.data.funq || 0);
+				$('#count-appq').text(res.data.appq || 0);
+				$('#count-allq').text(res.data.allq || 0);
+			}
+		}
+	});
+}
+
+// 页面加载时获取数量
+$(function() {
+	setTimeout(function() {
+		loadFlowCounts();
+	}, 200);
+	// 初始化步骤条active状态
+	var activeIndex = $('#qarepTabView').data('active-index') || 0;
+	switchTabByIndex(activeIndex);
+	// 定时刷新数量（每30秒）
+	setInterval(loadFlowCounts, 30000);
+});
+
 //点击时处理订单备注格式
 $(document).on('click', '[data-dialogbtn]', function() {
     var $btn = $(this);

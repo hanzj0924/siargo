@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.Ret;
@@ -33,9 +34,82 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	/** 检验报告单数据访问对象 */
 	private final Qareport dao = new Qareport().dao();
 
+	// ========== 流程统计缓存（30分钟有效期） ==========
+	private static final long FLOW_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
+	private volatile Map<String, Long> cachedFlowCounts;
+	private volatile long flowCountsCacheTimestamp;
+	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
+
 	@Override
 	protected Qareport dao() {
 		return dao;
+	}
+	
+	/**
+	 * 获取各流程阶段的数量统计（带30分钟缓存）
+	 * @return Map包含各阶段数量：all(全部), noq(精度待检), accq(外观待检), funq(包装待检), appq(待批准), allq(已完成)
+	 */
+	public java.util.Map<String, Long> getFlowCounts() {
+		// 先检查缓存是否有效（无锁快速路径）
+		if (cachedFlowCounts != null && (System.currentTimeMillis() - flowCountsCacheTimestamp) < FLOW_COUNTS_CACHE_TTL) {
+			return cachedFlowCounts;
+		}
+		// 缓存失效，加锁查询并刷新缓存
+		flowCountsCacheLock.lock();
+		try {
+			// 双重检查：防止多线程同时穿透
+			if (cachedFlowCounts != null && (System.currentTimeMillis() - flowCountsCacheTimestamp) < FLOW_COUNTS_CACHE_TTL) {
+				return cachedFlowCounts;
+			}
+			Map<String, Long> counts = loadFlowCountsFromDb();
+			cachedFlowCounts = counts;
+			flowCountsCacheTimestamp = System.currentTimeMillis();
+			return counts;
+		} finally {
+			flowCountsCacheLock.unlock();
+		}
+	}
+
+	/**
+	 * 主动清除流程统计缓存（数据变更时调用）
+	 */
+	public void clearFlowCountsCache() {
+		cachedFlowCounts = null;
+		flowCountsCacheTimestamp = 0;
+	}
+
+	/**
+	 * 从数据库加载各流程阶段的数量统计
+	 * <p>合并为单条SQL：一次性统计全部数量及insp=1~5各分类数量，避免多次查询导致的性能损耗</p>
+	 */
+	private Map<String, Long> loadFlowCountsFromDb() {
+		Map<String, Long> counts = new java.util.HashMap<>();
+		// 合并为单条SQL：使用SUM(CASE WHEN)一次性统计所有指标
+		String sql = "SELECT"
+				+ "  COUNT(*) AS all_count"
+				+ ", SUM(CASE WHEN insp = 1 THEN 1 ELSE 0 END) AS insp_1"
+				+ ", SUM(CASE WHEN insp = 2 THEN 1 ELSE 0 END) AS insp_2"
+				+ ", SUM(CASE WHEN insp = 3 THEN 1 ELSE 0 END) AS insp_3"
+				+ ", SUM(CASE WHEN insp = 4 THEN 1 ELSE 0 END) AS insp_4"
+				+ ", SUM(CASE WHEN insp = 5 THEN 1 ELSE 0 END) AS insp_5"
+				+ " FROM siargo_product sp WHERE sp.vd = 1";
+		Record row = Db.findFirst(sql);
+		if (row != null) {
+			counts.put("all", row.getLong("all_count") != null ? row.getLong("all_count") : 0L);
+			counts.put("noq", row.getLong("insp_1") != null ? row.getLong("insp_1") : 0L);
+			counts.put("accq", row.getLong("insp_2") != null ? row.getLong("insp_2") : 0L);
+			counts.put("funq", row.getLong("insp_3") != null ? row.getLong("insp_3") : 0L);
+			counts.put("appq", row.getLong("insp_4") != null ? row.getLong("insp_4") : 0L);
+			counts.put("allq", row.getLong("insp_5") != null ? row.getLong("insp_5") : 0L);
+		} else {
+			counts.put("all", 0L);
+			counts.put("noq", 0L);
+			counts.put("accq", 0L);
+			counts.put("funq", 0L);
+			counts.put("appq", 0L);
+			counts.put("allq", 0L);
+		}
+		return counts;
 	}
 	
 	/**
@@ -239,6 +313,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			prodsuccess = product.save();
 		}
 
+		if (prodsuccess) {
+			clearFlowCountsCache();
+		}
 		return ret(prodsuccess);
 	}
 
@@ -351,7 +428,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			product.set("allq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		}
 
-		return ret(product.update());
+		boolean prodSuccess = product.update();
+		if (prodSuccess) {
+			clearFlowCountsCache();
+		}
+		return ret(prodSuccess);
 	}
 	
 
@@ -415,7 +496,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		product.set("delete_time",DateUtil.getDateString(DateUtil.YMDHMS));
 		product.set("vd", 0);
 
-		return ret(product.save());
+		Ret result = ret(product.save());
+		if (result.isOk()) {
+			clearFlowCountsCache();
+		}
+		return result;
 	}
 
 	/**

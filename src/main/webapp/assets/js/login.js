@@ -359,6 +359,27 @@ function md5(string){
 	return (md5_WordToHex(a)+md5_WordToHex(b)+md5_WordToHex(c)+md5_WordToHex(d)).toLowerCase();
 }
 var _submit_ing=false;
+/**
+ * 尝试获取平台版本信息（用于区分 Windows 10/11，同时获取 CPU 架构信息）
+ * @param callback 回调函数，参数为 {platformVersion, architecture, bitness}（获取失败时均为空字符串）
+ */
+function getPlatformVersion(callback){
+	if(navigator.userAgentData && navigator.userAgentData.getHighEntropyValues){
+		navigator.userAgentData.getHighEntropyValues(["platformVersion", "architecture", "bitness"])
+			.then(function(ua){
+				callback({
+					platformVersion: ua.platformVersion || "",
+					architecture: ua.architecture || "",
+					bitness: ua.bitness || ""
+				});
+			})
+			.catch(function(){
+				callback({platformVersion: "", architecture: "", bitness: ""});
+			});
+	}else{
+		callback({platformVersion: "", architecture: "", bitness: ""});
+	}
+}
 //提交登录
 function submitForm(form){
 		if(_submit_ing){
@@ -373,21 +394,34 @@ function submitForm(form){
 			var left = getRandomString(2);
 			var right = getRandomString(3);
 			pwdInput.val(left+md5(passwordValue)+right);
-			Ajax.post("admin/login",sf.serialize(),function(res){
-				LayerMsgBox.success("登录成功",300,function(){
+			// 先获取平台版本及架构信息，再提交登录请求
+			getPlatformVersion(function(uaInfo){
+				var formData = sf.serialize();
+				if(uaInfo.platformVersion){
+					formData += "&_platformVersion=" + encodeURIComponent(uaInfo.platformVersion);
+				}
+				if(uaInfo.architecture){
+					formData += "&_architecture=" + encodeURIComponent(uaInfo.architecture);
+				}
+				if(uaInfo.bitness){
+					formData += "&_bitness=" + encodeURIComponent(uaInfo.bitness);
+				}
+				Ajax.post("admin/login",formData,function(res){
+					LayerMsgBox.success("登录成功",300,function(){
+						_submit_ing=false;
+						var base=$("base").attr("href");
+						if(base.charAt(base.length-1)=='/'){
+							window.location.href=base+"admin";
+						}else{
+							window.location.href=base+"/admin";
+						}
+					});
+				},function(){
 					_submit_ing=false;
-					var base=$("base").attr("href");
-					if(base.charAt(base.length-1)=='/'){
-						window.location.href=base+"admin";
-					}else{
-						window.location.href=base+"/admin";
-					}
+					pwdInput.val("");
+					changeCaptcha();
 				});
-			},function(){
-				_submit_ing=false;
-				pwdInput.val("");
-				changeCaptcha();
-			})
+			});
 		}else{
 			_submit_ing=false;
 		}
