@@ -1,0 +1,214 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)" data-require-plugin="morris,splitjs" data-init-handler="initApiCallLogChart_#(pageId)">
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-auto">
+	<h1>API调用记录</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="apiCallLogForm_#(pageId)" onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off" class="form-control" placeholder="输入API路径搜索" name="keywords" value="" />
+		<select class="form-control ml-2" name="responseStatus">
+			<option value="">全部状态</option>
+			<option value="ok">成功</option>
+			<option value="fail">失败</option>
+		</select>
+		<input type="text" autocomplete="off" class="form-control ml-2" name="startDate" data-date data-type="date" data-fmt="yyyy-MM-dd" placeholder="开始日期" style="width:130px;" />
+		<span class="ml-1 mr-1">-</span>
+		<input type="text" autocomplete="off" class="form-control" name="endDate" data-date data-type="date" data-fmt="yyyy-MM-dd" placeholder="结束日期" style="width:130px;" />
+		<button type="submit" class="btn btn-outline-secondary ml-2"><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-auto"></div>
+	</div>
+</div>
+
+<div class="jbolt_page_content jb_vbody">
+
+<!-- JBoltTable 数据模板 -->
+<textarea class="jb_tpl_box" id="apiCallLogRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" style="text-align:center;">
+<td >${pageNumber,pageSize,index | rownum}</td>
+<td style="text-align:left;">${data.api_path}</td>
+<td >${data.api_method}</td>
+<td >${data.order_id?? '-'}</td>
+<td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${data.order_ids ?? '-'}">${data.order_ids ?? '-'}</td>
+<td >${data.request_ip}</td>
+<td >{@if data.response_status == 'ok'}<span class="badge badge-success">成功</span>{@else}<span class="badge badge-danger">失败</span>{@/if}</td>
+<td >${data.response_code}</td>
+<td >${data.response_msg}</td>
+<td >${data.cost_time}</td>
+<td >${data.create_time}</td>
+</tr>
+{@/each}
+</textarea>
+
+<div class="jbolttable_master_slave_box">
+	<div class="split" id="apicalllog_master_#(pageId)">
+		<!-- 统计卡片区 -->
+		<div class="row mb-2 px-2 pt-2">
+			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+				<div class="card border-0 mb-2 jb-dashboard-card hand">
+					<div class="card-body p-4 text-nowrap">
+						<span class="float-left"><i class="fa fa-bar-chart j_font_30 j_left_fa text-primary rounded"></i></span>
+						<div class="text-right">
+							<span class="d-block j_font_24">#(callStats.total ?? 0)</span>
+							<span class="d-block">总调用次数</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+				<div class="card border-0 mb-2 jb-dashboard-card hand">
+					<div class="card-body p-4 text-nowrap">
+						<span class="float-left"><i class="fa fa-check-circle j_font_30 j_left_fa text-success rounded"></i></span>
+						<div class="text-right">
+							<span class="d-block j_font_24">#(callStats.successCount ?? 0)</span>
+							<span class="d-block">成功次数</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+				<div class="card border-0 mb-2 jb-dashboard-card hand">
+					<div class="card-body p-4 text-nowrap">
+						<span class="float-left"><i class="fa fa-times-circle j_font_30 j_left_fa text-danger rounded"></i></span>
+						<div class="text-right">
+							<span class="d-block j_font_24">#(callStats.failCount ?? 0)</span>
+							<span class="d-block">失败次数</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
+				<div class="card border-0 mb-2 jb-dashboard-card hand">
+					<div class="card-body p-4 text-nowrap">
+						<span class="float-left"><i class="fa fa-clock-o j_font_30 j_left_fa text-info rounded"></i></span>
+						<div class="text-right">
+							<span class="d-block j_font_24">#(callStats.avgCostTime ?? 0)<small>ms</small></span>
+							<span class="d-block">平均耗时</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Morris.Bar 图表区 -->
+		<div class="row px-2">
+			<div class="col-lg-12 px-2">
+				<div class="card border-0 mb-2">
+					<div class="card-body" style="height:250px">
+						<h5 class="card-title"><span>最近30天API调用量</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
+						<div id="morris-bar_#(pageId)" style="height:85%;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="split" id="apicalllog_slave_#(pageId)">
+<!-- 工具条 -->
+		<div class="jbolt_table_toolbar" id="apiCallLog_toolbar_#(pageId)">
+			<div class="btn-group" role="group">
+				<button data-openpage="dialog" data-area="800,500" data-handler="refreshJBoltTable" data-title="调用详情" data-check-handler="jboltTableGetCheckedId" data-url="admin/siargo/apicalllog/detail/" class="btn btn-outline-info btn-sm"><i class="fa fa-eye"></i> 查看详情</button>
+				<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+		<!-- JBoltTable -->
+		<table class="jbolt_table thead_font_normal"
+		data-jbolttable
+		data-height="fill_box"
+		data-ajax="true"
+		data-url="admin/siargo/apicalllog/datas"
+		data-column-resize="true"
+		data-column-prepend="1:checkbox"
+		data-conditions-form="apiCallLogForm_#(pageId)"
+		data-rowtpl="apiCallLogRowtpl_#(pageId)"
+		data-page="apiCallLogPage_#(pageId)"
+		data-toolbar="apiCallLog_toolbar_#(pageId)"
+		data-pagesize="100"
+		data-fixed-columns-left="1,2,3"
+		>
+		<thead class="fw-normal">
+		<tr style="text-align:center;">
+			<th data-width="60" data-align="center">序号</th>
+			<th data-min-width="100" data-column="api_path">API路径</th>
+			<th data-width="80" data-column="api_method" data-align="center">方法</th>
+			<th data-width="80" data-column="order_id" data-align="center">订单号</th>
+			<th data-width="400" data-column="order_ids">批量订单号</th>
+			<th data-width="100" data-column="request_ip" data-align="center">请求IP</th>
+			<th data-width="100" data-column="response_status" data-align="center">状态</th>
+			<th data-width="80" data-column="response_code">状态码</th>
+			<th data-width="150" data-column="response_msg" data-align="center">响应消息</th>
+			<th data-width="90" data-column="cost_time" data-align="center">耗时(ms)</th>
+			<th data-width="160" data-column="create_time" data-align="center">调用时间</th>
+		</tr>
+		</thead>
+		<tbody>
+		</tbody>
+		</table>
+	</div>
+</div>
+
+</div>
+</div>
+#end
+#define js()
+<script type="text/javascript">
+$(function(){
+	Split(['#apicalllog_master_#(pageId)', '#apicalllog_slave_#(pageId)'],{
+		direction:'vertical',
+		sizes:[40,60],
+		minSize:[200,300],
+		gutterSize:10
+	});
+});
+function initApiCallLogChart_#(pageId)(){
+	$("#morris-bar_#(pageId)").empty();
+	var barData = #json(dailyStats);
+	if(barData && barData.length > 0){
+		// 动态计算合理的 Y 轴最大值
+		var maxValue = 0;
+		var ykeys = ['success_count', 'fail_count'];
+		for(var i = 0; i < barData.length; i++){
+			for(var j = 0; j < ykeys.length; j++){
+				var val = barData[i][ykeys[j]] || 0;
+				if(val > maxValue) maxValue = val;
+			}
+		}
+		// 动态选择取整粒度
+		var step;
+		if (maxValue <= 50) {
+		    step = 10;
+		} else if (maxValue <= 200) {
+		    step = 50;
+		} else if (maxValue <= 1000) {
+		    step = 100;
+		} else {
+		    step = 1000;
+		}
+		var ymax = Math.ceil(maxValue / step) * step;
+		if (ymax < 10) { ymax = 10; }
+
+		Morris.Bar({
+			element: 'morris-bar_#(pageId)',
+			data: barData,
+			xkey: 'day',
+			ykeys: ['success_count', 'fail_count'],
+			labels: ['成功', '失败'],
+			gridLineColor: '#eee',
+			barSizeRatio: 0.6,
+			resize: true,
+			hideHover: 'auto',
+			barColors: ['#10c888', '#f43f5d'],
+			stacked: false,
+			ymax: ymax,
+			yLabelFormat: function(y) { return Math.round(y).toString(); }
+		});
+	}
+}
+</script>
+#end

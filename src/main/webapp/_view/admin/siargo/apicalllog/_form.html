@@ -1,0 +1,83 @@
+<form onsubmit="return false;" id="apiCallLogForm" action="#(action)" method="post">
+<input type="hidden" name="apiCallLog.id" value="#(apiCallLog.id??)" />
+<div class="row">
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">API路径(如:/api/siargo/order/status)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入API路径(如:/api/siargo/order/status)" maxlength="255" name="apiCallLog.apiPath" value="#(apiCallLog.apiPath??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">请求方法(GET/POST)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入请求方法(GET/POST)" maxlength="10" name="apiCallLog.apiMethod" value="#(apiCallLog.apiMethod??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">订单号(单个查询)</label>
+		<div class="col">
+		<input type="text" autocomplete="off" data-autocomplete data-url="demo/userAutocomplete"  data-hiddeninput="orderId_hidden" class="form-control"  placeholder="请选择订单号(单个查询)"  data-tips="请选择订单号(单个查询)"  maxlength="200"/>
+		<input type="hidden" autocomplete="off" id="orderId_hidden"  placeholder="请选择订单号(单个查询)"   data-tips="请选择订单号(单个查询)"  name="apiCallLog.orderId" value="#(apiCallLog.orderId??)" maxLength="100"/>
+		</div>
+	</div>
+    <div class="form-group row"
+    	data-checkbox
+    	
+    	data-value="#(apiCallLog.orderIds??)"
+    	data-name="apiCallLog.orderIds"
+    	data-default="options_first"
+    	data-url="替换为自己的数据源地址"
+    	data-label="订单号列表(批量查询,逗号分隔)"
+    	data-width="col-sm-2,col"
+    	data-inline="true"
+    	data-item-min-width="auto"
+    	></div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">请求IP地址</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入请求IP地址" maxlength="50" name="apiCallLog.requestIp" value="#(apiCallLog.requestIp??)"/>
+		</div>
+	</div>
+	</div>
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">客户端User-Agent</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入客户端User-Agent" maxlength="500" name="apiCallLog.userAgent" value="#(apiCallLog.userAgent??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">响应状态(ok/fail)</label>
+		<div class="col input-group">
+			<select class="form-control"  data-autoload data-url="替换为自己的数据源地址"  name="apiCallLog.responseStatus" data-refresh="true"  data-rule="select"  data-tips="请选择响应状态(ok/fail)" data-text="=请选择="  data-value="" data-select="#( apiCallLog.responseStatus ??)"></select>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">响应业务状态码(200/1001/1002等)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="pnumber"  data-notnull="false" placeholder="请输入响应业务状态码(200/1001/1002等)"  maxlength="10" name="apiCallLog.responseCode" value="#(apiCallLog.responseCode??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">响应消息</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入响应消息" maxlength="255" name="apiCallLog.responseMsg" value="#(apiCallLog.responseMsg??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">请求耗时(毫秒)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入请求耗时(毫秒)" maxlength="19" name="apiCallLog.costTime" value="#(apiCallLog.costTime??)"/>
+		</div>
+	</div>
+	</div>
+</div>
+
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="apiCallLogForm")
+#end
+

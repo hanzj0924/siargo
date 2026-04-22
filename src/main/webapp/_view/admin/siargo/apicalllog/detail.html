@@ -1,0 +1,78 @@
+<div class="container-fluid p-3">
+<div class="row">
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">API路径</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.apiPath ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">请求方法</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.apiMethod ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">订单号</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.orderId ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">批量订单号</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.orderIds ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">请求IP</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.requestIp ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">User-Agent</label>
+		<div class="col">
+			<p class="form-control-plaintext" style="word-break:break-all;">#(apiCallLog.userAgent ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">响应状态</label>
+		<div class="col">
+			<p class="form-control-plaintext">
+				#if(apiCallLog.responseStatus == "ok")
+				<span class="badge badge-success">成功</span>
+				#else
+				<span class="badge badge-danger">失败</span>
+				#end
+			</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">状态码</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.responseCode ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">响应消息</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.responseMsg ??)</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">耗时</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.costTime ??)ms</p>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label font-weight-bold">调用时间</label>
+		<div class="col">
+			<p class="form-control-plaintext">#(apiCallLog.createTime ??)</p>
+		</div>
+	</div>
+	</div>
+</div>
+</div>
