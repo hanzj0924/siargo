@@ -2,8 +2,11 @@ package cn.jbolt.admin.siargo.equipment;
 
 import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
+import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.permission.CheckPermission;
+import cn.jbolt.core.permission.JBoltUserAuthKit;
 import cn.jbolt._admin.permission.PermissionKey;
+import cn.jbolt._admin.role.RoleService;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
 import com.jfinal.aop.Before;
@@ -26,11 +29,23 @@ public class EquipmentAdminController extends JBoltBaseController {
 
 	@Inject
 	private EquipmentService service;
+	/** 角色服务 */
+	@Inject
+	private RoleService roleService;
 	
    /**
 	* 首页
 	*/
 	public void index() {
+		Long userId = JBoltUserKit.getUserId();
+		
+		//管理员权限
+		Long adminRoleId = roleService.findIdBySn(1);
+		boolean isAdmin = adminRoleId != null && JBoltUserAuthKit.hasRole(userId, adminRoleId);
+		
+		//审核权限
+		Long auditRoleId = roleService.findIdBySn(221);
+		set("audit", isAdmin || (auditRoleId != null && JBoltUserAuthKit.hasRole(userId, auditRoleId)));
 		render("index.html");
 	}
   	
@@ -61,7 +76,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 	*/
 	@Before(Tx.class)
 	public void batchInspection() {
-		renderJson(service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate")));
+		renderJson(service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status")));
 	}
 	
 	/**

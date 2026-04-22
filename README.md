@@ -8,9 +8,25 @@ https://www.siargo.com.cn
 
 ## 更新日志
 
+### v2.2.0 (2026-04-22)
+- feat(apicalllog): 修复日期控件data-datepicker改为data-date，修复JBoltTable布局与分页（添加jb_vflex/jb_vbody/fill_box），优化Morris柱状图Y轴自适应取整与整数显示
+- feat(pdf): PDFService增加safeStr空值安全处理，防止报告生成时字段空指针异常
+- feat(equipment): 设备记录事件日期升级为datetime格式(yyyy-MM-dd HH:mm:ss)，描述列增加省略溢出样式，一键审核按钮增加权限控制(#if(audit))，隐藏Tab导航栏，调整弹窗尺寸
+- feat(qarep): 质检报告精度/外观/包装检验按钮优化权限控制(#if(accuracy/appearance/packaging))
+- 新增API管理模块
+
+### v2.1.0 (2026-04-21)
+- feat(equipment): 批量编制增加设备状态选择功能
+- feat(equipment): 设备记录事件日期升级为日期时间格式（精确到秒）
+- feat(permission): 设备管理和质量报告操作按钮增加权限控制
+- fix(pdf): PDF报告生成增加空值安全处理（safeStr）
+- style(equipment): 优化批量操作弹窗尺寸和记录描述列样式
+- style(equipment): 隐藏设备分类Tab标签栏
+
 ### v2.0.0 (2026-04-20)
 - 质量报告检验流程UI重构：使用流程步骤条替代审批进度条，新增流程操作按钮样式，添加Tab切换和流程数量统计
 - 登录页增加 Client Hints API 获取平台版本及架构信息，精准识别操作系统
+- 新增设备管理模块
 
 ### v1.9.1 (2026-04-17)
 - 优化质量报告审批流程 UI，改为现代化步骤条导航

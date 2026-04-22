@@ -22,5 +22,13 @@ public class RoleService extends JBoltRoleService {
 		Role role = findFirst(Okv.by("name", name.trim()));
 		return role == null ? null : role.getId();
 	}
+
+	/**
+	 * 根据角色SN编码获取角色ID
+	 */
+	public Long findIdBySn(int sn) {
+		Role role = findFirst(Okv.by("sn", sn));
+		return role == null ? null : role.getId();
+	}
 	
 }

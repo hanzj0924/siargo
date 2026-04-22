@@ -136,8 +136,14 @@ public class EquipmentRecordService extends JBoltBaseService<EquipmentRecord> {
 		} catch (Exception e) {
 			LOG.error("级联删除证书记录异常，recordId=" + equipmentRecord.getId(), e);
 		}
-		// 记录永久删除操作日志
-		addDeleteSystemLog(equipmentRecord.getId(), JBoltUserKit.getUserId(), equipmentRecord.getDescription());
+		// 查询关联的器具名称
+		String equipmentName = Db.queryStr("SELECT name FROM siargo_equipment WHERE id = ?", equipmentRecord.getEquipmentId());
+		if (equipmentName == null) { equipmentName = ""; }
+		// 记录永久删除操作日志（器具名称 + 记录日期 + 事件描述）
+		Date recordDate = equipmentRecord.getRecordDate();
+		String recordDateStr = recordDate != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(recordDate) : "";
+		addDeleteSystemLog(equipmentRecord.getId(), JBoltUserKit.getUserId(),
+				equipmentName + " " + recordDateStr + " " + equipmentRecord.getDescription());
 		return null;
 	}
 

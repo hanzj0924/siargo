@@ -7,21 +7,28 @@ import cn.jbolt.core.service.base.JBoltBaseService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Db;
+import cn.jbolt.common.model.Todo;
 import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
 import cn.jbolt.core.kit.JBoltUserKit;
+import cn.jbolt.core.model.User;
 import cn.jbolt.siargo.model.Product;
 import cn.jbolt.siargo.model.Qareport;
+import cn.jbolt._admin.role.RoleService;
+import cn.jbolt._admin.user.UserService;
+import net.dreamlu.event.EventKit;
 
 /**
  * 检验报告单管理 Service
@@ -33,6 +40,14 @@ import cn.jbolt.siargo.model.Qareport;
 public class QareportService extends JBoltBaseService<Qareport> {
 	/** 检验报告单数据访问对象 */
 	private final Qareport dao = new Qareport().dao();
+
+	/** 用户服务（用于查询拥有指定角色的用户列表） */
+	@Inject
+	private UserService userService;
+
+	/** 角色服务（用于根据 SN 查询角色ID） */
+	@Inject
+	private RoleService roleService;
 
 	// ========== 流程统计缓存（30分钟有效期） ==========
 	private static final long FLOW_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
@@ -315,6 +330,8 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 		if (prodsuccess) {
 			clearFlowCountsCache();
+			// 新建产品设置 insp 后，为对应阶段用户创建待办通知
+			//notifyNextStageUsers(product.getInsp());
 		}
 		return ret(prodsuccess);
 	}
@@ -431,6 +448,8 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		boolean prodSuccess = product.update();
 		if (prodSuccess) {
 			clearFlowCountsCache();
+			// 为对应阶段用户创建待办通知：目前只通知批准
+			notifyNextStageUsers(product.getInsp());
 		}
 		return ret(prodSuccess);
 	}
@@ -814,6 +833,117 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	        result.add(item);
 	    }
 	    return result;
+	}
+
+	/**
+	 * 当 insp 状态变更时，为下一阶段对应权限的用户创建待办通知
+	 * <p>映射关系： insp=2 → 通知角色SN=212（外观检验）， insp=3 → 通知SN=213（包装检验）， insp=4 → 通知SN=214（批准检验）</p>
+	 * <p>任何异常不影响主流程，全部 try-catch 包裹</p>
+	 * @param newInsp 产品更新后的新 insp 值
+	 */
+	public void notifyNextStageUsers(int newInsp) {
+		// 只处理 insp=2、3、4，其他值不需要通知
+		if (newInsp < 2 || newInsp > 4) {
+			return;
+		}
+		try {
+			// ========== 根据新 insp 值确定通知参数 ==========
+			int roleSn;
+			String stageName;
+			int tabIndex;
+			String countKey;
+			switch (newInsp) {
+			/*
+			 * case 2: // 产品进入外观待检，通知外观检验权限用户 roleSn = 212; stageName = "外观检验"; tabIndex =
+			 * 2; countKey = "accq"; break; case 3: // 产品进入包装待检，通知包装检验权限用户 roleSn = 213;
+			 * stageName = "包装检验"; tabIndex = 3; countKey = "funq"; break;
+			 */
+				case 4:
+					// 产品进入待批准，通知批准权限用户
+					roleSn = 214;
+					stageName = "批准";
+					tabIndex = 4;
+					countKey = "appq";
+					break;
+				default:
+					return;
+			}
+
+			// ========== 查询目标角色ID ==========
+			Long roleId = roleService.findIdBySn(roleSn);
+			if (roleId == null) {
+				// 角色不存在，无法通知，直接返回
+				return;
+			}
+
+			// ========== 查询拥有该角色的用户列表 ==========
+			List<User> users = userService.getUsersByRoleId(roleId);
+			if (users == null || users.isEmpty()) {
+				// 该角色下无用户，无需通知
+				return;
+			}
+
+			// ========== 获取当前阶段待处理数量 ==========
+			// clearFlowCountsCache() 已在 batchInspection 中调用，此处可得到最新数据
+			Map<String, Long> flowCounts = getFlowCounts();
+			long pendingCount = flowCounts.getOrDefault(countKey, 0L);
+
+			// ========== 构建待办标题前缀（用于防重复检查） ==========
+			String titlePrefix = "有新的" + stageName + "报告单需要处理";
+			String title = titlePrefix + "：当前还剩" + pendingCount + "条！";
+			String url = "/admin/siargo/qarep";
+
+			// 当前操作用户（待办创建人）
+			Long operatorUserId = JBoltUserKit.getUserId();
+			// 待办规定完成时间：当前时间 + 15 天
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.DAY_OF_MONTH, 15);
+			Date finishTime = cal.getTime();
+			Date now = new Date();
+
+			// ========== 逐个用户创建待办 ==========
+			for (User user : users) {
+				Long targetUserId = user.getId();
+				if (targetUserId == null) {
+					continue;
+				}
+
+				// 防重复检查：该用户是否已有同类未完成待办（state IN (1,2)）
+				String checkSql = "SELECT COUNT(*) FROM jb_todo WHERE user_id = ? AND title LIKE ? AND state IN (1, 2)";
+				Long existCount = Db.queryLong(checkSql, targetUserId, titlePrefix + "%");
+				if (existCount != null && existCount > 0) {
+					// 已存在未完成的同类待办，跳过该用户
+					continue;
+				}
+
+				// 构建 Todo 对象并手动设置所有必填字段
+				// 直接使用 Model.save() 避免 TodoService.save() 强制覆盖 userId
+				Todo todo = new Todo();
+				todo.autoProcessIdValue();                // 自动生成雪花 ID
+				todo.setTitle(title);                    // 待办标题
+				todo.setUserId(targetUserId);            // 目标用户
+				todo.setState(2);                        // 状态：进行中
+				todo.setType(1);                         // 类型：无链接无内容
+				todo.setPriorityLevel(1);                // 优先级：普通
+				todo.setUrl(url);                        // 待办链接
+				todo.setIsReaded(false);                 // 未读
+				todo.setCreateUserId(operatorUserId);    // 创建人：当前操作用户
+				todo.setUpdateUserId(operatorUserId);    // 更新人：当前操作用户
+				todo.setCreateTime(now);                 // 创建时间
+				todo.setUpdateTime(now);                 // 更新时间
+				todo.setSpecifiedFinishTime(finishTime); // 规定完成时间
+
+				// 直接调用 Model.save() 保存，不经过 TodoService.save()
+				boolean saved = todo.save();
+				if (saved) {
+					// 保存成功后触发 EventKit 事件，推送 WebSocket 消息给目标用户
+					EventKit.post(todo);
+				}
+			}
+		} catch (Exception e) {
+			// 通知失败不影响主流程，记录异常日志
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -1,9 +1,15 @@
 package cn.jbolt.admin.siargo.qarep;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.itextpdf.text.pdf.AcroFields;
@@ -33,18 +39,22 @@ public class PDFService {
 	 * <p>根据产品类型和型号选择对应的PDF模板，填充数据后生成PDF文件</p>
 	 * @param id 产品ID
 	 * @param pdfsrc PDF输出目录（如：export/PDF 或 export/LastMonthPDF）
+	 * @return 成功返回null，失败返回 "报告单号;失败原因"
 	 */
-	public void generateReportPdf(Long id,String pdfsrc) {
+	public String generateReportPdf(Long id,String pdfsrc) {
 		// 查询数据
 		Qareport report = qaservice.qareportFindByProId(id);
 		if (report == null) {
-			throw new RuntimeException("未找到对应报告单数据");
+			return "产品ID:" + id + ";未找到对应报告单数据";
 		}
-		
+
 		// 初始化数据
 		String proModel = report.getStr("sp_model");
 		String prodType = report.getStr("prod_type");
 		String pdfver = report.getStr("sp_pdfver");
+		String orderId = report.getOrderId().toString();
+		String formnum = report.getFormnum().toString();
+		
 		OutputStream os = null;
         PdfStamper ps = null;
         PdfReader reader = null;
@@ -127,6 +137,8 @@ public class PDFService {
         } catch (Exception e) {
             System.out.println("===============PDF导出失败=============");
             e.printStackTrace();
+            String failKey = "报告单号：" + formnum + " ； 订单号：" + orderId;
+            return failKey + " ;  失败原因：" + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
         } finally {
             try {
                 ps.close();
@@ -136,7 +148,35 @@ public class PDFService {
                 e.printStackTrace();
             }
         }
+        return null;
     }
+
+	/**
+	 * 将导出失败记录写入txt文件
+	 * <p>文件名格式：导出失败记录_yyyyMMdd_HHmmss.txt，输出到指定目录</p>
+	 * @param failList 失败记录列表，每项格式为 "报告单号;失败原因"
+	 * @param outputDir 输出目录路径
+	 */
+	public static void writeFailLog(List<String> failList, String outputDir) {
+		if (failList == null || failList.isEmpty()) {
+			return;
+		}
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+		String fileName = outputDir + File.separator + "导出失败记录_" + timestamp + ".txt";
+		File dir = new File(outputDir);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+			for (String record : failList) {
+				writer.write(record);
+				writer.newLine();
+			}
+		} catch (IOException e) {
+			System.out.println("===============写入失败记录文件失败=============");
+			e.printStackTrace();
+		}
+	}
 
 
 	/**
@@ -153,46 +193,48 @@ public class PDFService {
 	 */
 	private Map<String, String> buildDataMap(Qareport report) {
 		Map<String, String> map = new HashMap<String, String>();
-		String proModel = report.getStr("sp_model");
+		String proModel = safeStr(report.getStr("sp_model"), "sp_model");
 		
 		// ========== 基础信息映射 ==========
-		map.put("formnum", report.getFormnum().toString());
-		map.put("sp_qsi", report.getStr("sp_qsi"));
-		map.put("sp_qi", report.getStr("sp_qi"));
-		map.put("sc_name", report.getStr("sc_name"));
-		map.put("order_id", report.getOrderId().toString());
-		map.put("sp_model", report.getStr("sp_model"));
+		map.put("formnum", safeStr(report.getFormnum(), "formnum"));
+		map.put("sp_qsi", safeStr(report.getStr("sp_qsi"), "sp_qsi"));
+		map.put("sp_qi", safeStr(report.getStr("sp_qi"), "sp_qi"));
+		map.put("sc_name", safeStr(report.getStr("sc_name"), "sc_name"));
+		map.put("order_id", safeStr(report.getOrderId(), "order_id"));
+		map.put("sp_model", proModel);
 		
 		// 报告类型：1=产成品，2=退修品
-		if (report.getStr("rep_type").equals("1")) {
+		String repType = safeStr(report.getStr("rep_type"), "rep_type");
+		if (repType.equals("1")) {
 			map.put("rep_type_name", "■ 产成品 □退修品");
-		} else if (report.getStr("rep_type").equals("2")) {
+		} else if (repType.equals("2")) {
 			map.put("rep_type_name", "□产成品 ■退修品");
 		}
 
 		// ========== 检验人员信息映射 ==========
-		map.put("c_time", report.getStr("c_time"));
-		map.put("sp_number", report.getStr("sp_number"));
+		map.put("c_time", safeStr(report.getStr("c_time"), "c_time"));
+		map.put("sp_number", safeStr(report.getStr("sp_number"), "sp_number"));
 		// 精度检验人员
-		map.put("accq_name", report.getStr("accq_name"));
-		map.put("accq_time", report.getStr("accq_time"));
+		map.put("accq_name", safeStr(report.getStr("accq_name"), "accq_name"));
+		map.put("accq_time", safeStr(report.getStr("accq_time"), "accq_time"));
 		map.put("accq_email", report.getStr("accq_email") == null? "" : report.getStr("accq_email"));
 		// 外观检验人员
-		map.put("funq_name", report.getStr("funq_name"));
-		map.put("funq_time", report.getStr("funq_time"));
+		map.put("funq_name", safeStr(report.getStr("funq_name"), "funq_name"));
+		map.put("funq_time", safeStr(report.getStr("funq_time"), "funq_time"));
 		map.put("funq_email", report.getStr("funq_email") == null? "" : report.getStr("funq_email"));
 		// 包装检验人员
-		map.put("appq_name", report.getStr("appq_name"));
-		map.put("appq_time", report.getStr("appq_time"));
+		map.put("appq_name", safeStr(report.getStr("appq_name"), "appq_name"));
+		map.put("appq_time", safeStr(report.getStr("appq_time"), "appq_time"));
 		map.put("appq_email", report.getStr("appq_email") == null? "" : report.getStr("appq_email"));
 		// 最终批准人员
-		map.put("allq_name", report.getStr("allq_name"));
-		map.put("allq_time", report.getStr("allq_time"));
+		map.put("allq_name", safeStr(report.getStr("allq_name"), "allq_name"));
+		map.put("allq_time", safeStr(report.getStr("allq_time"), "allq_time"));
 		map.put("allq_email", report.getStr("allq_email") == null? "" : report.getStr("allq_email"));
 		
 		// ========== 小流量产品类型参数映射（prod_type=2）==========
 		//小流量
-		if (report.getStr("prod_type").equals("2")) {
+		String prodType = safeStr(report.getStr("prod_type"), "prod_type");
+		if (prodType.equals("2")) {
 			// MF66型号：para2标记为不适用
 			if (proModel.contains("MF66")) {
 				map.put("para2", "/");
@@ -214,47 +256,56 @@ public class PDFService {
 		} 
 		// ========== 大流量产品类型参数映射（prod_type=3）==========
 		//大流量
-		else if (report.getStr("prod_type").equals("3")) {
+		else if (prodType.equals("3")) {
 			map.put("flow_range", report.getStr("flow_name")  == null? "" : report.getStr("flow_name"));
 			
 			// GD型号（中低压）：整机电流、热头电压、零点内码、故障电平
 			if (proModel.contains("GD")) {
-				map.put("cuc", report.getStr("sp_cuc"));
-				map.put("thv", report.getStr("sp_thv"));
-				map.put("zp", report.getStr("sp_zp"));
-				map.put("fl", report.getStr("sp_fl"));
+				map.put("cuc", safeStr(report.getStr("sp_cuc"), "sp_cuc"));
+				map.put("thv", safeStr(report.getStr("sp_thv"), "sp_thv"));
+				map.put("zp", safeStr(report.getStr("sp_zp"), "sp_zp"));
+				map.put("fl", safeStr(report.getStr("sp_fl"), "sp_fl"));
 				
 			}
 			// FD-E型号（工业表-脉冲型）：整机电流范围、脉冲电压、本地地址
 			if (proModel.contains("FD-E")) {
-				map.put("cucmax", report.getStr("sp_cucmax"));
-				map.put("cucmin", report.getStr("sp_cucmin"));
-				map.put("pv", report.getStr("sp_pv"));
+				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
+				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
+				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
 				map.put("pulseValue", "ok");
-				map.put("la", report.getStr("sp_la"));
-				map.put("thv", report.getStr("sp_thv"));
-				map.put("zp", report.getStr("sp_zp"));
+				map.put("la", safeStr(report.getStr("sp_la"), "sp_la"));
+				map.put("thv", safeStr(report.getStr("sp_thv"), "sp_thv"));
+				map.put("zp", safeStr(report.getStr("sp_zp"), "sp_zp"));
 				map.put("fl", "/");
 				map.put("bv", "/");
 				
 			}
 			// FD-D型号（工业表-普通型）：无脉冲电压参数，有故障电平和电池电压
 			else if (proModel.contains("FD-D"))  { 
-				map.put("cucmax", report.getStr("sp_cucmax"));
-				map.put("cucmin", report.getStr("sp_cucmin"));
-				map.put("pv", report.getStr("sp_pv"));
+				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
+				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
+				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
 				map.put("pulseValue", "/");
-				map.put("la", report.getStr("sp_la"));
-				map.put("thv", report.getStr("sp_thv"));
-				map.put("fl", report.getStr("sp_fl"));
-				map.put("zp", report.getStr("sp_zp"));
-				map.put("bv", report.getStr("sp_bv"));
+				map.put("la", safeStr(report.getStr("sp_la"), "sp_la"));
+				map.put("thv", safeStr(report.getStr("sp_thv"), "sp_thv"));
+				map.put("fl", safeStr(report.getStr("sp_fl"), "sp_fl"));
+				map.put("zp", safeStr(report.getStr("sp_zp"), "sp_zp"));
+				map.put("bv", safeStr(report.getStr("sp_bv"), "sp_bv"));
 			} 
 		}
 		return map;
 	}
 
-	
+	/**
+	 * 安全获取字符串值，为空时抛出包含字段名的异常
+	 */
+	private String safeStr(Object value, String fieldName) {
+		if (value == null) {
+			throw new IllegalArgumentException("字段[" + fieldName + "]为空");
+		}
+		return value.toString();
+	}
+
 	/**
 	 * 根据产品类型和型号构建PDF模板路径
 	 * <p>模板选择规则：</p>

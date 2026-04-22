@@ -11,10 +11,10 @@ public enum ProjectSystemLogTargetType {
 	NONE("NONE",0),
 	CUSTOM_BUSINESS("系统业务定义",10001),
 	QAREPORT("检验报告单",20001),
-	
 	EQUIPMENT("设备",20002),
+	EQUIPMENTRECORD("设备维护记录",20003),
 	EQUIPMENTCERTIFICATERECORD("设备证书记录",20004),
-	EQUIPMENTRECORD("设备记录",20003)
+	ApiCallLog("API调用记录",20005)
 	;
 	private String text;
 	private int value;

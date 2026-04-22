@@ -67,11 +67,28 @@ public class QareportAdminController extends JBoltBaseController {
 	* 首页
 	*/
 	public void index() {
-		//批准权限
-		Long approvalRoleId = roleService.findIdByName("报告单批准");
-		boolean has = approvalRoleId != null && JBoltUserAuthKit.hasRole(JBoltUserKit.getUserId(), approvalRoleId);
+		Long userId = JBoltUserKit.getUserId();
 		
-		set("approval", has);
+		//管理员权限
+		Long adminRoleId = roleService.findIdBySn(1);
+		boolean isAdmin = adminRoleId != null && JBoltUserAuthKit.hasRole(userId, adminRoleId);
+		
+		//精度权限
+		Long accuracyRoleId = roleService.findIdBySn(211);
+		set("accuracy", isAdmin || (accuracyRoleId != null && JBoltUserAuthKit.hasRole(userId, accuracyRoleId)));
+		
+		//外观权限
+		Long appearanceRoleId = roleService.findIdBySn(212);
+		set("appearance", isAdmin || (appearanceRoleId != null && JBoltUserAuthKit.hasRole(userId, appearanceRoleId)));
+		
+		//包装权限
+		Long packagingRoleId = roleService.findIdBySn(213);
+		set("packaging", isAdmin || (packagingRoleId != null && JBoltUserAuthKit.hasRole(userId, packagingRoleId)));
+		
+		//批准权限
+		Long approvalRoleId = roleService.findIdBySn(214);
+		set("approval", isAdmin || (approvalRoleId != null && JBoltUserAuthKit.hasRole(userId, approvalRoleId)));
+		
 		render("index.html");
 	}
 
@@ -142,15 +159,23 @@ public class QareportAdminController extends JBoltBaseController {
 	    	renderFail("无上月数据!");
 	    	return;
 	    }
+	    List<String> failList = new ArrayList<>();
 	    for (Record record : records) {
 	    	Long id = record.getLong("id");
-	        pdfservice.generateReportPdf(id,pdfsrc);
+	        String failMsg = pdfservice.generateReportPdf(id,pdfsrc);
+	        if (failMsg != null) {
+	        	failList.add(failMsg);
+	        }
+	    }
+	    if (!failList.isEmpty()) {
+	    	String outputDir = PathKit.getWebRootPath() + "/" + pdfsrc;
+	    	PDFService.writeFailLog(failList, outputDir);
 	    }
 	    
 	    // 压缩PDF文件
 	    int lastMonth = LocalDate.now().minusMonths(1).getMonthValue();
 	    String rarName = lastMonth + "月报告单.rar";
-	    String exportDir = PathKit.getWebRootPath() + "/export/";
+	    String exportDir = PathKit.getWebRootPath() + "/export/LastMonthPDF/";
 	    String rarPath = exportDir + rarName;
 	    String srcDir = PathKit.getWebRootPath() + "/export/LastMonthPDF/*";
 	    String winrarExe = "C:\\Program Files\\WinRAR\\WinRAR.exe";
@@ -194,9 +219,17 @@ public class QareportAdminController extends JBoltBaseController {
 	            .map(Long::parseLong)
 	            .collect(Collectors.toList());
 	    
+	    List<String> failList = new ArrayList<>();
 	    for (int i =0; i < ids.size() ; i++) {
-	    	pdfservice.generateReportPdf(ids.get(i),pdfsrc);
+	    	String failMsg = pdfservice.generateReportPdf(ids.get(i),pdfsrc);
+	    	if (failMsg != null) {
+	    		failList.add(failMsg);
+	    	}
         }
+	    if (!failList.isEmpty()) {
+	    	String outputDir = PathKit.getWebRootPath() + "/" + pdfsrc;
+	    	PDFService.writeFailLog(failList, outputDir);
+	    }
 			
 	    renderJsonSuccess();
     }
@@ -336,6 +369,8 @@ public class QareportAdminController extends JBoltBaseController {
                 }
             }
             service.clearFlowCountsCache();
+            // 批量检验完成后，为下一阶段对应权限用户创建待办通知
+            service.notifyNextStageUsers(insp);
             renderJsonSuccess();
 	}
 	

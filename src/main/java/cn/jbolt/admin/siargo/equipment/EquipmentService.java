@@ -192,7 +192,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	 * @param nextDate 下次校准日期
 	 * @return
 	 */
-	public Ret batchInspection(String ids, java.util.Date lastDate, java.util.Date nextDate) {
+	public Ret batchInspection(String ids, java.util.Date lastDate, java.util.Date nextDate, Integer status) {
 		if (notOk(ids)) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
@@ -217,38 +217,60 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			if (i > 0) placeholders.append(",");
 			placeholders.append("?");
 		}
-		Object[] params = new Object[idList.size() + 2];
-		params[0] = lastDate;
-		params[1] = nextDate;
-		for (int i = 0; i < idList.size(); i++) {
-			params[2 + i] = idList.get(i);
+		// 构建 UPDATE SQL：status 为可选字段
+		boolean updateStatus = status != null && status > 0;
+		String sql;
+		Object[] params;
+		if (updateStatus) {
+			params = new Object[idList.size() + 3];
+			params[0] = lastDate;
+			params[1] = nextDate;
+			params[2] = status;
+			for (int i = 0; i < idList.size(); i++) {
+				params[3 + i] = idList.get(i);
+			}
+			sql = "UPDATE siargo_equipment SET last_inspection_date = ?, next_inspection_date = ?, status = ? WHERE id IN (" + placeholders + ")";
+		} else {
+			params = new Object[idList.size() + 2];
+			params[0] = lastDate;
+			params[1] = nextDate;
+			for (int i = 0; i < idList.size(); i++) {
+				params[2 + i] = idList.get(i);
+			}
+			sql = "UPDATE siargo_equipment SET last_inspection_date = ?, next_inspection_date = ? WHERE id IN (" + placeholders + ")";
 		}
-		String sql = "UPDATE siargo_equipment SET last_inspection_date = ?, next_inspection_date = ? WHERE id IN (" + placeholders + ")";
 		int count = Db.update(sql, params);
 		if (count > 0) {
 			clearOverviewCountsCache();
-			addUpdateSystemLog(ids, userId, "批量校准设备：" + ids);
-			// 为每台设备创建编制记录
+			//addUpdateSystemLog(idList.get(0), userId, "批量校准设备：" + ids);
+			// 状态文本：优先使用用户传入的 status，否则查库
 			for (Long equipmentId : idList) {
-				// 查询设备状态
-				Record equip = Db.findFirst("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
 				String statusText = "未知";
-				if (equip != null) {
-					Integer st = equip.getInt("status");
-					if (st != null) {
-						switch (st) {
-							case 1: statusText = "合格"; break;
-							case 2: statusText = "维修中"; break;
-							case 3: statusText = "已封存"; break;
-							case 4: statusText = "报废"; break;
-							case 5: statusText = "不合格"; break;
+				if (updateStatus) {
+					switch (status) {
+						case 1: statusText = "合格"; break;
+						case 2: statusText = "不合格->维修中"; break;
+						case 3: statusText = "已封存"; break;
+						case 4: statusText = "报废"; break;
+					}
+				} else {
+					Record equip = Db.findFirst("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
+					if (equip != null) {
+						Integer st = equip.getInt("status");
+						if (st != null) {
+							switch (st) {
+								case 1: statusText = "合格"; break;
+								case 2: statusText = "不合格->维修中"; break;
+								case 3: statusText = "已封存"; break;
+								case 4: statusText = "报废"; break;
+							}
 						}
 					}
 				}
 				String description = "批量编制：检校对比结果【" + statusText + "】";
 				long recordId = JBoltSnowflakeKit.me.nextId();
-				Db.update("INSERT INTO siargo_equipment_record (id, equipment_id, record_type, record_date, description, user_id, creator_id, creator_time, audit_status) VALUES (?, ?, '1', ?, ?, ?, ?, NOW(), 1)",
-					recordId, equipmentId, lastDate, description, userId, userId);
+				Db.update("INSERT INTO siargo_equipment_record (id, equipment_id, record_type, record_date, description, user_id, creator_id, creator_time, audit_status) VALUES (?, ?, '1', NOW(), ?, ?, ?, NOW(), 1)",
+					recordId, equipmentId, description, userId, userId);
 			}
 		}
 		return ret(count > 0);
@@ -285,7 +307,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 				userId, equipmentId, equipmentId);
 		}
 		clearOverviewCountsCache();
-		addUpdateSystemLog(ids, userId, "批量审核设备：" + ids);
+		//addUpdateSystemLog(idList.get(0), userId, "批量审核设备：" + ids);
 		return ret(true);
 	}
 	
@@ -332,7 +354,24 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		int count = Db.update(sql, params);
 		if (count > 0) {
 			clearOverviewCountsCache();
-			addUpdateSystemLog(ids, userId, "批量更改设备状态：" + ids);
+			//addUpdateSystemLog(idList.get(0), userId, "批量更改设备状态：" + ids);
+			// 状态文本转换
+			String statusText = "未知";
+			switch (status) {
+				case 1: statusText = "合格"; break;
+				case 2: statusText = "不合格->维修中"; break;
+				case 3: statusText = "已封存"; break;
+				case 4: statusText = "报废"; break;
+			}
+			// 为每台设备创建状态变更记录
+			for (Long equipmentId : idList) {
+				String description = "检校对比结果【" + statusText + "】";
+				long recordId = JBoltSnowflakeKit.me.nextId();
+				Db.update(
+					"INSERT INTO siargo_equipment_record (id, equipment_id, record_type, record_date, description, user_id, creator_id, creator_time, audit_status) VALUES (?, ?, '1', NOW(), ?, ?, ?, NOW(), 1)",
+					recordId, equipmentId, description, userId, userId
+				);
+			}
 		}
 		return ret(count > 0);
 	}

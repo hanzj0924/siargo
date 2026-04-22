@@ -88,7 +88,7 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
 	/**
 	 * 事件日期
 	 */
-	@JBoltField(name="recordDate" ,columnName="record_date",type="Date", remark="事件日期", required=false, maxLength=10, fixed=0, order=4)
+	@JBoltField(name="recordDate" ,columnName="record_date",type="DateTime", remark="事件日期", required=false, maxLength=19, fixed=0, order=4)
 	public java.util.Date getRecordDate() {
 		return getDate("record_date");
 	}

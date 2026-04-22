@@ -386,12 +386,14 @@
 		</div>
 		<div class="col-sm-4 text-right">
 			<div class="btn-group " role="group" aria-label="btn-group">
+				#if(accuracy)
 				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
 					data-confirm="确定精度检验合格？" 
 					class="btn flow-action-btn flow-action-accq"><i class="fa fa-check-circle"></i> 精度合格 <i class="fa fa-chevron-right"></i>
 				</button>
+				#end
 			</div>
 		</div>
 	</div>
@@ -433,12 +435,14 @@
 			</form>
 		</div>
 		<div class="col-sm-4 text-right">
+			#if(appearance)
 			<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 				data-check-handler="jboltTableGetCheckedIds" 
 				data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
 				data-confirm="确定外观检验合格？" 
 				class="btn flow-action-btn flow-action-funq"><i class="fa fa-check-circle"></i> 外观合格 <i class="fa fa-chevron-right"></i>
 			</button>
+			#end
 		</div>
 	</div>
 	<div class="clearfix"></div>
@@ -480,12 +484,14 @@
 			</form>
 		</div>
 		<div class="col-sm-4 text-right">
+			#if(packaging)
 			<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
 					data-check-handler="jboltTableGetCheckedIds" 
 					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
 					data-confirm="确定包装检验合格？" 
 					class="btn flow-action-btn flow-action-appq"><i class="fa fa-check-circle"></i> 包装合格 <i class="fa fa-chevron-right"></i>
 			</button>
+			#end
 		</div>
 	</div>
 	<div class="clearfix"></div>
