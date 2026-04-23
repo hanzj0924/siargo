@@ -1,10 +1,20 @@
 #@jboltLayout()
 #define main()
+<style>
+.il-hd{display:flex;align-items:center;margin-bottom:10px;padding:0 2px}
+.il-hd span{font-size:14px;font-weight:600;color:#2c3e50}
+.il-hd i{flex:1;height:1px;background:#dee2e6;margin-left:10px}
+.il-search-bar{background:#f8f9fa;border:1px solid #e9ecef;border-radius:6px;padding:8px 12px;margin-bottom:10px}
+.il-search-bar .form-control{border-color:#dee2e6;border-radius:4px;font-size:13px}
+.il-search-bar .btn{border-radius:4px;font-size:13px}
+</style>
 #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page" data-key="#(pmkey)">
 	<div class="jbolt_page_title">
+		<div class="il-hd"><span>&#128451; 废弃报告单</span><i></i></div>
 		<div class="row">
 			<div class="col">
+				<div class="il-search-bar">
 				<form class="form-inline" id="inactiveForm_#(pageId)" onsubmit="return false;" method="post">
 					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
 						placeholder="输入订单号搜索" name="keywords" value="" style="width: 130px;" />
@@ -12,6 +22,7 @@
 					<i class="fa fa-search"></i> 查询
 				</button>
 				</form>
+				</div>
 			</div>
 		</div>
 	</div>

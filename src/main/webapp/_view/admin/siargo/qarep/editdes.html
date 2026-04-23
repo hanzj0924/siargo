@@ -1,18 +1,25 @@
 #@jboltLayout() #define main()
+<style>
+.fm-wrap{padding:14px 16px;font-size:13px;color:#333}
+.fm-sec{margin-bottom:12px}
+.fm-hd{display:flex;align-items:center;margin-bottom:8px}
+.fm-hd span{font-size:14px;font-weight:600;color:#2c3e50}
+.fm-hd i{flex:1;height:1px;background:#dee2e6;margin-left:10px}
+.fm-card{border:1px solid #e9ecef;border-radius:6px;overflow:hidden;padding:12px}
+.fm-card textarea.form-control{border-color:#dee2e6;border-radius:4px;font-size:13px;color:#212529;resize:vertical}
+.fm-card textarea.form-control:focus{border-color:#80bdff;box-shadow:0 0 0 2px rgba(0,123,255,.1)}
+</style>
 <div class="jbolt_page">
 	<div class="jbolt_page_content">
 		<form onsubmit="return false;" id="qareportUpdateDesForm"
 			action="admin/siargo/qarep/updateDes" method="post">
 			<input type="hidden" name="product.id" value="#(product.id??)" />
-			<div class="row">
-				<div class="col">
-					<div class="form-group row">
-						<div class="col">
-							<textarea class="form-control" style="height: 150px;white-space: pre;word-wrap: break-word;" 
-								placeholder="请输入备注" data-tips="请输入备注" 
-								maxlength="900" name="product.des" data-with-clearbtn="true">#(product.des??)</textarea>
-							
-						</div>
+			<div class="fm-wrap">
+				<div class="fm-sec">
+					<div class="fm-card">
+						<textarea class="form-control" style="height: 150px;white-space: pre-wrap;word-wrap: break-word;" 
+							placeholder="请输入备注" data-tips="请输入备注" 
+							maxlength="900" name="product.des" data-with-clearbtn="true">#(product.des??)</textarea>
 					</div>
 				</div>
 			</div>

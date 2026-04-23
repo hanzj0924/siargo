@@ -10,7 +10,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="750,780" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -19,13 +19,11 @@
 <td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
-		无
+		<span class="text-muted">-</span>
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
-        	<i class="fa fa-eye"></i> 查看
-		</button>
+		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
+			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
 </td>
 <td>${data.spQsi}</td>
@@ -59,7 +57,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="750,780" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -68,13 +66,11 @@
 <td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
-		无
+		<span class="text-muted">-</span>
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
-        	<i class="fa fa-eye"></i> 查看
-		</button>
+		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
+			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
 </td>
 <td>${data.spQsi}</td>
@@ -93,7 +89,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="750,780" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -102,13 +98,11 @@
 <td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
-		无
+		<span class="text-muted">-</span>
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
-        	<i class="fa fa-eye"></i> 查看
-		</button>
+		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
+			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
 </td>
 <td>${data.spQsi}</td>
@@ -130,7 +124,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="750,780" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -139,13 +133,11 @@
 <td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
-		无
+		<span class="text-muted">-</span>
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
-        	<i class="fa fa-eye"></i> 查看
-		</button>
+		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
+			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
 </td>
 <td>${data.spQsi}</td>
@@ -159,7 +151,7 @@
 </td>
 <td>
 	{@if data.funqName==null}
-		<span class="text-muted">无</span>
+		<span class="text-muted"><span class="text-muted">-</span></span>
 	{@else}
 		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
@@ -176,7 +168,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="750,780" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -185,13 +177,11 @@
 <td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
-		无
+		<span class="text-muted">-</span>
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
-        	<i class="fa fa-eye"></i> 查看
-		</button>
+		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
+			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
 </td>
 <td>${data.spQsi}</td>
@@ -205,7 +195,7 @@
 </td>
 <td>
 	{@if data.funqName==null}
-		<span class="text-muted">无</span>
+		<span class="text-muted"><span class="text-muted">-</span></span>
 	{@else}
 		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
@@ -213,7 +203,7 @@
 </td>
 <td>
 	{@if data.appqName==null}
-		<span class="text-muted">无</span>
+		<span class="text-muted"><span class="text-muted">-</span></span>
 	{@else}
 		<span class="badge badge-warning">${data.appqName}</span>
 		<small class="text-muted d-block">${data.appqTime}</small>
@@ -229,7 +219,7 @@
 <tr data-id="${data.spid}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="报告单详情" data-dialogbtn data-area="1100,850" data-btn="close"
+	<a tooltip data-title="报告单详情" data-dialogbtn data-area="750,780" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -238,18 +228,16 @@
 <td>${data.typeName}</td>
 <td>
 	{@if data.spDes==null || data.spDes==""}
-		无
+		<span class="text-muted">-</span>
 	{@else}
-		<button data-dialogbtn data-area="530,325" data-btn="close" data-title="产品备注" class="btn btn-outline-info btn-sm" 
-            data-content="<div style='white-space: pre-wrap; word-wrap: break-word;'>
-			${data.spDes.replace(/\\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;').replace(/"/g, '&quot;')}</div>">
-        	<i class="fa fa-eye"></i> 查看
-		</button>
+		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
+			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
 </td>
 <td>
 	{@if data.spPdfstr==null}
-		无
+		<span class="text-muted">-</span>
 	{@else}
 		<a  id="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
 			href="${data.spPdfstr}" onclick="loadPDF(this, '${data.spPdfstr}')">
@@ -268,7 +256,7 @@
 </td>
 <td>
 	{@if data.funqName==null}
-		<span class="text-muted">无</span>
+		<span class="text-muted"><span class="text-muted">-</span></span>
 	{@else}
 		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
@@ -291,13 +279,13 @@
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="1100,850"
+				<button data-openpage="dialog" data-area="1060,870"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
 					data-url="admin/siargo/qarep/add"
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
 				</button>
-				<button data-openpage="dialog" data-area="530,325"
+				<button data-openpage="dialog" data-area="570,380"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -332,7 +320,7 @@
 			</form>
 		</div>
 		<div class="col-sm-4 text-right">
-			<button data-dialogbtn data-area="1300,700" data-title="已删除报告单列表"
+			<button data-dialogbtn data-area="1300,760" data-title="已删除报告单列表"
 				data-url="admin/siargo/qarep/inactiveList"  type="button"
 				class="btn btn-outline-danger">
 				<i class="fa fa-trash"></i> 回收站
@@ -347,13 +335,13 @@
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="1100,850"
+				<button data-openpage="dialog" data-area="1060,870"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
 					data-url="admin/siargo/qarep/add"
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
 				</button>
-				<button data-openpage="dialog" data-area="1100,850"
+				<button data-openpage="dialog" data-area="1060,830"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/edit/"
@@ -405,7 +393,7 @@
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="530,325"
+				<button data-openpage="dialog" data-area="570,380"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -454,7 +442,7 @@
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				
-				<button data-openpage="dialog" data-area="530,325"
+				<button data-openpage="dialog" data-area="570,380"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -503,7 +491,7 @@
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				
-				<button data-openpage="dialog" data-area="530,325"
+				<button data-openpage="dialog" data-area="570,380"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -551,7 +539,7 @@
 	<div class="row">
 		<div class="col-sm-3 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="530,325"
+				<button data-openpage="dialog" data-area="570,380"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -672,7 +660,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="110" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="200" data-column="sp_model">产品型号</th>
@@ -710,7 +698,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="110" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
@@ -747,7 +735,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="110" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
@@ -784,7 +772,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="110" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
@@ -823,7 +811,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="110" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="250" data-column="sp_model">产品型号</th>
@@ -863,7 +851,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="80" data-column="sp_des">备注</th>
+						<th data-width="110" data-column="sp_des">备注</th>
 						<th data-width="120" data-column="pdfstr">查看PDF</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>

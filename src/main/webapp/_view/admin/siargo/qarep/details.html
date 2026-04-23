@@ -1,146 +1,146 @@
 #@jboltLayout() #define main()
 <style>
-.readonly-border {
-    pointer-events: none;      /* 阻止所有鼠标事件 */
-    cursor: not-allowed;       /* 显示禁用光标 */
-}
-
-.readonly-border:focus {
-    outline: none;            /* 移除焦点轮廓 */
-    box-shadow: none;         /* 移除阴影效果 */
-}
+.dt-wrap{padding:16px 18px;font-size:13px;color:#333;line-height:1.6}
+.dt-sec{margin-bottom:14px}
+.dt-hd{display:flex;align-items:center;margin-bottom:8px}
+.dt-hd span{font-size:14px;font-weight:600;color:#2c3e50}
+.dt-hd i{flex:1;height:1px;background:#dee2e6;margin-left:10px}
+.dt-card{border:1px solid #e9ecef;border-radius:6px;overflow:hidden}
+.dt-row{display:flex;border-bottom:1px solid #f1f3f5}
+.dt-row:last-child{border-bottom:none}
+.dt-lbl{width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef}
+.dt-lbl-m{width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;border-left:1px solid #e9ecef}
+.dt-val{flex:1;padding:8px 12px;color:#212529}
+.dt-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #f1f3f5}
+.dt-grid:last-child{border-bottom:none}
+.dt-gcl{display:flex;border-right:1px solid #f1f3f5}
+.dt-gcr{display:flex}
+.dt-badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:12px;font-weight:600;font-size:12px}
 </style>
-<div class="jbolt_page">
-	<div class="jbolt_page_content">
-			<div class="row">
-				<div class="col">
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">报告单类型：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.retype_name ??)" />
-						</div>
-						<label class="col-sm-3 col-form-label">报告单版号：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.pdfver_name ??)" />
-						</div>
-					</div>
-					<div class="form-group row" contenteditable="false" >
-						<label class="col-sm-3 col-form-label">订单号：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.order_id ??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">客户名称：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sc_name ??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">产品类型：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.type_name??)" />
-						</div>
-					</div>
-					<div class="form-group row">
+<div class="dt-wrap">
 
-						<label class="col-sm-3 col-form-label">检验进度：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.insp_name ??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">送检数量：</label>
-						<div class="col input-group">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_qsi??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">检验数量：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_qi??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">产品型号：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_model??)" />
-						</div>
-					</div>
-				</div>
-				<div class="col">
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">流量范围：</label>
-						<div class="col input-group">
-							<input type="text" class="form-control readonly-border" value="#(qapro.flow_name??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流 24v：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_cucmax??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流 12v：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_cucmin??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">整机电流 8v：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_cuc??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">脉冲电压：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_pv??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">本地地址：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_la??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">热头电压：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_thv??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">零点内码：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_zp??)" />
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-3 col-form-label">故障电平：</label>
-						<div class="col">
-							<input type="text" class="form-control readonly-border" value="#(qapro.sp_fl??)" />
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col">
-					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">编号：</label>
-						<div class="col">
-							<textarea class="form-control readonly-border" style="height: 110px;white-space: pre;" >#(qapro.sp_number??)</textarea>
-						</div>
-					</div>
-					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">备注：</label>
-						<div class="col">
-							<textarea class="form-control readonly-border" style="height: 110px;white-space: pre;" >#(qapro.sp_des??)</textarea>
-						</div>
-					</div>
-				</div>
-			</div>
-	</div>
+  <!-- 报告单信息 -->
+  <div class="dt-sec">
+    <div class="dt-hd"><span>&#128203; 报告单信息</span><i></i></div>
+    <div class="dt-card">
+      <div class="dt-row">
+        <div class="dt-lbl">报告单类型</div>
+        <div class="dt-val">#(qapro.retype_name ??)</div>
+        <div class="dt-lbl-m">报告单版号</div>
+        <div class="dt-val">#(qapro.pdfver_name ??)</div>
+      </div>
+      <div class="dt-row">
+        <div class="dt-lbl">报告单号</div>
+        <div class="dt-val">#(qapro.formnum ??)</div>
+        <div class="dt-lbl-m">订单号</div>
+        <div class="dt-val">#(qapro.order_id ??)</div>
+      </div>
+      <div class="dt-row">
+        <div class="dt-lbl">客户名称</div>
+        <div class="dt-val">#(qapro.sc_name ??)</div>
+      </div>
+      <div class="dt-row">
+        <div class="dt-lbl">检验进度</div>
+        <div class="dt-val">
+          #if(qapro.insp == 1)
+          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(qapro.insp_name ??)</span>
+          #else if(qapro.insp == 2)
+          <span class="dt-badge" style="background:#d1ecf1;color:#0c5460;">#(qapro.insp_name ??)</span>
+          #else if(qapro.insp == 3)
+          <span class="dt-badge" style="background:#fff3cd;color:#856404;">#(qapro.insp_name ??)</span>
+          #else if(qapro.insp == 4)
+          <span class="dt-badge" style="background:#fde8d8;color:#7d3c0d;">#(qapro.insp_name ??)</span>
+          #else if(qapro.insp == 5)
+          <span class="dt-badge" style="background:#d4edda;color:#155724;">&#10003; #(qapro.insp_name ??)</span>
+          #else
+          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(qapro.insp_name ??)</span>
+          #end
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 产品信息 -->
+  <div class="dt-sec">
+    <div class="dt-hd"><span>&#128230; 产品信息</span><i></i></div>
+    <div class="dt-card">
+      <div class="dt-row">
+        <div class="dt-lbl">产品类型</div>
+        <div class="dt-val">#(qapro.type_name??)</div>
+        <div class="dt-lbl-m">产品型号</div>
+        <div class="dt-val">#(qapro.sp_model??)</div>
+      </div>
+      <div class="dt-row">
+        <div class="dt-lbl">送检 / 检验数量</div>
+        <div class="dt-val">
+          <span style="font-weight:500;">#(qapro.sp_qsi??)</span>
+          <span style="color:#adb5bd;margin:0 4px;">/</span>
+          <span style="font-weight:500;">#(qapro.sp_qi??)</span>
+        </div>
+      </div>
+      <div class="dt-row">
+        <div class="dt-lbl">编号</div>
+        <div class="dt-val" style="white-space:pre-wrap;word-break:break-all;">#(qapro.sp_number??)</div>
+      </div>
+      <div class="dt-row">
+        <div class="dt-lbl">备注</div>
+        <div class="dt-val" style="color:#495057;white-space:pre-wrap;word-break:break-all;">#(qapro.sp_des??)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 大流量计参数 -->
+  #if(qapro.prod_type == 3)
+  <div>
+    <div class="dt-hd"><span>&#9889; 大流量计参数</span><i></i></div>
+    <div class="dt-card">
+      <div class="dt-row">
+        <div class="dt-lbl">流量范围</div>
+        <div class="dt-val">#(qapro.flow_name??)</div>
+      </div>
+      <div class="dt-grid">
+        <div class="dt-gcl">
+          <div class="dt-lbl">整机电流 24v</div>
+          <div class="dt-val">#(qapro.sp_cucmax??)</div>
+        </div>
+        <div class="dt-gcr">
+          <div class="dt-lbl">整机电流 12v</div>
+          <div class="dt-val">#(qapro.sp_cucmin??)</div>
+        </div>
+      </div>
+      <div class="dt-grid">
+        <div class="dt-gcl">
+          <div class="dt-lbl">整机电流 8v</div>
+          <div class="dt-val">#(qapro.sp_cuc??)</div>
+        </div>
+        <div class="dt-gcr">
+          <div class="dt-lbl">脉冲电压</div>
+          <div class="dt-val">#(qapro.sp_pv??)</div>
+        </div>
+      </div>
+      <div class="dt-grid">
+        <div class="dt-gcl">
+          <div class="dt-lbl">本地地址</div>
+          <div class="dt-val">#(qapro.sp_la??)</div>
+        </div>
+        <div class="dt-gcr">
+          <div class="dt-lbl">热头电压</div>
+          <div class="dt-val">#(qapro.sp_thv??)</div>
+        </div>
+      </div>
+      <div class="dt-grid">
+        <div class="dt-gcl">
+          <div class="dt-lbl">零点内码</div>
+          <div class="dt-val">#(qapro.sp_zp??)</div>
+        </div>
+        <div class="dt-gcr">
+          <div class="dt-lbl">故障电平</div>
+          <div class="dt-val">#(qapro.sp_fl??)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  #end
+
 </div>
 #end

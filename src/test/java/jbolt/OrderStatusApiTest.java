@@ -37,10 +37,10 @@ public class OrderStatusApiTest {
 	// ==================== 配置常量 ====================
 	
 	/** 测试用API基础URL（集成测试时需要服务运行） */
-	private static final String API_BASE_URL = "http://192.168.77.37/api/siargo/order/status";
+	private static final String API_BASE_URL = "http://localhost/api/siargo/order/status";
 	
 	/** 批量查询API基础URL */
-	private static final String BATCH_API_BASE_URL = "http://192.168.77.37/api/siargo/order/batchStatus";
+	private static final String BATCH_API_BASE_URL = "http://localhost/api/siargo/order/batchStatus";
 
 	/** 测试用密钥（与Application的app_secret保持一致） */
 	private static final String TEST_SECRET = "bjVzamw0ZWIzdjRsc3hmZGVwcmxta3RqOHc4OXZkaGM=";

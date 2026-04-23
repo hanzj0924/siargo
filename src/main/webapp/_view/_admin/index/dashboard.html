@@ -1,92 +1,304 @@
 #@jboltLayout()
 #define main()
 #set(pageId=RandomUtil.random(6))
+<style>
+/* ========================================
+   Dashboard 精致工业仪表盘 - 局部样式
+   前缀 db- 防止污染全局
+   ======================================== */
+
+/* 页面背景 */
+.db-wrapper {
+    background: linear-gradient(135deg, #f0f4ff 0%, #f5f7fa 50%, #eef2f7 100%);
+    min-height: 100%;
+    padding: 16px 0 8px;
+}
+
+/* ---- 统计卡片 ---- */
+.db-stat-card {
+    background: #ffffff;
+    border-radius: 12px !important;
+    border: none !important;
+    overflow: hidden;
+    transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.28s ease;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+}
+.db-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+}
+
+/* 图标容器（圆角方块，淡色背景） */
+.db-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.db-icon-wrap.db-ic1 { background: #eef2ff; }
+.db-icon-wrap.db-ic1 i { color: #4361ee !important; }
+.db-icon-wrap.db-ic2 { background: #ecfdf5; }
+.db-icon-wrap.db-ic2 i { color: #10b981 !important; }
+.db-icon-wrap.db-ic3 { background: #fff7ed; }
+.db-icon-wrap.db-ic3 i { color: #f59e0b !important; }
+.db-icon-wrap.db-ic4 { background: #fef2f2; }
+.db-icon-wrap.db-ic4 i { color: #ef4444 !important; }
+.db-icon-wrap i { font-size: 22px; }
+
+/* 卡片数值与标签 */
+.db-stat-body {
+    display: flex;
+    align-items: center;
+    padding: 20px 20px 20px 20px;
+    gap: 0;
+}
+.db-stat-info {
+    flex: 1;
+    text-align: right;
+}
+.db-stat-num {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: 0.3px;
+    line-height: 1.25;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.db-stat-label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 12.5px;
+    color: #94a3b8;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    margin-top: 6px;
+    gap: 6px;
+}
+.db-stat-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.db-c1 .db-stat-label::before { background: #4361ee; }
+.db-c2 .db-stat-label::before { background: #10b981; }
+.db-c3 .db-stat-label::before { background: #f59e0b; }
+.db-c4 .db-stat-label::before { background: #ef4444; }
+
+/* ---- 图表卡片 ---- */
+.db-chart-card {
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+    overflow: hidden;
+    background: #ffffff;
+}
+.db-chart-card .card-body {
+    padding: 18px 20px 14px;
+}
+.db-chart-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f2f5;
+}
+.db-chart-title-text {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #344563;
+    letter-spacing: 0.2px;
+}
+.db-chart-title-text::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    background: linear-gradient(180deg, #4361ee, #7289ff);
+    border-radius: 2px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+.db-chart-title-text.db-line-accent::before {
+    background: linear-gradient(180deg, #e71d36, #ff5c72);
+}
+.db-chart-title-text.db-donut-accent::before {
+    background: linear-gradient(180deg, #2ec4b6, #6eddd6);
+}
+.db-fullscreen-btn {
+    color: #b0bac9;
+    transition: color 0.2s, transform 0.2s;
+    line-height: 1;
+}
+.db-fullscreen-btn:hover {
+    color: #4361ee;
+    transform: scale(1.15);
+    text-decoration: none;
+}
+
+/* ---- 入场动画 ---- */
+@keyframes db-fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes db-fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.db-anim-card {
+    animation: db-fadeInUp 0.5s ease both;
+}
+.db-anim-chart {
+    animation: db-fadeIn 0.6s ease both;
+}
+.db-delay-1 { animation-delay: 0.05s; }
+.db-delay-2 { animation-delay: 0.15s; }
+.db-delay-3 { animation-delay: 0.25s; }
+.db-delay-4 { animation-delay: 0.35s; }
+.db-delay-5 { animation-delay: 0.1s; }
+.db-delay-6 { animation-delay: 0.2s; }
+.db-delay-7 { animation-delay: 0.15s; }
+
+/* Morris 图表容器 */
+.db-morris-wrap {
+    width: 100%;
+}
+/* 修正 Morris SVG 文字颜色 */
+.db-chart-card .morris-hover {
+    border-radius: 8px;
+    font-size: 12px;
+}
+</style>
 <!--主页面内容显示区域 start-->
-<div class="jbolt_page shadow-none bg-transparent" data-key="#(pmkey)" data-require-plugin="morris" data-init-handler="initDashboard_#(pageId)" style="padding:0px 10px;">
-<div class="jbolt_page_content p-0" >
-		<div class="row">
-				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-					<div class="card border-0  mb-2 jb-dashboard-card hand">
-						<div class="card-body p-4 text-nowrap">
-							<span class="float-left"><i class="jbicon jb-zhiliangrenwu j_font_30 j_left_fa text-primary rounded"></i></span>
-							<div class="text-right ">
-								<span class="d-block  j_font_24" id="currentMonthTotal">#(dashboard.currentMonthTotal ??)</span>
-								<span class="d-block">本年度送检总量/只</span>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-					<div class="card border-0  mb-2 jb-dashboard-card hand">
-						<div class="card-body p-4 text-nowrap">
-							<span class="float-left"><i class="jbicon jb-zhiliangbz j_font_30 j_left_fa text-success rounded"></i></span>
-							<div class="text-right ">
-								<span class="d-block  j_font_24">#(dashboard.cTotal ??)</span>
-								<span class="d-block">本年度传感器总量/只</span>
-							</div>
-						</div>
-					</div>
-					
-				</div>
-				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-					<div class="card border-0  mb-2 jb-dashboard-card hand">
-						<div class="card-body p-4 text-nowrap">
-							<span class="float-left"><i class="jbicon jb-suyuanzhijianbz j_font_30 j_left_fa text-info rounded"></i></span>
-							<div class="text-right ">
-								<span class="d-block  j_font_24">#(dashboard.xTotal ??)</span>
-								<span class="d-block">本年度小流量总量/只</span>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-					<div class="card border-0  mb-2 jb-dashboard-card hand">
-						<div class="card-body p-4 text-nowrap">
-							<span class="float-left"><i class="jbicon jb-zlgl j_font_30 j_left_fa text-danger rounded"></i></span>
-							<div class="text-right ">
-								<span class="d-block  j_font_24">#(dashboard.dTotal ??)</span>
-								<span class="d-block">本年大流量总量/只</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row mt-2">
-				<div class="col-lg-12 col-sm-12 px-2">
-					<div class="card border-0  mb-2">
-						<div class="card-body" style="height:350px">
-							<h5 class="card-title"><span>送检总量(包含退修)/只</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
-							<div id="morris-bar_#(pageId)" style="height:90%;"></div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row mt-2">
-					<div class="col-lg-9 col-sm-12 px-2">
-						<div class="card border-0  mb-2">
-							<div class="card-body" style="height:300px">
-								<h5 class="card-title"><span>退修总量/只</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
-								<div id="morris-line_#(pageId)" style="height:90%;"></div>
-							</div>
-						</div>
-					</div>
-					<div class="col-lg-3 col-md-12 px-2">
-					<div class="card border-0  mb-2">
-						<div class="card-body"  style="height:300px">
-							<h5 class="card-title"><span>本年度报告单来源/订单</span><a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50"><i class="jbicon2 jbi-fullscreen"></i></a></h5>
-								<div id="morris-donut_#(pageId)" style="height:90%"></div>
-						</div>
-					</div>
-					</div>
-			</div>
-	</div>
+<div class="jbolt_page shadow-none bg-transparent" data-key="#(pmkey)" data-require-plugin="morris" data-init-handler="initDashboard_#(pageId)" style="padding:0px 4px;">
+<div class="jbolt_page_content p-0">
+    <div class="db-wrapper">
+
+        <!-- ===== 统计卡片行 ===== -->
+        <div class="row mx-0">
+            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                <div class="db-stat-card db-c1 db-anim-card db-delay-1 hand">
+                    <div class="db-stat-body">
+                        <div class="db-icon-wrap db-ic1">
+                            <i class="jbicon jb-zhiliangrenwu"></i>
+                        </div>
+                        <div class="db-stat-info">
+                            <span class="db-stat-num" id="currentMonthTotal">#(dashboard.currentMonthTotal ??)</span>
+                            <span class="db-stat-label">本年度送检总量/只</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                <div class="db-stat-card db-c2 db-anim-card db-delay-2 hand">
+                    <div class="db-stat-body">
+                        <div class="db-icon-wrap db-ic2">
+                            <i class="jbicon jb-zhiliangbz"></i>
+                        </div>
+                        <div class="db-stat-info">
+                            <span class="db-stat-num">#(dashboard.cTotal ??)</span>
+                            <span class="db-stat-label">本年度传感器总量/只</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                <div class="db-stat-card db-c3 db-anim-card db-delay-3 hand">
+                    <div class="db-stat-body">
+                        <div class="db-icon-wrap db-ic3">
+                            <i class="jbicon jb-suyuanzhijianbz"></i>
+                        </div>
+                        <div class="db-stat-info">
+                            <span class="db-stat-num">#(dashboard.xTotal ??)</span>
+                            <span class="db-stat-label">本年度小流量总量/只</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                <div class="db-stat-card db-c4 db-anim-card db-delay-4 hand">
+                    <div class="db-stat-body">
+                        <div class="db-icon-wrap db-ic4">
+                            <i class="jbicon jb-zlgl"></i>
+                        </div>
+                        <div class="db-stat-info">
+                            <span class="db-stat-num">#(dashboard.dTotal ??)</span>
+                            <span class="db-stat-label">本年大流量总量/只</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 柱状图行 ===== -->
+        <div class="row mx-0 mt-1">
+            <div class="col-lg-12 col-sm-12 px-2">
+                <div class="db-chart-card db-anim-chart db-delay-5">
+                    <div class="card-body" style="height:340px;">
+                        <div class="db-chart-title">
+                            <span class="db-chart-title-text">送检总量（包含退修）/ 只</span>
+                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                <i class="jbicon2 jbi-fullscreen"></i>
+                            </a>
+                        </div>
+                        <div id="morris-bar_#(pageId)" class="db-morris-wrap" style="height:calc(100% - 50px);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 折线图 + 甜甜圈图行 ===== -->
+        <div class="row mx-0 mt-1">
+            <div class="col-lg-9 col-sm-12 px-2">
+                <div class="db-chart-card db-anim-chart db-delay-6">
+                    <div class="card-body" style="height:270px;">
+                        <div class="db-chart-title">
+                            <span class="db-chart-title-text db-line-accent">退修总量 / 只</span>
+                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                <i class="jbicon2 jbi-fullscreen"></i>
+                            </a>
+                        </div>
+                        <div id="morris-line_#(pageId)" class="db-morris-wrap" style="height:calc(100% - 50px);"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-12 px-2">
+                <div class="db-chart-card db-anim-chart db-delay-7">
+                    <div class="card-body" style="height:270px;">
+                        <div class="db-chart-title">
+                            <span class="db-chart-title-text db-donut-accent">本年度报告单来源 / 订单</span>
+                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                <i class="jbicon2 jbi-fullscreen"></i>
+                            </a>
+                        </div>
+                        <div id="morris-donut_#(pageId)" class="db-morris-wrap" style="height:calc(100% - 50px);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /db-wrapper -->
+</div>
 </div>
 <!--主页面内容显示区域 end-->
 #end
 #define js()
 <script type="text/javascript">
 var DashBoardUtil_#(pageId)={
-		init:function(){
+	init:function(){
             //creating line chart
             var $lineData = #json(repfixdata);
             this.createLineChart('morris-line_#(pageId)',  $lineData, 'x', ['a'], ['返修单量']);
@@ -94,80 +306,83 @@ var DashBoardUtil_#(pageId)={
             //creating bar chart
             var $barData = #json(repalldata);
             
-            this.createBarChart('morris-bar_#(pageId)', $barData, 'y', ['a', 'b', 'c'], ['传感器', '小流量', '大流量'], ['#4c84ff', '#10c888', '#f43f5d'])
+            this.createBarChart('morris-bar_#(pageId)', $barData, 'y', ['a', 'b', 'c'], ['传感器', '小流量', '大流量'], ['#4361ee', '#2ec4b6', '#e71d36'])
 
             //creating donut chart
             var $donutData = #json(donutData);
-            this.createDonutChart('morris-donut_#(pageId)', $donutData, ['#00a5a8', "#f43f5d", '#10c888', '#d1d337']);
+            this.createDonutChart('morris-donut_#(pageId)', $donutData, ['#0ea5e9', '#f97316', '#ec4899', '#84cc16']);
 
-		},
-		createAreaChart :function (element, pointSize, lineWidth, data, xkey, ykeys, labels, lineColors) {
-		        Morris.Area({
-		            element: element,
-		            pointSize: 0,
-		            lineWidth: 0,
+	},
+	createAreaChart :function (element, pointSize, lineWidth, data, xkey, ykeys, labels, lineColors) {
+	        Morris.Area({
+	            element: element,
+	            pointSize: 0,
+	            lineWidth: 0,
+	            data: data,
+	            xkey: xkey,
+	            ykeys: ykeys,
+	            labels: labels,
+	            resize: true,
+	            gridLineColor: '#f0f2f5',
+	            hideHover: 'auto',
+	            lineColors: lineColors,
+	            fillOpacity: .6,
+	            behaveLikeLine: true
+	        });
+	    },
+	      createBarChart :function (element, data, xkey, ykeys, labels, lineColors) {
+	            // 动态计算合理的 Y 轴最大值
+	            var maxValue = 0;
+	            for (var i = 0; i < data.length; i++) {
+	                for (var j = 0; j < ykeys.length; j++) {
+	                    var val = data[i][ykeys[j]];
+	                    if (val > maxValue) {
+	                        maxValue = val;
+	                    }
+	                }
+	            }
+	            // 统一按 1000 粒度向上取整，最小保证 ymax >= 1000
+	            var ymax = Math.ceil(maxValue / 1000) * 1000;
+	            if (ymax < 1000) { ymax = 1000; }
+	                  
+	            Morris.Bar({
+	                element: element,
+	                data: data,
+	                xkey: xkey,
+	                ykeys: ykeys,
+	                labels: labels,
+	                gridLineColor: '#f0f2f5',
+	                barSizeRatio: 0.6,
+	                resize: true,
+	                hideHover: 'auto',
+	                barColors: lineColors,
+	                stacked: false,
+	                ymax: ymax
+	            });
+	        },
+	        
+	         //creates Line chart
+	       createLineChart : function (element, data, xkey, ykeys, labels) {
+	            Morris.Line({
+	                element: element,
 		            data: data,
 		            xkey: xkey,
 		            ykeys: ykeys,
 		            labels: labels,
-		            resize: true,
-		            gridLineColor: '#eee',
-		            hideHover: 'auto',
-		            lineColors: lineColors,
-		            fillOpacity: .6,
-		            behaveLikeLine: true
-		        });
-		    },
-		      createBarChart :function (element, data, xkey, ykeys, labels, lineColors) {
-		            // 动态计算合理的 Y 轴最大值
-		            var maxValue = 0;
-		            for (var i = 0; i < data.length; i++) {
-		                for (var j = 0; j < ykeys.length; j++) {
-		                    var val = data[i][ykeys[j]];
-		                    if (val > maxValue) {
-		                        maxValue = val;
-		                    }
-		                }
-		            }
-		            // 统一按 1000 粒度向上取整，最小保证 ymax >= 1000
-		            var ymax = Math.ceil(maxValue / 1000) * 1000;
-		            if (ymax < 1000) { ymax = 1000; }
-		                  
-		            Morris.Bar({
-		                element: element,
-		                data: data,
-		                xkey: xkey,
-		                ykeys: ykeys,
-		                labels: labels,
-		                gridLineColor: '#eee',
-		                barSizeRatio: 0.6,
-		                resize: true,
-		                hideHover: 'auto',
-		                barColors: lineColors,
-		                stacked: false,
-		                ymax: ymax
-		            });
-		        },
-		        
-		         //creates Line chart
-		       createLineChart : function (element, data, xkey, ykeys, labels) {
-		            Morris.Line({
-		                element: element,
-			            data: data,
-			            xkey: xkey,
-			            ykeys: ykeys,
-			            labels: labels,
-			             resize: true,
-		                hideHover: 'auto'
-		            });
-		        },createDonutChart : function (element, data, colors) {
-		            Morris.Donut({
-		                element: element,
-		                data: data,
-		                resize: true,
-		                colors: colors,
-		            });
-		        }
+		             resize: true,
+	                hideHover: 'auto',
+	                lineColors: ['#e71d36'],
+	                pointFillColors: ['#e71d36'],
+	                gridLineColor: '#f0f2f5'
+	            });
+	        },createDonutChart : function (element, data, colors) {
+	            Morris.Donut({
+	                element: element,
+	                data: data,
+	                resize: true,
+	                colors: colors,
+	            });
+	        }
 
 }
 

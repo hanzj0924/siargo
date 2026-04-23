@@ -1,78 +1,107 @@
-<div class="container-fluid p-3">
-<div class="row">
-	<div class="col">
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">API路径</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.apiPath ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">请求方法</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.apiMethod ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">订单号</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.orderId ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">批量订单号</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.orderIds ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">请求IP</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.requestIp ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">User-Agent</label>
-		<div class="col">
-			<p class="form-control-plaintext" style="word-break:break-all;">#(apiCallLog.userAgent ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">响应状态</label>
-		<div class="col">
-			<p class="form-control-plaintext">
-				#if(apiCallLog.responseStatus == "ok")
-				<span class="badge badge-success">成功</span>
-				#else
-				<span class="badge badge-danger">失败</span>
-				#end
-			</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">状态码</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.responseCode ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">响应消息</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.responseMsg ??)</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">耗时</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.costTime ??)ms</p>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-3 col-form-label font-weight-bold">调用时间</label>
-		<div class="col">
-			<p class="form-control-plaintext">#(apiCallLog.createTime ??)</p>
-		</div>
-	</div>
-	</div>
-</div>
+<div style="padding:16px 18px;font-size:13px;color:#333;line-height:1.6;">
+
+  <!-- 请求信息 -->
+  <div style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;margin-bottom:8px;">
+      <span style="font-size:14px;font-weight:600;color:#2c3e50;">&#128225; 请求信息</span>
+      <div style="flex:1;height:1px;background:#dee2e6;margin-left:10px;"></div>
+    </div>
+    <div style="border:1px solid #e9ecef;border-radius:6px;overflow:hidden;">
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">API 路径</div>
+        <div style="flex:1;padding:8px 12px;color:#212529;word-break:break-all;">#(apiCallLog.apiPath ??)</div>
+      </div>
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">请求方法</div>
+        <div style="flex:1;padding:8px 12px;">
+          #if(apiCallLog.apiMethod == "POST")
+          <span style="display:inline-block;padding:1px 8px;border-radius:3px;background:#fff3cd;color:#856404;font-weight:600;font-size:12px;">POST</span>
+          #else if(apiCallLog.apiMethod == "GET")
+          <span style="display:inline-block;padding:1px 8px;border-radius:3px;background:#d1ecf1;color:#0c5460;font-weight:600;font-size:12px;">GET</span>
+          #else
+          <span style="display:inline-block;padding:1px 8px;border-radius:3px;background:#e2e3e5;color:#383d41;font-weight:600;font-size:12px;">#(apiCallLog.apiMethod ??)</span>
+          #end
+        </div>
+      </div>
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">订单号</div>
+        <div style="flex:1;padding:8px 12px;color:#212529;">#(apiCallLog.orderId ??)</div>
+      </div>
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">批量订单号</div>
+        <div style="flex:1;padding:8px 12px;color:#212529;word-break:break-all;">#(apiCallLog.orderIds ??)</div>
+      </div>
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">请求 IP</div>
+        <div style="flex:1;padding:8px 12px;color:#212529;font-family:monospace;">#(apiCallLog.requestIp ??)</div>
+      </div>
+
+      <div style="display:flex;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">User-Agent</div>
+        <div style="flex:1;padding:8px 12px;color:#495057;font-family:monospace;font-size:11px;word-break:break-all;">#(apiCallLog.userAgent ??)</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 响应信息 -->
+  <div>
+    <div style="display:flex;align-items:center;margin-bottom:8px;">
+      <span style="font-size:14px;font-weight:600;color:#2c3e50;">&#128203; 响应信息</span>
+      <div style="flex:1;height:1px;background:#dee2e6;margin-left:10px;"></div>
+    </div>
+    <div style="border:1px solid #e9ecef;border-radius:6px;overflow:hidden;">
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">响应状态</div>
+        <div style="flex:1;padding:8px 12px;">
+          #if(apiCallLog.responseStatus == "ok")
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:12px;background:#d4edda;color:#155724;font-weight:600;font-size:12px;">&#10003; 成功</span>
+          #else
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:12px;background:#f8d7da;color:#721c24;font-weight:600;font-size:12px;">&#10007; 失败</span>
+          #end
+        </div>
+      </div>
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">状态码</div>
+        <div style="flex:1;padding:8px 12px;color:#212529;font-weight:500;">#(apiCallLog.responseCode ??)</div>
+      </div>
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">响应消息</div>
+        <div style="flex:1;padding:8px 12px;color:#212529;word-break:break-all;">#(apiCallLog.responseMsg ??)</div>
+      </div>
+
+      <div style="display:flex;border-bottom:1px solid #f1f3f5;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">耗时</div>
+        <div style="flex:1;padding:8px 12px;">
+          #if(apiCallLog.costTime < 500)
+          <span style="font-weight:600;color:#155724;">#(apiCallLog.costTime ??)ms</span>
+          <span style="margin-left:6px;font-size:11px;color:#28a745;">&#9679; 快速</span>
+          #else
+            #if(apiCallLog.costTime < 2000)
+            <span style="font-weight:600;color:#856404;">#(apiCallLog.costTime ??)ms</span>
+            <span style="margin-left:6px;font-size:11px;color:#ffc107;">&#9679; 较慢</span>
+            #else
+            <span style="font-weight:600;color:#721c24;">#(apiCallLog.costTime ??)ms</span>
+            <span style="margin-left:6px;font-size:11px;color:#dc3545;">&#9679; 超慢</span>
+            #end
+          #end
+        </div>
+      </div>
+
+      <div style="display:flex;">
+        <div style="width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;">调用时间</div>
+        <div style="flex:1;padding:8px 12px;color:#495057;">#date(apiCallLog.createTime, "yyyy-MM-dd HH:mm:ss")</div>
+      </div>
+
+    </div>
+  </div>
+
 </div>

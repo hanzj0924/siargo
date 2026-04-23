@@ -8,6 +8,12 @@ https://www.siargo.com.cn
 
 ## 更新日志
 
+### v2.3.0 (2026-04-23)
+- feat(dashboard): Dashboard页面全面美化，统计卡片重构为清爽简约风格，图表卡片增加圆角阴影和标题装饰，甜甜圈图配色差异化
+- style(qarep): 报告单模块多页面UI一致性美化（add/edit/details/editdes/index/inactiveList），表单分区卡片化，详情页CSS抽象重构
+- style(apicalllog): API调用日志详情页和列表页UI美化，样式对齐qarep模块规范
+- style(equipment): 设备记录页面微调优化
+
 ### v2.2.0 (2026-04-22)
 - feat(apicalllog): 修复日期控件data-datepicker改为data-date，修复JBoltTable布局与分页（添加jb_vflex/jb_vbody/fill_box），优化Morris柱状图Y轴自适应取整与整数显示
 - feat(pdf): PDFService增加safeStr空值安全处理，防止报告生成时字段空指针异常

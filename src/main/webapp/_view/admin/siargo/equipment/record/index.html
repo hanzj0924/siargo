@@ -55,7 +55,15 @@
 		{@/if}
 	</td>
 	<td>${data.record_date ? data.record_date.substring(0, 19) : '-'}</td>
-	<td style="text-align:left;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#007bff;cursor:pointer;" title="${data.description ?? '-'}"><span style="color:#333;">${data.description ?? '-'}</span></td>
+	<td>
+		{@if data.description==null || data.description==""}
+			<span class="text-muted">-</span>
+		{@else}
+			<span data-dialogbtn data-area="570,380" data-btn="close" data-title="事件描述"
+				data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.description}</div>"
+				style="cursor:pointer;color:#007bff;">${data.description}</span>
+		{@/if}
+	</td>
 	<td>${data.user_name ?? '-'}</td>
 	<td>
 		{@if data.creator_name}
