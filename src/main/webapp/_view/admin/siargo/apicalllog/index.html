@@ -56,7 +56,7 @@
 					<div class="card-body p-4 text-nowrap">
 						<span class="float-left"><i class="fa fa-bar-chart j_font_30 j_left_fa text-primary rounded"></i></span>
 						<div class="text-right">
-							<span class="d-block j_font_24">#(callStats.total ?? 0)</span>
+							<span class="d-block j_font_24" id="stat_total_#(pageId)">...</span>
 							<span class="d-block">总调用次数</span>
 						</div>
 					</div>
@@ -67,7 +67,7 @@
 					<div class="card-body p-4 text-nowrap">
 						<span class="float-left"><i class="fa fa-check-circle j_font_30 j_left_fa text-success rounded"></i></span>
 						<div class="text-right">
-							<span class="d-block j_font_24">#(callStats.successCount ?? 0)</span>
+							<span class="d-block j_font_24" id="stat_success_#(pageId)">...</span>
 							<span class="d-block">成功次数</span>
 						</div>
 					</div>
@@ -78,7 +78,7 @@
 					<div class="card-body p-4 text-nowrap">
 						<span class="float-left"><i class="fa fa-times-circle j_font_30 j_left_fa text-danger rounded"></i></span>
 						<div class="text-right">
-							<span class="d-block j_font_24">#(callStats.failCount ?? 0)</span>
+							<span class="d-block j_font_24" id="stat_fail_#(pageId)">...</span>
 							<span class="d-block">失败次数</span>
 						</div>
 					</div>
@@ -89,7 +89,7 @@
 					<div class="card-body p-4 text-nowrap">
 						<span class="float-left"><i class="fa fa-clock-o j_font_30 j_left_fa text-info rounded"></i></span>
 						<div class="text-right">
-							<span class="d-block j_font_24">#(callStats.avgCostTime ?? 0)<small>ms</small></span>
+							<span class="d-block j_font_24" id="stat_avgtime_#(pageId)">...<small>ms</small></span>
 							<span class="d-block">平均耗时</span>
 						</div>
 					</div>
@@ -167,12 +167,46 @@ $(function(){
 	});
 });
 function initApiCallLogChart_#(pageId)(){
+	// 异步加载统计数据，避免阻塞页面渲染
+	$.ajax({
+		url: '#(ctxPath)/admin/siargo/apicalllog/statsData',
+		type: 'GET',
+		dataType: 'json',
+		success: function(res){
+			if(res.state === 'ok' && res.data){
+				// 更新统计卡片
+				var cs = res.data.callStats || {};
+				$('#stat_total_#(pageId)').text(cs.total || 0);
+				$('#stat_success_#(pageId)').text(cs.successCount || 0);
+				$('#stat_fail_#(pageId)').text(cs.failCount || 0);
+				$('#stat_avgtime_#(pageId)').html((cs.avgCostTime || 0) + '<small>ms</small>');
+				// 渲染图表
+				renderDailyChart_#(pageId)(res.data.dailyStats || []);
+			} else {
+				// 响应状态异常或数据为空，降级显示
+				console.warn('[ApiCallLog] 统计数据加载异常, state:', res.state, 'msg:', res.msg);
+				$('#stat_total_#(pageId)').text('--');
+				$('#stat_success_#(pageId)').text('--');
+				$('#stat_fail_#(pageId)').text('--');
+				$('#stat_avgtime_#(pageId)').html('--<small>ms</small>');
+			}
+		},
+		error: function(xhr, status, error){
+			// 网络异常或服务端错误，降级显示
+			console.error('[ApiCallLog] 统计数据请求失败:', status, error);
+			$('#stat_total_#(pageId)').text('--');
+			$('#stat_success_#(pageId)').text('--');
+			$('#stat_fail_#(pageId)').text('--');
+			$('#stat_avgtime_#(pageId)').html('--<small>ms</small>');
+		}
+	});
+}
+function renderDailyChart_#(pageId)(rawData){
 	var chartDom = document.getElementById('echarts-line_#(pageId)');
 	if(!chartDom) return;
 	var existChart = echarts.getInstanceByDom(chartDom);
 	if(existChart) existChart.dispose();
 	var myChart = echarts.init(chartDom);
-	var rawData = #json(dailyStats);
 	// 构建最近30天日期映射，没有数据的日补0
 	var dataMap = {};
 	if(rawData && rawData.length > 0){
@@ -229,7 +263,16 @@ function initApiCallLogChart_#(pageId)(){
 		xAxis: {
 			type: 'category',
 			boundaryGap: false,
-			data: days
+			data: days,
+			axisLabel: {
+				interval: 'auto',
+				hideOverlap: true,
+				rotate: 0,
+				fontSize: 11
+			},
+			axisTick: {
+				alignWithLabel: true
+			}
 		},
 		yAxis: {
 			type: 'value',

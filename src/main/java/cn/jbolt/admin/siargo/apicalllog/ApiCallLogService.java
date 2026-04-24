@@ -1,6 +1,7 @@
 package cn.jbolt.admin.siargo.apicalllog;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import com.jfinal.plugin.activerecord.Page;
@@ -28,7 +29,10 @@ public class ApiCallLogService extends JBoltBaseService<ApiCallLog> {
 
 	private volatile Kv statsCache;
 	private volatile long statsCacheTime;
+	private volatile List<Record> dailyStatsCache;
+	private volatile long dailyStatsCacheTime;
 	private final ReentrantLock statsLock = new ReentrantLock();
+	private final ReentrantLock dailyStatsLock = new ReentrantLock();
 	private static final long CACHE_TTL = 30 * 60 * 1000L;
 
 	@Override
@@ -228,21 +232,38 @@ public class ApiCallLogService extends JBoltBaseService<ApiCallLog> {
 	 */
 	public void clearStatsCache() {
 		statsCache = null;
+		dailyStatsCache = null;
 	}
 
 	/**
-	 * 获取最近30天每日调用量统计，供图表展示
+	 * 获取最近30天每日调用量统计（30分钟缓存），供图表展示
 	 * @return
 	 */
 	public List<Record> getDailyStats() {
-		return Db.find(
-			"SELECT DATE(create_time) AS day, " +
-			"SUM(CASE WHEN response_status='ok' THEN 1 ELSE 0 END) AS success_count, " +
-			"SUM(CASE WHEN response_status='fail' THEN 1 ELSE 0 END) AS fail_count " +
-			"FROM siargo_api_call_log " +
-			"WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) " +
-			"GROUP BY DATE(create_time) ORDER BY day"
-		);
+		// 无锁快速读
+		if (dailyStatsCache != null && (System.currentTimeMillis() - dailyStatsCacheTime) < CACHE_TTL) {
+			return dailyStatsCache;
+		}
+		dailyStatsLock.lock();
+		try {
+			// 双重检查
+			if (dailyStatsCache != null && (System.currentTimeMillis() - dailyStatsCacheTime) < CACHE_TTL) {
+				return dailyStatsCache;
+			}
+			List<Record> list = Db.find(
+				"SELECT DATE(create_time) AS day, " +
+				"SUM(CASE WHEN response_status='ok' THEN 1 ELSE 0 END) AS success_count, " +
+				"SUM(CASE WHEN response_status='fail' THEN 1 ELSE 0 END) AS fail_count " +
+				"FROM siargo_api_call_log " +
+				"WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) " +
+				"GROUP BY DATE(create_time) ORDER BY day"
+			);
+			dailyStatsCache = Collections.unmodifiableList(list);
+			dailyStatsCacheTime = System.currentTimeMillis();
+			return dailyStatsCache;
+		} finally {
+			dailyStatsLock.unlock();
+		}
 	}
 
 	/**

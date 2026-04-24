@@ -8,6 +8,7 @@ import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.kit.Kv;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.ApiCallLog;
 /**
@@ -26,11 +27,9 @@ public class ApiCallLogAdminController extends JBoltBaseController {
 	private ApiCallLogService service;
 	
    /**
-	* 首页 - 带统计数据渲染
+	* 首页
 	*/
 	public void index() {
-		set("callStats", service.getCallStats());
-		set("dailyStats", service.getDailyStats());
 		render("index.html");
 	}
   	
@@ -59,10 +58,13 @@ public class ApiCallLogAdminController extends JBoltBaseController {
 	}
 	
    /**
-	* 统计数据 JSON（供前端 AJAX 刷新）
+	* 统计数据 JSON（供前端 AJAX 异步加载）
 	*/
-	public void stats() {
-		renderJson(service.getCallStats());
+	public void statsData() {
+		Kv data = Kv.create();
+		data.set("callStats", service.getCallStats());
+		data.set("dailyStats", service.getDailyStats());
+		renderJsonData(data);
 	}
 	
    /**
