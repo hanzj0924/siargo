@@ -324,6 +324,9 @@ public class QareportAdminController extends JBoltBaseController {
 			return;
 		}
 		set("qapro",qareport);
+		// 查询该报告单下的全部产品
+		List<Product> products = service.findProductsByReportId(qareport.getLong("id"));
+		set("products", products);
 		render("details.html");
 	}
 	

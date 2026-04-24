@@ -8,6 +8,11 @@ https://www.siargo.com.cn
 
 ## 更新日志
 
+### v2.3.1 (2026-04-24)
+- feat(qarep): QA报告详情页检验进度从报告单级别下沉到每个产品独立展示，支持产品级检验人和时间显示
+- feat(qarep): 批准Tab表格新增行合并功能，同一报告单的多个产品行自动合并显示，交替背景色区分
+- refactor(qarep): 批准Tab表格列布局调整，查看PDF列移至末尾，固定列配置优化
+
 ### v2.3.0 (2026-04-23)
 - feat(dashboard): Dashboard页面全面美化，统计卡片重构为清爽简约风格，图表卡片增加圆角阴影和标题装饰，甜甜圈图配色差异化
 - style(qarep): 报告单模块多页面UI一致性美化（add/edit/details/editdes/index/inactiveList），表单分区卡片化，详情页CSS抽象重构

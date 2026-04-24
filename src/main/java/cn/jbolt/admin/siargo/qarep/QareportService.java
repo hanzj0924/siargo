@@ -227,24 +227,41 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		if (insp > 0) {
 			sql.eq("sp.insp", insp);
 				
-			// 根据检验进度设置对应的排序字段
+			// 排序：首要按创建时间倒序（最新报告单在前），次要按formnum保证同一报告单行相邻
 			switch(insp){
 	         case 1:
-	        	 sql.orderBy("sq.create_time", true);  // 待检验：按创建时间
+	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.formnum", true);
+	        	 break;
 	         case 2:
-	        	 sql.orderBy("sp.accq_time", true);  // 精度检验：按精度检验时间
+	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.formnum", true);
+	        	 sql.orderBy("sp.accq_time", true);  // 精度检验：组内按精度检验时间
+	        	 break;
 	         case 3:
-	        	 sql.orderBy("sp.funq_time", true);  // 功能检验：按功能检验时间
+	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.formnum", true);
+	        	 sql.orderBy("sp.funq_time", true);  // 功能检验：组内按功能检验时间
+	        	 break;
 	         case 4:
-	        	 sql.orderBy("sp.appq_time", true);  // 批准检验：按批准时间
+	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.formnum", true);
+	        	 sql.orderBy("sp.appq_time", true);  // 批准检验：组内按批准时间
+	        	 break;
 	         case 5:
-	        	 sql.orderBy("sp.allq_time", true);  // 最终放行：按放行时间
+	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.formnum", true);
+	        	 sql.orderBy("sp.allq_time", true);  // 最终放行：组内按放行时间
+	        	 break;
 	         default:
 	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.formnum", true);
+	        	 break;
 			}
 				
 		}else {
 			sql.orderBy("sq.create_time", true);
+			sql.orderBy("sq.formnum", true);
 		}
 			
 		return paginateRecord(sql, true);
@@ -389,6 +406,33 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  sp.id = ? ";
 
 		return dao.findFirst(sql, id);
+	}
+
+	/**
+	 * 根据报告单ID查询该报告单下的全部有效产品信息（含字典翻译）
+	 */
+	public List<Product> findProductsByReportId(Long reportId) {
+		String sql = "SELECT sp.*, "
+			+ "d_type.NAME AS type_name, "
+			+ "d_insp.NAME AS insp_name, "
+			+ "accq_user.NAME AS accq_name, "
+			+ "funq_user.NAME AS funq_name, "
+			+ "appq_user.NAME AS appq_name, "
+			+ "allq_user.NAME AS allq_name "
+			+ "FROM siargo_product sp "
+			+ "LEFT JOIN jb_dictionary AS d_type ON d_type.type_key = 'siargo_prod_type' "
+			+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+			+ "AND d_type.enable = '1' "
+			+ "LEFT JOIN jb_dictionary AS d_insp ON d_insp.type_key = 'siargo_insp' "
+			+ "AND d_insp.sn COLLATE utf8mb4_general_ci = CAST(sp.insp AS CHAR) "
+			+ "AND d_insp.enable = '1' "
+			+ "LEFT JOIN jb_user AS accq_user ON accq_user.id = sp.accq_uid "
+			+ "LEFT JOIN jb_user AS funq_user ON funq_user.id = sp.funq_uid "
+			+ "LEFT JOIN jb_user AS appq_user ON appq_user.id = sp.appq_uid "
+			+ "LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid "
+			+ "WHERE sp.report_id = ? AND sp.vd = 1 "
+			+ "ORDER BY sp.id ASC";
+		return new Product().dao().find(sql, reportId);
 	}
 
 	/**

@@ -16,6 +16,12 @@
 .dt-gcl{display:flex;border-right:1px solid #f1f3f5}
 .dt-gcr{display:flex}
 .dt-badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:12px;font-weight:600;font-size:12px}
+.insp-flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:2px 0}
+.insp-step{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:80px}
+.insp-step-name{font-size:11px;color:#6c757d;font-weight:500}
+.insp-step-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-weight:600;font-size:12px;white-space:nowrap}
+.insp-step-time{font-size:11px;color:#999;white-space:nowrap}
+.insp-arrow{color:#adb5bd;font-size:16px;line-height:1;margin:0 2px;align-self:center}
 </style>
 <div class="dt-wrap">
 
@@ -24,9 +30,9 @@
     <div class="dt-hd"><span>&#128203; 报告单信息</span><i></i></div>
     <div class="dt-card">
       <div class="dt-row">
-        <div class="dt-lbl">报告单类型</div>
+        <div class="dt-lbl">类型</div>
         <div class="dt-val">#(qapro.retype_name ??)</div>
-        <div class="dt-lbl-m">报告单版号</div>
+        <div class="dt-lbl-m">版号</div>
         <div class="dt-val">#(qapro.pdfver_name ??)</div>
       </div>
       <div class="dt-row">
@@ -39,54 +45,84 @@
         <div class="dt-lbl">客户名称</div>
         <div class="dt-val">#(qapro.sc_name ??)</div>
       </div>
-      <div class="dt-row">
-        <div class="dt-lbl">检验进度</div>
-        <div class="dt-val">
-          #if(qapro.insp == 1)
-          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(qapro.insp_name ??)</span>
-          #else if(qapro.insp == 2)
-          <span class="dt-badge" style="background:#d1ecf1;color:#0c5460;">#(qapro.insp_name ??)</span>
-          #else if(qapro.insp == 3)
-          <span class="dt-badge" style="background:#fff3cd;color:#856404;">#(qapro.insp_name ??)</span>
-          #else if(qapro.insp == 4)
-          <span class="dt-badge" style="background:#fde8d8;color:#7d3c0d;">#(qapro.insp_name ??)</span>
-          #else if(qapro.insp == 5)
-          <span class="dt-badge" style="background:#d4edda;color:#155724;">&#10003; #(qapro.insp_name ??)</span>
-          #else
-          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(qapro.insp_name ??)</span>
-          #end
-        </div>
-      </div>
     </div>
   </div>
 
   <!-- 产品信息 -->
   <div class="dt-sec">
     <div class="dt-hd"><span>&#128230; 产品信息</span><i></i></div>
-    <div class="dt-card">
+    #for(p : products)
+    <div class="dt-card" #if(for.index > 0) style="margin-top:8px;border-top:1px dashed #dee2e6;padding-top:8px;" #end>
       <div class="dt-row">
         <div class="dt-lbl">产品类型</div>
-        <div class="dt-val">#(qapro.type_name??)</div>
-        <div class="dt-lbl-m">产品型号</div>
-        <div class="dt-val">#(qapro.sp_model??)</div>
-      </div>
-      <div class="dt-row">
-        <div class="dt-lbl">送检 / 检验数量</div>
+        <div class="dt-val">#(p.type_name??)</div>
+        <div class="dt-lbl-m">送检 / 检验数量</div>
         <div class="dt-val">
-          <span style="font-weight:500;">#(qapro.sp_qsi??)</span>
+          <span style="font-weight:500;">#(p.qsi??)</span>
           <span style="color:#adb5bd;margin:0 4px;">/</span>
-          <span style="font-weight:500;">#(qapro.sp_qi??)</span>
+          <span style="font-weight:500;">#(p.qi??)</span>
         </div>
       </div>
       <div class="dt-row">
+        <div class="dt-lbl">产品型号</div>
+        <div class="dt-val">#(p.model??)</div>
+      </div>
+      <div class="dt-row">
         <div class="dt-lbl">编号</div>
-        <div class="dt-val" style="white-space:pre-wrap;word-break:break-all;">#(qapro.sp_number??)</div>
+        <div class="dt-val" style="white-space:pre-wrap;word-break:break-all;">#(p.number??)</div>
       </div>
       <div class="dt-row">
         <div class="dt-lbl">备注</div>
-        <div class="dt-val" style="color:#495057;white-space:pre-wrap;word-break:break-all;">#(qapro.sp_des??)</div>
+        <div class="dt-val" style="color:#495057;white-space:pre-wrap;word-break:break-all;">#(p.des??)</div>
+      </div>
+      <div class="dt-row">
+        <div class="dt-lbl">检验进度</div>
+        <div class="dt-val">
+          #if(p.insp == 1)
+          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(p.insp_name ??)</span>
+          #else if(p.insp >= 2)
+          <div class="insp-flow">
+            <!-- 精度检验 -->
+            <div class="insp-step">
+              <span class="insp-step-name">精度检验</span>
+              <span class="insp-step-badge" style="background:#17a2b8;color:#fff;">#(p.accq_name ??)</span>
+              <span class="insp-step-time">#(p.accq_time ??)</span>
+            </div>
+            #if(p.insp >= 3)
+            <span class="insp-arrow">&#8594;</span>
+            <!-- 外观检验 -->
+            <div class="insp-step">
+              <span class="insp-step-name">外观检验</span>
+              <span class="insp-step-badge" style="background:#007bff;color:#fff;">#(p.funq_name ??)</span>
+              <span class="insp-step-time">#(p.funq_time ??)</span>
+            </div>
+            #end
+            #if(p.insp >= 4)
+            <span class="insp-arrow">&#8594;</span>
+            <!-- 包装检验 -->
+            <div class="insp-step">
+              <span class="insp-step-name">包装检验</span>
+              <span class="insp-step-badge" style="background:#ffc107;color:#212529;">#(p.appq_name ??)</span>
+              <span class="insp-step-time">#(p.appq_time ??)</span>
+            </div>
+            #end
+            #if(p.insp >= 5)
+            <span class="insp-arrow">&#8594;</span>
+            <!-- 批准 -->
+            <div class="insp-step">
+              <span class="insp-step-name">批准</span>
+              <span class="insp-step-badge" style="background:#dc3545;color:#fff;">&#10003; #(p.allq_name ??)</span>
+              <span class="insp-step-time">#(p.allq_time ??)</span>
+            </div>
+            #end
+          </div>
+          #else
+          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(p.insp_name ??)</span>
+          #end
+        </div>
       </div>
     </div>
+    #end
   </div>
 
   <!-- 大流量计参数 -->

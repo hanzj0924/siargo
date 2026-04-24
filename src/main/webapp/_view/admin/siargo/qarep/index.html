@@ -235,16 +235,6 @@
 			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
 </td>
-<td>
-	{@if data.spPdfstr==null}
-		<span class="text-muted">-</span>
-	{@else}
-		<a  id="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
-			href="${data.spPdfstr}" onclick="loadPDF(this, '${data.spPdfstr}')">
-		<i class="fa fa-eye"></i> 查看</a> 
-	{@/if}
-	
-</td>
 <td>${data.spQsi}</td>
 <td>${data.spQi}</td>
 <td>${data.spModel}</td>
@@ -269,6 +259,16 @@
 <td>
 	<span class="badge badge-danger">${data.allqName}</span>
 	<small class="text-muted d-block">${data.allqTime}</small>
+</td>
+<td>
+	{@if data.spPdfstr==null}
+		<span class="text-muted">-</span>
+	{@else}
+		<a  id="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
+			href="${data.spPdfstr}" onclick="loadPDF(this, '${data.spPdfstr}')">
+		<i class="fa fa-eye"></i> 查看</a> 
+	{@/if}
+	
 </td>
 </tr>
 {@/each}
@@ -644,6 +644,7 @@
 				id="allreport_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
+				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas"
 				data-column-resize="true"
 				data-column-prepend="1:checkbox"
@@ -651,7 +652,7 @@
 				data-rowtpl="allreportRowtpl_#(pageId)"
 				data-page="allreportPage_#(pageId)"
 				data-toolbar="allreport_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3,4"
+				data-fixed-columns-left="1,2,3,4,5,6"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -660,7 +661,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="110" data-column="sp_des">备注</th>
+						<th data-width="130" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="200" data-column="sp_model">产品型号</th>
@@ -682,6 +683,7 @@
 				id="noq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
+				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=1"
 				data-column-resize="true"
 				data-column-prepend="1:checkbox"
@@ -689,7 +691,7 @@
 				data-rowtpl="noqRowtpl_#(pageId)"
 				data-page="noqPage_#(pageId)"
 				data-toolbar="noq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3,4"
+				data-fixed-columns-left="1,2,3,4,5,6"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -698,7 +700,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="110" data-column="sp_des">备注</th>
+						<th data-width="130" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
@@ -719,6 +721,7 @@
 				id="accq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
+				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=2"
 				data-column-resize="true"
 				data-column-prepend="1:checkbox"
@@ -726,7 +729,7 @@
 				data-rowtpl="accqRowtpl_#(pageId)"
 				data-page="accqPage_#(pageId)"
 				data-toolbar="accq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3,4"
+				data-fixed-columns-left="1,2,3,4,5,6"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -735,7 +738,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="110" data-column="sp_des">备注</th>
+						<th data-width="130" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
@@ -756,6 +759,7 @@
 				id="funq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
+				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=3"
 				data-column-resize="true"
 				data-column-prepend="1:checkbox"
@@ -763,7 +767,7 @@
 				data-rowtpl="funqRowtpl_#(pageId)"
 				data-page="funqPage_#(pageId)"
 				data-toolbar="funq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3,4"
+				data-fixed-columns-left="1,2,3,4,5,6"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -772,7 +776,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="110" data-column="sp_des">备注</th>
+						<th data-width="130" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="220" data-column="sp_model">产品型号</th>
@@ -794,6 +798,7 @@
 				id="appq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
+				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=4"
 				data-column-resize="true"
 				data-column-prepend="1:checkbox"
@@ -801,8 +806,7 @@
 				data-rowtpl="appqRowtpl_#(pageId)"
 				data-page="appqPage_#(pageId)"
 				data-toolbar="appq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3,4"
-				data-fixed-columns-right="-1,-2,-3"
+				data-fixed-columns-left="1,2,3,4,5,6"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -811,7 +815,7 @@
 						<th data-width="80" data-column="order_id">订单号</th>
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="110" data-column="sp_des">备注</th>
+						<th data-width="130" data-column="sp_des">备注</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="250" data-column="sp_model">产品型号</th>
@@ -834,6 +838,7 @@
 				id="allq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
+				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=5"
 				data-column-resize="true"
 				data-column-prepend="1:checkbox"
@@ -841,8 +846,8 @@
 				data-rowtpl="allqRowtpl_#(pageId)"
 				data-page="allqPage_#(pageId)"
 				data-toolbar="allq_toolbar_#(pageId)"
-				data-fixed-columns-left="1,2,3,4" 
-				data-fixed-columns-right="-1,-2,-3,-4"
+				data-fixed-columns-left="1,2,3,4,5,6" 
+				data-fixed-columns-right="-1"
 				>
 				<thead class="fw-normal">
 					<tr>
@@ -852,7 +857,6 @@
 						<th data-width="100" data-column="rep_type">报告单类型</th>
 						<th data-width="80" data-column="prod_type">产品类型</th>
 						<th data-width="110" data-column="sp_des">备注</th>
-						<th data-width="120" data-column="pdfstr">查看PDF</th>
 						<th data-width="80" data-column="sp_qsi">送检数量</th>
 						<th data-width="80" data-column="sp_qi">检验数量</th>
 						<th data-min-width="250" data-column="sp_model">产品型号</th>
@@ -862,6 +866,7 @@
 						<th data-width="130" data-column="funq_uid">外观检验</th>
 						<th data-width="130" data-column="appq_uid">包装检验</th>
 						<th data-width="130" data-column="allq_uid">批准</th>
+						<th data-width="100" data-column="pdfstr">查看PDF</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -1104,8 +1109,116 @@
 .badge-warning { background-color: #f5a962 !important; color: #fff !important; }
 /* 批准badge柔红色 */
 .badge-danger { background-color: #e86a78 !important; }
+
+/* 报告单行合并 - 左侧固定列垂直居中 */
+.DTFC_LeftBodyWrapper td[rowspan] {
+    vertical-align: middle !important;
+}
+
+/* 报告单行合并 - 合并组交替背景色（区分相邻合并组） */
+.jbolt_table tbody tr.merge-group-odd > td,
+.jbolt_table_fixed_left .jbolt_table_body table tbody tr.merge-group-odd > td {
+    background-color: #f0f7ff !important;
+}
+.jbolt_table tbody tr.merge-group-even > td,
+.jbolt_table_fixed_left .jbolt_table_body table tbody tr.merge-group-even > td {
+    background-color: #f0fff4 !important;
+}
 </style>
 <script type="text/javascript">
+/**
+ * 报告单行合并 - AJAX成功回调入口
+ * 同时合并主表和左侧固定列，确保无论 left_fixed 是否可见都能看到合并效果
+ */
+function mergeReportRows(table, res) {
+    if (!table) return;
+    
+    // 分页参数
+    var currentPage = parseInt(table.data("currentpage")) || 1;
+    var pageSize = parseInt(table.data("pagesize")) || 15;
+    // 合并列索引（跳过 0=checkbox），formnum 在索引 2
+    var mergeColIndexes = [1, 2, 3, 4, 5];
+    var formnumColIdx = 2;
+    
+    // 1. 始终合并主表 tbody（确保无水平滚动条时用户也能看到合并效果）
+    var $mainTbody = table.find("tbody");
+    if ($mainTbody.length && $mainTbody.find("tr").length > 0) {
+        mergeFixedLeftRows($mainTbody, mergeColIndexes, formnumColIdx, currentPage, pageSize);
+    }
+    
+    // 2. 如果左侧固定列存在，也合并它（水平滚动条出现时覆盖层可见）
+    var $fixedLeftTbody = null;
+    if (table.left_fixed && table.left_fixed.body && table.left_fixed.body.table) {
+        $fixedLeftTbody = table.left_fixed.body.table.find("tbody");
+    }
+    if (!$fixedLeftTbody || !$fixedLeftTbody.length) {
+        // 降级：通过 DOM 查找
+        if (table.table_box) {
+            $fixedLeftTbody = table.table_box.find(".jbolt_table_fixed_left .jbolt_table_body table tbody");
+        }
+    }
+    if ($fixedLeftTbody && $fixedLeftTbody.length && $fixedLeftTbody.find("tr").length > 0) {
+        mergeFixedLeftRows($fixedLeftTbody, mergeColIndexes, formnumColIdx, currentPage, pageSize);
+    }
+}
+
+/**
+ * 核心合并逻辑 - 按 formnum 分组并应用 rowspan
+ * @param $tbody       左侧固定列的 tbody jQuery 对象
+ * @param colIndexes   需要合并的列索引数组（基于固定列表格的 td 索引）
+ * @param formnumColIdx formnum 所在的列索引（用于分组依据）
+ * @param currentPage  当前页码
+ * @param pageSize     每页条数
+ */
+function mergeFixedLeftRows($tbody, colIndexes, formnumColIdx, currentPage, pageSize) {
+    var $rows = $tbody.find("tr");
+    if ($rows.length === 0) return;
+
+    // 1. 按 formnum 连续分组
+    var groups = [];
+    var currentFormnum = null;
+    $rows.each(function(i) {
+        var formnum = $(this).find("td").eq(formnumColIdx).text().trim();
+        if (formnum !== currentFormnum) {
+            groups.push({ startIdx: i, count: 1, formnum: formnum });
+            currentFormnum = formnum;
+        } else {
+            groups[groups.length - 1].count++;
+        }
+    });
+
+    // 2. 对每个分组执行合并
+    var pageOffset = (currentPage - 1) * pageSize;
+    var mergeGroupCount = 0; // 合并组计数器，用于交替背景色
+    groups.forEach(function(group, gIdx) {
+        colIndexes.forEach(function(colIdx) {
+            var $firstTd = $rows.eq(group.startIdx).find("td").eq(colIdx);
+            if (group.count > 1) {
+                $firstTd.attr("rowspan", group.count);
+                for (var r = 1; r < group.count; r++) {
+                    $rows.eq(group.startIdx + r).find("td").eq(colIdx).hide();
+                }
+            }
+            $firstTd.css("vertical-align", "middle");
+            // 序号列重算：每个分组只显示一个序号
+            if (colIdx === 1) {
+                $firstTd.text(pageOffset + gIdx + 1);
+            }
+        });
+        // 为多行合并组添加交替背景色标记
+        if (group.count > 1) {
+            var colorClass = (mergeGroupCount % 2 === 0) ? "merge-group-odd" : "merge-group-even";
+            mergeGroupCount++;
+            $rows.eq(group.startIdx).addClass("merge-group-first");
+            for (var r = 0; r < group.count; r++) {
+                $rows.eq(group.startIdx + r).addClass(colorClass);
+            }
+        }
+        // 为分组最后一行添加加深边框样式（视觉分隔）
+        $rows.eq(group.startIdx + group.count - 1).addClass("merge-group-last");
+    });
+}
+
 // 切换Tab
 function switchTabByIndex(index) {
 	// 更新导航active状态
