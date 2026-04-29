@@ -42,17 +42,17 @@ public class MainLogicGenerator extends JBoltMainLogicGenerator{
 		//生成java代码里的作者信息 默认 JBolt-Generator
 		String author                    = "hanzj";
 		//controller service等java代码生成的报名 路径
-		String packageName               = "cn.jbolt.admin.siargo.apicalllog";
+		String packageName               = "cn.jbolt.admin.siargo.equipment.inspectionBatch";
 		//在路由配置里的controllerPath参数 也用在生成其它URL的前缀
-		String controllerPath            = "/admin/siargo/apicalllog";
+		String controllerPath            = "/admin/siargo/equipment/inspectionBatch";
 		//生成html存放位置 从src/main/webapp根目录下开始 /作为前缀
-		String viewFolder                = "/_view/admin/siargo/apicalllog";
+		String viewFolder                = "/_view/admin/siargo/equipment/inspectionBatch";
 		//生成Index.html左上角页面标题
-		String pageTitle                 = "API调用记录";
+		String pageTitle                 = "检校批次记录";
 		//在页面里使用增加 修改 删除 提示信息等用到的针对此模块操作的数据名称 例如 商品管理中是【商品】 品牌管理中是【品牌】
-		String dataName                  = "ApiCallLog";
+		String dataName                  = "InspectionBatch";
 		//生成模块用的model是哪个？
-		Class<? extends Model<?>> modelClass = ApiCallLog.class;
+		Class<? extends Model<?>> modelClass = EquipmentInspectionBatch.class;
 		//是否需要分页查询
 		boolean needPaginate             = true;
 		//index.html 是否需要启用表格的工具条 toolbar
@@ -60,14 +60,14 @@ public class MainLogicGenerator extends JBoltMainLogicGenerator{
 		//执行删除时是否做检测校验
 		boolean checkDelete              = true;
 		//关键词查询匹配字段 多个用逗号隔开
-		String matchColumns              = "api_path";
+		String matchColumns              = "batch_date";
 		//查询用默认排序字段 多个用逗号隔开
-		String orderColumn               = "create_time";
+		String orderColumn               = "batch_date";
 		//查询用默认排序方式 desc asc
 		String orderType                 = "desc";
 		//这个模块crud 等关键操作如果需要增加systemLog需要指定log类型 默认是空 需要设置按照下面注释的案例设置
 		//SystemLogTargetType projectSystemLogTargetType   = SystemLogTargetType.NONE;
-		SystemLogTargetType projectSystemLogTargetType   = new SystemLogTargetType("ApiCallLog","API调用记录",20005);
+		SystemLogTargetType projectSystemLogTargetType   = new SystemLogTargetType("EquipmentInspectionBatch","检校批次记录",20006);
 
 		/*
 		 * 需要在Controller上方声明的@CheckPermission(PermissionKey.USER) 

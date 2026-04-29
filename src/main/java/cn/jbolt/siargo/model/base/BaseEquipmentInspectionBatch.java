@@ -19,7 +19,7 @@ public abstract class BaseEquipmentInspectionBatch<M extends BaseEquipmentInspec
     public static final String BATCH_DATE = "batch_date";
     /**检校概况描述*/
     public static final String DESCRIPTION = "description";
-    /**设备检定状态：1-合格 0-不合格*/
+    /**设备检定状态：1-合格 2-不合格*/
     public static final String STATUS = "status";
     /**编制人，关联jb_user.id*/
     public static final String CREATOR_ID = "creator_id";
@@ -92,7 +92,7 @@ public abstract class BaseEquipmentInspectionBatch<M extends BaseEquipmentInspec
 	}
 
 	/**
-	 * 设备检定状态：1-合格 0-不合格
+	 * 设备检定状态：1-合格 2-不合格
 	 */
 	public M setStatus(java.lang.Integer status) {
 		set("status", status);
@@ -100,9 +100,9 @@ public abstract class BaseEquipmentInspectionBatch<M extends BaseEquipmentInspec
 	}
 	
 	/**
-	 * 设备检定状态：1-合格 0-不合格
+	 * 设备检定状态：1-合格 2-不合格
 	 */
-	@JBoltField(name="status" ,columnName="status",type="Integer", remark="设备检定状态：1-合格 0-不合格", required=true, maxLength=3, fixed=0, order=5)
+	@JBoltField(name="status" ,columnName="status",type="Integer", remark="设备检定状态：1-合格 2-不合格", required=true, maxLength=3, fixed=0, order=5)
 	public java.lang.Integer getStatus() {
 		return getInt("status");
 	}

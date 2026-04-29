@@ -47,14 +47,20 @@ public class EquipmentRecordService extends JBoltBaseService<EquipmentRecord> {
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param keywords
+	 * @param batchId 批次ID（可为null）
 	 * @return
 	 */
-	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords) {
+	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, Long batchId) {
+		StringBuilder fromSql = new StringBuilder(
+			"FROM siargo_equipment_record er " +
+			"LEFT JOIN jb_dictionary d ON d.sn = er.record_type AND d.type_id = (SELECT id FROM jb_dictionary_type WHERE type_key = 'siargo_equipment_record_type' LIMIT 1) ");
+		if (batchId != null) {
+			fromSql.append("WHERE er.batch_id = " + batchId + " ");
+		}
+		fromSql.append("ORDER BY er.record_date DESC");
 		return Db.paginate(pageNumber, pageSize,
 				"SELECT er.*, d.name AS record_type_name",
-				"FROM siargo_equipment_record er " +
-				"LEFT JOIN jb_dictionary d ON d.sn = er.record_type AND d.type_id = (SELECT id FROM jb_dictionary_type WHERE type_key = 'siargo_equipment_record_type' LIMIT 1) " +
-				"ORDER BY er.record_date DESC");
+				fromSql.toString());
 	}
 	
 	/**

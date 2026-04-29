@@ -15,7 +15,9 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
     public static final String ID = "id";
     /**设备ID*/
     public static final String EQUIPMENT_ID = "equipment_id";
-    /**使用状态/记录类型，字典siargo_equipment_record_type的sn*/
+    /**检校批次ID*/
+    public static final String BATCH_ID = "batch_id";
+    /**记录类型，字典siargo_equipment_record_type的sn*/
     public static final String RECORD_TYPE = "record_type";
     /**事件日期*/
     public static final String RECORD_DATE = "record_date";
@@ -23,16 +25,6 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
     public static final String DESCRIPTION = "description";
     /**处理人，关联jb_user.id*/
     public static final String USER_ID = "user_id";
-    /**编制人，关联jb_user.id*/
-    public static final String CREATOR_ID = "creator_id";
-    /**审核人，关联jb_user.id*/
-    public static final String AUDITOR_ID = "auditor_id";
-    /**编制时间*/
-    public static final String CREATOR_TIME = "creator_time";
-    /**审核时间*/
-    public static final String AUDITOR_TIME = "auditor_time";
-    /**审核状态 0-未审核 1-待审核 2-已审核*/
-    public static final String AUDIT_STATUS = "audit_status";
 	public M setId(java.lang.Long id) {
 		set("id", id);
 		return (M)this;
@@ -62,7 +54,24 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
 	}
 
 	/**
-	 * 使用状态/记录类型，字典siargo_equipment_record_type的sn
+	 * 检校批次ID
+	 */
+	public M setBatchId(java.lang.Long batchId) {
+		set("batch_id", batchId);
+		return (M)this;
+	}
+	
+	/**
+	 * 检校批次ID
+	 */
+	@JBoltField(name="batchId" ,columnName="batch_id",type="Long", remark="检校批次ID", required=false, maxLength=19, fixed=0, order=3)
+	@JSONField(serializeUsing= ToStringSerializer.class)
+	public java.lang.Long getBatchId() {
+		return getLong("batch_id");
+	}
+
+	/**
+	 * 记录类型，字典siargo_equipment_record_type的sn
 	 */
 	public M setRecordType(java.lang.String recordType) {
 		set("record_type", recordType);
@@ -70,9 +79,9 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
 	}
 	
 	/**
-	 * 使用状态/记录类型，字典siargo_equipment_record_type的sn
+	 * 记录类型，字典siargo_equipment_record_type的sn
 	 */
-	@JBoltField(name="recordType" ,columnName="record_type",type="String", remark="使用状态/记录类型，字典siargo_equipment_record_type的sn", required=true, maxLength=30, fixed=0, order=3)
+	@JBoltField(name="recordType" ,columnName="record_type",type="String", remark="记录类型，字典siargo_equipment_record_type的sn", required=true, maxLength=30, fixed=0, order=4)
 	public java.lang.String getRecordType() {
 		return getStr("record_type");
 	}
@@ -88,7 +97,7 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
 	/**
 	 * 事件日期
 	 */
-	@JBoltField(name="recordDate" ,columnName="record_date",type="DateTime", remark="事件日期", required=false, maxLength=19, fixed=0, order=4)
+	@JBoltField(name="recordDate" ,columnName="record_date",type="Date", remark="事件日期", required=false, maxLength=19, fixed=0, order=5)
 	public java.util.Date getRecordDate() {
 		return getDate("record_date");
 	}
@@ -104,7 +113,7 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
 	/**
 	 * 事件描述
 	 */
-	@JBoltField(name="description" ,columnName="description",type="String", remark="事件描述", required=true, maxLength=500, fixed=0, order=5)
+	@JBoltField(name="description" ,columnName="description",type="String", remark="事件描述", required=true, maxLength=500, fixed=0, order=6)
 	public java.lang.String getDescription() {
 		return getStr("description");
 	}
@@ -124,88 +133,6 @@ public abstract class BaseEquipmentRecord<M extends BaseEquipmentRecord<M>> exte
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getUserId() {
 		return getLong("user_id");
-	}
-
-	/**
-	 * 编制人，关联jb_user.id
-	 */
-	public M setCreatorId(java.lang.Long creatorId) {
-		set("creator_id", creatorId);
-		return (M)this;
-	}
-	
-	/**
-	 * 编制人，关联jb_user.id
-	 */
-	@JBoltField(name="creatorId" ,columnName="creator_id",type="Long", remark="编制人，关联jb_user.id", required=false, maxLength=19, fixed=0, order=8)
-	@JSONField(serializeUsing= ToStringSerializer.class)
-	public java.lang.Long getCreatorId() {
-		return getLong("creator_id");
-	}
-
-	/**
-	 * 审核人，关联jb_user.id
-	 */
-	public M setAuditorId(java.lang.Long auditorId) {
-		set("auditor_id", auditorId);
-		return (M)this;
-	}
-	
-	/**
-	 * 审核人，关联jb_user.id
-	 */
-	@JBoltField(name="auditorId" ,columnName="auditor_id",type="Long", remark="审核人，关联jb_user.id", required=false, maxLength=19, fixed=0, order=9)
-	@JSONField(serializeUsing= ToStringSerializer.class)
-	public java.lang.Long getAuditorId() {
-		return getLong("auditor_id");
-	}
-
-	/**
-	 * 编制时间
-	 */
-	public M setCreatorTime(java.util.Date creatorTime) {
-		set("creator_time", creatorTime);
-		return (M)this;
-	}
-	
-	/**
-	 * 编制时间
-	 */
-	@JBoltField(name="creatorTime" ,columnName="creator_time",type="Date", remark="编制时间", required=false, maxLength=19, fixed=0, order=10)
-	public java.util.Date getCreatorTime() {
-		return getDate("creator_time");
-	}
-
-	/**
-	 * 审核时间
-	 */
-	public M setAuditorTime(java.util.Date auditorTime) {
-		set("auditor_time", auditorTime);
-		return (M)this;
-	}
-	
-	/**
-	 * 审核时间
-	 */
-	@JBoltField(name="auditorTime" ,columnName="auditor_time",type="Date", remark="审核时间", required=false, maxLength=19, fixed=0, order=11)
-	public java.util.Date getAuditorTime() {
-		return getDate("auditor_time");
-	}
-
-	/**
-	 * 审核状态 0-未审核 1-待审核 2-已审核
-	 */
-	public M setAuditStatus(java.lang.Integer auditStatus) {
-		set("audit_status", auditStatus);
-		return (M)this;
-	}
-	
-	/**
-	 * 审核状态 0-未审核 1-待审核 2-已审核
-	 */
-	@JBoltField(name="auditStatus" ,columnName="audit_status",type="Integer", remark="审核状态 0-未审核 1-待审核 2-已审核", required=false, maxLength=3, fixed=0, order=12)
-	public java.lang.Integer getAuditStatus() {
-		return getInt("audit_status");
 	}
 
 }

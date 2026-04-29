@@ -18,8 +18,8 @@ import cn.jbolt.siargo.model.EquipmentRecord;
 import cn.jbolt.siargo.model.EquipmentCertificate;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
+import cn.jbolt.common.util.DateUtil;
 /**
  * 检校批次记录 Service
  * @ClassName: EquipmentInspectionBatchService   
@@ -73,14 +73,28 @@ public class EquipmentInspectionBatchService extends JBoltBaseService<EquipmentI
 	 * @param batchId 批次ID
 	 * @param auditorId 审核人ID
 	 */
-	public void audit(Long batchId, Long auditorId) {
+	public Ret audit(Long batchId, Long auditorId) {
 		EquipmentInspectionBatch batch = findById(batchId);
-		if (batch != null) {
-			batch.setAuditorId(auditorId);
-			batch.setAuditorTime(new Date());
-			batch.setAuditStatus(2);
-			batch.update();
+		if (batch == null) {
+			return fail(JBoltMsg.PARAM_ERROR);
 		}
+		// 验证是否已审核
+		if (batch.getAuditStatus() != null && batch.getAuditStatus() == 2) {
+			return fail("请勿重复审核！");
+		}
+
+		batch.setAuditorId(auditorId);
+		batch.set("auditor_time", DateUtil.getDateString(DateUtil.YMDHMS));
+		batch.setAuditStatus(2);
+		batch.update();
+
+		// 生成审核事件记录
+		long recordId = JBoltSnowflakeKit.me.nextId();
+		Db.update("INSERT INTO siargo_equipment_record " +
+			"(id, equipment_id, batch_id, record_type, record_date, description, user_id) " +
+			"VALUES (?, ?, ?, '1', NOW(), ?, ?)",
+			recordId, batch.getEquipmentId(), batchId, "检校对比结果【已审核】", auditorId);
+		return ret(true);
 	}
 
 	/**
@@ -88,18 +102,22 @@ public class EquipmentInspectionBatchService extends JBoltBaseService<EquipmentI
 	 * @param ids 逗号分隔的批次ID
 	 * @param auditorId 审核人ID
 	 */
-	public void batchAudit(String ids, Long auditorId) {
-		if (notOk(ids)) return;
+	public Ret batchAudit(String ids, Long auditorId) {
+		if (notOk(ids)) return fail(JBoltMsg.PARAM_ERROR);
 		String[] idArr = ids.split(",");
 		for (String idStr : idArr) {
 			String trimmed = idStr.trim();
 			if (trimmed.isEmpty()) continue;
 			try {
-				audit(Long.valueOf(trimmed), auditorId);
+				Ret ret = audit(Long.valueOf(trimmed), auditorId);
+				if (ret.isFail()) {
+					return ret;
+				}
 			} catch (NumberFormatException e) {
 				// 跳过非法ID
 			}
 		}
+		return ret(true);
 	}
 
 	/**
@@ -123,12 +141,23 @@ public class EquipmentInspectionBatchService extends JBoltBaseService<EquipmentI
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
 		//if(existsName(equipmentInspectionBatch.getName())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+		// 验证：设备状态非正常时，不能设置检校结果为合格
+		if (equipmentInspectionBatch.getStatus() != null && equipmentInspectionBatch.getStatus() == 1) {
+			Long equipmentId = equipmentInspectionBatch.getEquipmentId();
+			Integer equipmentStatus = Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
+			if (equipmentStatus == null || equipmentStatus != 1) {
+				String equipmentNo = Db.queryStr("SELECT equipment_no FROM siargo_equipment WHERE id = ?", equipmentId);
+				return fail("【" + (equipmentNo != null ? equipmentNo : "") + "】状态异常，不能填合格！");
+			}
+		}
 		boolean success=equipmentInspectionBatch.save();
 		if(success) {
 			//添加日志
 			//addSaveSystemLog(equipmentInspectionBatch.getId(), JBoltUserKit.getUserId(), equipmentInspectionBatch.getName());
 			// 自动创建一条检校记录
 			createInspectionRecord(equipmentInspectionBatch);
+			// 根据检校批次状态同步设备使用状态
+			syncEquipmentStatus(equipmentInspectionBatch);
 		}
 		return ret(success);
 	}
@@ -146,16 +175,41 @@ public class EquipmentInspectionBatchService extends JBoltBaseService<EquipmentI
 		EquipmentInspectionBatch dbEquipmentInspectionBatch=findById(equipmentInspectionBatch.getId());
 		if(dbEquipmentInspectionBatch==null) {return fail(JBoltMsg.DATA_NOT_EXIST);}
 		//if(existsName(equipmentInspectionBatch.getName(), equipmentInspectionBatch.getId())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+		// 验证：设备状态非正常时，不能设置检校结果为合格
+		if (equipmentInspectionBatch.getStatus() != null && equipmentInspectionBatch.getStatus() == 1) {
+			Long equipmentId = equipmentInspectionBatch.getEquipmentId();
+			Integer equipmentStatus = Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
+			if (equipmentStatus == null || equipmentStatus != 1) {
+				String equipmentNo = Db.queryStr("SELECT equipment_no FROM siargo_equipment WHERE id = ?", equipmentId);
+				return fail("【" + (equipmentNo != null ? equipmentNo : "") + "】状态异常，不能填合格！");
+			}
+		}
 		boolean success=equipmentInspectionBatch.update();
 		if(success) {
 			//添加日志
 			//addUpdateSystemLog(equipmentInspectionBatch.getId(), JBoltUserKit.getUserId(), equipmentInspectionBatch.getName());
 			// 自动创建一条检校记录
 			createInspectionRecord(equipmentInspectionBatch);
+			// 根据检校批次状态同步设备使用状态
+			syncEquipmentStatus(equipmentInspectionBatch);
 		}
 		return ret(success);
 	}
 	
+	/**
+	 * 根据检校批次状态同步设备使用状态
+	 * status=1（合格）→ equipment.status=1（正常）
+	 * status=2（不合格）→ equipment.status=2（维修中）
+	 */
+	private void syncEquipmentStatus(EquipmentInspectionBatch batch) {
+		Integer batchStatus = batch.getStatus();
+		Long equipmentId = batch.getEquipmentId();
+		if (batchStatus != null && (batchStatus == 1 || batchStatus == 2)) {
+			Db.update("UPDATE siargo_equipment SET status = ? WHERE id = ? AND status != ?",
+				batchStatus, equipmentId, batchStatus);
+		}
+	}
+
 	/**
 	 * 删除 指定多个ID
 	 * @param ids
@@ -176,8 +230,8 @@ public class EquipmentInspectionBatchService extends JBoltBaseService<EquipmentI
 
 		long recordId = JBoltSnowflakeKit.me.nextId();
 		Long userId = JBoltUserKit.getUserId();
-		Db.update("INSERT INTO siargo_equipment_record (id, equipment_id, batch_id, record_type, record_date, description, user_id, creator_id, creator_time, audit_status) VALUES (?, ?, ?, '1', NOW(), ?, ?, ?, NOW(), 1)",
-			recordId, batch.getEquipmentId(), batch.getId(), description, userId, userId);
+		Db.update("INSERT INTO siargo_equipment_record (id, equipment_id, batch_id, record_type, record_date, description, user_id) VALUES (?, ?, ?, '1', NOW(), ?, ?)",
+			recordId, batch.getEquipmentId(), batch.getId(), description, userId);
 	}
 	
 	/**

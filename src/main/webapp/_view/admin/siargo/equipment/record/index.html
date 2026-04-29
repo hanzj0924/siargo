@@ -23,14 +23,14 @@
 			<div class="col-md-3" style="padding:6px 12px;">
 				<span class="equip-summary-label">状态</span>
 				<div>
-				#if(equipment.status ?? == 1)
-					<span class="badge badge-success equip-status-badge"><i class="fa fa-check-circle"></i> 合格</span>
-				#elseif(equipment.status ?? == 2)
-					<span class="badge badge-warning equip-status-badge"><i class="fa fa-wrench"></i> 维修中</span>
-				#elseif(equipment.status ?? == 3)
+				#if(equipment.status == 1)
+					<span class="badge badge-success equip-status-badge"><i class="fa fa-check-circle"></i> 正常</span>
+				#elseif(equipment.status == 2)
+					<span class="badge badge-primary equip-status-badge"><i class="fa fa-wrench"></i> 维修中</span>
+				#elseif(equipment.status == 3)
 					<span class="badge badge-secondary equip-status-badge"><i class="fa fa-archive"></i> 已封存</span>
-				#elseif(equipment.status ?? == 4)
-					<span class="badge badge-danger equip-status-badge"><i class="fa fa-times-circle"></i> 报废</span>
+				#elseif(equipment.status == 4)
+					<span class="badge badge-secondary equip-status-badge"><i class="fa fa-times-circle"></i> 报废</span>
 				#else
 					<span class="badge badge-secondary equip-status-badge">未知</span>
 				#end
@@ -64,7 +64,7 @@
 				style="cursor:pointer;color:#007bff;">${data.description}</span>
 		{@/if}
 	</td>
-	<td>${data.user_name ?? '-'}</td>
+	<td>${data.user_name || '-'}</td>
 	<td>
 		{@if data.creator_name}
 			<span class="badge badge-info">${data.creator_name}</span>

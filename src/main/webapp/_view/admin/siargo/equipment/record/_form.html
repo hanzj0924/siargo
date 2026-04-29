@@ -43,6 +43,7 @@
 <form onsubmit="return false;" id="equipmentRecordForm" action="#(action)" method="post">
 <input type="hidden" name="equipmentRecord.id" value="#(equipmentRecord.id??)" />
 <input type="hidden" name="equipmentRecord.equipmentId" value="#(equipmentId ?? equipmentRecord.equipmentId ??)" />
+<input type="hidden" name="equipmentRecord.batchId" value="#(batchId ?? equipmentRecord.batchId ??)" />
 
 <div class="row align-items-start">
 	<div class="col">

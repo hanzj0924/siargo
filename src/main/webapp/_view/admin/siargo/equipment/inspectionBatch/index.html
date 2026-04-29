@@ -33,11 +33,11 @@
 <script type="text/template" id="masterRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.id}" onclick="masterTableTrTriggerShowSlave(this,'${data.id}')">
-<td>${data.batch_date}</td>
+<td>${data.batch_date ? data.batch_date.substring(0, 10) : '-'}</td>
 <td>{@if data.description}${data.description}{@else}-{@/if}</td>
 <td>
   {@if data.status==1}<span class="badge badge-success">合格</span>
-  {@else if data.status==0}<span class="badge badge-danger">不合格</span>
+  {@else if data.status==2}<span class="badge badge-danger">不合格</span>
   {@else}<span class="badge badge-secondary">-</span>{@/if}
 </td>
 <td>
@@ -94,7 +94,7 @@
     <div class="jbolt_table_toolbar" id="master_toolbar_#(pageId)">
       <div class="btn-group" role="group" aria-label="btn-group">
         <span style="font-weight:bold;font-size:13px;color:#333;margin-right:10px;line-height:30px;">检校批次</span>
-        <button data-openpage="dialog" data-area="360,610" data-handler="jboltTablePageToFirst" data-title="<i class='fa fa-plus'></i>新增检校批次" data-url="admin/siargo/equipment/inspectionBatch/add?equipmentId=#(equipmentId)" class="btn btn-outline-primary btn-sm"><i class="fa fa-plus"></i> 新增</button>
+        <button data-openpage="dialog" data-area="360,610" data-handler="jboltTablePageToFirst" data-title="<i class='fa fa-plus'></i>新增检校批次" data-url="admin/siargo/equipment/inspectionBatch/add?equipmentId=#(equipmentId)" class="btn btn-outline-primary btn-sm"><i class="fa fa-plus"></i> 编制</button>
         <button data-openpage="dialog" data-area="360,610" data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedId" data-title="<i class='fa fa-edit'></i>编辑检校批次" data-url="admin/siargo/equipment/inspectionBatch/edit/" class="btn btn-outline-info btn-sm"><i class="fa fa-edit"></i> 编辑</button>
         <button data-ajaxbtn data-handler="masterDeleteAndClearSlave" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/equipment/inspectionBatch/deleteByIds?ids=" data-confirm="确定删除选中的检校批次？删除后关联的记录和证书也将一并删除！" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i> 删除</button>
         <button data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/equipment/inspectionBatch/batchAudit?ids=" data-confirm="确定审核选中的检校批次？" class="btn btn-outline-warning btn-sm"><i class="fa fa-check-circle"></i> 审核</button>

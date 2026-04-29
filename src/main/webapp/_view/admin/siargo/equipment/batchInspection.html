@@ -17,12 +17,22 @@
 			</div>
 		</div>
 		<div class="form-group row">
-			<label class="col-sm-4 col-form-label">设备状态</label>
+			<label class="col-sm-4 col-form-label">检校结果</label>
 			<div class="col-sm-8">
 				<select class="form-control" data-autoload name="status"
 					data-text="=请选择=" data-value="" data-rule="select"
-					data-options="合格:1,维修中:2,已封存:3,报废:4">
+					data-options="合格:1,不合格:2">
 				</select>
+			</div>
+		</div>
+		<!-- 检校概况描述 -->
+		<div class="form-group row">
+			<label class="col-sm-4 col-form-label">检校概况</label>
+			<div class="col-sm-8">
+				<textarea class="form-control" data-rule="required" 
+						  placeholder="请输入检校概况描述" 
+						  data-tips="请输入检校概况描述" 
+						  maxlength="500" name="description" rows="3"></textarea>
 			</div>
 		</div>
 	</form>

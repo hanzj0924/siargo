@@ -6,6 +6,9 @@ import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
+
+import cn.jbolt.common.util.DateUtil;
+
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import cn.jbolt.core.base.JBoltMsg;
@@ -38,7 +41,7 @@ public class EquipmentRecordAdminController extends JBoltBaseController {
 	* 数据源
 	*/
 	public void datas() {
-		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords()));
+		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords(),getLong("batchId")));
 	}
 	
    /**
@@ -46,8 +49,12 @@ public class EquipmentRecordAdminController extends JBoltBaseController {
 	*/
 	public void add() {
 		Long equipmentId = getLong("equipmentId");
+		Long batchId = getLong("batchId");
 		set("equipmentId", equipmentId);
-		set("equipmentRecord", new EquipmentRecord());
+		set("batchId", batchId);
+		EquipmentRecord equipmentRecord = new EquipmentRecord();
+		equipmentRecord.set("record_date", DateUtil.getDateString(DateUtil.YMDHMS));
+		set("equipmentRecord", equipmentRecord);
 		set("equipmentCertificate", new EquipmentCertificate());
 		set("certificateImageUrls", "");
 		if (equipmentId != null) {

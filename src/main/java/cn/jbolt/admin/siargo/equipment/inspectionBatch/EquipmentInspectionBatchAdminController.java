@@ -12,7 +12,7 @@ import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.EquipmentInspectionBatch;
 import cn.jbolt.siargo.model.Equipment;
 import cn.jbolt.core.kit.JBoltUserKit;
-import java.util.Date;
+import cn.jbolt.common.util.DateUtil;
 /**
  * 检校批次记录 Controller
  * @ClassName: EquipmentInspectionBatchAdminController
@@ -88,7 +88,7 @@ public class EquipmentInspectionBatchAdminController extends JBoltBaseController
 	public void save() {
 		EquipmentInspectionBatch batch = getModel(EquipmentInspectionBatch.class, "equipmentInspectionBatch");
 		batch.setCreatorId(JBoltUserKit.getUserId());
-		batch.setCreatorTime(new Date());
+		batch.set("creator_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		batch.setAuditStatus(1);
 		renderJson(service.save(batch));
 	}
@@ -115,8 +115,7 @@ public class EquipmentInspectionBatchAdminController extends JBoltBaseController
 	@Before(Tx.class)
 	public void audit() {
 		Long id = getLong(0);
-		service.audit(id, JBoltUserKit.getUserId());
-		renderJsonSuccess();
+		renderJson(service.audit(id, JBoltUserKit.getUserId()));
 	}
 
 	/**
@@ -125,8 +124,7 @@ public class EquipmentInspectionBatchAdminController extends JBoltBaseController
 	@Before(Tx.class)
 	public void batchAudit() {
 		String ids = get("ids");
-		service.batchAudit(ids, JBoltUserKit.getUserId());
-		renderJsonSuccess();
+		renderJson(service.batchAudit(ids, JBoltUserKit.getUserId()));
 	}
 	
 

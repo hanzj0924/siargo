@@ -2,7 +2,9 @@ package cn.jbolt.admin.siargo.equipment;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.aop.Inject;
@@ -18,6 +20,7 @@ import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
 import cn.jbolt.siargo.model.Equipment;
 import cn.jbolt.siargo.model.EquipmentRecord;
+import cn.jbolt.siargo.model.EquipmentInspectionBatch;
 
 import java.util.concurrent.locks.ReentrantLock;
 /**
@@ -49,16 +52,19 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	 * @param keywords
 	 * @param category 分类筛选
 	 * @param filter 过滤条件：expired/audit/repairing/sealed
+	 * @param status 状态筛选
 	 * @return
 	 */
-	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, String category, String filter) {
-		String select = "SELECT e.*, lr.creator_time, lr.auditor_time, lr.audit_status, "
-			+ "cu.name AS creator_name, au.name AS auditor_name, "
-			+ "(SELECT c.image_url FROM siargo_equipment_certificate c WHERE c.equipment_id = e.id ORDER BY c.certificate_date DESC, c.id DESC LIMIT 1) AS latest_cert_image";
+	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, String category, String filter, String status) {
+		String select = "SELECT e.*, "
+			+ "(SELECT c.image_url FROM siargo_equipment_certificate c WHERE c.equipment_id = e.id ORDER BY c.certificate_date DESC, c.id DESC LIMIT 1) AS latest_cert_image, "
+			+ "lb.creator_time, lb.auditor_time, lb.audit_status, lb.status AS inspection_status, "
+			+ "cu.name AS creator_name, au.name AS auditor_name";
 		StringBuilder from = new StringBuilder("FROM siargo_equipment e ");
-		from.append("LEFT JOIN (SELECT er1.* FROM siargo_equipment_record er1 INNER JOIN (SELECT equipment_id, MAX(id) AS max_id FROM siargo_equipment_record GROUP BY equipment_id) er2 ON er1.id = er2.max_id) lr ON lr.equipment_id = e.id ");
-		from.append("LEFT JOIN jb_user cu ON cu.id = lr.creator_id ");
-		from.append("LEFT JOIN jb_user au ON au.id = lr.auditor_id ");
+		from.append("LEFT JOIN (SELECT er1.id, er1.equipment_id FROM siargo_equipment_record er1 WHERE er1.id IN (SELECT MAX(id) FROM siargo_equipment_record GROUP BY equipment_id)) lr ON lr.equipment_id = e.id ");
+		from.append("LEFT JOIN (SELECT ib1.id, ib1.equipment_id, ib1.creator_id, ib1.auditor_id, ib1.creator_time, ib1.auditor_time, ib1.audit_status, ib1.status FROM siargo_equipment_inspection_batch ib1 WHERE ib1.id IN (SELECT MAX(id) FROM siargo_equipment_inspection_batch GROUP BY equipment_id)) lb ON lb.equipment_id = e.id ");
+		from.append("LEFT JOIN jb_user cu ON cu.id = lb.creator_id ");
+		from.append("LEFT JOIN jb_user au ON au.id = lb.auditor_id ");
 		
 		List<Object> params = new ArrayList<>();
 		List<String> conditions = new ArrayList<>();
@@ -69,6 +75,12 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			params.add(category);
 		}
 		
+		// 状态筛选
+		if (isOk(status)) {
+			conditions.add("e.status = ?");
+			params.add(status);
+		}
+		
 		// 过滤条件
 		if ("expired".equals(filter)) {
 			Calendar cal = Calendar.getInstance();
@@ -77,7 +89,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			conditions.add("e.next_inspection_date IS NOT NULL AND e.next_inspection_date <= ?");
 			params.add(expireDate);
 		} else if ("audit".equals(filter)) {
-			conditions.add("EXISTS (SELECT 1 FROM siargo_equipment_record er WHERE er.equipment_id = e.id AND er.id = (SELECT MAX(er2.id) FROM siargo_equipment_record er2 WHERE er2.equipment_id = e.id) AND er.audit_status = 1)");
+			conditions.add("EXISTS (SELECT 1 FROM siargo_equipment_inspection_batch ib WHERE ib.equipment_id = e.id AND ib.id = (SELECT MAX(ib2.id) FROM siargo_equipment_inspection_batch ib2 WHERE ib2.equipment_id = e.id) AND ib.audit_status = 1)");
 		} else if ("repairing".equals(filter)) {
 			conditions.add("e.status = 2");
 		} else if ("sealed".equals(filter)) {
@@ -86,8 +98,9 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		
 		// 关键词模糊匹配
 		if (isOk(keywords)) {
-			conditions.add("(e.equipment_no LIKE ? OR e.name LIKE ?)");
+			conditions.add("(e.equipment_no LIKE ? OR e.name LIKE ? OR e.model LIKE ?)");
 			String kw = "%" + keywords + "%";
+			params.add(kw);
 			params.add(kw);
 			params.add(kw);
 		}
@@ -156,7 +169,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 				+ ", SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS repairing"
 				+ ", SUM(CASE WHEN status IN (3, 4) THEN 1 ELSE 0 END) AS sealed"
 				+ ", SUM(CASE WHEN next_inspection_date IS NOT NULL AND next_inspection_date <= DATE_ADD(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS expired"
-				+ ", SUM(CASE WHEN (SELECT er.audit_status FROM siargo_equipment_record er WHERE er.equipment_id = siargo_equipment.id ORDER BY er.id DESC LIMIT 1) = 1 THEN 1 ELSE 0 END) AS audit"
+				+ ", SUM(CASE WHEN (SELECT ib.audit_status FROM siargo_equipment_inspection_batch ib WHERE ib.equipment_id = siargo_equipment.id ORDER BY ib.id DESC LIMIT 1) = 1 THEN 1 ELSE 0 END) AS audit"
 				+ " FROM siargo_equipment";
 		Record row = Db.findFirst(sql);
 		if (row != null) {
@@ -190,9 +203,10 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	 * @param ids 逗号分隔的ID
 	 * @param lastDate 上次校准日期
 	 * @param nextDate 下次校准日期
+	 * @param status 检定结果：1-合格 2-不合格
 	 * @return
 	 */
-	public Ret batchInspection(String ids, java.util.Date lastDate, java.util.Date nextDate, Integer status) {
+	public Ret batchInspection(String ids, java.util.Date lastDate, java.util.Date nextDate, Integer status, String description) {
 		if (notOk(ids)) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
@@ -217,68 +231,58 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			if (i > 0) placeholders.append(",");
 			placeholders.append("?");
 		}
-		// 构建 UPDATE SQL：status 为可选字段
-		boolean updateStatus = status != null && status > 0;
-		String sql;
-		Object[] params;
-		if (updateStatus) {
-			params = new Object[idList.size() + 3];
-			params[0] = lastDate;
-			params[1] = nextDate;
-			params[2] = status;
-			for (int i = 0; i < idList.size(); i++) {
-				params[3 + i] = idList.get(i);
-			}
-			sql = "UPDATE siargo_equipment SET last_inspection_date = ?, next_inspection_date = ?, status = ? WHERE id IN (" + placeholders + ")";
-		} else {
-			params = new Object[idList.size() + 2];
-			params[0] = lastDate;
-			params[1] = nextDate;
-			for (int i = 0; i < idList.size(); i++) {
-				params[2 + i] = idList.get(i);
-			}
-			sql = "UPDATE siargo_equipment SET last_inspection_date = ?, next_inspection_date = ? WHERE id IN (" + placeholders + ")";
+		// 仅更新检校日期，不再更新设备使用状态
+		Object[] params = new Object[idList.size() + 2];
+		params[0] = lastDate;
+		params[1] = nextDate;
+		for (int i = 0; i < idList.size(); i++) {
+			params[2 + i] = idList.get(i);
 		}
+		String sql = "UPDATE siargo_equipment SET last_inspection_date = ?, next_inspection_date = ? WHERE id IN (" + placeholders + ")";
 		int count = Db.update(sql, params);
 		if (count > 0) {
 			clearOverviewCountsCache();
-			//addUpdateSystemLog(idList.get(0), userId, "批量校准设备：" + ids);
-			// 状态文本：优先使用用户传入的 status，否则查库
+			// 检定结果文案：1-合格 2-不合格
+			int inspectionStatus = (status != null) ? status : 1;
+			// 设备记录的事件描述：根据检校状态自动生成
+			String recordDescription = "检校对比结果【" + ((inspectionStatus == 1) ? "合格" : "不合格") + "】";
+			// 为每台设备创建检校批次记录和设备记录
 			for (Long equipmentId : idList) {
-				String statusText = "未知";
-				if (updateStatus) {
-					switch (status) {
-						case 1: statusText = "合格"; break;
-						case 2: statusText = "不合格->维修中"; break;
-						case 3: statusText = "已封存"; break;
-						case 4: statusText = "报废"; break;
-					}
-				} else {
-					Record equip = Db.findFirst("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
-					if (equip != null) {
-						Integer st = equip.getInt("status");
-						if (st != null) {
-							switch (st) {
-								case 1: statusText = "合格"; break;
-								case 2: statusText = "不合格->维修中"; break;
-								case 3: statusText = "已封存"; break;
-								case 4: statusText = "报废"; break;
-							}
-						}
+				// 验证：设备状态非正常时，不能设置检校结果为合格
+				if (inspectionStatus == 1) {
+					Integer equipmentStatus = Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
+					if (equipmentStatus == null || equipmentStatus != 1) {
+						String equipmentNo = Db.queryStr("SELECT equipment_no FROM siargo_equipment WHERE id = ?", equipmentId);
+						return fail("【" + (equipmentNo != null ? equipmentNo : "") + "】状态异常，不能填合格！");
 					}
 				}
-				String description = "批量编制：检校对比结果【" + statusText + "】";
+				// 创建检校批次记录（description使用用户输入的检校概况）
+				long batchId = JBoltSnowflakeKit.me.nextId();
+				Db.update("INSERT INTO siargo_equipment_inspection_batch (id, equipment_id, batch_date, description, status, creator_id, creator_time, audit_status) VALUES (?, ?, ?, ?, ?, ?, NOW(), 1)",
+					batchId, equipmentId, lastDate, description, inspectionStatus, userId);
+
+				// 生成设备记录，关联批次ID（description使用自动生成的事件描述）
 				long recordId = JBoltSnowflakeKit.me.nextId();
-				Db.update("INSERT INTO siargo_equipment_record (id, equipment_id, record_type, record_date, description, user_id, creator_id, creator_time, audit_status) VALUES (?, ?, '1', NOW(), ?, ?, ?, NOW(), 1)",
-					recordId, equipmentId, description, userId, userId);
+				Db.update("INSERT INTO siargo_equipment_record (id, equipment_id, batch_id, record_type, record_date, description, user_id) VALUES (?, ?, ?, '1', NOW(), ?, ?)",
+					recordId, equipmentId, batchId, recordDescription, userId);
+			}
+			// 根据检校批次状态同步设备使用状态
+			if (inspectionStatus == 1 || inspectionStatus == 2) {
+				Object[] syncParams = new Object[idList.size() + 2];
+				syncParams[0] = inspectionStatus;
+				for (int i = 0; i < idList.size(); i++) {
+					syncParams[1 + i] = idList.get(i);
+				}
+				syncParams[syncParams.length - 1] = inspectionStatus;
+				Db.update("UPDATE siargo_equipment SET status = ? WHERE id IN (" + placeholders + ") AND status != ?", syncParams);
 			}
 		}
 		return ret(count > 0);
 	}
 	
 	/**
-	 * 批量审核
-	 * @param ids 逗号分隔的ID
+	 * 批量审核（操作检校批次表）
+	 * @param ids 逗号分隔的设备ID
 	 * @return
 	 */
 	public Ret batchAudit(String ids) {
@@ -301,20 +305,35 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		if (idList.isEmpty()) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		// 更新每台设备最新record的审核状态
+		// 更新每台设备最新检校批次的审核状态
 		for (Long equipmentId : idList) {
-			Db.update("UPDATE siargo_equipment_record SET audit_status = 2, auditor_id = ?, auditor_time = NOW() WHERE equipment_id = ? AND id = (SELECT max_id FROM (SELECT MAX(id) AS max_id FROM siargo_equipment_record WHERE equipment_id = ?) t)",
+			// 验证是否已审核
+			Integer auditStatus = Db.queryInt("SELECT audit_status FROM siargo_equipment_inspection_batch WHERE equipment_id = ? AND id = (SELECT max_id FROM (SELECT MAX(id) AS max_id FROM siargo_equipment_inspection_batch WHERE equipment_id = ?) t)", equipmentId, equipmentId);
+			if (auditStatus != null && auditStatus == 2) {
+				return fail("请勿重复审核！");
+			}
+
+			Db.update("UPDATE siargo_equipment_inspection_batch SET audit_status = 2, auditor_id = ?, auditor_time = NOW() WHERE equipment_id = ? AND id = (SELECT max_id FROM (SELECT MAX(id) AS max_id FROM siargo_equipment_inspection_batch WHERE equipment_id = ?) t)",
 				userId, equipmentId, equipmentId);
+
+			// 获取最新批次ID
+			Long latestBatchId = Db.queryLong("SELECT MAX(id) FROM siargo_equipment_inspection_batch WHERE equipment_id = ?", equipmentId);
+
+			// 生成审核事件记录
+			long recordId = JBoltSnowflakeKit.me.nextId();
+			Db.update("INSERT INTO siargo_equipment_record " +
+				"(id, equipment_id, batch_id, record_type, record_date, description, user_id) " +
+				"VALUES (?, ?, ?, '1', NOW(), ?, ?)",
+				recordId, equipmentId, latestBatchId, "检校对比结果【已审核】", userId);
 		}
 		clearOverviewCountsCache();
-		//addUpdateSystemLog(idList.get(0), userId, "批量审核设备：" + ids);
 		return ret(true);
 	}
 	
 	/**
 	 * 批量更改状态
 	 * @param ids 逗号分隔的ID
-	 * @param status 设备状态（1-合格 2-维修中 3-已封存 4-报废）
+	 * @param status 设备使用状态（1-正常 2-维修中 3-已封存 4-报废）
 	 * @return
 	 */
 	public Ret batchStatus(String ids, Integer status) {
@@ -345,6 +364,13 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			if (i > 0) placeholders.append(",");
 			placeholders.append("?");
 		}
+		// 1. 先查询所有设备的旧状态
+		Map<Long, Integer> oldStatusMap = new HashMap<>();
+		for (Long equipmentId : idList) {
+			Integer oldStatus = Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
+			oldStatusMap.put(equipmentId, oldStatus);
+		}
+		// 2. 执行 UPDATE
 		Object[] params = new Object[idList.size() + 1];
 		params[0] = status;
 		for (int i = 0; i < idList.size(); i++) {
@@ -354,26 +380,52 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		int count = Db.update(sql, params);
 		if (count > 0) {
 			clearOverviewCountsCache();
-			//addUpdateSystemLog(idList.get(0), userId, "批量更改设备状态：" + ids);
-			// 状态文本转换
-			String statusText = "未知";
-			switch (status) {
-				case 1: statusText = "合格"; break;
-				case 2: statusText = "不合格->维修中"; break;
-				case 3: statusText = "已封存"; break;
-				case 4: statusText = "报废"; break;
+			// 当新状态为1（正常）或2（不合格）时，将该设备最新检校批次状态同步更新（仅在批次状态不一致时才更新）
+			if (status == 1 || status == 2) {
+				Object[] idParams = new Object[idList.size() + 2];
+				idParams[0] = status;
+				for (int i = 0; i < idList.size(); i++) {
+					idParams[1 + i] = idList.get(i);
+				}
+				idParams[idList.size() + 1] = status;
+				Db.update("UPDATE siargo_equipment_inspection_batch SET status = ? WHERE id IN " +
+					"(SELECT max_id FROM (SELECT MAX(id) AS max_id FROM siargo_equipment_inspection_batch WHERE equipment_id IN (" +
+					placeholders + ") GROUP BY equipment_id) tmp) AND status != ?",
+					idParams);
 			}
-			// 为每台设备创建状态变更记录
+			// 3. 为每台设备生成状态变更记录
+			String newStatusText = getStatusText(status);
 			for (Long equipmentId : idList) {
-				String description = "检校对比结果【" + statusText + "】";
+				Integer oldStatus = oldStatusMap.get(equipmentId);
+				String oldStatusText = getStatusText(oldStatus);
+				String description = oldStatusText + "->" + newStatusText;
+				// 查询最新批次ID
+				Long latestBatchId = Db.queryLong("SELECT MAX(id) FROM siargo_equipment_inspection_batch WHERE equipment_id = ?", equipmentId);
+				// 生成设备记录
 				long recordId = JBoltSnowflakeKit.me.nextId();
-				Db.update(
-					"INSERT INTO siargo_equipment_record (id, equipment_id, record_type, record_date, description, user_id, creator_id, creator_time, audit_status) VALUES (?, ?, '1', NOW(), ?, ?, ?, NOW(), 1)",
-					recordId, equipmentId, description, userId, userId
-				);
+				Db.update("INSERT INTO siargo_equipment_record " +
+					"(id, equipment_id, batch_id, record_type, record_date, description, user_id) " +
+					"VALUES (?, ?, ?, '1', NOW(), ?, ?)",
+					recordId, equipmentId, latestBatchId, description, userId);
 			}
 		}
 		return ret(count > 0);
+	}
+
+	/**
+	 * 获取设备状态文本
+	 * @param status 状态值（1-正常 2-维修中 3-已封存 4-报废）
+	 * @return 状态文本
+	 */
+	private String getStatusText(Integer status) {
+		if (status == null) return "未知";
+		switch (status) {
+			case 1: return "正常";
+			case 2: return "维修中";
+			case 3: return "已封存";
+			case 4: return "报废";
+			default: return "未知";
+		}
 	}
 	
 	/**
@@ -381,21 +433,26 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param equipmentId
+	 * @param batchId 检校批次ID，不为null时按批次过滤
 	 * @return
 	 */
-	public Page<Record> paginateRecordDatas(int pageNumber, int pageSize, Long equipmentId) {
-		return Db.paginate(pageNumber, pageSize,
-				"SELECT er.*, u.name AS user_name, " +
+	public Page<Record> paginateRecordDatas(int pageNumber, int pageSize, Long equipmentId, Long batchId) {
+		// batchId 为 null 或 <= 0 时，表示未选中任何批次，直接返回空页
+		if (batchId == null || batchId <= 0) {
+			return new Page<>(new ArrayList<>(), pageNumber, pageSize, 0, 0);
+		}
+		String select = "SELECT er.*, u.name AS user_name, " +
 				"d.name AS record_type_name, " +
-				"cu.name AS creator_name, au.name AS auditor_name, " +
-				"(SELECT c.image_url FROM siargo_equipment_certificate c WHERE c.record_id = er.id ORDER BY c.id LIMIT 1) AS cert_image_url",
-				"FROM siargo_equipment_record er " +
+				"(SELECT c.image_url FROM siargo_equipment_certificate c WHERE c.record_id = er.id ORDER BY c.id LIMIT 1) AS cert_image_url";
+		StringBuilder from = new StringBuilder("FROM siargo_equipment_record er " +
 				"LEFT JOIN jb_user u ON u.id = er.user_id " +
-				"LEFT JOIN jb_user cu ON cu.id = er.creator_id " +
-				"LEFT JOIN jb_user au ON au.id = er.auditor_id " +
 				"LEFT JOIN jb_dictionary d ON d.sn = er.record_type AND d.type_id = (SELECT id FROM jb_dictionary_type WHERE type_key = 'siargo_equipment_record_type' LIMIT 1) " +
-				"WHERE er.equipment_id = ? ORDER BY er.record_date DESC",
-				equipmentId);
+				"WHERE er.equipment_id = ? AND er.batch_id = ?");
+		List<Object> params = new ArrayList<>();
+		params.add(equipmentId);
+		params.add(batchId);
+		from.append(" ORDER BY er.record_date DESC");
+		return Db.paginate(pageNumber, pageSize, select, from.toString(), params.toArray());
 	}
 	
 	/**

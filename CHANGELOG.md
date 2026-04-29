@@ -1,5 +1,19 @@
 ## 更新日志
 
+### v2.4.0 (2026-04-29)
+- feat(equipment): 设备搜索支持规格型号模糊查询
+- feat(equipment): 设备主页编制/审核列改由最新检校批次数据驱动
+- feat(equipment): 新增"检校结果"列展示最新批次检定状态
+- feat(equipment): 检校批次状态枚举值调整（不合格: 0→2）
+- feat(equipment): 设备状态与检校批次状态双向联动
+- feat(equipment): 编制操作同步更新设备使用状态
+- fix(equipment): 移除 siargo_equipment_record 表已删除字段的后端引用
+- fix(equipment): 修复 SQL 子查询 Unknown column 'lr.auditor_id' 错误
+- fix(equipment): 移除审核操作中设备状态前置校验
+- refactor(equipment): 统一所有Tab表格列宽配置
+- fix(qarep): 修复质量报告单时间字段 ISO 格式显示问题
+- style(qarep): 详情弹窗尺寸和样式优化
+
 ### v2.3.1 (2026-04-24)
 - feat(qarep): QA报告详情页检验进度从报告单级别下沉到每个产品独立展示，支持产品级检验人和时间显示
 - feat(qarep): 批准Tab表格新增行合并功能，同一报告单的多个产品行自动合并显示，交替背景色区分

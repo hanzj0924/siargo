@@ -9,8 +9,8 @@
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>{@if data.name}${data.name}{@else}<span class="text-muted">-</span>{@/if}</td>
 <td>
-  <a tooltip data-title="维修校准记录" data-dialog-title="<i class='fa fa-wrench' style='color:#5b8def;margin-right:6px;'></i>维修校准记录" data-dialogbtn data-area="1000,800" data-btn="close" data-tips="维修校准记录"
-    href="admin/siargo/equipment/records?equipmentId=${data.id}">${data.equipment_no}</a>
+  <a tooltip data-title="维修校准记录" data-dialog-title="<i class='fa fa-wrench' style='color:#5b8def;margin-right:6px;'></i>维修校准记录" data-dialogbtn data-area="1200,880" data-btn="close" data-tips="维修校准记录"
+    href="admin/siargo/equipment/inspectionBatch?equipmentId=${data.id}">${data.equipment_no}</a>
 </td>
 <td>{@if data.model}${data.model}{@else}<span class="text-muted">-</span>{@/if}</td>
 <td>
@@ -48,11 +48,15 @@
   {@/if}
 </td>
 <td>
-  {@if data.status==1}<span class="badge badge-success">合格</span>
+  {@if data.inspection_status==1}<span class="badge badge-success">合格</span>
+  {@else if data.inspection_status==2}<span class="badge badge-danger">不合格</span>
+  {@else}<span class="text-muted">-</span>{@/if}
+</td>
+<td>
+  {@if data.status==1}<span class="badge badge-success">正常</span>
   {@else if data.status==2}<span class="badge badge-primary">维修中</span>
   {@else if data.status==3}<span class="badge badge-secondary">已封存</span>
   {@else if data.status==4}<span class="badge badge-secondary">报废</span>
-  {@else if data.status==5}<span class="badge badge-danger">不合格</span>
   {@/if}
 </td>
 </tr>
@@ -62,7 +66,7 @@
 		<!-- ===== 全部设备 工具条 ===== -->
 		<div class="jbolt_table_toolbar" id="all_toolbar_#(pageId)">
 			<div class="row">
-				<div class="col-sm-4 text-left">
+				<div class="col-sm-3 text-left">
 					<div class="btn-group">
 						<button data-openpage="dialog" data-area="850,850"
 							data-handler="jboltTablePageToFirst" data-title="新增设备"
@@ -89,22 +93,29 @@
 						</button>
 					</div>
 				</div>
-				<div class="col-sm-4 text-center">
+				<div class="col-sm-6 text-center">
 					<form class="form-inline d-inline-block" id="allForm_#(pageId)"
 						onsubmit="return false;" method="post">
 						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号搜索" name="keywords"
-							value="" style="width: 200px;" /> <select class="form-control"
+							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号" name="keywords"
+							value="" style="width: 240px;" /> <select class="form-control"
 							data-autoload name="category" style="width: 120px;"
 							data-url="admin/dictionary/options?key=siargo_equipment_category"
 							data-text="=全部分类=" data-value="" data-value-attr="sn">
+						</select>
+						<select class="form-control" name="status" style="width: 120px;">
+							<option value="">全部状态</option>
+							<option value="1">正常</option>
+							<option value="2">维修中</option>
+							<option value="3">已封存</option>
+							<option value="4">报废</option>
 						</select>
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
 					</form>
 				</div>
-				<div class="col-sm-4 text-right">
+				<div class="col-sm-3 text-right">
 					<button data-openpage="dialog" data-area="260,370"
 						data-handler="refreshAllEquipmentTables_#(pageId)"
 						data-check-handler="jboltTableGetCheckedIds"
@@ -113,7 +124,7 @@
 						class="btn btn-outline-info">
 						<i class="fa fa-exchange"></i> 更改状态
 					</button>
-					<button data-openpage="dialog" data-area="330,645"
+					<button data-openpage="dialog" data-area="330,750"
 						data-handler="refreshAllEquipmentTables_#(pageId)"
 						data-check-handler="jboltTableGetCheckedIds"
 						data-title="批量编制"
@@ -169,8 +180,15 @@
 					<form class="form-inline d-inline-block" id="cat1Form_#(pageId)"
 						onsubmit="return false;" method="post">
 						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号搜索" name="keywords"
-							value="" style="width: 200px;" />
+							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号" name="keywords"
+							value="" style="width: 240px;" />
+						<select class="form-control" name="status" style="width: 120px;">
+							<option value="">全部状态</option>
+							<option value="1">正常</option>
+							<option value="2">维修中</option>
+							<option value="3">已封存</option>
+							<option value="4">报废</option>
+						</select>
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
@@ -185,7 +203,7 @@
 						class="btn btn-outline-info">
 						<i class="fa fa-exchange"></i> 更改状态
 					</button>
-					<button data-openpage="dialog" data-area="330,645"
+					<button data-openpage="dialog" data-area="330,750"
 						data-handler="refreshAllEquipmentTables_#(pageId)"
 						data-check-handler="jboltTableGetCheckedIds"
 						data-title="批量编制"
@@ -241,8 +259,15 @@
 					<form class="form-inline d-inline-block" id="cat2Form_#(pageId)"
 						onsubmit="return false;" method="post">
 						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号搜索" name="keywords"
-							value="" style="width: 200px;" />
+							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号" name="keywords"
+							value="" style="width: 240px;" />
+						<select class="form-control" name="status" style="width: 120px;">
+							<option value="">全部状态</option>
+							<option value="1">正常</option>
+							<option value="2">维修中</option>
+							<option value="3">已封存</option>
+							<option value="4">报废</option>
+						</select>
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
@@ -257,7 +282,7 @@
 						class="btn btn-outline-info">
 						<i class="fa fa-exchange"></i> 更改状态
 					</button>
-					<button data-openpage="dialog" data-area="330,645"
+					<button data-openpage="dialog" data-area="330,750"
 						data-handler="refreshAllEquipmentTables_#(pageId)"
 						data-check-handler="jboltTableGetCheckedIds"
 						data-title="批量编制"
@@ -313,8 +338,15 @@
 					<form class="form-inline d-inline-block" id="cat3Form_#(pageId)"
 						onsubmit="return false;" method="post">
 						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号搜索" name="keywords"
-							value="" style="width: 200px;" />
+							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号" name="keywords"
+							value="" style="width: 240px;" />
+						<select class="form-control" name="status" style="width: 120px;">
+							<option value="">全部状态</option>
+							<option value="1">正常</option>
+							<option value="2">维修中</option>
+							<option value="3">已封存</option>
+							<option value="4">报废</option>
+						</select>
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
@@ -329,7 +361,7 @@
 						class="btn btn-outline-info">
 						<i class="fa fa-exchange"></i> 更改状态
 					</button>
-					<button data-openpage="dialog" data-area="330,645"
+					<button data-openpage="dialog" data-area="330,750"
 						data-handler="refreshAllEquipmentTables_#(pageId)"
 						data-check-handler="jboltTableGetCheckedIds"
 						data-title="批量编制"
@@ -385,8 +417,15 @@
 					<form class="form-inline d-inline-block" id="cat4Form_#(pageId)"
 						onsubmit="return false;" method="post">
 						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号搜索" name="keywords"
-							value="" style="width: 200px;" />
+							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号" name="keywords"
+							value="" style="width: 240px;" />
+						<select class="form-control" name="status" style="width: 120px;">
+							<option value="">全部状态</option>
+							<option value="1">正常</option>
+							<option value="2">维修中</option>
+							<option value="3">已封存</option>
+							<option value="4">报废</option>
+						</select>
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
@@ -401,7 +440,7 @@
 						class="btn btn-outline-info">
 						<i class="fa fa-exchange"></i> 更改状态
 					</button>
-					<button data-openpage="dialog" data-area="330,645"
+					<button data-openpage="dialog" data-area="330,750"
 						data-handler="refreshAllEquipmentTables_#(pageId)"
 						data-check-handler="jboltTableGetCheckedIds"
 						data-title="批量编制"
@@ -457,8 +496,15 @@
 					<form class="form-inline d-inline-block" id="cat5Form_#(pageId)"
 						onsubmit="return false;" method="post">
 						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号搜索" name="keywords"
-							value="" style="width: 200px;" />
+							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号" name="keywords"
+							value="" style="width: 240px;" />
+						<select class="form-control" name="status" style="width: 120px;">
+							<option value="">全部状态</option>
+							<option value="1">正常</option>
+							<option value="2">维修中</option>
+							<option value="3">已封存</option>
+							<option value="4">报废</option>
+						</select>
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
@@ -473,7 +519,7 @@
 						class="btn btn-outline-info">
 						<i class="fa fa-exchange"></i> 更改状态
 					</button>
-					<button data-openpage="dialog" data-area="330,645"
+					<button data-openpage="dialog" data-area="330,750"
 						data-handler="refreshAllEquipmentTables_#(pageId)"
 						data-check-handler="jboltTableGetCheckedIds"
 						data-title="批量编制"
@@ -601,16 +647,17 @@
 								<th data-width="60">序号</th>
 								<th data-width="120" data-column="name">名称</th>
 								<th data-width="140" data-column="equipment_no">器具编号</th>
-								<th data-min-width="100" data-column="model">规格型号</th>
+								<th data-min-width="120" data-column="model">规格型号</th>
 								<th data-width="100" data-column="">证书</th>
 								<th data-width="150" data-column="factory_no">出厂编号</th>
-								<th data-width="100" data-column="inspection_method">检定方式</th>
-								<th data-width="100" data-column="inspection_cycle">检校周期</th>
-								<th data-width="120" data-column="last_inspection_date">最近检校</th>
-								<th data-width="120" data-column="next_inspection_date">下次检校</th>
-								<th data-width="100" data-column="responsible_person">责任人</th>
-								<th data-width="120" data-column="creator_id">编制</th>
-								<th data-width="120" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_method">检定方式</th>
+								<th data-width="80" data-column="inspection_cycle">检校周期</th>
+								<th data-width="110" data-column="last_inspection_date">最近检校</th>
+								<th data-width="110" data-column="next_inspection_date">下次检校</th>
+								<th data-width="80" data-column="responsible_person">责任人</th>
+								<th data-width="110" data-column="creator_id">编制</th>
+								<th data-width="110" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_status">检校结果</th>
 								<th data-width="70" data-column="status">状态</th>
 							</tr>
 						</thead>
@@ -635,16 +682,17 @@
 								<th data-width="60">序号</th>
 								<th data-width="120" data-column="name">名称</th>
 								<th data-width="140" data-column="equipment_no">器具编号</th>
-								<th data-min-width="100" data-column="model">规格型号</th>
+								<th data-min-width="120" data-column="model">规格型号</th>
 								<th data-width="100" data-column="">证书</th>
 								<th data-width="150" data-column="factory_no">出厂编号</th>
-								<th data-width="100" data-column="inspection_method">检定方式</th>
-								<th data-width="100" data-column="inspection_cycle">检校周期</th>
-								<th data-width="120" data-column="last_inspection_date">最近检校</th>
-								<th data-width="120" data-column="next_inspection_date">下次检校</th>
-								<th data-width="100" data-column="responsible_person">责任人</th>
-								<th data-width="120" data-column="creator_id">编制</th>
-								<th data-width="120" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_method">检定方式</th>
+								<th data-width="80" data-column="inspection_cycle">检校周期</th>
+								<th data-width="110" data-column="last_inspection_date">最近检校</th>
+								<th data-width="110" data-column="next_inspection_date">下次检校</th>
+								<th data-width="80" data-column="responsible_person">责任人</th>
+								<th data-width="110" data-column="creator_id">编制</th>
+								<th data-width="110" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_status">检校结果</th>
 								<th data-width="70" data-column="status">状态</th>
 							</tr>
 						</thead>
@@ -669,16 +717,17 @@
 								<th data-width="60">序号</th>
 								<th data-width="120" data-column="name">名称</th>
 								<th data-width="140" data-column="equipment_no">器具编号</th>
-								<th data-min-width="100" data-column="model">规格型号</th>
+								<th data-min-width="120" data-column="model">规格型号</th>
 								<th data-width="100" data-column="">证书</th>
 								<th data-width="150" data-column="factory_no">出厂编号</th>
-								<th data-width="100" data-column="inspection_method">检定方式</th>
-								<th data-width="100" data-column="inspection_cycle">检校周期</th>
-								<th data-width="120" data-column="last_inspection_date">最近检校</th>
-								<th data-width="120" data-column="next_inspection_date">下次检校</th>
-								<th data-width="100" data-column="responsible_person">责任人</th>
-								<th data-width="120" data-column="creator_id">编制</th>
-								<th data-width="120" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_method">检定方式</th>
+								<th data-width="80" data-column="inspection_cycle">检校周期</th>
+								<th data-width="110" data-column="last_inspection_date">最近检校</th>
+								<th data-width="110" data-column="next_inspection_date">下次检校</th>
+								<th data-width="80" data-column="responsible_person">责任人</th>
+								<th data-width="110" data-column="creator_id">编制</th>
+								<th data-width="110" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_status">检校结果</th>
 								<th data-width="70" data-column="status">状态</th>
 							</tr>
 						</thead>
@@ -703,16 +752,17 @@
 								<th data-width="60">序号</th>
 								<th data-width="120" data-column="name">名称</th>
 								<th data-width="140" data-column="equipment_no">器具编号</th>
-								<th data-min-width="100" data-column="model">规格型号</th>
+								<th data-min-width="120" data-column="model">规格型号</th>
 								<th data-width="100" data-column="">证书</th>
 								<th data-width="150" data-column="factory_no">出厂编号</th>
-								<th data-width="100" data-column="inspection_method">检定方式</th>
-								<th data-width="100" data-column="inspection_cycle">检校周期</th>
-								<th data-width="120" data-column="last_inspection_date">最近检校</th>
-								<th data-width="120" data-column="next_inspection_date">下次检校</th>
-								<th data-width="100" data-column="responsible_person">责任人</th>
-								<th data-width="120" data-column="creator_id">编制</th>
-								<th data-width="120" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_method">检定方式</th>
+								<th data-width="80" data-column="inspection_cycle">检校周期</th>
+								<th data-width="110" data-column="last_inspection_date">最近检校</th>
+								<th data-width="110" data-column="next_inspection_date">下次检校</th>
+								<th data-width="80" data-column="responsible_person">责任人</th>
+								<th data-width="110" data-column="creator_id">编制</th>
+								<th data-width="110" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_status">检校结果</th>
 								<th data-width="70" data-column="status">状态</th>
 							</tr>
 						</thead>
@@ -737,16 +787,17 @@
 								<th data-width="60">序号</th>
 								<th data-width="120" data-column="name">名称</th>
 								<th data-width="140" data-column="equipment_no">器具编号</th>
-								<th data-min-width="100" data-column="model">规格型号</th>
+								<th data-min-width="120" data-column="model">规格型号</th>
 								<th data-width="100" data-column="">证书</th>
 								<th data-width="150" data-column="factory_no">出厂编号</th>
-								<th data-width="100" data-column="inspection_method">检定方式</th>
-								<th data-width="100" data-column="inspection_cycle">检校周期</th>
-								<th data-width="120" data-column="last_inspection_date">最近检校</th>
-								<th data-width="120" data-column="next_inspection_date">下次检校</th>
-								<th data-width="100" data-column="responsible_person">责任人</th>
-								<th data-width="120" data-column="creator_id">编制</th>
-								<th data-width="120" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_method">检定方式</th>
+								<th data-width="80" data-column="inspection_cycle">检校周期</th>
+								<th data-width="110" data-column="last_inspection_date">最近检校</th>
+								<th data-width="110" data-column="next_inspection_date">下次检校</th>
+								<th data-width="80" data-column="responsible_person">责任人</th>
+								<th data-width="110" data-column="creator_id">编制</th>
+								<th data-width="110" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_status">检校结果</th>
 								<th data-width="70" data-column="status">状态</th>
 							</tr>
 						</thead>
@@ -771,16 +822,17 @@
 								<th data-width="60">序号</th>
 								<th data-width="120" data-column="name">名称</th>
 								<th data-width="140" data-column="equipment_no">器具编号</th>
-								<th data-min-width="100" data-column="model">规格型号</th>
+								<th data-min-width="120" data-column="model">规格型号</th>
 								<th data-width="100" data-column="">证书</th>
 								<th data-width="150" data-column="factory_no">出厂编号</th>
-								<th data-width="100" data-column="inspection_method">检定方式</th>
-								<th data-width="100" data-column="inspection_cycle">检校周期</th>
-								<th data-width="120" data-column="last_inspection_date">最近检校</th>
-								<th data-width="120" data-column="next_inspection_date">下次检校</th>
-								<th data-width="100" data-column="responsible_person">责任人</th>
-								<th data-width="120" data-column="creator_id">编制</th>
-								<th data-width="120" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_method">检定方式</th>
+								<th data-width="80" data-column="inspection_cycle">检校周期</th>
+								<th data-width="110" data-column="last_inspection_date">最近检校</th>
+								<th data-width="110" data-column="next_inspection_date">下次检校</th>
+								<th data-width="80" data-column="responsible_person">责任人</th>
+								<th data-width="110" data-column="creator_id">编制</th>
+								<th data-width="110" data-column="auditor_id">审核</th>
+								<th data-width="80" data-column="inspection_status">检校结果</th>
 								<th data-width="70" data-column="status">状态</th>
 							</tr>
 						</thead>

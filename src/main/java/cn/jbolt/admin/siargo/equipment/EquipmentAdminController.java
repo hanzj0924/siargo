@@ -53,7 +53,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 	* 数据源
 	*/
 	public void datas() {
-		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords(),get("category"),get("filter")));
+		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords(),get("category"),get("filter"),get("status")));
 	}
 	
 	/**
@@ -76,7 +76,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 	*/
 	@Before(Tx.class)
 	public void batchInspection() {
-		renderJson(service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status")));
+		renderJson(service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status"),get("description")));
 	}
 	
 	/**
@@ -103,7 +103,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 		}
 		set("equipmentId", equipmentId);
 		set("equipment", equipment);
-		render("record/index.html");
+		render("inspectionBatch/index.html");
 	}
 	
 	/**
@@ -115,7 +115,8 @@ public class EquipmentAdminController extends JBoltBaseController {
 			renderFail(JBoltMsg.PARAM_ERROR);
 			return;
 		}
-		renderJsonData(service.paginateRecordDatas(getPageNumber(), getPageSize(), equipmentId));
+		Long batchId = getLong("batchId");
+		renderJsonData(service.paginateRecordDatas(getPageNumber(), getPageSize(), equipmentId, batchId));
 	}
 	
 	/**

@@ -56,7 +56,7 @@
       <div class="dt-row">
         <div class="dt-lbl">产品类型</div>
         <div class="dt-val">#(p.type_name??)</div>
-        <div class="dt-lbl-m">送检 / 检验数量</div>
+        <div class="dt-lbl-m">送检 / 检验</div>
         <div class="dt-val">
           <span style="font-weight:500;">#(p.qsi??)</span>
           <span style="color:#adb5bd;margin:0 4px;">/</span>
@@ -73,7 +73,7 @@
       </div>
       <div class="dt-row">
         <div class="dt-lbl">备注</div>
-        <div class="dt-val" style="color:#495057;white-space:pre-wrap;word-break:break-all;">#(p.des??)</div>
+        <div class="dt-val" style="color:#95a5a6;white-space:pre-wrap;word-break:break-all;">#(p.des??)</div>
       </div>
       <div class="dt-row">
         <div class="dt-lbl">检验进度</div>
@@ -86,7 +86,7 @@
             <div class="insp-step">
               <span class="insp-step-name">精度检验</span>
               <span class="insp-step-badge" style="background:#17a2b8;color:#fff;">#(p.accq_name ??)</span>
-              <span class="insp-step-time">#(p.accq_time ??)</span>
+              <span class="insp-step-time">#if(p.accq_time)#date(p.accq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #if(p.insp >= 3)
             <span class="insp-arrow">&#8594;</span>
@@ -94,7 +94,7 @@
             <div class="insp-step">
               <span class="insp-step-name">外观检验</span>
               <span class="insp-step-badge" style="background:#007bff;color:#fff;">#(p.funq_name ??)</span>
-              <span class="insp-step-time">#(p.funq_time ??)</span>
+              <span class="insp-step-time">#if(p.funq_time)#date(p.funq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
             #if(p.insp >= 4)
@@ -103,7 +103,7 @@
             <div class="insp-step">
               <span class="insp-step-name">包装检验</span>
               <span class="insp-step-badge" style="background:#ffc107;color:#212529;">#(p.appq_name ??)</span>
-              <span class="insp-step-time">#(p.appq_time ??)</span>
+              <span class="insp-step-time">#if(p.appq_time)#date(p.appq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
             #if(p.insp >= 5)
@@ -112,7 +112,7 @@
             <div class="insp-step">
               <span class="insp-step-name">批准</span>
               <span class="insp-step-badge" style="background:#dc3545;color:#fff;">&#10003; #(p.allq_name ??)</span>
-              <span class="insp-step-time">#(p.allq_time ??)</span>
+              <span class="insp-step-time">#if(p.allq_time)#date(p.allq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
           </div>

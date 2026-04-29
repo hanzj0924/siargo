@@ -39,7 +39,7 @@ public abstract class BaseEquipment<M extends BaseEquipment<M>> extends JBoltBas
     public static final String MANUFACTURER = "manufacturer";
     /**出厂编号*/
     public static final String FACTORY_NO = "factory_no";
-    /**设备本身状态：1-合格 2-维修中 3-已封存 4-报废*/
+    /**设备使用状态：1-正常 2-维修中 3-已封存 4-报废*/
     public static final String STATUS = "status";
     /**购入日期*/
     public static final String PURCHASE_DATE = "purchase_date";
@@ -265,7 +265,7 @@ public abstract class BaseEquipment<M extends BaseEquipment<M>> extends JBoltBas
 	}
 
 	/**
-	 * 设备本身状态：1-合格 2-维修中 3-已封存 4-报废
+	 * 设备使用状态：1-正常 2-维修中 3-已封存 4-报废
 	 */
 	public M setStatus(java.lang.Integer status) {
 		set("status", status);
@@ -273,9 +273,9 @@ public abstract class BaseEquipment<M extends BaseEquipment<M>> extends JBoltBas
 	}
 	
 	/**
-	 * 设备本身状态：1-合格 2-维修中 3-已封存 4-报废
+	 * 设备使用状态：1-正常 2-维修中 3-已封存 4-报废
 	 */
-	@JBoltField(name="status" ,columnName="status",type="Integer", remark="设备本身状态：1-合格 2-维修中 3-已封存 4-报废", required=true, maxLength=3, fixed=0, order=15)
+	@JBoltField(name="status" ,columnName="status",type="Integer", remark="设备使用状态：1-正常 2-维修中 3-已封存 4-报废", required=true, maxLength=3, fixed=0, order=15)
 	public java.lang.Integer getStatus() {
 		return getInt("status");
 	}
@@ -311,7 +311,6 @@ public abstract class BaseEquipment<M extends BaseEquipment<M>> extends JBoltBas
 	public java.lang.String getRemark() {
 		return getStr("remark");
 	}
-
 
 }
 

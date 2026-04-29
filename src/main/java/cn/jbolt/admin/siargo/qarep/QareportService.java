@@ -366,7 +366,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  sp.insp,\n" + "  DATE_FORMAT(sp.accq_time, '%Y-%m-%d %H:%i') AS accq_time,\n"
 				+ "  DATE_FORMAT(sp.funq_time, '%Y-%m-%d %H:%i') AS funq_time,\n"
 				+ "  DATE_FORMAT(sp.appq_time, '%Y-%m-%d %H:%i') AS appq_time,\n"
-				+ "  DATE_FORMAT(sp.allq_time, '%Y-%m-%d %H:%i') AS allq_time,\n" 
+				+ "  DATE_FORMAT(sp.allq_time, '%Y-%m-%D %H:%i') AS allq_time,\n" 
 				+ "  accq_user.NAME AS accq_name,\n funq_user.NAME AS funq_name,\n" 
 				+ "  appq_user.NAME AS appq_name,\n allq_user.NAME AS allq_name,\n"
 				+ "  accq_user.email AS accq_email,\n funq_user.email AS funq_email,\n" 
@@ -943,7 +943,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.DAY_OF_MONTH, 15);
 			Date finishTime = cal.getTime();
-			Date now = new Date();
+			String now = DateUtil.getDateString(DateUtil.YMDHMS);
 
 			// ========== 逐个用户创建待办 ==========
 			for (User user : users) {
@@ -973,8 +973,8 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				todo.setIsReaded(false);                 // 未读
 				todo.setCreateUserId(operatorUserId);    // 创建人：当前操作用户
 				todo.setUpdateUserId(operatorUserId);    // 更新人：当前操作用户
-				todo.setCreateTime(now);                 // 创建时间
-				todo.setUpdateTime(now);                 // 更新时间
+				todo.set("create_time", now);                 // 创建时间
+				todo.set("update_time", now);                 // 更新时间
 				todo.setSpecifiedFinishTime(finishTime); // 规定完成时间
 
 				// 直接调用 Model.save() 保存，不经过 TodoService.save()
