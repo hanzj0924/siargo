@@ -1,0 +1,231 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)" id="jbolttable_mspage_#(pageId)">
+<div class="jbolt_page_title">
+	<div class="row align-items-center">
+
+	<div class="col">
+		<span style="color:#666;font-size:0.85rem;margin-right:4px;"><i class="fa fa-barcode" style="color:#4a7dff;"></i> 器具编号</span>
+		<span style="color:#333;font-weight:600;margin-right:16px;">#(equipment.equipmentNo ?? "-")</span>
+		<span style="color:#666;font-size:0.85rem;margin-right:4px;"><i class="fa fa-cube" style="color:#4a7dff;"></i> 名称</span>
+		<span style="color:#333;font-weight:600;margin-right:16px;">#(equipment.name ?? "-")</span>
+		<span style="color:#666;font-size:0.85rem;margin-right:4px;"><i class="fa fa-cog" style="color:#4a7dff;"></i> 规格型号</span>
+		<span style="color:#333;font-weight:600;margin-right:16px;">#(equipment.model ?? "-")</span>
+		#if(equipment.status == 1)
+			<span class="badge badge-success">正常</span>
+		#elseif(equipment.status == 2)
+			<span class="badge badge-primary">维修中</span>
+		#elseif(equipment.status == 3)
+			<span class="badge badge-secondary">已封存</span>
+		#elseif(equipment.status == 4)
+			<span class="badge badge-secondary">报废</span>
+		#else
+			<span class="badge badge-light">-</span>
+		#end
+	</div>
+	<div class="col-md-auto"></div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+
+<!-- Master 行模板 -->
+<script type="text/template" id="masterRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" onclick="masterTableTrTriggerShowSlave(this,'${data.id}')">
+<td>${data.batch_date}</td>
+<td>{@if data.description}${data.description}{@else}-{@/if}</td>
+<td>
+  {@if data.status==1}<span class="badge badge-success">合格</span>
+  {@else if data.status==0}<span class="badge badge-danger">不合格</span>
+  {@else}<span class="badge badge-secondary">-</span>{@/if}
+</td>
+<td>
+  {@if data.creator_name}
+    <span>${data.creator_name}</span>
+    <small class="text-muted d-block">${data.creator_time ? data.creator_time.substring(0, 16) : ''}</small>
+  {@else}<span class="text-muted">-</span>{@/if}
+</td>
+<td>
+  {@if data.auditor_name}
+    <span>${data.auditor_name}</span>
+    <small class="text-muted d-block">${data.auditor_time ? data.auditor_time.substring(0, 16) : ''}</small>
+  {@else}<span class="text-muted">-</span>{@/if}
+</td>
+<td>
+  {@if data.audit_status==2}<span class="badge badge-success">已审核</span>
+  {@else if data.audit_status==1}<span class="badge badge-danger">待审核</span>
+  {@else}<span class="badge badge-secondary">未审核</span>{@/if}
+</td>
+</tr>
+{@/each}
+</script>
+
+<!-- Slave 行模板 -->
+<script type="text/template" id="slaveRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}">
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>{@if data.record_type_name}${data.record_type_name}{@else}-{@/if}</td>
+<td>${data.record_date ? data.record_date.substring(0, 19) : '-'}</td>
+<td style="max-width:200px;">
+  {@if data.description}
+    <span data-dialogbtn data-area="570,380" data-btn="close" data-title="事件描述"
+      data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.description}</div>"
+      style="cursor:pointer;color:#007bff;">${data.description}</span>
+  {@else}<span class="text-muted">-</span>{@/if}
+</td>
+<td>{@if data.user_name}${data.user_name}{@else}-{@/if}</td>
+<td>
+  {@if data.cert_image_url}
+    <a href="javascript:;" onclick="layer.photos({photos:{title:'证书',data:[{src:'${data.cert_image_url}'}]},anim:5});">
+      <img src="${data.cert_image_url}" style="height:36px;border-radius:3px;cursor:pointer;">
+    </a>
+  {@else}<span class="text-muted">-</span>{@/if}
+</td>
+</tr>
+{@/each}
+</script>
+
+<!-- Master-Slave 上下分栏布局 -->
+<div class="jbolttable_master_slave_box">
+  <div class="split master">
+    <!-- Master 工具条 -->
+    <div class="jbolt_table_toolbar" id="master_toolbar_#(pageId)">
+      <div class="btn-group" role="group" aria-label="btn-group">
+        <span style="font-weight:bold;font-size:13px;color:#333;margin-right:10px;line-height:30px;">检校批次</span>
+        <button data-openpage="dialog" data-area="360,610" data-handler="jboltTablePageToFirst" data-title="<i class='fa fa-plus'></i>新增检校批次" data-url="admin/siargo/equipment/inspectionBatch/add?equipmentId=#(equipmentId)" class="btn btn-outline-primary btn-sm"><i class="fa fa-plus"></i> 新增</button>
+        <button data-openpage="dialog" data-area="360,610" data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedId" data-title="<i class='fa fa-edit'></i>编辑检校批次" data-url="admin/siargo/equipment/inspectionBatch/edit/" class="btn btn-outline-info btn-sm"><i class="fa fa-edit"></i> 编辑</button>
+        <button data-ajaxbtn data-handler="masterDeleteAndClearSlave" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/equipment/inspectionBatch/deleteByIds?ids=" data-confirm="确定删除选中的检校批次？删除后关联的记录和证书也将一并删除！" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i> 删除</button>
+        <button data-ajaxbtn data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/equipment/inspectionBatch/batchAudit?ids=" data-confirm="确定审核选中的检校批次？" class="btn btn-outline-warning btn-sm"><i class="fa fa-check-circle"></i> 审核</button>
+        <button onclick="jboltTableRefresh(this)" class="btn btn-outline-secondary btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <!-- Master 表格 - 批次列表 -->
+    <table class="jbolt_table jbolt_main_table table_striped table-center"
+      data-height="fill_box"
+      data-ajax="true"
+      data-url="admin/siargo/equipment/inspectionBatch/datas?equipmentId=#(equipmentId)"
+      data-ajax-success-handler="onMasterTableLoaded"
+      data-column-resize="true"
+      data-column-prepend="1:checkbox"
+      data-rowtpl="masterRowtpl_#(pageId)"
+      data-page="masterPage_#(pageId)"
+      data-toolbar="master_toolbar_#(pageId)"
+      data-pagesize="10">
+    <thead class="fw-normal">
+    <tr>
+      <th data-width="100" data-column="batch_date">检校日期</th>
+      <th data-min-width="160" data-column="description">检校概况</th>
+      <!-- <th data-width="70" data-column="record_count">记录数</th> -->
+      <th data-width="80" data-column="status">状态</th>
+      <th data-width="120" data-column="creator_name">编制</th>
+      <th data-width="120" data-column="auditor_name">审核</th>
+      <th data-width="80" data-column="audit_status">审核状态</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+    </table>
+  </div>
+  <div class="split slave">
+    <!-- Slave 工具条 -->
+    <div class="jbolt_table_toolbar" id="slave_toolbar_#(pageId)">
+      <div class="btn-group" role="group" aria-label="btn-group">
+        <span style="font-weight:bold;font-size:13px;color:#333;margin-right:10px;line-height:30px;">详细记录</span>
+        <button data-openpage="dialog" data-area="800,670" data-handler="jboltTablePageToFirst" data-title="<i class='fa fa-plus'></i>新增记录" data-origin-url="admin/siargo/equipment/record/add?equipmentId=#(equipmentId)&batchId=[masterId]" data-url="admin/siargo/equipment/record/add?equipmentId=#(equipmentId)&batchId=0" class="btn btn-outline-primary btn-sm"><i class="fa fa-plus"></i> 新增</button>
+        <button data-openpage="dialog" data-area="800,670" data-handler="refreshJBoltTable" data-check-handler="jboltTableGetCheckedId" data-title="<i class='fa fa-edit'></i>编辑记录" data-url="admin/siargo/equipment/record/edit/" class="btn btn-outline-info btn-sm"><i class="fa fa-edit"></i> 编辑</button>
+        <button data-ajaxbtn data-handler="removeJBoltTableCheckedTr" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/equipment/record/deleteByIds?ids=" data-confirm="确定删除选中的记录？" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i> 删除</button>
+        <button onclick="jboltTableRefresh(this)" class="btn btn-outline-secondary btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <!-- Slave 表格 - 记录列表 -->
+    <table class="jbolt_table jbolt_main_table table_striped table-center"
+      data-height="fill_box"
+      data-ajax="true"
+      data-autoload="false"
+      data-origin-url="admin/siargo/equipment/recordDatas?equipmentId=#(equipmentId)&batchId=[masterId]"
+      data-url="admin/siargo/equipment/recordDatas?equipmentId=#(equipmentId)&batchId=0"
+      data-column-resize="true"
+      data-column-prepend="1:checkbox"
+      data-rowtpl="slaveRowtpl_#(pageId)"
+      data-page="slavePage_#(pageId)"
+      data-toolbar="slave_toolbar_#(pageId)"
+      data-pagesize="10">
+    <thead class="fw-normal">
+    <tr>
+      <th data-width="50">序号</th>
+      <th data-width="80" data-column="record_type_name">记录类型</th>
+      <th data-width="150" data-column="record_date">事件日期</th>
+      <th data-min-width="220" data-column="description">事件描述</th>
+      <th data-width="100" data-column="user_name">处理人</th>
+      <th data-width="100" data-column="cert_image_url">证书</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+</div>
+#end
+#define js()
+<script>
+/**
+ * 清空 Slave 表格：将 data-url 恢复为 batchId=0 的初始地址，然后重新加载空数据
+ */
+function clearSlaveTable() {
+    var pageBox = $('[id^="jbolttable_mspage_"]');
+    var slaveSection = pageBox.find('.slave');
+    var slaveTable = slaveSection.find('table.jbolt_table');
+    if (slaveTable.length) {
+        // 重置 URL 为 batchId=0（不选中任何批次）
+        var originUrl = slaveTable.attr('data-origin-url');
+        if (originUrl) {
+            var resetUrl = originUrl.replace('[masterId]', '0');
+            slaveTable.data('url', resetUrl).attr('data-url', resetUrl);
+        }
+        // 直接清空 tbody 数据行，不发 AJAX 请求
+        slaveTable.find('tbody').empty();
+        // 重置分页信息
+        var pager = slaveSection.find('.jbolt_table_page');
+        if (pager.length) {
+            pager.find('.jbolt_table_page_total_row').text('0');
+            pager.find('.jbolt_table_page_total').text('1');
+            pager.find('.jbolt_table_page_input').val('1');
+        }
+    }
+    // 同时重置 Slave 工具条中依赖 masterId 的按钮 URL
+    var slaveAddBtn = slaveSection.find('[data-origin-url]');
+    slaveAddBtn.each(function() {
+        var oUrl = $(this).attr('data-origin-url');
+        if (oUrl) {
+            $(this).attr('data-url', oUrl.replace('[masterId]', '0'));
+        }
+    });
+}
+
+/**
+ * Master 表格数据加载成功回调（data-ajax-success-handler）
+ * 每次 Master 表格数据刷新后自动清空 Slave，因为 Master 刷新后选中状态丢失
+ */
+function onMasterTableLoaded(table, res) {
+    clearSlaveTable();
+}
+
+/**
+ * Master 删除按钮自定义 handler（data-ajaxbtn 的 else 分支，接收 action 和 data 参数）
+ * 删除操作只移除 DOM 行不重载数据，所以 data-ajax-success-handler 不会触发，需手动清空 Slave
+ */
+function masterDeleteAndClearSlave(action, data) {
+    removeJBoltTableCheckedTr(action, false);
+    clearSlaveTable();
+}
+
+$(function(){
+	MasterSlaveUtil.initJBoltTable("jbolttable_mspage_#(pageId)");
+});
+</script>
+#end

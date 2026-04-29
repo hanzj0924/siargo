@@ -1,0 +1,97 @@
+<style>
+.equip-section-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.8rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid #e9ecef;
+}
+
+.equip-section-header i {
+	font-size: 1.1rem;
+	color: #667eea;
+	margin-right: 0.5rem;
+}
+
+.equip-section-header span {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #343a40;
+	letter-spacing: 0.5px;
+}
+
+.equip-section-header::after {
+	content: '';
+	flex: 1;
+	height: 2px;
+	background: linear-gradient(to right, #e9ecef, transparent);
+	margin-left: 0.8rem;
+}
+
+.equip-form-group {
+	margin-bottom: 0.6rem;
+}
+
+.equip-form-group label {
+	font-size: 0.85rem;
+	color: #495057;
+}
+
+.equip-form-group .form-control {
+	font-size: 0.85rem;
+}
+</style>
+<div class="container-fluid" style="padding: 15px;">
+	<form id="equipmentInspectionBatchForm"
+		action="admin/siargo/equipment/inspectionBatch/#(isAdd ? 'save' : 'update')"
+		onsubmit="return false;" method="post">
+		#if(!isAdd && equipmentInspectionBatch != null) <input type="hidden"
+			name="equipmentInspectionBatch.id"
+			value="#(equipmentInspectionBatch.id)"> #end <input
+			type="hidden" name="equipmentInspectionBatch.equipmentId"
+			value="#(equipmentId ?? equipmentInspectionBatch.equipmentId)">
+
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="form-group equip-form-group">
+					<label class="col-sm-4 control-label" style="font-size: 0.85rem;">日期</label>
+					<div class="col-sm-8">
+						<input name="equipmentInspectionBatch.batchDate"
+							value="#(isAdd ? '' : equipmentInspectionBatch.batchDate)"
+							class="form-control" data-rule="required" data-date
+							data-type="date" data-fmt="yyyy-MM-dd" type="text"
+							placeholder="选择日期" autocomplete="off" readonly="readonly">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="form-group equip-form-group">
+					<label class="col-sm-4 control-label" style="font-size: 0.85rem;">结果</label>
+					<div class="col-sm-8">
+						<select name="equipmentInspectionBatch.status"
+							class="form-control">
+							<option value="1" #if(!isAdd && equipmentInspectionBatch.status==
+								1) selected #end>合格</option>
+							<option value="0" #if(!isAdd && equipmentInspectionBatch.status==
+								0) selected #end>不合格</option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="form-group equip-form-group">
+					<label class="col-sm-2 control-label" style="font-size: 0.85rem;">概况</label>
+					<div class="col-sm-10">
+						<textarea name="equipmentInspectionBatch.description"
+							class="form-control" rows="3" maxlength="500" style="height: 200px; white-space: pre;"
+							placeholder="检校概况描述">#(isAdd ? '' : (equipmentInspectionBatch.description ?? ''))</textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+#include("/_view/_admin/common/_formjs.html",formId="equipmentInspectionBatchForm")
