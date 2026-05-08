@@ -1,0 +1,826 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
+
+<!-- 设备概要信息 -->
+<div style="padding:0 15px 10px;">
+	<div class="equip-summary-card">
+		<div class="row" style="margin:0;">
+			<div class="col-md-2" style="padding:6px 12px;">
+				<span class="equip-summary-label">器具编号</span>
+				<div class="equip-summary-value">#(equipment.equipmentNo ??)</div>
+			</div>
+			<div class="col-md-2" style="padding:6px 12px;">
+				<span class="equip-summary-label">名称</span>
+				<div class="equip-summary-value">#(equipment.name ??)</div>
+			</div>
+			<div class="col-md-2" style="padding:6px 12px;">
+				<span class="equip-summary-label">规格型号</span>
+				<div class="equip-summary-value">#(equipment.model ??)</div>
+			</div>
+			<div class="col-md-2" style="padding:6px 12px;">
+				<span class="equip-summary-label">生产厂家</span>
+				<div class="equip-summary-value">#(equipment.manufacturer ??)</div>
+			</div>
+			<div class="col-md-2" style="padding:6px 12px;">
+				<span class="equip-summary-label">购入日期</span>
+				<div class="equip-summary-value">#if(equipment.purchaseDate)#date(equipment.purchaseDate, "yyyy-MM-dd")#else - #end</div>
+			</div>
+			<div class="col-md-2" style="padding:6px 12px;">
+				<span class="equip-summary-label">状态</span>
+				<div id="equip_status_badge_#(pageId)">
+				#if(equipment.status == 1)
+					<span class="badge badge-success equip-status-badge"><i class="fa fa-check-circle"></i> 正常</span>
+				#elseif(equipment.status == 2)
+					<span class="badge badge-primary equip-status-badge"><i class="fa fa-wrench"></i> 维修中</span>
+				#elseif(equipment.status == 3)
+					<span class="badge badge-secondary equip-status-badge"><i class="fa fa-archive"></i> 已封存</span>
+				#elseif(equipment.status == 4)
+					<span class="badge badge-secondary equip-status-badge"><i class="fa fa-times-circle"></i> 报废</span>
+				#else
+					<span class="badge badge-secondary equip-status-badge">未知</span>
+				#end
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 工具栏 -->
+<div style="padding:10px 15px;">
+	#if(equipment.status != 3 && equipment.status != 4)
+	<button class="btn btn-outline-primary btn-sm" onclick="addComparison_#(pageId)()">
+		<i class="fa fa-balance-scale"></i> 新增对比
+	</button>
+	#end
+	<button class="btn btn-outline-secondary btn-sm" onclick="refreshTimeline_#(pageId)()">
+		<i class="fa fa-refresh"></i> 刷新
+	</button>
+</div>
+
+<!-- 时间轴容器 -->
+<div class="jb_vbody" style="overflow-y:auto;padding:0 15px;">
+	<div class="timeline-container" id="timeline_container_#(pageId)">
+		<!-- JS 动态填充 -->
+	</div>
+
+	<!-- 加载更多 -->
+	<div class="text-center" style="padding:15px;" id="timeline_loadmore_#(pageId)">
+		<button class="btn btn-outline-secondary btn-sm" onclick="loadMoreTimeline_#(pageId)()">
+			<i class="fa fa-angle-down"></i> 加载更多
+		</button>
+	</div>
+</div>
+
+</div>
+#end
+
+#define js()
+<style>
+.equip-summary-card {
+	background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+	border-radius: 8px;
+	padding: 16px 20px;
+	border: 1px solid #e3e6e8;
+	border-left: 3px solid #4e73df;
+	box-shadow: 0 2px 8px rgba(78,115,223,0.08);
+}
+.equip-summary-label {
+	color: #868e96;
+	font-size: 11px;
+	letter-spacing: 0.5px;
+	font-weight: 500;
+	display: block;
+	margin-bottom: 3px;
+}
+.equip-summary-value {
+	font-weight: 600;
+	color: #2d3748;
+	font-size: 14px;
+}
+.equip-status-badge {
+	border-radius: 12px;
+	padding: 4px 10px !important;
+	font-size: 12px;
+	font-weight: 500;
+}
+/* 时间轴 */
+.timeline-container {
+	position: relative;
+	padding: 20px 0;
+}
+.timeline-container::before {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: #e9ecef;
+	transform: translateX(-50%);
+}
+.timeline-item {
+	position: relative;
+	width: 46%;
+	padding: 12px 16px;
+	margin-bottom: 20px;
+	background: #fafbfc;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+	border: 1px solid #edf0f2;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+.timeline-item:hover {
+	box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.timeline-item.left {
+	margin-left: 4%;
+}
+.timeline-item.right {
+	margin-left: 50%;
+}
+/* 左右固定双色交替 */
+.timeline-item.left {
+	border-left: 3px solid #b8a9c9;
+}
+.timeline-item.right {
+	border-left: 3px solid #d4a574;
+}
+.timeline-dot {
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	top: 20px;
+	border: 2px solid #fff;
+}
+.timeline-item.left .timeline-dot {
+	right: -32px;
+	background: #b8a9c9;
+	box-shadow: 0 0 0 2px #b8a9c9;
+}
+.timeline-item.right .timeline-dot {
+	left: -32px;
+	background: #d4a574;
+	box-shadow: 0 0 0 2px #d4a574;
+}
+.timeline-item-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+.timeline-item-date {
+	color: #868e96;
+	font-size: 12px;
+}
+.timeline-item-body {
+	font-size: 13px;
+	color: #5a6268;
+	margin-bottom: 8px;
+}
+.timeline-item-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 12px;
+}
+.timeline-empty {
+	text-align: center;
+	padding: 40px 0;
+	color: #adb5bd;
+	font-size: 14px;
+}
+/* 维修子卡片 */
+.repair-subcard {
+	margin-top: 10px;
+	padding: 10px 12px;
+	background: #fff8f0;
+	border-radius: 6px;
+	border: 1px solid #f0e0d0;
+	border-left: 3px solid #e8946a;
+	font-size: 12px;
+}
+.repair-subcard-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 6px;
+	font-weight: 500;
+	color: #e8946a;
+}
+.repair-subcard-body {
+	color: #5a6268;
+	line-height: 1.6;
+}
+.repair-subcard-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 6px;
+}
+.repair-progress {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	font-size: 11px;
+	margin-top: 8px;
+	padding: 6px 0;
+}
+.repair-progress-node {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	position: relative;
+}
+.repair-progress-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: #e8946a;
+	border: 2px solid #e8946a;
+	position: relative;
+}
+.repair-progress-dot.active {
+	background: #28a745;
+	border-color: #28a745;
+}
+.repair-progress-dot.danger {
+	background: #dc3545;
+	border-color: #dc3545;
+}
+.repair-progress-dot.pending {
+	background: #fff;
+	border-color: #ccc;
+}
+.repair-progress-line {
+	flex: 1;
+	height: 2px;
+	background: #ddd;
+	min-width: 40px;
+}
+.repair-progress-line.done {
+	background: #28a745;
+}
+.repair-progress-label {
+	font-size: 10px;
+	color: #888;
+	margin-top: 4px;
+	white-space: nowrap;
+}
+.repair-progress-dot[onclick] {
+	cursor: pointer;
+	position: relative;
+}
+.repair-progress-dot[onclick]::after {
+	content: '✎';
+	position: absolute;
+	top: -14px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 10px;
+	color: #666;
+	opacity: 0.7;
+}
+.repair-progress-dot[onclick]:hover {
+	transform: scale(1.6);
+	box-shadow: 0 0 8px rgba(0,0,0,0.3);
+	transition: all 0.2s;
+}
+.repair-progress-dot[onclick]:hover::after {
+	opacity: 1;
+	color: #333;
+}
+/* 维修记录折叠 */
+.repair-collapse-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 10px;
+	padding: 6px 10px;
+	background: #f8f4ef;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	color: #e8946a;
+	font-weight: 500;
+}
+.repair-collapse-header:hover {
+	background: #f0ebe5;
+}
+.repair-collapse-icon {
+	transition: transform 0.3s;
+}
+.repair-collapse-icon.collapsed {
+	transform: rotate(-90deg);
+}
+.repair-collapse-body {
+	overflow: hidden;
+	transition: max-height 0.3s ease;
+}
+.repair-collapse-body.collapsed {
+	max-height: 0 !important;
+	overflow: hidden;
+}
+</style>
+<script type="text/javascript">
+var currentPage_#(pageId) = 1;
+var totalPages_#(pageId) = 1;
+var equipmentId_#(pageId) = #(equipment.id);
+
+// 加载时间线数据
+function loadTimeline_#(pageId)(page, append) {
+	$.ajax({
+		url: 'admin/siargo/equipment/timelineDatas',
+		data: { equipmentId: equipmentId_#(pageId), pageNumber: page, pageSize: 10 },
+		success: function(res) {
+			if (res.state === 'ok') {
+				var data = res.data;
+				totalPages_#(pageId) = data.totalPage;
+				currentPage_#(pageId) = data.pageNumber;
+				renderTimeline_#(pageId)(data.list, append);
+				if (currentPage_#(pageId) >= totalPages_#(pageId)) {
+					$('#timeline_loadmore_#(pageId)').hide();
+				} else {
+					$('#timeline_loadmore_#(pageId)').show();
+				}
+			}
+		}
+	});
+}
+
+// 渲染时间线
+function renderTimeline_#(pageId)(list, append) {
+	var container = $('#timeline_container_#(pageId)');
+	if (!append) container.empty();
+	if (!list || list.length === 0) {
+		if (!append) {
+			container.append('<div class="timeline-empty"><i class="fa fa-clock-o" style="font-size:32px;margin-bottom:8px;display:block;"></i>暂无时间线记录</div>');
+		}
+		return;
+	}
+	for (var i = 0; i < list.length; i++) {
+		var item = list[i];
+		var side = (i % 2 === 0) ? 'left' : 'right';
+		var html = buildTimelineCard_#(pageId)(item, side);
+		container.append(html);
+	}
+}
+
+// 构建卡片HTML
+function buildTimelineCard_#(pageId)(item, side) {
+	var typeBadge = '';
+	if (item.comparison_type == 1) {
+		typeBadge = '<span class="badge" style="background:#5b7e8a;color:#fff;"><i class="fa fa-calendar-check-o"></i> 定期对比</span>';
+	} else if (item.comparison_type == 2) {
+		typeBadge = '<span class="badge" style="background:#8a5b6e;color:#fff;"><i class="fa fa-bolt"></i> 临时对比</span>';
+	} else if (item.comparison_type == 3) {
+		typeBadge = '<span class="badge" style="background:#7a7a6a;color:#fff;"><i class="fa fa-file-text-o"></i> 新表对比</span>';
+	}
+
+	var dateStr = item.event_date ? item.event_date.substring(0, 10) : '-';
+
+	var desc = item.description || '';
+	if (desc.length > 30) desc = desc.substring(0, 30) + '...';
+	if (!desc) desc = '<span class="text-muted">---</span>';
+
+	var resultBadge = '';
+	if (item.status_value == 1) resultBadge = '<span class="badge badge-success">合格</span>';
+	else if (item.status_value == 2) resultBadge = '<span class="badge badge-danger">不合格</span>';
+
+	var auditBadge = '';
+	if (item.audit_status == 2) {
+		auditBadge = '<span class="badge badge-success">已审核</span>';
+		if (item.auditor_name) {
+			var auditTime = item.auditor_time ? item.auditor_time.substring(0,10) : '';
+			auditBadge += ' <span style="font-size:11px;color:#888;">' + item.auditor_name + (auditTime ? ' ' + auditTime : '') + '</span>';
+		}
+	} else if (item.audit_status == 1) {
+		auditBadge = '<span class="badge badge-danger">待审核</span>';
+	}
+
+	var creator = item.creator_name || '-';
+
+	// 证书按钮
+	var certBtn = '';
+	if (item.cert_images) {
+		var certPhotos = item.cert_images.split(',').map(function(url) {
+			return {src: url.trim()};
+		});
+		certBtn = ' <a href="javascript:;" class="btn btn-outline-primary btn-xs" title="查看证书" onclick="viewCertificateImages_#(pageId)(' + JSON.stringify(certPhotos).replace(/"/g, '&quot;') + ')"><i class="jbicon jb-21ok"></i>查看证书</a>';
+	}
+
+	var html = '<div class="timeline-item ' + side + '">'
+		+ '<div class="timeline-dot"></div>'
+		+ '<div class="timeline-item-header">'
+		+   typeBadge
+		+   '<span class="timeline-item-date"><i class="fa fa-calendar"></i> ' + dateStr + '</span>'
+		+ '</div>'
+		+ '<div class="timeline-item-body">' + desc + '</div>'
+		+ '<div class="timeline-item-footer">'
+		+   '<div>' + resultBadge + ' ' + auditBadge + certBtn + '</div>'
+		+   '<div style="display:flex;align-items:center;gap:8px;">'
+		+     '<span class="text-muted"><i class="fa fa-user"></i> ' + creator + '</span>'
+		+     '<div class="btn-group btn-group-sm">'
+		+       '<button class="btn btn-outline-info btn-xs" onclick="editTimelineItem_#(pageId)(\'' + item.id + '\')">' + '<i class="fa fa-edit"></i></button>'
+		+       (item.audit_status != 2 ? '<button class="btn btn-outline-danger btn-xs" onclick="deleteTimelineItem_#(pageId)(\'' + item.id + '\')">' + '<i class="fa fa-trash"></i></button>' : '')
+		+     '</div>'
+		+   '</div>'
+		+ '</div>';
+
+	// 不合格时显示维修子卡片列表（可折叠）
+	if (item.status_value == 2) {
+		var repairs = [];
+		if (item.repairs_json) {
+			try { repairs = JSON.parse(item.repairs_json); } catch(e) {}
+		}
+		if (repairs.length > 0) {
+			// 折叠头：维修记录数量 + 展开/收起图标
+			var collapseId = 'rp_' + item.id;
+			html += '<div class="repair-collapse-header" onclick="toggleRepairs_#(pageId)(\'' + collapseId + '\')">'
+				+ '<span><i class="fa fa-wrench"></i> 维修记录 (' + repairs.length + ')</span>'
+				+ '<i class="fa fa-chevron-down repair-collapse-icon collapsed" id="icon_' + collapseId + '"></i>'
+				+ '</div>';
+			// 可折叠容器（默认折叠）
+			html += '<div class="repair-collapse-body collapsed" id="' + collapseId + '" style="max-height:0">';
+			for (var ri = 0; ri < repairs.length; ri++) {
+				var rep = repairs[ri];
+				var repairStartDate = rep.repair_date ? rep.repair_date.substring(0,10) : '';
+				var repairEndDate = rep.completion_date ? rep.completion_date.substring(0,10) : '';
+				var endDotClass = 'pending';
+				var endLabel = '进行中...';
+				var lineClass = '';
+				if (rep.repair_result == 2) {
+					endDotClass = 'active';
+					endLabel = repairEndDate + ' 已完成';
+					lineClass = 'done';
+				} else if (rep.repair_result == 3) {
+					endDotClass = 'danger';
+					endLabel = repairEndDate + ' 无法修复';
+					lineClass = 'done';
+				}
+				html += '<div class="repair-subcard">'
+					+ '<div class="repair-subcard-header">'
+					+   '<span><i class="fa fa-wrench"></i> ' + (rep.repair_type == 1 ? '公司维修' : rep.repair_type == 2 ? '寄出维修' : '维修') + '</span>'
+					+   '<div class="btn-group btn-group-sm">'
+					+     '<button class="btn btn-outline-info btn-xs" onclick="editRepairItem_#(pageId)(\'' + rep.id + '\')"><i class="fa fa-edit"></i></button>'
+					+     (item.audit_status != 2 ? '<button class="btn btn-outline-danger btn-xs" onclick="deleteRepairItem_#(pageId)(\'' + rep.id + '\')"><i class="fa fa-trash"></i></button>' : '')
+					+   '</div>'
+					+ '</div>'
+					+ '<div class="repair-subcard-body">'
+					+   '<div><b>故障：</b>' + (rep.fault_description || '-') + '</div>'
+					+   '<div><b>措施：</b>' + (rep.repair_action || '-') + '</div>'
+					+   '<div><b>维修人：</b>' + (rep.repairer || '-') + '</div>'
+					+ '</div>'
+					+ '<div class="repair-subcard-footer">'
+					+ '<div class="repair-progress">'
+					+   '<div class="repair-progress-node">'
+					+     '<div class="repair-progress-dot"></div>'
+					+     '<span class="repair-progress-label">' + repairStartDate + ' 开始维修</span>'
+					+   '</div>'
+					+   '<div class="repair-progress-line ' + lineClass + '"></div>'
+					+   '<div class="repair-progress-node">'
+					+     '<div class="repair-progress-dot ' + endDotClass + '" title="点击修改维修进度" onclick="updateRepairProgress_#(pageId)(\'' + rep.id + '\',' + rep.repair_result + ')"></div>'
+					+     '<span class="repair-progress-label">' + endLabel + '</span>'
+					+   '</div>'
+					+ '</div>'
+					+ '</div>'
+					+ '</div>';
+			}
+			html += '</div>';
+		}
+		// 始终显示新增维修按钮
+		html += '<div style="margin-top:10px;text-align:center;">'
+			+ '<button class="btn btn-outline-warning btn-xs" onclick="addRepairForComparison_#(pageId)(\'' + item.id + '\')">' 
+			+ '<i class="fa fa-wrench"></i> 新增维修</button></div>';
+	}
+
+	html += '</div>';
+	return html;
+}
+
+// 加载更多
+function loadMoreTimeline_#(pageId)() {
+	loadTimeline_#(pageId)(currentPage_#(pageId) + 1, true);
+}
+
+// 刷新设备状态badge
+function refreshEquipStatus_#(pageId)() {
+	$.ajax({
+		url: 'admin/siargo/equipment/getStatus',
+		data: { equipmentId: equipmentId_#(pageId) },
+		success: function(res) {
+			if (res.state === 'ok') {
+				var status = res.data;
+				var badgeHtml = '';
+				if (status == 1) {
+					badgeHtml = '<span class="badge badge-success equip-status-badge"><i class="fa fa-check-circle"></i> 正常</span>';
+				} else if (status == 2) {
+					badgeHtml = '<span class="badge badge-primary equip-status-badge"><i class="fa fa-wrench"></i> 维修中</span>';
+				} else if (status == 3) {
+					badgeHtml = '<span class="badge badge-secondary equip-status-badge"><i class="fa fa-archive"></i> 已封存</span>';
+				} else if (status == 4) {
+					badgeHtml = '<span class="badge badge-secondary equip-status-badge"><i class="fa fa-times-circle"></i> 报废</span>';
+				} else {
+					badgeHtml = '<span class="badge badge-secondary equip-status-badge">未知</span>';
+				}
+				$('#equip_status_badge_#(pageId)').html(badgeHtml);
+			}
+		}
+	});
+}
+
+// 刷新
+function refreshTimeline_#(pageId)() {
+	currentPage_#(pageId) = 1;
+	loadTimeline_#(pageId)(1, false);
+	refreshEquipStatus_#(pageId)();
+}
+
+// 新增对比
+function addComparison_#(pageId)() {
+	$.ajax({
+		url: 'admin/siargo/equipment/checkPendingAudit',
+		data: { equipmentId: equipmentId_#(pageId) },
+		success: function(res) {
+			if (res.state === 'ok' && res.data === true) {
+				layer.msg('有待审核的数据！', {icon: 2});
+				return;
+			}
+			DialogUtil.openNewDialog({
+				url: 'admin/siargo/equipment/comparison/add?equipmentId=' + equipmentId_#(pageId),
+				title: '新增对比',
+				width: '800',
+				height: '600',
+				handler: 'refreshTimeline_#(pageId)'
+			});
+		}
+	});
+}
+
+// 折叠/展开维修记录
+function toggleRepairs_#(pageId)(collapseId) {
+	var body = document.getElementById(collapseId);
+	var icon = document.getElementById('icon_' + collapseId);
+	if (body.classList.contains('collapsed')) {
+		body.classList.remove('collapsed');
+		body.style.maxHeight = body.scrollHeight + 'px';
+		icon.classList.remove('collapsed');
+	} else {
+		body.classList.add('collapsed');
+		body.style.maxHeight = '0';
+		icon.classList.add('collapsed');
+	}
+}
+
+// 新增维修（关联对比）
+function addRepairForComparison_#(pageId)(comparisonId) {
+	DialogUtil.openNewDialog({
+		url: 'admin/siargo/equipment/repair/add?equipmentId=' + equipmentId_#(pageId) + '&comparisonId=' + comparisonId,
+		title: '新增维修',
+		width: '820',
+		height: '600',
+		handler: 'refreshTimeline_#(pageId)'
+	});
+}
+
+// 快捷更新维修进度
+function updateRepairProgress_#(pageId)(repairId, currentResult) {
+	var content = '<div style="padding:20px;">'
+		+ '<div style="margin-bottom:15px;">'
+		+ '  <label style="font-weight:500;margin-bottom:8px;display:block;">维修状态</label>'
+		+ '  <select id="repairResultSelect" class="form-control">'
+		+ '    <option value="1"' + (currentResult==1?' selected':'') + '>维修中</option>'
+		+ '    <option value="2"' + (currentResult==2?' selected':'') + '>已完成</option>'
+		+ '    <option value="3"' + (currentResult==3?' selected':'') + '>无法修复</option>'
+		+ '  </select>'
+		+ '</div>'
+		+ '<div id="completionDateGroup" style="margin-bottom:10px;' + (currentResult==1?'display:none':'') + '">'
+		+ '  <label style="font-weight:500;margin-bottom:8px;display:block;">完成日期</label>'
+		+ '  <input type="date" id="completionDateInput" class="form-control" value="' + (new Date().toISOString().substring(0,10)) + '">'
+		+ '</div>'
+		+ '</div>';
+
+	layer.open({
+		type: 1,
+		title: '更新维修进度',
+		area: ['250px', '330px'],
+		content: content,
+		btn: ['确定', '取消'],
+		success: function(layero) {
+			layero.find('#repairResultSelect').on('change', function() {
+				var val = $(this).val();
+				layero.find('#completionDateGroup').toggle(val != '1');
+			});
+		},
+		yes: function(index, layero) {
+			var result = layero.find('#repairResultSelect').val();
+			var completionDate = layero.find('#completionDateInput').val();
+			
+			var postData = {
+				'equipmentRepair.id': repairId,
+				'equipmentRepair.repairResult': result
+			};
+			if (result != '1' && completionDate) {
+				postData['equipmentRepair.completionDate'] = completionDate;
+			}
+			
+			layer.close(index);
+			Ajax.post('admin/siargo/equipment/repair/update', postData, function(data) {
+				LayerMsgBox.success(data.msg || '更新成功', 800, function() {
+					refreshTimeline_#(pageId)();
+				});
+			});
+		}
+	});
+}
+
+// 编辑维修
+function editRepairItem_#(pageId)(repairId) {
+	DialogUtil.openNewDialog({
+		url: 'admin/siargo/equipment/repair/edit/' + repairId,
+		title: '编辑维修',
+		width: '820',
+		height: '600',
+		handler: 'refreshTimeline_#(pageId)'
+	});
+}
+
+// 删除维修
+function deleteRepairItem_#(pageId)(repairId) {
+	layer.confirm('确定删除该维修记录？', {icon: 3, title: '提示'}, function(idx) {
+		$.ajax({
+			url: 'admin/siargo/equipment/repair/deleteByIds?ids=' + repairId,
+			type: 'post',
+			success: function(res) {
+				layer.close(idx);
+				if (res.state === 'ok') {
+					layer.msg('删除成功', {icon: 1});
+					refreshTimeline_#(pageId)();
+				} else {
+					layer.msg(res.msg || '删除失败', {icon: 2});
+				}
+			}
+		});
+	});
+}
+
+// 编辑对比
+function editTimelineItem_#(pageId)(id) {
+	DialogUtil.openNewDialog({
+		url: 'admin/siargo/equipment/comparison/edit/' + id,
+		title: '编辑对比',
+		width: '800',
+		height: '600',
+		handler: 'refreshTimeline_#(pageId)'
+	});
+}
+
+// 删除对比
+function deleteTimelineItem_#(pageId)(id) {
+	layer.confirm('确定删除该对比记录？', {icon: 3, title: '提示'}, function(idx) {
+		$.ajax({
+			url: 'admin/siargo/equipment/comparison/deleteByIds?ids=' + id,
+			type: 'post',
+			success: function(res) {
+				layer.close(idx);
+				if (res.state === 'ok') {
+					layer.msg('删除成功', {icon: 1});
+					refreshTimeline_#(pageId)();
+				} else {
+					layer.msg(res.msg || '删除失败', {icon: 2});
+				}
+			}
+		});
+	});
+}
+
+// 证书图片全屏预览（支持滚轮缩放、拖拽、多图切换）
+function viewCertificateImages_#(pageId)(photos) {
+	var layerObj = top.layer || layer;
+	var currentIndex = 0;
+	var total = photos.length;
+
+	function buildContent(idx) {
+		var navLeft = total > 1 ? '<div id="certNavLeft" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:10;cursor:pointer;color:#fff;font-size:36px;opacity:0.7;user-select:none;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">&lt;</div>' : '';
+		var navRight = total > 1 ? '<div id="certNavRight" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:10;cursor:pointer;color:#fff;font-size:36px;opacity:0.7;user-select:none;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">&gt;</div>' : '';
+		var counter = total > 1 ? '<div style="position:absolute;bottom:15px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;background:rgba(0,0,0,0.5);padding:2px 12px;border-radius:10px;">' + (idx+1) + ' / ' + total + '</div>' : '';
+		return '<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000;user-select:none;">'
+			+ navLeft + navRight + counter
+			+ '<img id="certZoomImg" src="' + photos[idx].src + '" style="max-width:90%;max-height:90%;cursor:grab;transition:transform 0.2s;" draggable="false" />'
+			+ '</div>';
+	}
+
+	var idx = layerObj.open({
+		type: 1,
+		title: false,
+		area: ['100%', '100%'],
+		content: buildContent(currentIndex),
+		closeBtn: 1,
+		shadeClose: true,
+		success: function(layero) {
+			// 关闭按钮样式：无标题模式下白色圆形按钮
+			var closeBtn = layero.find('.layui-layer-close');
+			if (closeBtn.length) {
+				closeBtn.css({
+					'position': 'absolute',
+					'right': '15px',
+					'top': '15px',
+					'width': '40px',
+					'height': '40px',
+					'line-height': '40px',
+					'background': 'transparent',
+					'text-align': 'center',
+					'cursor': 'pointer',
+					'z-index': '1'
+				});
+				closeBtn.html('<span style="color:#fff;font-size:24px;font-weight:bold;line-height:40px;">×</span>');
+			}
+			var scale = 1, translateX = 0, translateY = 0;
+			var isDragging = false, startX = 0, startY = 0;
+			var doc = layero[0].ownerDocument || document;
+
+			function getImg() { return layero.find('#certZoomImg')[0]; }
+			function applyTransform() {
+				var img = getImg();
+				if (img) img.style.transform = 'scale(' + scale + ') translate(' + translateX + 'px,' + translateY + 'px)';
+			}
+			function resetTransform() { scale = 1; translateX = 0; translateY = 0; applyTransform(); }
+
+			// 滚轮缩放
+			layero[0].addEventListener('wheel', function(e) {
+				e.preventDefault();
+				if (e.deltaY < 0) { scale = Math.min(scale * 1.15, 8); }
+				else { scale = Math.max(scale / 1.15, 0.2); }
+				applyTransform();
+			}, {passive: false});
+
+			// 拖拽移动
+			layero[0].addEventListener('mousedown', function(e) {
+				if (e.target.tagName === 'IMG') {
+					isDragging = true;
+					startX = e.clientX - translateX;
+					startY = e.clientY - translateY;
+					e.target.style.cursor = 'grabbing';
+					e.preventDefault();
+				}
+			});
+			doc.addEventListener('mousemove', function(e) {
+				if (isDragging) {
+					translateX = e.clientX - startX;
+					translateY = e.clientY - startY;
+					applyTransform();
+				}
+			});
+			doc.addEventListener('mouseup', function() {
+				if (isDragging) {
+					isDragging = false;
+					var img = getImg();
+					if (img) img.style.cursor = 'grab';
+				}
+			});
+
+			// 多图切换
+			if (total > 1) {
+				layero.find('#certNavLeft').on('click', function() {
+					currentIndex = (currentIndex - 1 + total) % total;
+					navTo(layero);
+				});
+				layero.find('#certNavRight').on('click', function() {
+					currentIndex = (currentIndex + 1) % total;
+					navTo(layero);
+				});
+			}
+
+			// 双击还原
+			layero[0].addEventListener('dblclick', function(e) {
+				if (e.target.tagName === 'IMG') { resetTransform(); }
+			});
+
+			function navTo(layero) {
+				var container = layero.find('.layui-layer-content');
+				container.html(buildContent(currentIndex));
+				resetTransform();
+				// 重新绑定切换事件
+				if (total > 1) {
+					layero.find('#certNavLeft').on('click', function() {
+						currentIndex = (currentIndex - 1 + total) % total;
+						navTo(layero);
+					});
+					layero.find('#certNavRight').on('click', function() {
+						currentIndex = (currentIndex + 1) % total;
+						navTo(layero);
+					});
+				}
+			}
+		}
+	});
+}
+
+// 页面加载
+$(function(){
+	loadTimeline_#(pageId)(1, false);
+});
+</script>
+#end

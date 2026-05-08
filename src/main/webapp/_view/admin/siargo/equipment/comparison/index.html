@@ -1,0 +1,96 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)" >
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1>检校批次记录</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="equipmentComparisonForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<textarea class="jb_tpl_box" id="equipmentComparisonRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" >
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.equipmentId}</td>
+<td>${data.comparisonType}</td>
+<td>${data.comparisonDate}</td>
+<td>${data.result}</td>
+<td>${data.description}</td>
+<td>${data.creatorId}</td>
+<td>${data.creatorTime}</td>
+<td>${data.auditorId}</td>
+<td>${data.auditorTime}</td>
+<td>${data.auditStatus}</td>
+</tr>
+{@/each}
+</textarea>
+
+<!-- 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="equipmentComparison_toolbar_#(pageId)">
+	<div class="btn-group" role="group" aria-label="btn-group">
+		<button data-openpage="dialog" data-area="800,600"  data-handler="jboltTablePageToFirst" data-title="新增Comparison"  data-url="admin/siargo/equipment/comparison/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+		<button data-openpage="dialog" data-area="800,600"  data-handler="refreshJBoltTable" data-title="修改Comparison" data-check-handler="jboltTableGetCheckedId" data-url="admin/siargo/equipment/comparison/edit/" class="btn btn-outline-info btn-sm"><i class="fa fa-edit"></i> 修改</button>
+		<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/equipment/comparison/deleteByIds?ids=" data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm" ><i class="fa fa-trash"></i> 删除</button>
+		<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+	</div>
+	
+	<div class="clearfix"></div>
+</div>
+
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+data-jbolttable
+data-height="fill"
+data-ajax="true"
+data-url="admin/siargo/equipment/comparison/datas"
+data-column-resize="true"
+data-column-prepend="1:checkbox"
+data-conditions-form="equipmentComparisonForm_#(pageId)"
+data-rowtpl="equipmentComparisonRowtpl_#(pageId)"
+data-page="equipmentComparisonPage_#(pageId)"
+data-toolbar="equipmentComparison_toolbar_#(pageId)"
+
+
+
+
+data-fixed-columns-left="1,2,3"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	<th data-min-width="150" data-column="equipment_id">被对比设备ID</th>
+	<th data-width="150" data-column="comparison_type">对比类型：1-定期对比 2-临时对比 3-新表对比</th>
+	<th data-width="150" data-column="comparison_date">对比日期</th>
+	<th data-width="150" data-column="result">对比结果：1-待判定 2-合格 3-不合格</th>
+	<th data-width="150" data-column="description">对比备注/概况描述</th>
+	<th data-width="150" data-column="creator_id">编制人</th>
+	<th data-width="150" data-column="creator_time">编制时间</th>
+	<th data-width="150" data-column="auditor_id">审核人</th>
+	<th data-width="150" data-column="auditor_time">审核时间</th>
+	<th data-width="150" data-column="audit_status">审核状态：1-待审核 2-已审核</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+	
+</div>
+</div>
+#end
+

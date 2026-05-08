@@ -1,0 +1,94 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-key="#(pmkey)" >
+
+<div class="jbolt_page_title">
+	<div class="row">
+	<div class="col-md-auto">
+	<h1>设备维护记录</h1>
+	</div>
+	<div class="col">
+		<form class="form-inline" id="equipmentRepairForm_#(pageId)"   onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off"  class="form-control"  placeholder="输入关键字搜索" name="keywords" value="" />
+		<button  type="submit" class="btn btn-outline-secondary" ><i class="fa fa-search"></i> 查询</button>
+		</form>
+	</div>
+	<div class="col-md-auto">
+	</div>
+	</div>
+</div>
+<div class="jbolt_page_content">
+<!-- JBoltTable的数据模板定义-->
+<textarea class="jb_tpl_box" id="equipmentRepairRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" >
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td>${data.equipmentId}</td>
+<td>${data.comparisonId}</td>
+<td>${data.repairType}</td>
+<td>${data.repairDate}</td>
+<td>${data.faultDescription}</td>
+<td>${data.repairAction}</td>
+<td>${data.repairResult}</td>
+<td>${data.completionDate}</td>
+<td>${data.repairer}</td>
+</tr>
+{@/each}
+</textarea>
+
+<!-- 工具条 toolbar -->
+<div class="jbolt_table_toolbar" id="equipmentRepair_toolbar_#(pageId)">
+	<div class="btn-group" role="group" aria-label="btn-group">
+		<button data-openpage="dialog" data-area="800,600"  data-handler="jboltTablePageToFirst" data-title="新增Repair"  data-url="admin/siargo/equipment/repair/add" class="btn btn-outline-primary btn-sm" ><i class="fa fa-plus"></i> 新增</button>
+		<button data-openpage="dialog" data-area="800,600"  data-handler="refreshJBoltTable" data-title="修改Repair" data-check-handler="jboltTableGetCheckedId" data-url="admin/siargo/equipment/repair/edit/" class="btn btn-outline-info btn-sm"><i class="fa fa-edit"></i> 修改</button>
+		<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr" data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/equipment/repair/deleteByIds?ids=" data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm" ><i class="fa fa-trash"></i> 删除</button>
+		<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm" ><i class="fa fa-refresh"></i> 刷新</button>
+	</div>
+	
+	<div class="clearfix"></div>
+</div>
+
+
+
+<table class="jbolt_table jbolt_main_table table-center"
+data-jbolttable
+data-height="fill"
+data-ajax="true"
+data-url="admin/siargo/equipment/repair/datas"
+data-column-resize="true"
+data-column-prepend="1:checkbox"
+data-conditions-form="equipmentRepairForm_#(pageId)"
+data-rowtpl="equipmentRepairRowtpl_#(pageId)"
+data-page="equipmentRepairPage_#(pageId)"
+data-toolbar="equipmentRepair_toolbar_#(pageId)"
+
+
+
+
+data-fixed-columns-left="1,2,3"
+>
+<thead class="fw-normal">
+<tr>
+	<th data-width="60">序号</th>
+	<th data-min-width="150" data-column="equipment_id">设备ID</th>
+	<th data-width="150" data-column="comparison_id">触发维修的对比记录ID（可空，表示主动维修）</th>
+	<th data-width="150" data-column="repair_type">维修类型：1-公司维修 2-寄出维修</th>
+	<th data-width="150" data-column="repair_date">维修/送修日期</th>
+	<th data-width="150" data-column="fault_description">故障描述</th>
+	<th data-width="150" data-column="repair_action">维修措施</th>
+	<th data-width="150" data-column="repair_result">维修结果：1-维修中 2-已完成 3-无法修复</th>
+	<th data-width="150" data-column="completion_date">维修完成日期</th>
+	<th data-width="150" data-column="repairer">维修人/维修单位</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+	
+</div>
+</div>
+#end
+

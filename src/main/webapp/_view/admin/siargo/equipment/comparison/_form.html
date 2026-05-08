@@ -1,0 +1,146 @@
+<style>
+.equip-section-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.8rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid #e9ecef;
+}
+.equip-section-header i {
+	font-size: 1.1rem;
+	color: #667eea;
+	margin-right: 0.5rem;
+}
+.equip-section-header span {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #343a40;
+	letter-spacing: 0.5px;
+}
+.equip-section-header::after {
+	content: '';
+	flex: 1;
+	height: 2px;
+	background: linear-gradient(to right, #e9ecef, transparent);
+	margin-left: 0.8rem;
+}
+.equip-form-group {
+	margin-bottom: 0.6rem;
+}
+.equip-form-group label {
+	font-size: 0.85rem;
+	color: #495057;
+}
+.equip-form-group .form-control {
+	font-size: 0.85rem;
+}
+/* 缩小日期选择器面板，避免弹窗出现滚动条 */
+.layui-laydate {
+	transform: scale(0.85);
+	transform-origin: top left;
+}
+</style>
+<form onsubmit="return false;" id="equipmentComparisonForm" action="#(action)" method="post">
+<input type="hidden" name="equipmentComparison.id" value="#(equipmentComparison.id??)" />
+<input type="hidden" name="equipmentComparison.equipmentId" value="#(equipmentId ?? equipmentComparison.equipmentId ??)" />
+
+<div class="row align-items-start">
+	#if(equipmentComparison.auditStatus != 2)
+	<!-- 左列：对比信息（未审核时显示） -->
+	<div class="col-md-6">
+		<div class="equip-section-header">
+			<i class="fa fa-balance-scale"></i>
+			<span>对比信息</span>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-4 col-form-label">对比类型</label>
+			<div class="col input-group">
+				<select class="form-control" name="equipmentComparison.comparisonType"
+					data-rule="select">
+					<option value="">=请选择对比类型=</option>
+					<option value="1" #if(equipmentComparison.comparisonType?? == 1) selected #end>定期对比</option>
+					<option value="2" #if(equipmentComparison.comparisonType?? == 2) selected #end>临时对比</option>
+					<option value="3" #if(equipmentComparison.comparisonType?? == 3) selected #end>新表对比</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-4 col-form-label">对比日期</label>
+			<div class="col">
+				<input type="text" data-date data-type="date" data-fmt="yyyy-MM-dd"
+					readonly="readonly" autocomplete="off" class="form-control"
+					data-rule="required" placeholder="请设置对比日期"
+					maxlength="10" name="equipmentComparison.comparisonDate"
+					value="#date(equipmentComparison.comparisonDate,'yyyy-MM-dd')" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-4 col-form-label">对比结果</label>
+			<div class="col input-group">
+				<select class="form-control" name="equipmentComparison.result"
+					data-rule="select">
+					<option value="">=请选择对比结果=</option>
+					<option value="1" #if(equipmentComparison.result?? == 1) selected #end>合格</option>
+					<option value="2" #if(equipmentComparison.result?? == 2) selected #end>不合格</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-4 col-form-label">描述</label>
+			<div class="col">
+				<textarea class="form-control"
+					placeholder="请输入对比备注/概况描述" maxlength="500"
+					name="equipmentComparison.description" rows="3">#(equipmentComparison.description??)</textarea>
+			</div>
+		</div>
+	</div>
+	#end
+	<!-- 右列：证书信息 -->
+	<div class="#if(equipmentComparison.auditStatus == 2)col-md-12#else col-md-6#end">
+		<div class="equip-section-header">
+			<i class="fa fa-certificate"></i>
+			<span>证书信息</span>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-4 col-form-label">过期日期</label>
+			<div class="col">
+				<input type="text" data-date data-type="date" data-fmt="yyyy-MM-dd"
+					readonly="readonly" autocomplete="off" class="form-control"
+					 placeholder="请设置证书过期日期"
+					maxlength="10" name="equipmentCertificate.certificateDate"
+					value="#if(equipmentCertificate.certificateDate??)#date(equipmentCertificate.certificateDate,'yyyy-MM-dd')#end" />
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-4 col-form-label">证书描述</label>
+			<div class="col">
+				<textarea class="form-control" 
+					placeholder="请输入证书描述" maxlength="500"
+					name="equipmentCertificate.remark" rows="3">#(equipmentCertificate.remark??)</textarea>
+			</div>
+		</div>
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-4 col-form-label">证书图片</label>
+			<div class="col">
+				<input type="hidden" id="certificateImageUrls" name="certificateImageUrls" value="#(certificateImageUrls??)" />
+				<div class="j_img_uploder"
+					data-handler="uploadFile"
+					data-url="/admin/siargo/equipment/certificate/uploadImages?save=true"
+					data-hiddeninput="certificateImageUrls"
+					data-value="#(certificateImageUrls??)"
+					data-area="120,120"
+					data-maxsize="102400"
+					style="width:120px;height:120px;">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="equipmentComparisonForm")
+#end
+
