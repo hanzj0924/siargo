@@ -5,9 +5,9 @@ import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
 import cn.jbolt.core.kit.JBoltUserKit;
 import com.jfinal.kit.Kv;
-import com.jfinal.kit.Okv;
 import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
+import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import cn.jbolt.common.config.JBoltUploadFolder;
 import cn.jbolt.core.base.JBoltMsg;
@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
  * @date: 2026-04-18 15:45  
  */
 public class EquipmentCertificateService extends JBoltBaseService<EquipmentCertificate> {
+	private static final Log LOG = Log.getLog(EquipmentCertificateService.class);
 	private final EquipmentCertificate dao=new EquipmentCertificate().dao();
 
 	/** Web 根目录绝对路径 */
@@ -108,13 +109,20 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	
 	/**
 	 * 删除数据后执行的回调
+	 * 删除策略：
+	 * 1. 删除磁盘上的证书图片文件
+	 * 2. 记录操作日志
 	 * @param equipmentCertificate 要删除的model
 	 * @param kv 携带额外参数一般用不上
-	 * @return
+	 * @return null表示正常完成
 	 */
 	@Override
 	protected String afterDelete(EquipmentCertificate equipmentCertificate, Kv kv) {
-		//addDeleteSystemLog(equipmentCertificate.getId(), JBoltUserKit.getUserId(),equipmentCertificate.getName());
+		// 删除磁盘上的证书图片文件
+		String imageUrl = equipmentCertificate.getStr("image_url");
+		deleteCertificateFile(imageUrl);
+		// 记录删除日志
+		addDeleteSystemLog(equipmentCertificate.getId(), JBoltUserKit.getUserId(), imageUrl);
 		return null;
 	}
 	
@@ -136,7 +144,161 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 */
 	@Override
 	protected int systemLogTargetType() {
-		return ProjectSystemLogTargetType.EQUIPMENTCERTIFICATERECORD.getValue();
+		return ProjectSystemLogTargetType.EQUIPMENTCERTIFICATE.getValue();
+	}
+
+	// -------------------------------------------------------------------------
+	// 查询方法
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 根据对比记录ID查询关联的所有证书
+	 * @param comparisonId 对比记录ID
+	 * @return 证书列表
+	 */
+	public List<EquipmentCertificate> findByComparisonId(Long comparisonId) {
+		if (notOk(comparisonId)) return null;
+		return dao.find("SELECT * FROM siargo_equipment_certificate WHERE comparison_id = ? ORDER BY id", comparisonId);
+	}
+
+	/**
+	 * 根据设备ID查询所有证书
+	 * @param equipmentId 设备ID
+	 * @return 证书列表
+	 */
+	public List<EquipmentCertificate> findByEquipmentId(Long equipmentId) {
+		if (notOk(equipmentId)) return null;
+		return dao.find("SELECT * FROM siargo_equipment_certificate WHERE equipment_id = ? ORDER BY id DESC", equipmentId);
+	}
+
+	/**
+	 * 查询设备当前有效证书（status=1）
+	 * @param equipmentId 设备ID
+	 * @return 有效的证书记录，无则返回null
+	 */
+	public EquipmentCertificate findValidByEquipmentId(Long equipmentId) {
+		if (notOk(equipmentId)) return null;
+		return dao.findFirst("SELECT * FROM siargo_equipment_certificate WHERE equipment_id = ? AND status = 1 LIMIT 1", equipmentId);
+	}
+
+	// -------------------------------------------------------------------------
+	// 保存与更新方法
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 为对比记录保存证书
+	 * 逻辑：解析 imageUrls（逗号分隔），将临时文件移动到正式目录，创建证书记录
+	 * @param comparisonId 对比记录ID
+	 * @param equipmentId 设备ID
+	 * @param imageUrls 逗号分隔的临时文件相对路径列表
+	 */
+	public void saveCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls) {
+		saveCertificatesForComparison(comparisonId, equipmentId, imageUrls, null, null);
+	}
+
+	/**
+	 * 为对比记录保存证书（含证书日期和描述）
+	 * 逻辑：解析 imageUrls（逗号分隔），将临时文件移动到正式目录，创建证书记录
+	 * @param comparisonId 对比记录ID
+	 * @param equipmentId 设备ID
+	 * @param imageUrls 逗号分隔的临时文件相对路径列表
+	 * @param certificateDate 证书日期（可为null）
+	 * @param certificateRemark 证书描述（可为null）
+	 */
+	public void saveCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls, String certificateDate, String certificateRemark) {
+		if (notOk(comparisonId) || notOk(equipmentId) || imageUrls == null || imageUrls.trim().isEmpty()) {
+			return;
+		}
+		// 将该设备当前的有效证书更新为无效
+		Db.update("UPDATE siargo_equipment_certificate SET status = 2 WHERE equipment_id = ? AND status = 1", equipmentId);
+
+		List<String> urls = Arrays.stream(imageUrls.split(","))
+				.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.collect(Collectors.toList());
+
+		String tempPrefix = localPath + "temp/";
+
+		for (String url : urls) {
+			String finalUrl = url;
+			// 判断是否为临时路径，需要移动文件到正式目录
+			if (url.startsWith(tempPrefix)) {
+				try {
+					String safePath = normalizeTempPath(url);
+					File tempFile = new File(webRootPath + safePath);
+					if (!tempFile.exists()) continue;
+
+					String targetDir = localPath + equipmentId + "/";
+					File targetFolder = new File(webRootPath + targetDir);
+					if (!targetFolder.exists()) targetFolder.mkdirs();
+
+					String targetPath = targetDir + tempFile.getName();
+					File targetFile = new File(webRootPath + targetPath);
+					Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					finalUrl = targetPath;
+				} catch (Exception e) {
+					LOG.error("移动证书文件异常: " + url, e);
+					continue; // 单张失败不阻断整体
+				}
+			}
+			// 创建证书记录
+			EquipmentCertificate cert = new EquipmentCertificate();
+			cert.set("comparison_id", comparisonId);
+			cert.set("equipment_id", equipmentId);
+			cert.set("image_url", finalUrl);
+			cert.setStatus(1);
+			if (certificateDate != null && !certificateDate.trim().isEmpty()) {
+				cert.set("certificate_date", certificateDate);
+			}
+			if (certificateRemark != null && !certificateRemark.trim().isEmpty()) {
+				cert.set("remark", certificateRemark);
+			}
+			cert.save();
+		}
+	}
+
+	/**
+	 * 更新对比记录的证书
+	 * 逻辑：先删除旧证书记录和文件，再保存新证书
+	 * @param comparisonId 对比记录ID
+	 * @param equipmentId 设备ID
+	 * @param imageUrls 逗号分隔的图片路径
+	 */
+	public void updateCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls) {
+		updateCertificatesForComparison(comparisonId, equipmentId, imageUrls, null, null);
+	}
+
+	/**
+	 * 更新对比记录的证书（含证书日期和描述）
+	 * 逻辑：先删除旧证书记录和文件，再保存新证书
+	 * @param comparisonId 对比记录ID
+	 * @param equipmentId 设备ID
+	 * @param imageUrls 逗号分隔的图片路径
+	 * @param certificateDate 证书日期（可为null）
+	 * @param certificateRemark 证书描述（可为null）
+	 */
+	public void updateCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls, String certificateDate, String certificateRemark) {
+		// 先删除旧证书记录和文件
+		deleteByComparisonId(comparisonId);
+		// 再保存新证书
+		if (isOk(imageUrls)) {
+			saveCertificatesForComparison(comparisonId, equipmentId, imageUrls, certificateDate, certificateRemark);
+		}
+	}
+
+	/**
+	 * 删除某对比记录的所有证书（含磁盘文件）
+	 * @param comparisonId 对比记录ID
+	 */
+	public void deleteByComparisonId(Long comparisonId) {
+		if (notOk(comparisonId)) return;
+		List<EquipmentCertificate> certs = findByComparisonId(comparisonId);
+		if (certs != null && !certs.isEmpty()) {
+			for (EquipmentCertificate cert : certs) {
+				deleteCertificateFile(cert.getStr("image_url"));
+			}
+		}
+		Db.delete("DELETE FROM siargo_equipment_certificate WHERE comparison_id = ?", comparisonId);
 	}
 
 	// -------------------------------------------------------------------------
@@ -297,6 +459,35 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 		String fileName = file.getName();
 		int dotIndex = fileName.lastIndexOf('.');
 		return dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
+	}
+
+	// -------------------------------------------------------------------------
+	// 私有工具方法
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 删除单个证书图片的磁盘文件
+	 * 文件不存在时静默跳过，删除失败只记录警告
+	 * @param imageUrl 图片相对路径
+	 */
+	private void deleteCertificateFile(String imageUrl) {
+		if (imageUrl == null || imageUrl.isEmpty()) {
+			return;
+		}
+		try {
+			String physicalPath = webRootPath + imageUrl;
+			File file = new File(physicalPath);
+			if (file.exists() && file.isFile()) {
+				boolean deleted = file.delete();
+				if (deleted) {
+					LOG.info("证书图片删除成功: " + physicalPath);
+				} else {
+					LOG.warn("证书图片删除失败: " + physicalPath);
+				}
+			}
+		} catch (Exception e) {
+			LOG.error("删除证书图片文件异常: " + imageUrl, e);
+		}
 	}
 
 }

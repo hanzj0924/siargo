@@ -12,6 +12,7 @@ import com.jfinal.core.Path;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import cn.jbolt.core.base.JBoltMsg;
+import com.jfinal.plugin.activerecord.Db;
 import cn.jbolt.siargo.model.Equipment;
 import cn.jbolt.siargo.model.EquipmentCertificate;
 import java.util.List;
@@ -53,7 +54,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 	* 数据源
 	*/
 	public void datas() {
-		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords(),get("category"),get("filter"),get("status")));
+		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords(),get("category"),get("filter"),get("status"),get("inspectionMethod"),get("inspectionCycle")));
 	}
 	
 	/**
@@ -72,11 +73,11 @@ public class EquipmentAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	* 批量校准
+	* 批量定期对比
 	*/
 	@Before(Tx.class)
 	public void batchInspection() {
-		renderJson(service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status"),get("description")));
+		renderJson(service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status")));
 	}
 	
 	/**
@@ -88,7 +89,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	* 设备维修校准记录页面
+	* 设备对比记录页面
 	*/
 	public void records() {
 		Long equipmentId = getLong("equipmentId");
@@ -107,7 +108,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	* 设备维修校准记录数据源
+	* 设备对比记录数据源
 	*/
 	public void recordDatas() {
 		Long equipmentId = getLong("equipmentId");
@@ -115,20 +116,19 @@ public class EquipmentAdminController extends JBoltBaseController {
 			renderFail(JBoltMsg.PARAM_ERROR);
 			return;
 		}
-		Long batchId = getLong("batchId");
-		renderJsonData(service.paginateRecordDatas(getPageNumber(), getPageSize(), equipmentId, batchId));
+		renderJsonData(service.paginateRecordDatas(getPageNumber(), getPageSize(), equipmentId));
 	}
 	
 	/**
 	* 查看证书
 	*/
 	public void certificates() {
-		Long recordId = getLong("recordId");
-		if (notOk(recordId)) { renderFail(JBoltMsg.PARAM_ERROR); return; }
+		Long comparisonId = getLong("comparisonId");
+		if (notOk(comparisonId)) { renderFail(JBoltMsg.PARAM_ERROR); return; }
 		List<EquipmentCertificate> certs = new EquipmentCertificate().dao()
-			.find("SELECT * FROM siargo_equipment_certificate WHERE record_id = ? ORDER BY certificate_date DESC", recordId);
+			.find("SELECT * FROM siargo_equipment_certificate WHERE comparison_id = ? ORDER BY certificate_date DESC", comparisonId);
 		set("certs", certs);
-		set("recordId", recordId);
+		set("comparisonId", comparisonId);
 		render("certificates.html");
 	}
 	
@@ -193,5 +193,63 @@ public class EquipmentAdminController extends JBoltBaseController {
 		renderJson(service.batchStatus(get("ids"), getInt("status")));
 	}
 	
+	/**
+	 * 设备时间线页面
+	 */
+	public void timeline() {
+		Long equipmentId = getLong("equipmentId");
+		if (equipmentId == null) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		Equipment equipment = service.findById(equipmentId);
+		if (equipment == null) {
+			renderFail(JBoltMsg.DATA_NOT_EXIST);
+			return;
+		}
+		set("equipment", equipment);
+		render("timeline/index.html");
+	}
+	
+	/**
+	 * 时间线数据源 - 合并对比+维修记录按日期倒序
+	 */
+	public void timelineDatas() {
+		Long equipmentId = getLong("equipmentId");
+		if (equipmentId == null) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		renderJsonData(service.paginateTimelineDatas(getPageNumber(), getPageSize(), equipmentId));
+	}
+
+	/**
+	 * 检查设备是否有待审核数据
+	 */
+	public void checkPendingAudit() {
+		Long equipmentId = getLong("equipmentId");
+		if (equipmentId == null) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		renderJsonData(service.hasPendingAudit(equipmentId));
+	}
+
+	/**
+	 * 获取设备当前状态
+	 */
+	public void getStatus() {
+		Long equipmentId = getLong("equipmentId");
+		if (equipmentId == null) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		Integer status = Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
+		if (status == null) {
+			renderFail("设备不存在或状态异常");
+			return;
+		}
+		renderJsonData(status);
+	}
 
 }

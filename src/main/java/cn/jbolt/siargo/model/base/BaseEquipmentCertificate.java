@@ -11,48 +11,39 @@ import com.alibaba.fastjson.serializer.ToStringSerializer;
 @SuppressWarnings({"serial", "unchecked"})
 public abstract class BaseEquipmentCertificate<M extends BaseEquipmentCertificate<M>> extends JBoltBaseModel<M>{
     public static final String DATASOURCE_CONFIG_NAME = "main";
-    /***/
+    /**主键*/
     public static final String ID = "id";
-    /**关联记录ID（siargo_equipment_record.id）*/
-    public static final String RECORD_ID = "record_id";
-    /**设备ID（冗余，加速按设备查证书）*/
+    /**设备ID*/
     public static final String EQUIPMENT_ID = "equipment_id";
+    /**关联对比记录ID*/
+    public static final String COMPARISON_ID = "comparison_id";
     /**证书图片地址*/
     public static final String IMAGE_URL = "image_url";
     /**证书日期*/
     public static final String CERTIFICATE_DATE = "certificate_date";
     /**备注*/
     public static final String REMARK = "remark";
+    /**状态：1-有效 2-无效*/
+    public static final String STATUS = "status";
+	/**
+	 * 主键
+	 */
 	public M setId(java.lang.Long id) {
 		set("id", id);
 		return (M)this;
 	}
 	
-	@JBoltField(name="id" ,columnName="id",type="Long", remark="ID", required=true, maxLength=19, fixed=0, order=1)
+	/**
+	 * 主键
+	 */
+	@JBoltField(name="id" ,columnName="id",type="Long", remark="主键", required=true, maxLength=19, fixed=0, order=1)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getId() {
 		return getLong("id");
 	}
 
 	/**
-	 * 关联记录ID（siargo_equipment_record.id）
-	 */
-	public M setRecordId(java.lang.Long recordId) {
-		set("record_id", recordId);
-		return (M)this;
-	}
-	
-	/**
-	 * 关联记录ID（siargo_equipment_record.id）
-	 */
-	@JBoltField(name="recordId" ,columnName="record_id",type="Long", remark="关联记录ID（siargo_equipment_record.id）", required=true, maxLength=19, fixed=0, order=2)
-	@JSONField(serializeUsing= ToStringSerializer.class)
-	public java.lang.Long getRecordId() {
-		return getLong("record_id");
-	}
-
-	/**
-	 * 设备ID（冗余，加速按设备查证书）
+	 * 设备ID
 	 */
 	public M setEquipmentId(java.lang.Long equipmentId) {
 		set("equipment_id", equipmentId);
@@ -60,12 +51,29 @@ public abstract class BaseEquipmentCertificate<M extends BaseEquipmentCertificat
 	}
 	
 	/**
-	 * 设备ID（冗余，加速按设备查证书）
+	 * 设备ID
 	 */
-	@JBoltField(name="equipmentId" ,columnName="equipment_id",type="Long", remark="设备ID（冗余，加速按设备查证书）", required=true, maxLength=19, fixed=0, order=3)
+	@JBoltField(name="equipmentId" ,columnName="equipment_id",type="Long", remark="设备ID", required=true, maxLength=19, fixed=0, order=2)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getEquipmentId() {
 		return getLong("equipment_id");
+	}
+
+	/**
+	 * 关联对比记录ID
+	 */
+	public M setComparisonId(java.lang.Long comparisonId) {
+		set("comparison_id", comparisonId);
+		return (M)this;
+	}
+	
+	/**
+	 * 关联对比记录ID
+	 */
+	@JBoltField(name="comparisonId" ,columnName="comparison_id",type="Long", remark="关联对比记录ID", required=false, maxLength=19, fixed=0, order=3)
+	@JSONField(serializeUsing= ToStringSerializer.class)
+	public java.lang.Long getComparisonId() {
+		return getLong("comparison_id");
 	}
 
 	/**
@@ -114,6 +122,22 @@ public abstract class BaseEquipmentCertificate<M extends BaseEquipmentCertificat
 	@JBoltField(name="remark" ,columnName="remark",type="String", remark="备注", required=false, maxLength=255, fixed=0, order=6)
 	public java.lang.String getRemark() {
 		return getStr("remark");
+	}
+
+	/**
+	 * 状态：1-有效 2-无效
+	 */
+	public M setStatus(java.lang.Integer status) {
+		set("status", status);
+		return (M)this;
+	}
+	
+	/**
+	 * 状态：1-有效 2-无效
+	 */
+	@JBoltField(name="status" ,columnName="status",type="Integer", remark="状态：1-有效 2-无效", required=false, maxLength=10, fixed=0, order=7)
+	public java.lang.Integer getStatus() {
+		return getInt("status");
 	}
 
 }

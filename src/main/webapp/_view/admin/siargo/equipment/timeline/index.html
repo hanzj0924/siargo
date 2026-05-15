@@ -38,6 +38,8 @@
 					<span class="badge badge-secondary equip-status-badge"><i class="fa fa-archive"></i> 已封存</span>
 				#elseif(equipment.status == 4)
 					<span class="badge badge-secondary equip-status-badge"><i class="fa fa-times-circle"></i> 报废</span>
+				#elseif(equipment.status == 5)
+					<span class="badge badge-danger equip-status-badge"><i class="fa fa-exclamation-triangle"></i> 异常</span>
 				#else
 					<span class="badge badge-secondary equip-status-badge">未知</span>
 				#end
@@ -327,7 +329,7 @@
 <script type="text/javascript">
 var currentPage_#(pageId) = 1;
 var totalPages_#(pageId) = 1;
-var equipmentId_#(pageId) = #(equipment.id);
+var equipmentId_#(pageId) = "#(equipment.id)";
 
 // 加载时间线数据
 function loadTimeline_#(pageId)(page, append) {
@@ -408,7 +410,8 @@ function buildTimelineCard_#(pageId)(item, side) {
 		var certPhotos = item.cert_images.split(',').map(function(url) {
 			return {src: url.trim()};
 		});
-		certBtn = ' <a href="javascript:;" class="btn btn-outline-primary btn-xs" title="查看证书" onclick="viewCertificateImages_#(pageId)(' + JSON.stringify(certPhotos).replace(/"/g, '&quot;') + ')"><i class="jbicon jb-21ok"></i>查看证书</a>';
+		var certDateStr = item.cert_date ? ' <small style="opacity:0.8;">' + item.cert_date.substring(0, 10) + '</small>' : '';
+		certBtn = ' <a href="javascript:;" class="btn btn-outline-primary btn-xs" title="查看证书" onclick="viewCertificateImages_#(pageId)(' + JSON.stringify(certPhotos).replace(/"/g, '&quot;') + ')"><i class="jbicon jb-21ok"></i>查看证书' + certDateStr + '</a>';
 	}
 
 	var html = '<div class="timeline-item ' + side + '">'
@@ -513,6 +516,9 @@ function refreshEquipStatus_#(pageId)() {
 		success: function(res) {
 			if (res.state === 'ok') {
 				var status = res.data;
+				if (status === null || status === undefined) {
+					return;
+				}
 				var badgeHtml = '';
 				if (status == 1) {
 					badgeHtml = '<span class="badge badge-success equip-status-badge"><i class="fa fa-check-circle"></i> 正常</span>';
@@ -522,6 +528,8 @@ function refreshEquipStatus_#(pageId)() {
 					badgeHtml = '<span class="badge badge-secondary equip-status-badge"><i class="fa fa-archive"></i> 已封存</span>';
 				} else if (status == 4) {
 					badgeHtml = '<span class="badge badge-secondary equip-status-badge"><i class="fa fa-times-circle"></i> 报废</span>';
+				} else if (status == 5) {
+					badgeHtml = '<span class="badge badge-danger equip-status-badge"><i class="fa fa-exclamation-triangle"></i> 异常</span>';
 				} else {
 					badgeHtml = '<span class="badge badge-secondary equip-status-badge">未知</span>';
 				}

@@ -1,0 +1,300 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册计量师 - 知识体系</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e8f4fd 0%, #f0f4ff 50%, #f8f9fe 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 顶部标题区 */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a5276, #2980b9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            color: #5d6d7e;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 学习模块卡片 */
+        .modules-title {
+            font-size: 1.4rem;
+            color: #1a5276;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modules-title::before {
+            content: "🗺️";
+            font-size: 1.3rem;
+        }
+
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(41, 128, 185, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .module-card:nth-child(1)::before {
+            background: linear-gradient(90deg, #2980b9, #3498db);
+        }
+
+        .module-card:nth-child(2)::before {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+        }
+
+        .module-card:nth-child(3)::before {
+            background: linear-gradient(90deg, #8e44ad, #9b59b6);
+        }
+
+        .module-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .module-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .module-card:nth-child(1) .module-number {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+
+        .module-card:nth-child(2) .module-number {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .module-card:nth-child(3) .module-number {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+        }
+
+        .module-card h3 {
+            font-size: 1.15rem;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .module-card p {
+            font-size: 0.9rem;
+            color: #5d6d7e;
+            flex: 1;
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+
+        .module-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .module-card:nth-child(1) .module-btn {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            color: white;
+        }
+
+        .module-card:nth-child(1) .module-btn:hover {
+            background: linear-gradient(135deg, #1a6fa0, #2980b9);
+            box-shadow: 0 4px 15px rgba(41, 128, 185, 0.4);
+        }
+
+        .module-card:nth-child(2) .module-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .module-card:nth-child(2) .module-btn:hover {
+            background: linear-gradient(135deg, #1e8c4e, #27ae60);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .module-card:nth-child(3) .module-btn {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+        }
+
+        .module-card:nth-child(3) .module-btn:hover {
+            background: linear-gradient(135deg, #763892, #8e44ad);
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+        }
+
+        .module-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* 底部 */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            color: #95a5a6;
+            font-size: 0.85rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header .subtitle {
+                font-size: 1rem;
+            }
+
+            .overview {
+                padding: 24px;
+            }
+
+            .modules {
+                grid-template-columns: 1fr;
+            }
+
+            .module-card {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .exam-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题区 -->
+        <header class="header">
+            <h1>一级注册计量师 - 知识体系</h1>
+            <p class="subtitle">备考学习资料库，系统梳理三科核心知识点，助力高效复习与通关</p>
+        </header>
+
+        <!-- 学习模块卡片 -->
+        <h2 class="modules-title">学习模块</h2>
+        <div class="modules">
+            <!-- 卡片1：法规模块 -->
+            <div class="module-card">
+                <span class="module-number">1</span>
+                <h3>计量法律法规及综合知识</h3>
+                <p>涵盖计量法律法规体系、技术机构管理、量和单位、测量基础、测量仪器等核心知识点</p>
+                <a href="admin/siargo/cme/fagui" target="_blank" class="module-btn">
+                    进入学习
+                    <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                </a>
+            </div>
+
+            <!-- 卡片2：实务模块 -->
+            <div class="module-card">
+                <span class="module-number">2</span>
+                <h3>测量数据处理与计量专业实务</h3>
+                <p>涵盖测量误差、不确定度评定、计量比对、期间核查、计量标准管理、检定规程等专业实务</p>
+                <a href="admin/siargo/cme/shiwu" target="_blank" class="module-btn">
+                    进入学习
+                    <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                </a>
+            </div>
+
+            <!-- 卡片3：案例模块 -->
+            <div class="module-card">
+                <span class="module-number">3</span>
+                <h3>计量专业案例分析</h3>
+                <p>涵盖计量标准建立与考核、检定校准检测、比对与核查、型式评价等实战案例分析</p>
+                <a href="admin/siargo/cme/anli" target="_blank" class="module-btn">
+                    进入学习
+                    <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- 底部 -->
+        <footer class="footer">
+            <p>一级注册计量师备考助手 · 学习系统</p>
+        </footer>
+    </div>
+</body>
+</html>

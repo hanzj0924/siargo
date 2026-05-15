@@ -5,7 +5,7 @@
 	<form onsubmit="return false;" id="batchInspectionForm" action="admin/siargo/equipment/batchInspection" method="post">
 		<input type="hidden" name="ids" value="#(ids ??)" />
 		<div class="form-group row">
-			<label class="col-sm-4 col-form-label">上次检校日期</label>
+			<label class="col-sm-4 col-form-label">最近检校日期</label>
 			<div class="col-sm-8">
 				<input type="text" data-rule="required" data-date data-type="date" data-fmt="yyyy-MM-dd" readonly="readonly" autocomplete="off" class="form-control" placeholder="请选择上次检校日期" data-tips="请选择上次检校日期" maxlength="10" name="lastInspectionDate" value="" />
 			</div>
@@ -17,22 +17,12 @@
 			</div>
 		</div>
 		<div class="form-group row">
-			<label class="col-sm-4 col-form-label">检校结果</label>
+			<label class="col-sm-4 col-form-label">对比结果</label>
 			<div class="col-sm-8">
 				<select class="form-control" data-autoload name="status"
 					data-text="=请选择=" data-value="" data-rule="select"
 					data-options="合格:1,不合格:2">
 				</select>
-			</div>
-		</div>
-		<!-- 检校概况描述 -->
-		<div class="form-group row">
-			<label class="col-sm-4 col-form-label">检校概况</label>
-			<div class="col-sm-8">
-				<textarea class="form-control" data-rule="required" 
-						  placeholder="请输入检校概况描述" 
-						  data-tips="请输入检校概况描述" 
-						  maxlength="500" name="description" rows="3"></textarea>
 			</div>
 		</div>
 	</form>
