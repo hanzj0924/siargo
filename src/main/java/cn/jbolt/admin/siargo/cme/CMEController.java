@@ -40,6 +40,14 @@ public class CMEController extends JBoltBaseController {
 	 * URL路径: GET /admin/siargo/cme/fagui
 	 */
 	public void fagui() {
+		render("1法规_viewer.html");
+	}
+
+	/**
+	 * 法规PDF原始文件流（供embed使用）
+	 * URL路径: GET /admin/siargo/cme/faguiPdfSrc
+	 */
+	public void faguiPdfSrc() {
 		servePdf("1法规.pdf");
 	}
 
@@ -48,6 +56,14 @@ public class CMEController extends JBoltBaseController {
 	 * URL路径: GET /admin/siargo/cme/shiwu
 	 */
 	public void shiwu() {
+		render("2实务_viewer.html");
+	}
+
+	/**
+	 * 实务PDF原始文件流（供embed使用）
+	 * URL路径: GET /admin/siargo/cme/shiwuPdfSrc
+	 */
+	public void shiwuPdfSrc() {
 		servePdf("2实务.pdf");
 	}
 
@@ -56,7 +72,39 @@ public class CMEController extends JBoltBaseController {
 	 * URL路径: GET /admin/siargo/cme/anli
 	 */
 	public void anli() {
+		render("3案例_viewer.html");
+	}
+
+	/**
+	 * 案例PDF原始文件流（供embed使用）
+	 * URL路径: GET /admin/siargo/cme/anliPdfSrc
+	 */
+	public void anliPdfSrc() {
 		servePdf("3案例.pdf");
+	}
+
+	/**
+	 * 法规思维导图
+	 * URL路径: GET /admin/siargo/cme/faguiMindmap
+	 */
+	public void faguiMindmap() {
+		render("1_法规_思维导图.html");
+	}
+
+	/**
+	 * 实务思维导图
+	 * URL路径: GET /admin/siargo/cme/shiwuMindmap
+	 */
+	public void shiwuMindmap() {
+		render("2_实务_思维导图.html");
+	}
+
+	/**
+	 * 案例思维导图
+	 * URL路径: GET /admin/siargo/cme/anliMindmap
+	 */
+	public void anliMindmap() {
+		render("3_案例_思维导图.html");
 	}
 
 	/**

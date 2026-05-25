@@ -17,10 +17,11 @@
             background: linear-gradient(135deg, #e8f4fd 0%, #f0f4ff 50%, #f8f9fe 100%);
             color: #2c3e50;
             line-height: 1.6;
+            overflow-y: auto;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -28,7 +29,7 @@
         /* 顶部标题区 */
         .header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
 
         .header h1 {
@@ -55,6 +56,7 @@
             margin-bottom: 24px;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
         }
 
@@ -64,9 +66,13 @@
         }
 
         .modules {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            display: flex;
+            flex-direction: row;
             gap: 24px;
+            align-items: stretch;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 0 40px;
         }
 
         .module-card {
@@ -80,6 +86,9 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            flex: 1;
+            min-width: 320px;
+            max-width: 500px;
         }
 
         .module-card::before {
@@ -149,17 +158,27 @@
             line-height: 1.7;
         }
 
+        .module-actions {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+            margin-top: auto;
+        }
+
         .module-btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 12px 24px;
+            padding: 12px 16px;
             border-radius: 8px;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             transition: all 0.3s ease;
-            align-self: flex-start;
+            border: 2px solid transparent;
+            white-space: nowrap;
+            flex: 1;
         }
 
         .module-card:nth-child(1) .module-btn {
@@ -198,11 +217,55 @@
             fill: currentColor;
         }
 
+        /* 思维导图按钮 - 描边样式做视觉区分 */
+        .mindmap-btn {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .module-card:nth-child(1) .mindmap-btn {
+            color: #2980b9;
+            border-color: #3498db;
+        }
+
+        .module-card:nth-child(1) .mindmap-btn:hover {
+            background: rgba(41, 128, 185, 0.08) !important;
+            border-color: #2980b9;
+            box-shadow: 0 4px 15px rgba(41, 128, 185, 0.15) !important;
+        }
+
+        .module-card:nth-child(2) .mindmap-btn {
+            color: #27ae60;
+            border-color: #2ecc71;
+        }
+
+        .module-card:nth-child(2) .mindmap-btn:hover {
+            background: rgba(39, 174, 96, 0.08) !important;
+            border-color: #27ae60;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.15) !important;
+        }
+
+        .module-card:nth-child(3) .mindmap-btn {
+            color: #8e44ad;
+            border-color: #9b59b6;
+        }
+
+        .module-card:nth-child(3) .mindmap-btn:hover {
+            background: rgba(142, 68, 173, 0.08) !important;
+            border-color: #8e44ad;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.15) !important;
+        }
+
+        .mindmap-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
         /* 底部 */
         .footer {
             text-align: center;
-            margin-top: 50px;
-            padding-top: 24px;
+            margin-top: 40px;
+            padding-top: 20px;
             border-top: 1px solid rgba(0, 0, 0, 0.06);
             color: #95a5a6;
             font-size: 0.85rem;
@@ -227,7 +290,14 @@
             }
 
             .modules {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                align-items: center;
+                padding: 0;
+            }
+
+            .modules .module-card {
+                width: 100%;
+                max-width: 480px;
             }
 
             .module-card {
@@ -251,7 +321,7 @@
         <!-- 顶部标题区 -->
         <header class="header">
             <h1>一级注册计量师 - 知识体系</h1>
-            <p class="subtitle">备考学习资料库，系统梳理三科核心知识点，助力高效复习与通关</p>
+            <p class="subtitle">备考学习资料库，系统梳理三科核心重要知识点，助力高效复习与通关</p>
         </header>
 
         <!-- 学习模块卡片 -->
@@ -261,11 +331,17 @@
             <div class="module-card">
                 <span class="module-number">1</span>
                 <h3>计量法律法规及综合知识</h3>
-                <p>涵盖计量法律法规体系、技术机构管理、量和单位、测量基础、测量仪器等核心知识点</p>
-                <a href="admin/siargo/cme/fagui" target="_blank" class="module-btn">
-                    进入学习
-                    <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                </a>
+                <p>涵盖计量法律法规体系、技术机构管理、量和单位、测量基础、测量仪器等核心重要知识点</p>
+                <div class="module-actions">
+                    <a href="admin/siargo/cme/fagui" data-openpage class="module-btn">
+                        法规重要知识点
+                        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                    </a>
+                    <a href="admin/siargo/cme/faguiMindmap" data-openpage class="module-btn mindmap-btn">
+                       法规思维导图
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 15c-.55 0-1.05.22-1.41.59L13.83 14H10v-2h8c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1h-3c-.55 0-1 .45-1 1v3H9c-.55 0-1 .45-1 1v3H6.17l-1.59-1.59C4.95 10.05 5 9.78 5 9.5 5 8.12 3.88 7 2.5 7S0 8.12 0 9.5 1.12 12 2.5 12c.28 0 .55-.05.81-.15L5.59 14l-2.28 2.15c-.26-.1-.53-.15-.81-.15C1.12 16 0 17.12 0 18.5S1.12 21 2.5 21 5 19.88 5 18.5c0-.28-.05-.55-.15-.81L7.17 16H8v3c0 .55.45 1 1 1h5c.55 0 1-.45 1-1v-3h1.83l3.76 1.59c-.06.13-.09.26-.09.41 0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2z"/></svg>
+                    </a>
+                </div>
             </div>
 
             <!-- 卡片2：实务模块 -->
@@ -273,10 +349,16 @@
                 <span class="module-number">2</span>
                 <h3>测量数据处理与计量专业实务</h3>
                 <p>涵盖测量误差、不确定度评定、计量比对、期间核查、计量标准管理、检定规程等专业实务</p>
-                <a href="admin/siargo/cme/shiwu" target="_blank" class="module-btn">
-                    进入学习
-                    <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                </a>
+                <div class="module-actions">
+                    <a href="admin/siargo/cme/shiwu" data-openpage class="module-btn">
+                        实务重要知识点
+                        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                    </a>
+                    <a href="admin/siargo/cme/shiwuMindmap" data-openpage class="module-btn mindmap-btn">
+                        实务思维导图
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 15c-.55 0-1.05.22-1.41.59L13.83 14H10v-2h8c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1h-3c-.55 0-1 .45-1 1v3H9c-.55 0-1 .45-1 1v3H6.17l-1.59-1.59C4.95 10.05 5 9.78 5 9.5 5 8.12 3.88 7 2.5 7S0 8.12 0 9.5 1.12 12 2.5 12c.28 0 .55-.05.81-.15L5.59 14l-2.28 2.15c-.26-.1-.53-.15-.81-.15C1.12 16 0 17.12 0 18.5S1.12 21 2.5 21 5 19.88 5 18.5c0-.28-.05-.55-.15-.81L7.17 16H8v3c0 .55.45 1 1 1h5c.55 0 1-.45 1-1v-3h1.83l3.76 1.59c-.06.13-.09.26-.09.41 0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2z"/></svg>
+                    </a>
+                </div>
             </div>
 
             <!-- 卡片3：案例模块 -->
@@ -284,16 +366,22 @@
                 <span class="module-number">3</span>
                 <h3>计量专业案例分析</h3>
                 <p>涵盖计量标准建立与考核、检定校准检测、比对与核查、型式评价等实战案例分析</p>
-                <a href="admin/siargo/cme/anli" target="_blank" class="module-btn">
-                    进入学习
-                    <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                </a>
+                <div class="module-actions">
+                    <a href="admin/siargo/cme/anli" data-openpage class="module-btn">
+                        案例重要知识点
+                        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                    </a>
+                    <a href="admin/siargo/cme/anliMindmap" data-openpage class="module-btn mindmap-btn">
+                        案例思维导图
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 15c-.55 0-1.05.22-1.41.59L13.83 14H10v-2h8c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1h-3c-.55 0-1 .45-1 1v3H9c-.55 0-1 .45-1 1v3H6.17l-1.59-1.59C4.95 10.05 5 9.78 5 9.5 5 8.12 3.88 7 2.5 7S0 8.12 0 9.5 1.12 12 2.5 12c.28 0 .55-.05.81-.15L5.59 14l-2.28 2.15c-.26-.1-.53-.15-.81-.15C1.12 16 0 17.12 0 18.5S1.12 21 2.5 21 5 19.88 5 18.5c0-.28-.05-.55-.15-.81L7.17 16H8v3c0 .55.45 1 1 1h5c.55 0 1-.45 1-1v-3h1.83l3.76 1.59c-.06.13-.09.26-.09.41 0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2z"/></svg>
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- 底部 -->
         <footer class="footer">
-            <p>一级注册计量师备考助手 · 学习系统</p>
+            <p>建议学习顺序：计量法律法规及综合知识 -> 测量数据处理与计量专业实务 -> 计量专业案例分析</p>
         </footer>
     </div>
 </body>

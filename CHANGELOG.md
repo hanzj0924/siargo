@@ -1,11 +1,17 @@
 ## 更新日志
 
+### v2.6.0 (2026-05-25)
+- feat(cme): 学习门户模块卡片新增思维导图入口按钮，法规/实务/案例三科各支持双入口（重要知识点 + 思维导图）
+- style(cme): 思维导图按钮采用蓝/绿/紫三色主题区分，卡片布局改为 flex column 响应式
+- chore: 删除 .qoder/commands/comment.md 命令文件
+
 ### v2.5.0 (2026-05-15)
 - refactor(equipment): 移除独立的检校批次和设备记录管理页面，整合至时间线视图
 - feat(equipment): 新增设备状态"异常"(status=5)展示支持
 - feat(equipment): 证书按钮增加证书日期显示
 - fix(equipment): 修复设备ID未加引号导致的JS类型问题
 - fix(equipment): 修复设备状态刷新时空值未处理的JS错误
+- add(learning): 增加学习模块
 - chore: 版本升级 2.4.0 → 2.5.0
 
 ### v2.4.0 (2026-04-29)
