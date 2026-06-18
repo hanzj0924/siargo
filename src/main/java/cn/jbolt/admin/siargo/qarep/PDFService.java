@@ -281,7 +281,7 @@ public class PDFService {
 				
 			}
 			// FD-D型号（工业表-普通型）：无脉冲电压参数，有故障电平和电池电压
-			else if (proModel.contains("FD-D"))  { 
+			 if (proModel.contains("FD-D"))  { 
 				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
 				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
 				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
@@ -292,6 +292,18 @@ public class PDFService {
 				map.put("zp", safeStr(report.getStr("sp_zp"), "sp_zp"));
 				map.put("bv", safeStr(report.getStr("sp_bv"), "sp_bv"));
 			} 
+			 
+			// MFI型号（插入式）：无脉冲电压参数，有故障电平和电池电压
+			 if (proModel.contains("MFI"))  { 
+				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
+				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
+				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
+				map.put("pulseValue", "/");
+				map.put("thv", safeStr(report.getStr("sp_thv"), "sp_thv"));
+				map.put("zp", safeStr(report.getStr("sp_zp"), "sp_zp"));
+			} 
+			 
+			 
 		}
 		return map;
 	}
@@ -387,7 +399,7 @@ public class PDFService {
 		        	 throw new RuntimeException("未找到中低压对应版号模板，请联系开发者");
 		      }
 				
-			}else if (proModel.contains("FD")) {
+			}else if (proModel.contains("FD") || proModel.contains("MFI")) {
 				// FD型号使用工业表模板
 				switch(pdfver){
 		         case "2":
