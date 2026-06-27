@@ -1,5 +1,13 @@
 ## 更新日志
 
+### v2.7.2 (2026-06-27)
+- feat(qarep): 批量审批功能，支持精度/外观/包装/批准合格批量更新产品状态
+- feat(qarep): 产品回收站功能，支持批量软删除与还原
+- feat(qarep): 进度统计缓存实时刷新，审批按钮点击后自动更新流程数量
+- refactor(qarep): 报告单列表排序规则优化，按上一进度完成时间倒序排列
+- feat(admin): 路由添加 JBoltAdminAuthInterceptor 统一鉴权拦截器
+- chore: 数据库配置从 siargodev 切换至 siargo
+
 ### v2.7.0 (2026-05-25)
 - feat(qarep): PDFService 新增 MFI 型号（插入式）报告生成支持，复用工业表模板
 - fix(qarep): 修复 FD-D 型号 else if 阻断后续型号参数填充的逻辑问题
