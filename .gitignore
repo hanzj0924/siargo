@@ -1,0 +1,17 @@
+# JDK 安装包（太大，不上传 GitHub）
+jdk/
+
+# IDE
+.idea/workspace.xml
+.idea/shelf/
+
+# Maven
+target/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
