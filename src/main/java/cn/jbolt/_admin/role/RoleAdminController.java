@@ -13,6 +13,10 @@ import cn.jbolt.core.model.Role;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt.core.permission.UnCheck;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 @CheckPermission(PermissionKey.ROLE)
 @UnCheckIfSystemAdmin
 public class RoleAdminController extends JBoltBaseController {
@@ -28,11 +32,34 @@ public class RoleAdminController extends JBoltBaseController {
 	}
 
 	public void datas() {
-		renderJsonData(service.getAllRoleTreeDatas());
+		renderJsonData(toPlainTree(service.getAllRoleTreeDatas()));
 	}
 	@UnCheck
 	public void options(){
-		renderJsonData(service.getAllRoleTreeDatas());
+		renderJsonData(toPlainTree(service.getAllRoleTreeDatas()));
+	}
+
+	/**
+	 * 将 Role 树转为普通 Map 列表，确保所有字段（含 type）被 FastJson 正确序列化
+	 */
+	@SuppressWarnings("unchecked")
+	private List<Map<String, Object>> toPlainTree(List<Role> roles) {
+		if (roles == null) return null;
+		List<Map<String, Object>> result = new ArrayList<>();
+		for (Role role : roles) {
+			Map<String, Object> node = new LinkedHashMap<>();
+			node.put("id", role.get("id"));
+			node.put("name", role.get("name"));
+			node.put("sn", role.get("sn"));
+			node.put("pid", role.get("pid"));
+			node.put("type", role.get("type"));
+			List<Role> items = role.get("items");
+			if (items != null && !items.isEmpty()) {
+				node.put("items", toPlainTree(items));
+			}
+			result.add(node);
+		}
+		return result;
 	}
 	/**
 	 * 查询role上所有用户列表进入页面

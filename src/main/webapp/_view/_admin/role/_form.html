@@ -23,6 +23,14 @@
 		</div>
 	#end
 	
+	<div class="form-group">
+		<label>角色类型:</label>
+		<select class="form-control" name="role.type">
+			<option value="0" #if(role.type?? && role.type == 0)selected#end>菜单权限</option>
+			<option value="1" #if(role.type?? && role.type == 1)selected#end>功能权限</option>
+		</select>
+	</div>
+	
 </form>
 #define js()
 #include("/_view/_admin/common/_formjs.html",formId="roleForm")
