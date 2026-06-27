@@ -18,6 +18,7 @@ import com.jfinal.kit.Kv;
 import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
 import com.jfinal.kit.StrKit;
+import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -38,6 +39,7 @@ import cn.jbolt.siargo.model.Image;
  * @date: 2026-01-30 16:19
  */
 public class ImageService extends JBoltBaseService<Image> {
+	private static final Log LOG = Log.getLog(ImageService.class);
 	private final Image dao = new Image().dao();
 
 	@Override
@@ -407,8 +409,8 @@ public class ImageService extends JBoltBaseService<Image> {
 			} catch (IOException ex) {
 				ex.printStackTrace();
 				// 回滚失败时记录日志，人工介入
-				System.err.println("[ImageService] 文件回滚失败，需人工处理: "
-						+ rollbackOldPath + " -> " + rollbackNewPath);
+				LOG.error("[ImageService] 文件回滚失败，需人工处理: "
+						+ rollbackOldPath + " -> " + rollbackNewPath, ex);
 			}
 			return fail("数据更新失败");
 		}
@@ -460,7 +462,7 @@ public class ImageService extends JBoltBaseService<Image> {
 		if (oldFile.exists()) {
 			boolean deleted = oldFile.delete();
 			if (!deleted) {
-				System.err.println("[ImageService] 文件删除失败，需人工清理: " + dbImage.getFilePath());
+				LOG.warn("[ImageService] 文件删除失败，需人工清理: " + dbImage.getFilePath());
 			}
 		}
 
@@ -543,8 +545,7 @@ public class ImageService extends JBoltBaseService<Image> {
 			}
 			return null;
 		} catch (Exception e) {
-			System.err.println("重命名文件时发生异常: " + e.getMessage());
-			e.printStackTrace();
+			LOG.error("重命名文件时发生异常: " + e.getMessage(), e);
 			return null;
 		}
 	}

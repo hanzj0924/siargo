@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.aop.Inject;
+import com.jfinal.log.Log;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
 import cn.jbolt.core.kit.JBoltUserKit;
@@ -22,6 +23,7 @@ import cn.jbolt.common.util.DateUtil;
  * @date: 2026-05-06 17:25  
  */
 public class EquipmentComparisonService extends JBoltBaseService<EquipmentComparison> {
+	private static final Log LOG = Log.getLog(EquipmentComparisonService.class);
 	private final EquipmentComparison dao=new EquipmentComparison().dao();
 
 	@Inject
@@ -81,7 +83,7 @@ public class EquipmentComparisonService extends JBoltBaseService<EquipmentCompar
 				try {
 					equipmentCertificateService.saveCertificatesForComparison(equipmentComparison.getId(), equipmentId, certificateImageUrls, certificateDate, certificateRemark);
 				} catch (Exception e) {
-					System.err.println("对比记录保存成功但证书图片保存失败: " + e.getMessage());
+					LOG.error("对比记录保存成功但证书图片保存失败: " + e.getMessage(), e);
 				}
 			}
 		}
@@ -115,7 +117,7 @@ public class EquipmentComparisonService extends JBoltBaseService<EquipmentCompar
 				try {
 					equipmentCertificateService.updateCertificatesForComparison(equipmentComparison.getId(), equipmentComparison.getEquipmentId(), certificateImageUrls, certificateDate, certificateRemark);
 				} catch (Exception e) {
-					System.err.println("对比记录更新成功但证书图片更新失败: " + e.getMessage());
+					LOG.error("对比记录更新成功但证书图片更新失败: " + e.getMessage(), e);
 				}
 			} else {
 				// 如果没有传图片URL，清空关联证书

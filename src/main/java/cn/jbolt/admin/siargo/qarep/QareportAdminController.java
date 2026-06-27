@@ -5,6 +5,7 @@ import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt.core.permission.JBoltUserAuthKit;
+import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt._admin.role.RoleService;
 import cn.jbolt.admin.siargo.customer.CustomerService;
@@ -40,6 +41,7 @@ import cn.jbolt.siargo.model.Qareport;
  * @date: 2025-12-02 14:14
  */
 @CheckPermission(PermissionKey.SIARGO)
+@UnCheckIfSystemAdmin
 @Path(value = "/admin/siargo/qarep", viewPath = "/_view/admin/siargo/qarep")
 
 public class QareportAdminController extends JBoltBaseController {
@@ -341,6 +343,7 @@ public class QareportAdminController extends JBoltBaseController {
 	 *   <li>insp=5：最终放行</li>
 	 * </ul>
 	 */
+	@Before(Tx.class)
 	public void batchInspection() {
         Integer insp = getParaToInt("insp");
         String idsJson = getPara("ids");
@@ -351,26 +354,7 @@ public class QareportAdminController extends JBoltBaseController {
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
 
-            for (int i =0; i < ids.size() ; i++) {
-            	Product product = proservice.findById(ids.get(i));
-                if (product != null) {
-                	if(insp == 2) {
-                		product.set("accq_uid", JBoltUserKit.getUserId());
-                		product.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
-                	}else if(insp == 3){
-                		product.set("funq_uid", JBoltUserKit.getUserId());
-                		product.set("funq_time", DateUtil.getDateString(DateUtil.YMDHMS));
-					}else if(insp == 4){
-						product.set("appq_uid", JBoltUserKit.getUserId());
-						product.set("appq_time", DateUtil.getDateString(DateUtil.YMDHMS));
-					}else if(insp == 5){
-						product.set("allq_uid", JBoltUserKit.getUserId());
-						product.set("allq_time", DateUtil.getDateString(DateUtil.YMDHMS));
-					}
-                	product.set("insp", insp);
-                	product.update();
-                }
-            }
+            service.batchUpdateInspStatus(ids, insp);
             service.clearFlowCountsCache();
             // 批量检验完成后，为下一阶段对应权限用户创建待办通知
             service.notifyNextStageUsers(insp);
@@ -538,15 +522,7 @@ public class QareportAdminController extends JBoltBaseController {
         	return;
         }
 
-        for (Long id : ids) {
-        	Product product = proservice.findById(id); 
-            if (product != null) {
-            	product.set("delete_time", DateUtil.getDateString(DateUtil.YMDHMS));
-            	product.set("vd", 0);
-            	product.set("delete_des", deleteDes);
-            	product.update();
-            }
-        }
+        service.batchSoftDeleteProduct(ids, deleteDes);
         service.clearFlowCountsCache();
         renderJsonSuccess();
 	}
@@ -571,25 +547,20 @@ public class QareportAdminController extends JBoltBaseController {
 	 * 恢复报告单（从回收站还原）
 	 * URL: /admin/siargo/qarep/restore/:id
 	 */
+	@Before(Tx.class)
 	public void restore() {
 		Long id = getLong(0);
 		if (id == null) {
 			renderFail("参数错误");
 			return;
 		}
-		Product product = proservice.findById(id);
-		if (product == null) {
+		boolean success = service.restoreProduct(id);
+		if (!success) {
 			renderFail("数据不存在");
 			return;
 		}
-		product.set("vd", 1);
-		product.set("delete_time", null);
-		product.set("delete_des", null);
-		boolean success = product.update();
-		if (success) {
-			service.clearFlowCountsCache();
-		}
-		renderJsonData(success);
+		service.clearFlowCountsCache();
+		renderJsonSuccess();
 	}
 
 	/**

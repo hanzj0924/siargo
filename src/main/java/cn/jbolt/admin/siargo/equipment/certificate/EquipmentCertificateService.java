@@ -158,7 +158,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 */
 	public List<EquipmentCertificate> findByComparisonId(Long comparisonId) {
 		if (notOk(comparisonId)) return null;
-		return dao.find("SELECT * FROM siargo_equipment_certificate WHERE comparison_id = ? ORDER BY id", comparisonId);
+		return dao.find("SELECT * FROM siargo_equipment_certificate WHERE comparison_id = ? ORDER BY certificate_date DESC", comparisonId);
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 */
 	public List<EquipmentCertificate> findByEquipmentId(Long equipmentId) {
 		if (notOk(equipmentId)) return null;
-		return dao.find("SELECT * FROM siargo_equipment_certificate WHERE equipment_id = ? ORDER BY id DESC", equipmentId);
+		return dao.find("SELECT * FROM siargo_equipment_certificate WHERE equipment_id = ? ORDER BY certificate_date DESC, id DESC", equipmentId);
 	}
 
 	/**

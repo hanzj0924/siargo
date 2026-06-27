@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.siargo</groupId>
 	<artifactId>siargo</artifactId>
-	<version>2.7.0</version>
+	<version>2.7.2</version>
 	<packaging>jar</packaging>
 	<name>siargo</name>
 	<description>siargo</description>
@@ -13,7 +13,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-		<jdk.version>1.8</jdk.version>
+		<jdk.version>17</jdk.version>
 		<junit.version>5.8.1</junit.version>
 		<cglib.version>3.3.0</cglib.version>
 		<javassist.version>3.30.2-GA</javassist.version>

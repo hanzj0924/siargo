@@ -265,10 +265,10 @@ public class PDFService {
 				map.put("thv", safeStr(report.getStr("sp_thv"), "sp_thv"));
 				map.put("zp", safeStr(report.getStr("sp_zp"), "sp_zp"));
 				map.put("fl", safeStr(report.getStr("sp_fl"), "sp_fl"));
-				
+
 			}
 			// FD-E型号（工业表-脉冲型）：整机电流范围、脉冲电压、本地地址
-			if (proModel.contains("FD-E")) {
+			else if (proModel.contains("FD-E")) {
 				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
 				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
 				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
@@ -281,7 +281,7 @@ public class PDFService {
 				
 			}
 			// FD-D型号（工业表-普通型）：无脉冲电压参数，有故障电平和电池电压
-			 if (proModel.contains("FD-D"))  { 
+			else if (proModel.contains("FD-D"))  {
 				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
 				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
 				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
@@ -294,16 +294,26 @@ public class PDFService {
 			} 
 			 
 			// MFI型号（插入式）：无脉冲电压参数，有故障电平和电池电压
-			 if (proModel.contains("MFI"))  { 
+			else if (proModel.contains("MFI"))  {
 				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
 				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
 				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
 				map.put("pulseValue", "/");
 				map.put("thv", safeStr(report.getStr("sp_thv"), "sp_thv"));
 				map.put("zp", safeStr(report.getStr("sp_zp"), "sp_zp"));
-			} 
-			 
-			 
+			}
+
+			// MF2025、MF2032型号
+			else if (proModel.contains("MF2025") || proModel.contains("MF2032")){
+				map.put("para2", "ok");
+				map.put("para6", "/");
+				map.put("para7", "/");
+			}
+			else{
+				throw new RuntimeException("未识别到大流量计，请检查型号是否有误");
+			}
+
+
 		}
 		return map;
 	}

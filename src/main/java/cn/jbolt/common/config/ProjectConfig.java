@@ -132,6 +132,7 @@ public class ProjectConfig extends JBoltProjectConfig {
 		me.add(new Routes() {
 			@Override
 			public void config() {
+				this.addInterceptor(new JBoltAdminAuthInterceptor());
 				this.scan("cn.jbolt.admin.siargo");
 			}
 		});

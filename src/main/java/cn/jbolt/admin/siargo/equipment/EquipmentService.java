@@ -7,6 +7,7 @@ import java.util.Map;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.aop.Inject;
+import com.jfinal.log.Log;
 import cn.jbolt.admin.siargo.equipment.certificate.EquipmentCertificateService;
 import cn.jbolt.admin.siargo.equipment.comparison.EquipmentComparisonService;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
@@ -29,6 +30,7 @@ import cn.jbolt.common.util.DateUtil;
  * @date: 2026-04-18 10:47  
  */
 public class EquipmentService extends JBoltBaseService<Equipment> {
+	private static final Log LOG = Log.getLog(EquipmentService.class);
 	private final Equipment dao=new Equipment().dao();
 
 	@Inject
@@ -463,7 +465,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 				try {
 					equipmentCertificateService.saveCertificateImages(equipment.getId(), certificateImageUrls);
 				} catch (Exception e) {
-					System.err.println("设备保存成功但证书图片保存失败，equipmentId=" + equipment.getId() + "，原因：" + e.getMessage());
+					LOG.error("设备保存成功但证书图片保存失败，equipmentId=" + equipment.getId() + "，原因：" + e.getMessage(), e);
 				}
 			}
 		}
@@ -624,6 +626,16 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			+ "OR (newer.comparison_date = ec.comparison_date AND newer.creator_time = ec.creator_time AND newer.id > ec.id)))",
 			equipmentId);
 		return compCount != null && compCount > 0;
+	}
+
+	/**
+	 * 获取设备当前状态
+	 * @param equipmentId 设备ID
+	 * @return 设备状态值，不存在返回 null
+	 */
+	public Integer getEquipmentStatus(Long equipmentId) {
+		if (equipmentId == null) return null;
+		return Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
 	}
 
 	/**

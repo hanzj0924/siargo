@@ -10,6 +10,7 @@ import com.jfinal.core.Path;
 import com.jfinal.kit.Ret;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -242,13 +243,25 @@ public class ImageAdminController extends JBoltBaseController {
 
 		// 先统一路径分隔符，再做安全校验
 		String normalizedPath = filePath.replace("\\", "/");
+		String tempPrefix = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_IMI + "/temp/";
 
-		// 安全校验：只允许删除 temp 目录下的文件，防止路径穿越攻击
-		if (!normalizedPath.contains("/temp/")) {
+		// 安全校验：使用 startsWith + canonicalPath 双重检查，防止路径穿越攻击
+		if (!normalizedPath.startsWith(tempPrefix)) {
 			renderJsonFail("只能删除临时目录下的文件");
 			return;
 		}
 		File file = new File(service.getWebRootPath() + normalizedPath);
+		try {
+			String canonicalBase = new File(service.getWebRootPath() + tempPrefix).getCanonicalPath();
+			String canonicalFile = file.getCanonicalPath();
+			if (!canonicalFile.startsWith(canonicalBase)) {
+				renderJsonFail("只能删除临时目录下的文件");
+				return;
+			}
+		} catch (IOException e) {
+			renderJsonFail("路径解析失败");
+			return;
+		}
 
 		if (!file.exists()) {
 			// 文件不存在，可能已被删除或路径错误，直接返回成功
@@ -291,14 +304,28 @@ public class ImageAdminController extends JBoltBaseController {
 		for (String filePath : paths) {
 			// 先统一路径分隔符，再做安全校验
 			String normalizedPath = filePath.replace("\\", "/");
+			String tempPrefix = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_IMI + "/temp/";
 
-			// 安全校验：只允许删除 temp 目录下的文件
-			if (!normalizedPath.contains("/temp/")) {
+			// 安全校验：使用 startsWith + canonicalPath 双重检查，防止路径穿越攻击
+			if (!normalizedPath.startsWith(tempPrefix)) {
 				failCount++;
 				failedFiles.add(filePath);
 				continue;
 			}
 			File file = new File(service.getWebRootPath() + normalizedPath);
+			try {
+				String canonicalBase = new File(service.getWebRootPath() + tempPrefix).getCanonicalPath();
+				String canonicalFile = file.getCanonicalPath();
+				if (!canonicalFile.startsWith(canonicalBase)) {
+					failCount++;
+					failedFiles.add(filePath);
+					continue;
+				}
+			} catch (IOException e) {
+				failCount++;
+				failedFiles.add(filePath);
+				continue;
+			}
 
 			if (!file.exists()) {
 				// 文件不存在视为删除成功

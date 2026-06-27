@@ -40,6 +40,11 @@ import net.dreamlu.event.EventKit;
 public class QareportService extends JBoltBaseService<Qareport> {
 	/** 检验报告单数据访问对象 */
 	private final Qareport dao = new Qareport().dao();
+	// ========== 流程统计缓存（30分钟有效期） ==========
+	private static final long FLOW_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 10分钟
+	private volatile Map<String, Long> cachedFlowCounts;
+	private volatile long flowCountsCacheTimestamp;
+	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
 
 	/** 用户服务（用于查询拥有指定角色的用户列表） */
 	@Inject
@@ -49,11 +54,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	@Inject
 	private RoleService roleService;
 
-	// ========== 流程统计缓存（30分钟有效期） ==========
-	private static final long FLOW_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
-	private volatile Map<String, Long> cachedFlowCounts;
-	private volatile long flowCountsCacheTimestamp;
-	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
+	/** 产品服务 */
+	@Inject
+	private ProductService productService;
 
 	@Override
 	protected Qareport dao() {
@@ -91,6 +94,69 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	public void clearFlowCountsCache() {
 		cachedFlowCounts = null;
 		flowCountsCacheTimestamp = 0;
+	}
+
+	/**
+	 * 批量更新产品检验状态
+	 * @param ids 产品ID列表
+	 * @param insp 检验阶段
+	 */
+	public void batchUpdateInspStatus(List<Long> ids, Integer insp) {
+		Long userId = JBoltUserKit.getUserId();
+		for (Long id : ids) {
+			Product product = productService.findById(id);
+			if (product != null) {
+				String now = DateUtil.getDateString(DateUtil.YMDHMS);
+				if (insp == 2) {
+					product.set("accq_uid", userId);
+					product.set("accq_time", now);
+				} else if (insp == 3) {
+					product.set("funq_uid", userId);
+					product.set("funq_time", now);
+				} else if (insp == 4) {
+					product.set("appq_uid", userId);
+					product.set("appq_time", now);
+				} else if (insp == 5) {
+					product.set("allq_uid", userId);
+					product.set("allq_time", now);
+				}
+				product.set("insp", insp);
+				product.update();
+			}
+		}
+	}
+
+	/**
+	 * 批量软删除产品（移至回收站）
+	 * @param ids 产品ID列表
+	 * @param deleteDes 删除原因
+	 */
+	public void batchSoftDeleteProduct(List<Long> ids, String deleteDes) {
+		for (Long id : ids) {
+			Product product = productService.findById(id);
+			if (product != null) {
+				product.set("delete_time", DateUtil.getDateString(DateUtil.YMDHMS));
+				product.set("vd", 0);
+				product.set("delete_des", deleteDes);
+				product.update();
+			}
+		}
+	}
+
+	/**
+	 * 恢复产品（从回收站还原）
+	 * @param id 产品ID
+	 * @return 是否成功
+	 */
+	public boolean restoreProduct(Long id) {
+		Product product = productService.findById(id);
+		if (product == null) {
+			return false;
+		}
+		product.set("vd", 1);
+		product.set("delete_time", null);
+		product.set("delete_des", null);
+		return product.update();
 	}
 
 	/**
@@ -227,31 +293,31 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		if (insp > 0) {
 			sql.eq("sp.insp", insp);
 				
-			// 排序：首要按创建时间倒序（最新报告单在前），次要按formnum保证同一报告单行相邻
+			// 排序：按上一个进度的操作时间倒序，次要按创建时间、formnum保证同一报告单行相邻
 			switch(insp){
 	         case 1:
 	        	 sql.orderBy("sq.create_time", true);
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 	         case 2:
+	        	 sql.orderBy("sp.accq_time", true);  // 主排序：上一个进度(精度检验)完成时间
 	        	 sql.orderBy("sq.create_time", true);
 	        	 sql.orderBy("sq.formnum", true);
-	        	 sql.orderBy("sp.accq_time", true);  // 精度检验：组内按精度检验时间
 	        	 break;
 	         case 3:
+	        	 sql.orderBy("sp.funq_time", true);  // 主排序：上一个进度(外观检验)完成时间
 	        	 sql.orderBy("sq.create_time", true);
 	        	 sql.orderBy("sq.formnum", true);
-	        	 sql.orderBy("sp.funq_time", true);  // 功能检验：组内按功能检验时间
 	        	 break;
 	         case 4:
+	        	 sql.orderBy("sp.appq_time", true);  // 主排序：上一个进度(包装检验)完成时间
 	        	 sql.orderBy("sq.create_time", true);
 	        	 sql.orderBy("sq.formnum", true);
-	        	 sql.orderBy("sp.appq_time", true);  // 批准检验：组内按批准时间
 	        	 break;
 	         case 5:
+	        	 sql.orderBy("sp.allq_time", true);  // 主排序：上一个进度(批准)完成时间
 	        	 sql.orderBy("sq.create_time", true);
 	        	 sql.orderBy("sq.formnum", true);
-	        	 sql.orderBy("sp.allq_time", true);  // 最终放行：组内按放行时间
 	        	 break;
 	         default:
 	        	 sql.orderBy("sq.create_time", true);

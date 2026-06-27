@@ -17,6 +17,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.jfinal.log.Log;
+
 
 /**
  * Excel Service
@@ -26,6 +28,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * @date: 2025-12-02 14:14
  */
 public class ExcelService {
+
+	private static final Log LOG = Log.getLog(ExcelService.class);
 
 	/**
      * 读取Excel文件内容，支持xls和xlsx格式
@@ -105,7 +109,7 @@ public class ExcelService {
                 try {
                     file.delete();
                 } catch (Exception e) {
-                    System.err.println("删除临时文件失败: " + e.getMessage());
+                    LOG.warn("删除临时文件失败: " + e.getMessage(), e);
                 }
             }
         }
@@ -242,7 +246,7 @@ public class ExcelService {
         String qsis = String.join(",", quantities);
         
         result.put("numbers", numbers);
-        result.put("qsis", qsis);
+        result.put("qsi", qsis);
         
         return result;
     }

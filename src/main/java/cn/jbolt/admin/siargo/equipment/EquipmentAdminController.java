@@ -7,12 +7,12 @@ import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt.core.permission.JBoltUserAuthKit;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt._admin.role.RoleService;
+import cn.jbolt.admin.siargo.equipment.certificate.EquipmentCertificateService;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import cn.jbolt.core.base.JBoltMsg;
-import com.jfinal.plugin.activerecord.Db;
 import cn.jbolt.siargo.model.Equipment;
 import cn.jbolt.siargo.model.EquipmentCertificate;
 import java.util.List;
@@ -30,6 +30,9 @@ public class EquipmentAdminController extends JBoltBaseController {
 
 	@Inject
 	private EquipmentService service;
+	/** 证书服务 */
+	@Inject
+	private EquipmentCertificateService certificateService;
 	/** 角色服务 */
 	@Inject
 	private RoleService roleService;
@@ -125,8 +128,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 	public void certificates() {
 		Long comparisonId = getLong("comparisonId");
 		if (notOk(comparisonId)) { renderFail(JBoltMsg.PARAM_ERROR); return; }
-		List<EquipmentCertificate> certs = new EquipmentCertificate().dao()
-			.find("SELECT * FROM siargo_equipment_certificate WHERE comparison_id = ? ORDER BY certificate_date DESC", comparisonId);
+		List<EquipmentCertificate> certs = certificateService.findByComparisonId(comparisonId);
 		set("certs", certs);
 		set("comparisonId", comparisonId);
 		render("certificates.html");
@@ -244,7 +246,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 			renderFail(JBoltMsg.PARAM_ERROR);
 			return;
 		}
-		Integer status = Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
+		Integer status = service.getEquipmentStatus(equipmentId);
 		if (status == null) {
 			renderFail("设备不存在或状态异常");
 			return;

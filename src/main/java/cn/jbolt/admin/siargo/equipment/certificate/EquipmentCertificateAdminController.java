@@ -87,8 +87,7 @@ public class EquipmentCertificateAdminController extends JBoltBaseController {
 	public void viewByEquipment() {
 		Long equipmentId = getLong("equipmentId");
 		if (notOk(equipmentId)) { renderFail(JBoltMsg.PARAM_ERROR); return; }
-		List<EquipmentCertificate> certs = new EquipmentCertificate().dao()
-			.find("SELECT * FROM siargo_equipment_certificate WHERE equipment_id = ? ORDER BY certificate_date DESC, id DESC", equipmentId);
+		List<EquipmentCertificate> certs = service.findByEquipmentId(equipmentId);
 		set("certs", certs);
 		render("/_view/admin/siargo/equipment/certificates.html");
 	}
