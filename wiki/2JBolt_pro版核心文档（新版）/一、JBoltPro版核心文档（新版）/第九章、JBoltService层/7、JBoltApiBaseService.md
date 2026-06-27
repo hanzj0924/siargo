@@ -1,0 +1,1 @@
+开发API接口，有相关业务需要Service的时候，如果不需要绑定某个Model可以继承JBoltApiBaseService

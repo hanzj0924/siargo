@@ -1,0 +1,10 @@
+在JBolt中，所有Service都要继承JBoltCommonService，JBoltCommonService 为service层编写提供了：
+1、数据库几个常用字段名的常量定义
+2、快速参数校验
+3、快速添加systemLog日志数据
+4、数据转jstreeBean
+5、表格filterBox自动拼接sql条件
+6、时间参数按照数据库类型转换
+
+在实际使用时，我们使用的是基于JBoltCommonService的子类，JBoltBaseService,JBoltBaseRecordService等。
+
