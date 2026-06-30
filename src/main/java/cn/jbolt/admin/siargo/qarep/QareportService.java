@@ -356,7 +356,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 			// 设置创建时间和自动生成报告单编号
 			qareport.set("create_time", DateUtil.getDateString(DateUtil.YMDHMS));
-			qareport.set("formnum", creatFormnum());
+			Ret formnumRet = creatFormnum();
+			if (formnumRet.isFail()) {
+				return formnumRet;
+			}
+			qareport.set("formnum", formnumRet.get("data"));
 
 			qareport.save();
 		}
@@ -571,7 +575,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * <p>示例：202512001 表示2025年12月第1份报告单</p>
 	 * @return 报告单编号
 	 */
-	public Long creatFormnum() {
+	public Ret creatFormnum() {
 		LocalDate now = LocalDate.now();
 		int year = now.getYear();
 		int month = now.getMonthValue();
@@ -579,7 +583,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 		String sql = "SELECT COUNT(sq.id) FROM `siargo_qareport` sq WHERE DATE_FORMAT(sq.create_time, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')";
 
-		return fornum * 1000 + Db.queryLong(sql) + 1;
+		long seq = Db.queryLong(sql) + 1;
+		if (seq > 999) {
+			return fail("报告单号生成失败，请联系开发人员！");
+		}
+		return Ret.ok().set("data", fornum * 1000 + seq);
 	}
 
 

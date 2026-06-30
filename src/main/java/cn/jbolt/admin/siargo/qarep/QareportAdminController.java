@@ -4,12 +4,9 @@ import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.permission.CheckPermission;
-import cn.jbolt.core.permission.JBoltUserAuthKit;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt._admin.role.RoleService;
-import cn.jbolt.core.cache.JBoltRoleCache;
-import cn.jbolt.core.model.Role;
 import cn.jbolt.admin.siargo.customer.CustomerService;
 import cn.jbolt.common.util.StringUtil;
 
@@ -73,50 +70,12 @@ public class QareportAdminController extends JBoltBaseController {
 		Long userId = JBoltUserKit.getUserId();
 		
 		// 报告单子权限：管理员/报告单 角色可覆盖，或直接拥有该子角色
-		set("accuracy",  hasRoleOrAbove(userId, 211));
-		set("appearance", hasRoleOrAbove(userId, 212));
-		set("packaging",  hasRoleOrAbove(userId, 213));
-		set("approval",   hasRoleOrAbove(userId, 214));
+		set("accuracy",  roleService.hasRoleOrAbove(userId, 211));
+		set("appearance", roleService.hasRoleOrAbove(userId, 212));
+		set("packaging",  roleService.hasRoleOrAbove(userId, 213));
+		set("approval",   roleService.hasRoleOrAbove(userId, 214));
 		
 		render("index.html");
-	}
-
-	/**
-	 * 检查用户是否拥有指定SN的角色或被其上级角色覆盖
-	 * 规则：沿 pid 链向上遍历，type=1 的功能角色参与覆盖检查，type=0 的菜单角色跳过
-	 *   管理员(sn=1) → 全局覆盖，单独判断
-	 *   质检(sn=2, type=0) → 纯菜单入口，不覆盖任何子按钮
-	 *   报告单(sn=21, type=1) → 覆盖 精度/外观/包装/批准
-	 *   设备(sn=22, type=1) → 覆盖 设备审核
-	 * 新增角色只需在 jb_role 中配置正确的 pid 和 type 即可生效，无需修改代码
-	 */
-	private boolean hasRoleOrAbove(Long userId, int sn) {
-		// 管理员拥有全部权限
-		Long adminRoleId = roleService.findIdBySn(1);
-		if (adminRoleId != null && JBoltUserAuthKit.hasRole(userId, adminRoleId)) {
-			return true;
-		}
-		
-		Long roleId = roleService.findIdBySn(sn);
-		if (roleId == null) return false;
-		
-		// 沿 pid 链向上遍历，跳过 type=0 的菜单角色
-		Long currentId = roleId;
-		while (currentId != null && currentId > 0) {
-			Role role = JBoltRoleCache.me.get(currentId);
-			if (role == null) break;
-			
-			Integer type = role.getInt("type");
-			// type=1 的功能角色参与覆盖检查
-			if (type != null && type == 1 && JBoltUserAuthKit.hasRole(userId, currentId)) {
-				return true;
-			}
-			
-			Long pid = role.getPid();
-			if (pid == null || pid == 0) break;
-			currentId = pid;
-		}
-		return false;
 	}
 
 	/**
@@ -151,16 +110,13 @@ public class QareportAdminController extends JBoltBaseController {
             
             File excelFile = uploadFile.getFile();
             
-            // 读取Excel文件
-            List<Map<String, Object>> dataList = excelservice.readExcel(excelFile);
+            // 统一入口：自动检测模板类型并提取数据
+            Map<String, Object> result = excelservice.processExcelFile(excelFile);
             
-            if (dataList == null || dataList.isEmpty()) {
+            if (result == null || result.isEmpty()) {
                 renderFail("Excel文件中没有数据");
                 return;
             }
-            
-            // 处理数据，提取所需信息
-            Map<String, Object> result = excelservice.processExcelData(dataList);
             
             // 返回处理结果
             result.put("success", true);
@@ -412,28 +368,28 @@ public class QareportAdminController extends JBoltBaseController {
     	List<Long> qis = Arrays.stream(qisJson.split(","))
                 .map(String::trim)
                 .map(Long::parseLong)
-                .collect(Collectors.toList());
+                .toList();
     	List<Long> qsis = Arrays.stream(qsisJson.split(","))
                 .map(String::trim)
                 .map(Long::parseLong)
-                .collect(Collectors.toList());
+                .toList();
     	
     	List<String> dess = new ArrayList<String>();
     	if (!StrKit.isBlank(dessJson)) {
     		dess = Arrays.stream(dessJson.split(","))
                     .map(String::trim)
                     .map(String::valueOf)
-                    .collect(Collectors.toList());
+                    .toList();
 		}
 
     	List<String> models = Arrays.stream(modelsJson.split(","))
                 .map(String::trim)
                 .map(String::valueOf)
-                .collect(Collectors.toList());
+                .toList();
     	List<String> numbers = Arrays.stream(numbersJson.split(","))
                 .map(String::trim)
                 .map(String::valueOf)
-                .collect(Collectors.toList());
+                .toList();
     	
     	Qareport qareport = getModel(Qareport.class, "qareport");
     	Product product = getModel(Product.class, "product");

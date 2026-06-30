@@ -242,6 +242,14 @@
                 <StringMatchFilter text="from jb_online_user" onMatch="DENY" onMismatch="ACCEPT"/>
             </Filters>
         </logger>
+        <!-- 单独压制 JBoltControllerKit.renderFail 的 INFO 日志 -->
+        <logger name="cn.jbolt.core.kit.JBoltControllerKit" level="WARN" additivity="false">
+            <appender-ref ref="JBoltConsole"/>
+            <appender-ref ref="RollingFileInfo"/>
+            <appender-ref ref="RollingFileWarn"/>
+            <appender-ref ref="RollingFileError"/>
+            <appender-ref ref="RollingFileDebug"/>
+        </logger>
         <logger name="cn.jbolt" level="DEBUG" additivity="false">
             <appender-ref ref="JBoltConsole"/>
             <appender-ref ref="RollingFileInfo"/>

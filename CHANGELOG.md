@@ -1,5 +1,13 @@
 ## 更新日志
 
+### v2.7.4 (2026-06-30)
+- feat: Excel双模板导入（104842+PFQVF81007自动检测）
+- feat: 设备分类卡片动态化，支持无限扩展
+- feat: RoleService权限校验方法hasRoleOrAbove
+- fix: Excel导入qsi/qsis键名不匹配导致数据无法填充
+- refactor: importExcel统一入口processExcelFile
+- chore: pom.xml新增spring-core依赖
+
 ### v2.7.3 (2026-06-27)
 - refactor: 报告单/设备权限覆盖逻辑重构，引入 hasRoleOrAbove 层级角色遍历
 - feat: 角色管理新增菜单权限与功能权限类型区分（type 字段）

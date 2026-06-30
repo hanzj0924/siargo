@@ -32,85 +32,45 @@ public class ExcelService {
 	private static final Log LOG = Log.getLog(ExcelService.class);
 
 	/**
-     * 读取Excel文件内容，支持xls和xlsx格式
+     * 读取sheet 0的列式数据（旧模板格式：104842.xls类型）
      * <p>解析Excel第一行为标题行，后续行为数据行，返回以标题为key的数据列表</p>
-     * @param file Excel文件对象
-     * @return 解析后的数据列表，每个元素为一行数据的Map（key为列标题，value为单元格值）
-     * @throws Exception 文件格式不支持或读取异常时抛出
+     * @param workbook 已打开的Workbook对象
+     * @return 解析后的数据列表
      */
-    List<Map<String, Object>> readExcel(File file) throws Exception {
+    private List<Map<String, Object>> readSheet0(Workbook workbook) {
         List<Map<String, Object>> dataList = new ArrayList<>();
-        FileInputStream fis = null;
-        Workbook workbook = null;
+        Sheet sheet = workbook.getSheetAt(0);
+        if (sheet == null) {
+            return dataList;
+        }
         
-        try {
-            fis = new FileInputStream(file);
-            
-            // 根据文件扩展名创建不同的Workbook
-            String fileName = file.getName().toLowerCase();
-            if (fileName.endsWith(".xlsx")) {
-                workbook = new XSSFWorkbook(fis);
-            } else if (fileName.endsWith(".xls")) {
-                workbook = new HSSFWorkbook(fis);
-            } else {
-                throw new Exception("不支持的文件格式，请上传Excel文件");
+        Row headerRow = sheet.getRow(0);
+        if (headerRow == null) {
+            return dataList;
+        }
+        
+        List<String> headers = new ArrayList<>();
+        for (Cell cell : headerRow) {
+            headers.add(getCellValue(cell));
+        }
+        
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) {
+                continue;
             }
             
-            // 读取第一个sheet
-            Sheet sheet = workbook.getSheetAt(0);
-            if (sheet == null) {
-                return dataList;
-            }
-            
-            // 获取标题行（第一行）
-            Row headerRow = sheet.getRow(0);
-            if (headerRow == null) {
-                return dataList;
-            }
-            
-            // 获取列标题
-            List<String> headers = new ArrayList<>();
-            for (Cell cell : headerRow) {
-                headers.add(getCellValue(cell));
-            }
-            
-            // 从第二行开始读取数据
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) {
-                    continue;
-                }
-                
-                Map<String, Object> rowData = new HashMap<>();
-                for (int j = 0; j < headers.size(); j++) {
-                    Cell cell = row.getCell(j);
-                    String header = headers.get(j);
-                    if (header != null && !header.trim().isEmpty()) {
-                        rowData.put(header, getCellValue(cell));
-                    }
-                }
-                
-                // 只添加有数据的行
-                if (!rowData.isEmpty()) {
-                    dataList.add(rowData);
+            Map<String, Object> rowData = new HashMap<>();
+            for (int j = 0; j < headers.size(); j++) {
+                Cell cell = row.getCell(j);
+                String header = headers.get(j);
+                if (header != null && !header.trim().isEmpty()) {
+                    rowData.put(header, getCellValue(cell));
                 }
             }
             
-        } finally {
-            if (fis != null) {
-                try { fis.close(); } catch (Exception e) {}
-            }
-            if (workbook != null) {
-                try { workbook.close(); } catch (Exception e) {}
-            }
-            
-         // 删除临时文件
-            if (file != null && file.exists()) {
-                try {
-                    file.delete();
-                } catch (Exception e) {
-                    LOG.warn("删除临时文件失败: " + e.getMessage(), e);
-                }
+            if (!rowData.isEmpty()) {
+                dataList.add(rowData);
             }
         }
         
@@ -246,11 +206,118 @@ public class ExcelService {
         String qsis = String.join(",", quantities);
         
         result.put("numbers", numbers);
-        result.put("qsi", qsis);
+        result.put("qsis", qsis);
+        result.put("qis", qsis);
         
         return result;
     }
 	
-	
+	/**
+	 * 查找检定记录sheet（名称以"检定记录"开头，用于匹配检定记录A0/A1等）
+	 * @param workbook 已打开的Workbook对象
+	 * @return 找到的Sheet对象，未找到返回null
+	 */
+	private Sheet findJdRecordSheet(Workbook workbook) {
+		for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+			String sheetName = workbook.getSheetName(i);
+			if (sheetName != null && sheetName.startsWith("检定记录")) {
+				return workbook.getSheetAt(i);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 处理PFQVF81007类型Excel模板（检定记录A* sheet，表单式布局）
+	 * <p>从表单中提取：型号规格(models)、产品编号(numbers)</p>
+	 * <p>订单号/报告类型/送检数量/检验数量不提取，由用户手动填写，对应字段设为null</p>
+	 * @param sheet 检定记录sheet
+	 * @return 统一样式的result Map（不可用字段值为null）
+	 */
+	private Map<String, Object> processPfqTemplate(Sheet sheet) {
+		Map<String, Object> result = new HashMap<>();
+		
+		// 读取型号规格 (R0C4, 第0行第4列)
+		Row row0 = sheet.getRow(0);
+		String models = null;
+		if (row0 != null) {
+			String val = getCellValue(row0.getCell(4));
+			if (val != null && !val.isEmpty()) {
+				models = val;
+			}
+		}
+		
+		// 读取产品编号 (R1C4, 第1行第4列)
+		Row row1 = sheet.getRow(1);
+		String numbers = null;
+		if (row1 != null) {
+			String val = getCellValue(row1.getCell(4));
+			if (val != null && !val.isEmpty()) {
+				numbers = val;
+			}
+		}
+		
+		result.put("orderId", null);
+		result.put("repType", null);
+		result.put("models", models);
+		result.put("numbers", numbers);
+		result.put("qsis", null);
+		result.put("qis", null);
+		
+		return result;
+	}
+
+	/**
+	 * 处理Excel文件导入的统一入口
+	 * <p>自动检测模板类型（旧模板 vs 检定记录模板），路由到对应的提取逻辑</p>
+	 * <p>负责文件生命周期管理：打开→检测→提取→关闭→删除临时文件</p>
+	 * @param file Excel文件对象
+	 * @return 统一样式的result Map
+	 * @throws Exception 文件格式不支持或读取异常时抛出
+	 */
+	public Map<String, Object> processExcelFile(File file) throws Exception {
+		FileInputStream fis = null;
+		Workbook workbook = null;
+		
+		try {
+			fis = new FileInputStream(file);
+			String fileName = file.getName().toLowerCase();
+			if (fileName.endsWith(".xlsx")) {
+				workbook = new XSSFWorkbook(fis);
+			} else if (fileName.endsWith(".xls")) {
+				workbook = new HSSFWorkbook(fis);
+			} else {
+				throw new Exception("不支持的文件格式，请上传Excel文件");
+			}
+			
+			// 检测是否为检定记录模板（名称以"检定记录"开头的sheet）
+			Sheet jdSheet = findJdRecordSheet(workbook);
+			if (jdSheet != null) {
+				return processPfqTemplate(jdSheet);
+			}
+			
+			// 回退到旧模板逻辑（读取sheet 0列式数据）
+			List<Map<String, Object>> dataList = readSheet0(workbook);
+			if (dataList == null || dataList.isEmpty()) {
+				return new HashMap<>();
+			}
+			return processExcelData(dataList);
+			
+		} finally {
+			if (fis != null) {
+				try { fis.close(); } catch (Exception e) {}
+			}
+			if (workbook != null) {
+				try { workbook.close(); } catch (Exception e) {}
+			}
+			if (file != null && file.exists()) {
+				try {
+					file.delete();
+				} catch (Exception e) {
+					LOG.warn("删除临时文件失败: " + e.getMessage(), e);
+				}
+			}
+		}
+	}
 
 }

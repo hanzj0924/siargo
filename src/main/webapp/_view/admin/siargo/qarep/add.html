@@ -146,7 +146,8 @@
 											data-url="admin/dictionary/options?key=siargo_prod_type"
 											data-rule="select" data-tips="请选择产品类型" data-text="=请选择="
 											data-value="" data-value-attr="sn"
-											data-select="#(qareport.prodType ??)">
+											data-select="#(qareport.prodType ??)"
+											data-beforechange="prodTypeChange">
 										</select>
 									</div>
 								</div>
@@ -352,32 +353,41 @@
 				SelectUtil.refresh($('#custSelect'));
 			}
 
+			// 大流量计(sn=3)时，送检数量=检验数量=1
+			function prodTypeChange(selectEl) {
+				var sn = selectEl.val();
+				if (sn === '3') {
+					$('textarea[name="qsis"]').val('1');
+					$('textarea[name="qis"]').val('1');
+				}
+			}
+
 			function uploadSuccessHandler(uploader, type, fileInput, result) {
 				var data = result.data;
 
-				// 填充数据
-				if (data.orderId) {
+				// 填充数据（使用 != null 精确判断，区分 null 和空字符串）
+				if (data.orderId != null) {
 					$('input[name="qareport.orderId"]').val(data.orderId);
 				}
-				if (data.models) {
+				if (data.models != null) {
 					$('textarea[name="models"]').val(data.models);
 				}
-				if (data.numbers) {
+				if (data.numbers != null) {
 					$('textarea[name="numbers"]').val(data.numbers);
 				}
-				if (data.qsis) {
+				if (data.qsis != null) {
 					$('textarea[name="qsis"]').val(data.qsis);
-					$('textarea[name="qis"]').val(data.qsis);
-
-				if (data.repType) {
+				}
+				if (data.qis != null) {
+					$('textarea[name="qis"]').val(data.qis);
+				}
+				if (data.repType != null) {
 					$('select[name="qareport.repType"]').val(data.repType);
 				}
 			}
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="qareportForm")
 		#end
-
-
 	</div>
 </div>
 #end

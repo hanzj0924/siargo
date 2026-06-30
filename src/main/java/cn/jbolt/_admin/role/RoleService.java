@@ -6,6 +6,8 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import cn.jbolt.core.service.JBoltRoleService;
 import cn.jbolt.core.model.Role;
+import cn.jbolt.core.cache.JBoltRoleCache;
+import cn.jbolt.core.permission.JBoltUserAuthKit;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +37,44 @@ public class RoleService extends JBoltRoleService {
 	public Long findIdBySn(int sn) {
 		Role role = findFirst(Okv.by("sn", sn));
 		return role == null ? null : role.getId();
+	}
+
+	/**
+	 * 检查用户是否拥有指定SN的角色或被其上级角色覆盖
+	 * 规则：沿 pid 链向上遍历，type=1 的功能角色参与覆盖检查，type=0 的菜单角色跳过
+	 *   管理员(sn=1) → 全局覆盖，单独判断
+	 *   质检(sn=2, type=0) → 纯菜单入口，不覆盖任何子按钮
+	 *   报告单(sn=21, type=1) → 覆盖 精度/外观/包装/批准
+	 *   设备(sn=22, type=1) → 覆盖 设备审核
+	 * 新增角色只需在 jb_role 中配置正确的 pid 和 type 即可生效，无需修改代码
+	 */
+	public boolean hasRoleOrAbove(Long userId, int sn) {
+		// 管理员拥有全部权限
+		Long adminRoleId = findIdBySn(1);
+		if (adminRoleId != null && JBoltUserAuthKit.hasRole(userId, adminRoleId)) {
+			return true;
+		}
+
+		Long roleId = findIdBySn(sn);
+		if (roleId == null) return false;
+
+		// 沿 pid 链向上遍历，跳过 type=0 的菜单角色
+		Long currentId = roleId;
+		while (currentId != null && currentId > 0) {
+			Role role = JBoltRoleCache.me.get(currentId);
+			if (role == null) break;
+
+			Integer type = role.getInt("type");
+			// type=1 的功能角色参与覆盖检查
+			if (type != null && type == 1 && JBoltUserAuthKit.hasRole(userId, currentId)) {
+				return true;
+			}
+
+			Long pid = role.getPid();
+			if (pid == null || pid == 0) break;
+			currentId = pid;
+		}
+		return false;
 	}
 
 	/**

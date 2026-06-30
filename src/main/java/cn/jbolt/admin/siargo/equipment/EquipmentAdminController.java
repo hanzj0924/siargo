@@ -4,11 +4,8 @@ import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.permission.CheckPermission;
-import cn.jbolt.core.permission.JBoltUserAuthKit;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt._admin.role.RoleService;
-import cn.jbolt.core.cache.JBoltRoleCache;
-import cn.jbolt.core.model.Role;
 import cn.jbolt.admin.siargo.equipment.certificate.EquipmentCertificateService;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
@@ -17,6 +14,8 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.Equipment;
 import cn.jbolt.siargo.model.EquipmentCertificate;
+import com.jfinal.plugin.activerecord.Record;
+import com.alibaba.fastjson.JSON;
 import java.util.List;
 /**
  * 设备管理 Controller
@@ -46,47 +45,14 @@ public class EquipmentAdminController extends JBoltBaseController {
 		Long userId = JBoltUserKit.getUserId();
 		
 		// 设备审核权限：管理员/设备 角色可覆盖，或直接拥有设备审核角色
-		set("audit", hasRoleOrAbove(userId, 221));
+		set("audit", roleService.hasRoleOrAbove(userId, 221));
+		
+		// 动态分类列表（从字典表查询，支持任意数量分类）
+		List<Record> categories = service.getCategories();
+		set("categories", categories);
+		set("categoriesJson", JSON.toJSONString(categories));
 		
 		render("index.html");
-	}
-
-	/**
-	 * 检查用户是否拥有指定SN的角色或被其上级角色覆盖
-	 * 规则：沿 pid 链向上遍历，type=1 的功能角色参与覆盖检查，type=0 的菜单角色跳过
-	 *   管理员(sn=1) → 全局覆盖，单独判断
-	 *   质检(sn=2, type=0) → 纯菜单入口，不覆盖任何子按钮
-	 *   报告单(sn=21, type=1) → 覆盖 精度/外观/包装/批准
-	 *   设备(sn=22, type=1) → 覆盖 设备审核
-	 * 新增角色只需在 jb_role 中配置正确的 pid 和 type 即可生效，无需修改代码
-	 */
-	private boolean hasRoleOrAbove(Long userId, int sn) {
-		// 管理员拥有全部权限
-		Long adminRoleId = roleService.findIdBySn(1);
-		if (adminRoleId != null && JBoltUserAuthKit.hasRole(userId, adminRoleId)) {
-			return true;
-		}
-		
-		Long roleId = roleService.findIdBySn(sn);
-		if (roleId == null) return false;
-		
-		// 沿 pid 链向上遍历，跳过 type=0 的菜单角色
-		Long currentId = roleId;
-		while (currentId != null && currentId > 0) {
-			Role role = JBoltRoleCache.me.get(currentId);
-			if (role == null) break;
-			
-			Integer type = role.getInt("type");
-			// type=1 的功能角色参与覆盖检查
-			if (type != null && type == 1 && JBoltUserAuthKit.hasRole(userId, currentId)) {
-				return true;
-			}
-			
-			Long pid = role.getPid();
-			if (pid == null || pid == 0) break;
-			currentId = pid;
-		}
-		return false;
 	}
   	
   	/**

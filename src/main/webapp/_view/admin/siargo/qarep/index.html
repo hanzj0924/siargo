@@ -640,7 +640,7 @@
 		<div class="jbolt_tab_content"  id="allreport_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
-				data-pagesize="15" 
+				data-pagesize="50"
 				id="allreport_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -679,7 +679,7 @@
 		<div class="jbolt_tab_content"  id="noq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
-				data-pagesize="10" 
+				data-pagesize="50" 
 				id="noq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -717,7 +717,7 @@
 		<div class="jbolt_tab_content"  id="accq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
-				data-pagesize="10" 
+				data-pagesize="50" 
 				id="accq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -755,7 +755,7 @@
 		<div class="jbolt_tab_content"  id="funq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
-				data-pagesize="10" 
+				data-pagesize="50" 
 				id="funq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -794,7 +794,7 @@
 		<div class="jbolt_tab_content"  id="appq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
-				data-pagesize="10" 
+				data-pagesize="50" 
 				id="appq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -834,7 +834,7 @@
 		<div class="jbolt_tab_content"  id="allq_tabcontent">
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
-				data-pagesize="20" 
+				data-pagesize="50" 
 				id="allq_mgrtable_#(pageId)"
 				data-height="fill_box"
 				data-ajax="true"
@@ -1303,12 +1303,16 @@ function openDeleteDialog_#(pageId)(tableId) {
         area: ['450px', '320px'],
         content: '<div class="p-3">' +
             '<div class="form-group">' +
-            '<label class="mb-2"><i class="fa fa-question-circle text-warning mr-1"></i>确定把选中数据放入回收站？</label>' +
-            '<textarea id="deleteReason_#(pageId)" class="form-control" rows="4" placeholder="请输入删除原因（选填）..."></textarea>' +
+            '<label class="mb-2"><span class="text-danger">*</span> <i class="fa fa-question-circle text-warning mr-1"></i>确定把选中数据放入回收站？</label>' +
+            '<textarea id="deleteReason_#(pageId)" class="form-control" rows="4" placeholder="请输入删除原因（必填）..."></textarea>' +
             '</div></div>',
         btn: ['确定', '取消'],
         yes: function(index) {
             var reason = $('#deleteReason_#(pageId)').val();
+            if (!reason || $.trim(reason) === '') {
+                LayerMsgBox.alert('请输入删除原因', 2);
+                return;
+            }
             var idsStr = $.isArray(ids) ? ids.join(',') : ids;
             LayerMsgBox.loading('正在处理...', 10000);
             $.ajax({

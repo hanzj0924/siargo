@@ -45,6 +45,11 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	private volatile Kv cachedOverviewCounts;
 	private volatile long cacheTimestamp;
 	private final ReentrantLock cacheLock = new ReentrantLock();
+
+	// ========== 分类列表缓存（60分钟有效期，字典表变更频率极低） ==========
+	private static final long CATEGORIES_CACHE_TTL = 60 * 60 * 1000L; // 60分钟
+	private volatile List<Record> cachedCategories;
+	private volatile long categoriesCacheTimestamp;
 	@Override
 	protected Equipment dao() {
 		return dao;
@@ -138,7 +143,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	
 	/**
 	 * 获取概览统计数量（带30分钟缓存）
-	 * @return Kv 包含 total, cat_1~cat_5, repairing, sealed, expired, audit
+	 * @return Kv 包含 total, cat_{sn}(动态), repairing, sealed, expired, audit, categories(JSON)
 	 */
 	public Kv getOverviewCounts() {
 		// 先检查缓存是否有效（无锁快速路径）
@@ -162,30 +167,103 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	}
 
 	/**
-	 * 主动清除概览统计缓存（数据变更时调用）
+	 * 主动清除概览统计缓存（数据变更时调用，同时清除分类缓存）
 	 */
 	public void clearOverviewCountsCache() {
 		cachedOverviewCounts = null;
 		cacheTimestamp = 0;
+		cachedCategories = null;
+		categoriesCacheTimestamp = 0;
 	}
 
 	/**
-	 * 从数据库加载概览统计数量
+	 * 从字典表查询设备分类列表（动态扩展，支持任意数量分类，带 60 分钟缓存）
+	 * @return List<Record> 每条包含 sn, name, index, color, icon
+	 */
+	public List<Record> getCategories() {
+		// 快速路径：缓存命中直接返回
+		if (cachedCategories != null && (System.currentTimeMillis() - categoriesCacheTimestamp) < CATEGORIES_CACHE_TTL) {
+			return cachedCategories;
+		}
+		cacheLock.lock();
+		try {
+			// 双重检查
+			if (cachedCategories != null && (System.currentTimeMillis() - categoriesCacheTimestamp) < CATEGORIES_CACHE_TTL) {
+				return cachedCategories;
+			}
+			String[] palette = {"#667eea","#17a2b8","#f5a962","#e86a78","#28a745","#6f42c1","#20c997","#fd7e14","#0dcaf0","#d63384"};
+			String[] icons = {"fa-cogs","fa-tachometer","fa-sliders","fa-compass","fa-database","fa-microchip","fa-thermometer","fa-cube","fa-cog","fa-wrench"};
+
+			List<Record> categories = Db.find(
+				"SELECT sn, name FROM jb_dictionary WHERE type_key = ? AND enable = 1 ORDER BY sort_rank ASC",
+				"siargo_equipment_category");
+
+			int index = 1;
+			for (Record cat : categories) {
+				cat.set("index", index);
+				cat.set("color", palette[(index - 1) % palette.length]);
+				cat.set("icon", icons[(index - 1) % icons.length]);
+				index++;
+			}
+			cachedCategories = categories;
+			categoriesCacheTimestamp = System.currentTimeMillis();
+			return categories;
+		} finally {
+			cacheLock.unlock();
+		}
+	}
+
+	/**
+	 * 从数据库加载概览统计数量（动态分类，支持任意数量分类）
 	 */
 	private Kv loadOverviewCountsFromDb() {
 		Kv counts = Kv.create();
-		// 初始化分类默认值
-		for (int i = 1; i <= 5; i++) {
-			counts.set("cat_" + i, 0L);
+
+		// 1. 获取所有启用的分类
+		List<Record> categories = getCategories();
+
+		// 2. 初始化分类默认值
+		for (Record cat : categories) {
+			counts.set("cat_" + cat.getStr("sn"), 0L);
 		}
-		// 合并为单条SQL：一次性统计所有指标，避免多次查询导致的性能损耗
+
+		// 3. 无分类时：仅统计非分类指标
+		if (categories.isEmpty()) {
+			String sql = "SELECT"
+					+ "  COUNT(*) AS total"
+					+ ", SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS repairing"
+					+ ", SUM(CASE WHEN status IN (3, 4) THEN 1 ELSE 0 END) AS sealed"
+					+ ", SUM(CASE WHEN status = 5 THEN 1 ELSE 0 END) AS abnormal"
+					+ ", SUM(CASE WHEN next_inspection_date IS NOT NULL AND next_inspection_date <= DATE_ADD(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS expired"
+					+ ", (SELECT COUNT(*) FROM siargo_equipment se INNER JOIN siargo_equipment_certificate ec ON ec.equipment_id = se.id AND ec.status = 1 AND ec.certificate_date + INTERVAL 9 MONTH <= NOW()) AS cert_expired"
+					+ ", SUM(CASE WHEN (SELECT ec.audit_status FROM siargo_equipment_comparison ec WHERE ec.equipment_id = siargo_equipment.id ORDER BY ec.comparison_date DESC, ec.creator_time DESC LIMIT 1) = 1 THEN 1 ELSE 0 END) AS audit"
+					+ " FROM siargo_equipment";
+			Record row = Db.findFirst(sql);
+			fillNonCategoryCounts(counts, row);
+			counts.set("categories", JSON.toJSONString(categories));
+			return counts;
+		}
+
+		// 4. 动态构建分类统计子句（参数化查询防止 SQL 注入，反引号保护别名）
+		StringBuilder catSelect = new StringBuilder();
+		List<Object> catParams = new ArrayList<>();
+		// 深拷贝分类列表（避免修改 getCategories() 缓存的 Record）
+		List<Record> categoriesWithCount = new ArrayList<>();
+		for (Record cat : categories) {
+			String sn = cat.getStr("sn");
+			if (catSelect.length() > 0) catSelect.append(", ");
+			catSelect.append("SUM(CASE WHEN category = ? THEN 1 ELSE 0 END) AS `cat_").append(sn).append("`");
+			catParams.add(sn);
+			// 创建副本用于附加 count 字段
+			Record copy = new Record();
+			copy.setColumns(cat.getColumns());
+			categoriesWithCount.add(copy);
+		}
+
+		// 5. 组装完整 SQL（一条 SQL 统计所有指标）
 		String sql = "SELECT"
 				+ "  COUNT(*) AS total"
-				+ ", SUM(CASE WHEN category = '1' THEN 1 ELSE 0 END) AS cat_1"
-				+ ", SUM(CASE WHEN category = '2' THEN 1 ELSE 0 END) AS cat_2"
-				+ ", SUM(CASE WHEN category = '3' THEN 1 ELSE 0 END) AS cat_3"
-				+ ", SUM(CASE WHEN category = '4' THEN 1 ELSE 0 END) AS cat_4"
-				+ ", SUM(CASE WHEN category = '5' THEN 1 ELSE 0 END) AS cat_5"
+				+ ", " + catSelect.toString()
 				+ ", SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS repairing"
 				+ ", SUM(CASE WHEN status IN (3, 4) THEN 1 ELSE 0 END) AS sealed"
 				+ ", SUM(CASE WHEN status = 5 THEN 1 ELSE 0 END) AS abnormal"
@@ -193,20 +271,51 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 				+ ", (SELECT COUNT(*) FROM siargo_equipment se INNER JOIN siargo_equipment_certificate ec ON ec.equipment_id = se.id AND ec.status = 1 AND ec.certificate_date + INTERVAL 9 MONTH <= NOW()) AS cert_expired"
 				+ ", SUM(CASE WHEN (SELECT ec.audit_status FROM siargo_equipment_comparison ec WHERE ec.equipment_id = siargo_equipment.id ORDER BY ec.comparison_date DESC, ec.creator_time DESC LIMIT 1) = 1 THEN 1 ELSE 0 END) AS audit"
 				+ " FROM siargo_equipment";
-		Record row = Db.findFirst(sql);
+
+		Record row = Db.findFirst(sql, catParams.toArray());
+
+		// 6. 解析结果
 		if (row != null) {
-			counts.set("total",     toLong(row.getLong("total")));
-			counts.set("cat_1",     toLong(row.getLong("cat_1")));
-			counts.set("cat_2",     toLong(row.getLong("cat_2")));
-			counts.set("cat_3",     toLong(row.getLong("cat_3")));
-			counts.set("cat_4",     toLong(row.getLong("cat_4")));
-			counts.set("cat_5",     toLong(row.getLong("cat_5")));
+			counts.set("total", toLong(row.getLong("total")));
+			// 动态读取各分类计数（写入副本）
+			for (Record cat : categoriesWithCount) {
+				String sn = cat.getStr("sn");
+				long count = toLong(row.getLong("cat_" + sn));
+				counts.set("cat_" + sn, count);
+				cat.set("count", count);
+			}
 			counts.set("repairing", toLong(row.getLong("repairing")));
-			counts.set("sealed",    toLong(row.getLong("sealed")));
-			counts.set("abnormal",  toLong(row.getLong("abnormal")));
-			counts.set("expired",   toLong(row.getLong("expired")));
+			counts.set("sealed", toLong(row.getLong("sealed")));
+			counts.set("abnormal", toLong(row.getLong("abnormal")));
+			counts.set("expired", toLong(row.getLong("expired")));
 			counts.set("cert_expired", toLong(row.getLong("cert_expired")));
-			counts.set("audit",     toLong(row.getLong("audit")));
+			counts.set("audit", toLong(row.getLong("audit")));
+		} else {
+			counts.set("total", 0L);
+			counts.set("repairing", 0L);
+			counts.set("sealed", 0L);
+			counts.set("abnormal", 0L);
+			counts.set("expired", 0L);
+			counts.set("cert_expired", 0L);
+			counts.set("audit", 0L);
+			for (Record cat : categoriesWithCount) {
+				cat.set("count", 0L);
+			}
+		}
+		counts.set("categories", JSON.toJSONString(categoriesWithCount));
+		return counts;
+	}
+
+	/** 填充非分类统计指标（row为null时设默认值，用于无分类场景） */
+	private void fillNonCategoryCounts(Kv counts, Record row) {
+		if (row != null) {
+			counts.set("total", toLong(row.getLong("total")));
+			counts.set("repairing", toLong(row.getLong("repairing")));
+			counts.set("sealed", toLong(row.getLong("sealed")));
+			counts.set("abnormal", toLong(row.getLong("abnormal")));
+			counts.set("expired", toLong(row.getLong("expired")));
+			counts.set("cert_expired", toLong(row.getLong("cert_expired")));
+			counts.set("audit", toLong(row.getLong("audit")));
 		} else {
 			counts.set("total", 0L);
 			counts.set("repairing", 0L);
@@ -216,7 +325,6 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			counts.set("cert_expired", 0L);
 			counts.set("audit", 0L);
 		}
-		return counts;
 	}
 
 	/** 将Long值转为0L（null安全） */
