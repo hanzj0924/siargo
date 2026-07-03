@@ -13,6 +13,7 @@ import cn.jbolt.admin.wechat.mpinfo.WechatMpinfoType;
 import cn.jbolt.apitest.ApiTestRoutes;
 import cn.jbolt.base.JBoltDruidStatViewHandler;
 import cn.jbolt.common.enums.*;
+import cn.jbolt.common.interceptor.SiargoTerminalOfflineInterceptor;
 import cn.jbolt.common.model.*;
 import cn.jbolt.common.ureport.IUreportViewAuth;
 import cn.jbolt.common.ureport.JBoltUreportViewHandler;
@@ -132,6 +133,7 @@ public class ProjectConfig extends JBoltProjectConfig {
 		me.add(new Routes() {
 			@Override
 			public void config() {
+				this.addInterceptor(new SiargoTerminalOfflineInterceptor());
 				this.addInterceptor(new JBoltAdminAuthInterceptor());
 				this.scan("cn.jbolt.admin.siargo");
 			}

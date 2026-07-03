@@ -28,6 +28,7 @@ import cn.jbolt._admin.userconfig.UserConfigAdminController;
 import cn.jbolt.common.controller.NeditorPreviewAdminController;
 import cn.jbolt.common.controller.NeditorUploadAdminController;
 import cn.jbolt.common.controller.SummernoteUploadAdminController;
+import cn.jbolt.common.interceptor.SiargoTerminalOfflineInterceptor;
 import cn.jbolt.common.style.JBoltStyleAdminController;
 import cn.jbolt.core.permission.JBoltAdminAuthInterceptor;
 import com.jfinal.config.Routes;
@@ -42,6 +43,7 @@ public class AdminRoutes extends Routes {
 	@Override
 	public void config() {
 		this.setBaseViewPath("/_view/_admin");
+		this.addInterceptor(new SiargoTerminalOfflineInterceptor());
 		this.addInterceptor(new JBoltAdminAuthInterceptor());
 		this.add("/admin", AdminIndexController.class,"/index");
 		this.add("/admin/pjaxerror", PjaxErrorController.class);

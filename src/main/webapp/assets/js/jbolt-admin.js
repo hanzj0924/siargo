@@ -6449,8 +6449,7 @@ var SwitchBtnUtil={
 							}else if(data.msg&&data.msg=="jbolt_nologin"){
 								showReloginDialog();
 							}else if(data.msg&&data.msg=="jbolt_terminal_offline"){
-								showReloginDialog();
-								LayerMsgBox.alert("当前用户已在其它终端登录，本机已下线",2);
+								// 由全局 ajaxComplete 统一处理
 							}else{
 								LayerMsgBox.alert(data.msg,2);
 							}
@@ -11044,8 +11043,7 @@ var Ajax={
 						}else if(data.msg&&data.msg=="jbolt_nologin"){
 							showReloginDialog();
 						}else if(data.msg&&data.msg=="jbolt_terminal_offline"){
-							showReloginDialog();
-							LayerMsgBox.alert("当前用户已在其它终端登录，本机已下线",2);
+							// 由全局 ajaxComplete 统一处理
 						}else{
 							LayerMsgBox.closeLoadingNow();
 							if(error){
@@ -11106,8 +11104,7 @@ var Ajax={
 							}else if(data.msg&&data.msg=="jbolt_nologin"){
 								showReloginDialog();
 							}else if(data.msg&&data.msg=="jbolt_terminal_offline"){
-								showReloginDialog();
-								LayerMsgBox.alert("当前用户已在其它终端登录，本机已下线",2);
+								// 由全局 ajaxComplete 统一处理
 							}else{
 								LayerMsgBox.closeLoadingNow();
 								if(error){
@@ -11171,8 +11168,7 @@ var Ajax={
 							}else if(data.msg&&data.msg=="jbolt_nologin"){
 								showReloginDialog();
 							}else if(data.msg&&data.msg=="jbolt_terminal_offline"){
-								showReloginDialog();
-								LayerMsgBox.alert("当前用户已在其它终端登录，本机已下线",2);
+								// 由全局 ajaxComplete 统一处理
 							}else{
 								LayerMsgBox.closeLoadingNow();
 								if(error){
@@ -14088,8 +14084,7 @@ function checkIdCardNo(card){
 										}else if(res.msg=="jbolt_nologin"){
 											showReloginDialog();
 										}else if(res.msg&&res.msg=="jbolt_terminal_offline"){
-											showReloginDialog();
-											LayerMsgBox.alert("当前用户已在其它终端登录，本机已下线",2);
+											// 由全局 ajaxComplete 统一处理
 										}else{
 											showItCheckFailResult(input,res.msg);
 											LayerMsgBox.error(res.msg,1500);
@@ -20338,3 +20333,16 @@ function isJSON(str) {
 	}
 	console.error('It is not a string!')
 }
+
+/**
+ * 全局 AJAX 终端下线拦截
+ * 无论 $.ajax / Ajax.get / Ajax.post，只要后端返回 jbolt_terminal_offline，统一提示并跳转登录页
+ */
+$(document).ajaxSuccess(function(event, xhr, settings, data) {
+	if (data && data.msg === 'jbolt_terminal_offline') {
+		showReloginDialog();
+		LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
+			top.location.href = '/admin';
+		});
+	}
+});

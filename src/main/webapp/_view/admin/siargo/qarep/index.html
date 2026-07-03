@@ -641,9 +641,9 @@
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50"
+				data-ajax="true"
 				id="allreport_mgrtable_#(pageId)"
 				data-height="fill_box"
-				data-ajax="true"
 				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas"
 				data-column-resize="true"
@@ -680,9 +680,10 @@
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
+				data-ajax="true"
+				data-autoload="false"
 				id="noq_mgrtable_#(pageId)"
 				data-height="fill_box"
-				data-ajax="true"
 				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=1"
 				data-column-resize="true"
@@ -718,9 +719,10 @@
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
+				data-ajax="true"
+				data-autoload="false"
 				id="accq_mgrtable_#(pageId)"
 				data-height="fill_box"
-				data-ajax="true"
 				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=2"
 				data-column-resize="true"
@@ -756,9 +758,10 @@
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
+				data-ajax="true"
+				data-autoload="false"
 				id="funq_mgrtable_#(pageId)"
 				data-height="fill_box"
-				data-ajax="true"
 				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=3"
 				data-column-resize="true"
@@ -795,9 +798,10 @@
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
+				data-ajax="true"
+				data-autoload="false"
 				id="appq_mgrtable_#(pageId)"
 				data-height="fill_box"
-				data-ajax="true"
 				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=4"
 				data-column-resize="true"
@@ -835,9 +839,10 @@
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
+				data-ajax="true"
+				data-autoload="false"
 				id="allq_mgrtable_#(pageId)"
 				data-height="fill_box"
-				data-ajax="true"
 				data-ajax-success-handler="mergeReportRows"
 				data-url="admin/siargo/qarep/datas?insp=5"
 				data-column-resize="true"
@@ -1219,6 +1224,10 @@ function mergeFixedLeftRows($tbody, colIndexes, formnumColIdx, currentPage, page
     });
 }
 
+// ===== Tab懒加载：追踪已加载的tab，避免首次打开时6个表格同时请求 =====
+var loadedTabs_#(pageId) = {};
+var tableIds_#(pageId) = ['allreport', 'noq', 'accq', 'funq', 'appq', 'allq'];
+
 // 切换Tab
 function switchTabByIndex(index) {
 	// 更新导航active状态
@@ -1229,6 +1238,16 @@ function switchTabByIndex(index) {
 	} else {
 		$('.flow-stepper-item').eq(index - 1).addClass('active');
 	}
+	
+	// 懒加载：首次切换到该tab时触发表格数据加载
+	if (!loadedTabs_#(pageId)[index]) {
+		loadedTabs_#(pageId)[index] = true;
+		var tableId = tableIds_#(pageId)[index] + '_mgrtable_#(pageId)';
+		setTimeout(function() {
+			refreshJBoltTableById(tableId);
+		}, 50);
+	}
+	
 	// 切换底层JBolt Tab
 	$('#qarepTabView .jbolt_tab_link').eq(index).trigger('click');
 }
@@ -1239,7 +1258,12 @@ function loadFlowCounts() {
 		url: 'admin/siargo/qarep/getFlowCounts',
 		type: 'get',
 		success: function(res) {
-			if (res.state == 'ok') {
+			if (res.msg && res.msg == 'jbolt_terminal_offline') {
+				showReloginDialog();
+				LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
+					top.location.href = '/admin';
+				});
+			} else if (res.state == 'ok') {
 				$('#count-all').text(res.data.all || 0);
 				$('#count-noq').text(res.data.noq || 0);
 				$('#count-accq').text(res.data.accq || 0);
@@ -1256,9 +1280,14 @@ $(function() {
 	setTimeout(function() {
 		loadFlowCounts();
 	}, 200);
+	
 	// 初始化步骤条active状态
 	var activeIndex = $('#qarepTabView').data('active-index') || 0;
+	
+	// 预标记默认tab为已加载，防止switchTabByIndex中重复触发
+	loadedTabs_#(pageId)[activeIndex] = true;
 	switchTabByIndex(activeIndex);
+	
 	// 定时刷新数量（每30秒）
 	setInterval(loadFlowCounts, 30000);
 });
@@ -1322,7 +1351,12 @@ function openDeleteDialog_#(pageId)(tableId) {
                 success: function(res) {
                     LayerMsgBox.closeLoading();
                     layer.close(index);
-                    if (res.state == 'ok') {
+                    if (res.msg && res.msg == 'jbolt_terminal_offline') {
+                        showReloginDialog();
+                        LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
+                            top.location.href = '/admin';
+                        });
+                    } else if (res.state == 'ok') {
                         LayerMsgBox.success('删除成功', 800, function() {
                             refreshAllQarepTables_#(pageId)();
                         });

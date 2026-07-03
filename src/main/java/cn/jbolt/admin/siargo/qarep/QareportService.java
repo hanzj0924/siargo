@@ -46,6 +46,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	private volatile long flowCountsCacheTimestamp;
 	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
 
+	// ========== 管理端分页数据缓存（30秒有效期，降低重复查询开销） ==========
+	private static final long PAGINATE_CACHE_TTL = 30 * 1000L;
+	private volatile Map<String, Page<Record>> cachedPaginateData;
+	private volatile long paginateCacheTimestamp;
+	private final ReentrantLock paginateCacheLock = new ReentrantLock();
+
 	/** 用户服务（用于查询拥有指定角色的用户列表） */
 	@Inject
 	private UserService userService;
@@ -94,6 +100,15 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	public void clearFlowCountsCache() {
 		cachedFlowCounts = null;
 		flowCountsCacheTimestamp = 0;
+		clearPaginateCache();
+	}
+
+	/**
+	 * 主动清除管理端分页数据缓存（数据变更时调用）
+	 */
+	public void clearPaginateCache() {
+		cachedPaginateData = null;
+		paginateCacheTimestamp = 0;
 	}
 
 	/**
@@ -226,6 +241,16 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * @return 分页数据
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords, int prodType, int insp, Date startTime, Date endTime) {
+		// ========== 缓存键构建与快速路径检查 ==========
+		String cacheKey = pageNumber + "_" + pageSize + "_" + keywords + "_" + prodType + "_" + insp + "_" + (startTime != null ? startTime.getTime() : 0) + "_" + (endTime != null ? endTime.getTime() : 0);
+		Map<String, Page<Record>> cache = cachedPaginateData;
+		if (cache != null && (System.currentTimeMillis() - paginateCacheTimestamp) < PAGINATE_CACHE_TTL) {
+			Page<Record> cached = cache.get(cacheKey);
+			if (cached != null) {
+				return cached;
+			}
+		}
+		
 		// ========== 构建基础查询 ==========
 		Sql sql = Sql.mysql()
 				// 选择字段：报告单基础信息
@@ -330,7 +355,21 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			sql.orderBy("sq.formnum", true);
 		}
 			
-		return paginateRecord(sql, true);
+		Page<Record> result = paginateRecord(sql, true);
+		
+		// ========== 将查询结果放入缓存 ==========
+		paginateCacheLock.lock();
+		try {
+			if (cachedPaginateData == null || (System.currentTimeMillis() - paginateCacheTimestamp) >= PAGINATE_CACHE_TTL) {
+				cachedPaginateData = new java.util.concurrent.ConcurrentHashMap<>();
+				paginateCacheTimestamp = System.currentTimeMillis();
+			}
+			cachedPaginateData.put(cacheKey, result);
+		} finally {
+			paginateCacheLock.unlock();
+		}
+		
+		return result;
 	}
 
 	/**
