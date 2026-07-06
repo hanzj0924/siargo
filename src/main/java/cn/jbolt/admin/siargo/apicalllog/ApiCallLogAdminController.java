@@ -40,8 +40,9 @@ public class ApiCallLogAdminController extends JBoltBaseController {
 		String responseStatus = get("responseStatus");
 		String startDate = get("startDate");
 		String endDate = get("endDate");
+		String traceId = get("traceId");
 		renderJsonData(service.paginateAdminDatas(getPageNumber(), getPageSize(),
-			getKeywords(), responseStatus, startDate, endDate));
+			getKeywords(), responseStatus, startDate, endDate, traceId));
 	}
 	
    /**

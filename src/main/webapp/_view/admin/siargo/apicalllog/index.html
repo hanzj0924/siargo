@@ -10,8 +10,9 @@
 	</div>
 	<div class="col">
 		<form class="form-inline" id="apiCallLogForm_#(pageId)" onsubmit="return false;" method="post">
-		<input type="text" autocomplete="off" class="form-control" placeholder="输入API路径搜索" name="keywords" value="" />
-		<select class="form-control ml-2" name="responseStatus">
+		<input type="text" autocomplete="off" class="form-control" placeholder="API路径搜索" name="keywords" value="" />
+		<input type="text" autocomplete="off" class="form-control ml-2" placeholder="请求追踪搜索" name="traceId" value="" style="width:140px;" />
+		<select class="form-control ml-2" name="responseStatus" onchange="jboltTableSearch(this)">
 			<option value="">全部状态</option>
 			<option value="ok">成功</option>
 			<option value="fail">失败</option>
@@ -19,7 +20,7 @@
 		<input type="text" autocomplete="off" class="form-control ml-2" name="startDate" data-date data-type="date" data-fmt="yyyy-MM-dd" placeholder="开始日期" style="width:130px;" />
 		<span class="ml-1 mr-1">-</span>
 		<input type="text" autocomplete="off" class="form-control" name="endDate" data-date data-type="date" data-fmt="yyyy-MM-dd" placeholder="结束日期" style="width:130px;" />
-		<button type="submit" class="btn btn-outline-secondary ml-2"><i class="fa fa-search"></i> 查询</button>
+		<button type="submit" onclick="jboltTableSearch(this)" class="btn btn-outline-secondary ml-2"><i class="fa fa-search"></i> 查询</button>
 		</form>
 	</div>
 	<div class="col-auto"></div>
@@ -33,7 +34,7 @@
 {@each datas as data,index}
 <tr data-id="${data.id}" style="text-align:center;">
 <td >${pageNumber,pageSize,index | rownum}</td>
-<td style="text-align:left;">${data.api_path}</td>
+<td style="text-align:left;"><a href="javascript:;" data-openpage="dialog" data-area="1000,800" data-handler="refreshJBoltTable" data-title="调用详情" data-url="admin/siargo/apicalllog/detail/${data.id}">${data.api_path}</a></td>
 <td >${data.api_method}</td>
 <td >${data.order_id?? '-'}</td>
 <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#2196F3;cursor:pointer;" title="${data.order_ids ?? '-'}"><span style="color:#333;">${data.order_ids ?? '-'}</span></td>
@@ -41,6 +42,7 @@
 <td >{@if data.response_status == 'ok'}<span class="badge badge-success">成功</span>{@else}<span class="badge badge-danger">失败</span>{@/if}</td>
 <td >${data.response_code}</td>
 <td >${data.response_msg}</td>
+<td >${data.trace_id?? '-'}</td>
 <td >${data.cost_time}</td>
 <td >${data.create_time}</td>
 </tr>
@@ -112,7 +114,6 @@
 <!-- 工具条 -->
 		<div class="jbolt_table_toolbar" id="apiCallLog_toolbar_#(pageId)">
 			<div class="btn-group" role="group">
-				<button data-openpage="dialog" data-area="1000,800" data-handler="refreshJBoltTable" data-title="调用详情" data-check-handler="jboltTableGetCheckedId" data-url="admin/siargo/apicalllog/detail/" class="btn btn-outline-info btn-sm"><i class="fa fa-eye"></i> 查看详情</button>
 				<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
 			</div>
 			<div class="clearfix"></div>
@@ -124,7 +125,7 @@
 		data-ajax="true"
 		data-url="admin/siargo/apicalllog/datas"
 		data-column-resize="true"
-		data-column-prepend="1:checkbox"
+		data-column-prepend=""
 		data-conditions-form="apiCallLogForm_#(pageId)"
 		data-rowtpl="apiCallLogRowtpl_#(pageId)"
 		data-page="apiCallLogPage_#(pageId)"
@@ -143,6 +144,7 @@
 			<th data-width="90" data-column="response_status" data-align="center">状态</th>
 			<th data-width="80" data-column="response_code">状态码</th>
 			<th data-width="100" data-column="response_msg" data-align="center">响应消息</th>
+			<th data-width="140" data-column="trace_id" data-align="center">Trace ID</th>
 			<th data-width="90" data-column="cost_time" data-align="center">耗时(ms)</th>
 			<th data-width="160" data-column="create_time" data-align="center">调用时间</th>
 		</tr>

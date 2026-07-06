@@ -62,7 +62,7 @@ public class ApiCallLogService extends JBoltBaseService<ApiCallLog> {
 	 * @return
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize,
-			String keywords, String responseStatus, String startDate, String endDate) {
+			String keywords, String responseStatus, String startDate, String endDate, String traceId) {
 		StringBuilder where = new StringBuilder("FROM siargo_api_call_log");
 		List<String> conditions = new ArrayList<>();
 		List<Object> params = new ArrayList<>();
@@ -70,6 +70,10 @@ public class ApiCallLogService extends JBoltBaseService<ApiCallLog> {
 		if (StrKit.notBlank(keywords)) {
 			conditions.add("api_path LIKE ?");
 			params.add("%" + keywords.trim() + "%");
+		}
+		if (StrKit.notBlank(traceId)) {
+			conditions.add("trace_id = ?");
+			params.add(traceId.trim());
 		}
 		if (StrKit.notBlank(responseStatus)) {
 			conditions.add("response_status = ?");
@@ -171,7 +175,7 @@ public class ApiCallLogService extends JBoltBaseService<ApiCallLog> {
 	public boolean logApiCall(String apiPath, String apiMethod, String orderId,
 			String orderIds, String requestIp, String userAgent,
 			String responseStatus, Integer responseCode, String responseMsg,
-			Long costTime, Long jboltAppId) {
+			Long costTime, Long jboltAppId, String traceId) {
 		try {
 			boolean success = new ApiCallLog()
 				.setApiPath(apiPath).setApiMethod(apiMethod)
@@ -179,6 +183,7 @@ public class ApiCallLogService extends JBoltBaseService<ApiCallLog> {
 				.setRequestIp(requestIp).setUserAgent(userAgent)
 				.setResponseStatus(responseStatus).setResponseCode(responseCode)
 				.setResponseMsg(responseMsg).setCostTime(costTime)
+				.set("trace_id", traceId)
 				.setJboltAppId(jboltAppId).save();
 			if (success) {
 				clearStatsCache();

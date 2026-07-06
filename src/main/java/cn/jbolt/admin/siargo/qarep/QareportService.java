@@ -948,10 +948,61 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "LEFT JOIN jb_user u2 ON sp.funq_uid = u2.id "
 				+ "LEFT JOIN jb_user u3 ON sp.appq_uid = u3.id "
 				+ "LEFT JOIN jb_user u4 ON sp.allq_uid = u4.id "
-				+ "WHERE sq.order_id = ? AND sp.vd = 1";
+				+ "WHERE sq.order_id = ? AND sp.vd = 1 "
+				+ "ORDER BY sp.id ASC";
 
 		List<Record> list = Db.find(sql, orderId);
 		return (list == null || list.isEmpty()) ? null : list;
+	}
+
+	/**
+	 * 批量查询订单检验状态（对外API使用，一次查询代替 N 次）
+	 * <p>使用 IN 查询一次性获取所有 orderId 对应的产品状态，按 orderId 分组返回</p>
+	 * @param orderIds 有效订单号列表（非空且已trim）
+	 * @return Map<orderId, List<Record>>，key为订单号，value为该订单的产品状态列表
+	 */
+	public Map<String, List<Record>> batchQueryOrderStatus(List<String> orderIds) {
+		if (orderIds == null || orderIds.isEmpty()) {
+			return new java.util.LinkedHashMap<>();
+		}
+
+		// 构建 IN 子句的 ? 占位符
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT sq.order_id, sp.model, sp.number, sp.insp, ")
+			.append("sp.accq_time, sp.funq_time, sp.appq_time, sp.allq_time, ")
+			.append("u1.name AS accq_name, u2.name AS funq_name, ")
+			.append("u3.name AS appq_name, u4.name AS allq_name ")
+			.append("FROM siargo_product sp ")
+			.append("LEFT JOIN siargo_qareport sq ON sp.report_id = sq.id ")
+			.append("LEFT JOIN jb_user u1 ON sp.accq_uid = u1.id ")
+			.append("LEFT JOIN jb_user u2 ON sp.funq_uid = u2.id ")
+			.append("LEFT JOIN jb_user u3 ON sp.appq_uid = u3.id ")
+			.append("LEFT JOIN jb_user u4 ON sp.allq_uid = u4.id ")
+			.append("WHERE sq.order_id IN (");
+
+		for (int i = 0; i < orderIds.size(); i++) {
+			if (i > 0) {
+				sql.append(",");
+			}
+			sql.append("?");
+		}
+		sql.append(") AND sp.vd = 1 ORDER BY sp.id ASC");
+
+		List<Record> allRecords = Db.find(sql.toString(), orderIds.toArray());
+
+		// 按 orderId 分组（保持传入顺序）
+		Map<String, List<Record>> result = new LinkedHashMap<>();
+		for (String oid : orderIds) {
+			result.put(oid, new ArrayList<>());
+		}
+		for (Record r : allRecords) {
+			String oid = r.getStr("order_id");
+			List<Record> list = result.get(oid);
+			if (list != null) {
+				list.add(r);
+			}
+		}
+		return result;
 	}
 
 	/**

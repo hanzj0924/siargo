@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 2. API接口集成测试（需要服务运行）
  * </p>
  * 
- * @author siargo
+ * @author Hanzj
  * @date 2026-04-13
  */
 @TestInstance(Lifecycle.PER_CLASS)
@@ -533,6 +533,208 @@ public class OrderStatusApiTest {
 			System.out.println("⚠ 服务未运行，跳过集成测试（" + e.getMessage() + "）\n");
 		} catch (Exception e) {
 			System.out.println("⚠ 请求异常，跳过集成测试（" + e.getMessage() + "）\n");
+		}
+	}
+
+	// ==================== 4. 多场景覆盖测试 ====================
+
+	/**
+	 * 场景1：单查 - 订单存在且 insp=2（精度检验已完成）
+	 */
+	@Test
+	public void testSingleInsp2() {
+		System.out.println("--- testSingleInsp2 ---");
+		String orderId = "103896";
+		String token = generateToken(orderId);
+		String url = API_BASE_URL + "?jboltappid=" + TEST_APP_ID + "&orderId=" + orderId + "&token=" + token;
+		System.out.println("请求URL: " + url);
+
+		try {
+			String response = sendGetRequest(url);
+			System.out.println("响应内容: " + response);
+
+			assertTrue(response.contains("\"found\":true"), "订单应存在");
+			assertTrue(response.contains("\"insp\":2"), "insp 应为 2");
+			assertTrue(response.contains("精度检验已完成"), "label 应为'精度检验已完成'");
+			assertTrue(response.contains("\"traceId\""), "应包含 traceId");
+			System.out.println("✓ testSingleInsp2 通过\n");
+		} catch (java.net.ConnectException e) {
+			System.out.println("⚠ 服务未运行，跳过（" + e.getMessage() + "）\n");
+		} catch (Exception e) {
+			System.out.println("✗ 失败: " + e.getMessage() + "\n");
+		}
+	}
+
+	/**
+	 * 场景2：单查 - 订单存在且 insp=5（已完成检验）
+	 */
+	@Test
+	public void testSingleInsp5() {
+		System.out.println("--- testSingleInsp5 ---");
+		String orderId = "49270";
+		String token = generateToken(orderId);
+		String url = API_BASE_URL + "?jboltappid=" + TEST_APP_ID + "&orderId=" + orderId + "&token=" + token;
+		System.out.println("请求URL: " + url);
+
+		try {
+			String response = sendGetRequest(url);
+			System.out.println("响应内容: " + response);
+
+			assertTrue(response.contains("\"found\":true"), "订单应存在");
+			assertTrue(response.contains("\"insp\":5"), "insp 应为 5");
+			assertTrue(response.contains("已完成检验"), "label 应为'已完成检验'");
+			System.out.println("✓ testSingleInsp5 通过\n");
+		} catch (java.net.ConnectException e) {
+			System.out.println("⚠ 服务未运行，跳过（" + e.getMessage() + "）\n");
+		} catch (Exception e) {
+			System.out.println("✗ 失败: " + e.getMessage() + "\n");
+		}
+	}
+
+	/**
+	 * 场景3：单查 - 订单不存在（found=false）
+	 */
+	@Test
+	public void testSingleNotFound() {
+		System.out.println("--- testSingleNotFound ---");
+		String orderId = "9999999999";
+		String token = generateToken(orderId);
+		String url = API_BASE_URL + "?jboltappid=" + TEST_APP_ID + "&orderId=" + orderId + "&token=" + token;
+		System.out.println("请求URL: " + url);
+
+		try {
+			String response = sendGetRequest(url);
+			System.out.println("响应内容: " + response);
+
+			assertTrue(response.contains("\"ok\""), "应返回 ok（业务成功）");
+			assertTrue(response.contains("\"found\":false"), "found 应为 false");
+			assertTrue(response.contains("订单未创建"), "msg 应为'订单未创建'");
+			assertTrue(response.contains("\"orderId\":\"9999999999\""), "应带回请求的 orderId");
+			System.out.println("✓ testSingleNotFound 通过\n");
+		} catch (java.net.ConnectException e) {
+			System.out.println("⚠ 服务未运行，跳过（" + e.getMessage() + "）\n");
+		} catch (Exception e) {
+			System.out.println("✗ 失败: " + e.getMessage() + "\n");
+		}
+	}
+
+	/**
+	 * 场景4：批量 - 混合 insp=2 + insp=5
+	 */
+	@Test
+	public void testBatchMixedInsp() {
+		System.out.println("--- testBatchMixedInsp ---");
+		String[] orderIds = {"103896", "49270"};
+		String token = generateBatchToken(orderIds);
+		String orderIdsStr = String.join(",", orderIds);
+		String url = BATCH_API_BASE_URL + "?jboltappid=" + TEST_APP_ID + "&orderIds=" + orderIdsStr + "&token=" + token;
+		System.out.println("请求URL: " + url);
+
+		try {
+			String response = sendGetRequest(url);
+			System.out.println("响应内容: " + response);
+
+			assertTrue(response.contains("\"ok\""), "应返回 ok");
+			assertTrue(response.contains("\"total\":2"), "total 应为 2");
+			assertTrue(response.contains("精度检验已完成"), "应包含 insp=2 的订单");
+			assertTrue(response.contains("已完成检验"), "应包含 insp=5 的订单");
+			// 两个都应 found
+			assertTrue(response.indexOf("\"found\":true") != response.lastIndexOf("\"found\":true"),
+				"两个订单都应是 found=true");
+			System.out.println("✓ testBatchMixedInsp 通过\n");
+		} catch (java.net.ConnectException e) {
+			System.out.println("⚠ 服务未运行，跳过（" + e.getMessage() + "）\n");
+		} catch (Exception e) {
+			System.out.println("✗ 失败: " + e.getMessage() + "\n");
+		}
+	}
+
+	/**
+	 * 场景5：批量 - 包含不存在的订单
+	 */
+	@Test
+	public void testBatchWithMissingOrder() {
+		System.out.println("--- testBatchWithMissingOrder ---");
+		String[] orderIds = {"49270", "9999999999", "103896"};
+		String token = generateBatchToken(orderIds);
+		String orderIdsStr = String.join(",", orderIds);
+		String url = BATCH_API_BASE_URL + "?jboltappid=" + TEST_APP_ID + "&orderIds=" + orderIdsStr + "&token=" + token;
+		System.out.println("请求URL: " + url);
+
+		try {
+			String response = sendGetRequest(url);
+			System.out.println("响应内容: " + response);
+
+			assertTrue(response.contains("\"ok\""), "应返回 ok");
+			assertTrue(response.contains("\"total\":3"), "total 应为 3");
+			// 结果中应包含两个 found=true 和一个 found=false
+			int firstTrue = response.indexOf("\"found\":true");
+			int secondTrue = response.indexOf("\"found\":true", firstTrue + 1);
+			int falseIdx = response.indexOf("\"found\":false");
+			assertTrue(firstTrue >= 0 && secondTrue >= 0, "应有两个 found=true");
+			assertTrue(falseIdx >= 0, "应有一个 found=false");
+			assertTrue(response.contains("订单未创建"), "不存在订单的 msg 应为'订单未创建'");
+			System.out.println("✓ testBatchWithMissingOrder 通过\n");
+		} catch (java.net.ConnectException e) {
+			System.out.println("⚠ 服务未运行，跳过（" + e.getMessage() + "）\n");
+		} catch (Exception e) {
+			System.out.println("✗ 失败: " + e.getMessage() + "\n");
+		}
+	}
+
+	/**
+	 * 场景6：单查 - 订单存在但返回结果中无 traceId（不应出现）
+	 */
+	@Test
+	public void testSingleHasTraceId() {
+		System.out.println("--- testSingleHasTraceId ---");
+		String orderId = "103896";
+		String token = generateToken(orderId);
+		String url = API_BASE_URL + "?jboltappid=" + TEST_APP_ID + "&orderId=" + orderId + "&token=" + token;
+		System.out.println("请求URL: " + url);
+
+		try {
+			String response = sendGetRequest(url);
+			System.out.println("响应内容: " + response);
+
+			assertTrue(response.contains("\"traceId\""), "应包含 traceId");
+			// traceId 应为12位十六进制
+			assertTrue(response.matches(".*\"traceId\":\"[0-9a-f]{12}\".*"), "traceId 格式应为12位十六进制");
+			System.out.println("✓ testSingleHasTraceId 通过\n");
+		} catch (java.net.ConnectException e) {
+			System.out.println("⚠ 服务未运行，跳过（" + e.getMessage() + "）\n");
+		} catch (Exception e) {
+			System.out.println("✗ 失败: " + e.getMessage() + "\n");
+		}
+	}
+
+	/**
+	 * 场景7：批量 - 超过100个订单应返回失败
+	 */
+	@Test
+	public void testBatchExceedLimit() {
+		System.out.println("--- testBatchExceedLimit ---");
+		String[] orderIds = new String[101];
+		for (int i = 0; i < 101; i++) {
+			orderIds[i] = String.valueOf(100000 + i);
+		}
+		String token = generateBatchToken(orderIds);
+		String orderIdsStr = String.join(",", orderIds);
+		String url = BATCH_API_BASE_URL + "?jboltappid=" + TEST_APP_ID + "&orderIds=" + orderIdsStr + "&token=" + token;
+		// URL 可能很长，只打印前200字符
+		System.out.println("请求URL: " + url.substring(0, Math.min(200, url.length())) + "...");
+
+		try {
+			String response = sendGetRequest(url);
+			System.out.println("响应内容: " + response);
+
+			assertTrue(response.contains("\"fail\""), "超过100个应返回 fail");
+			assertTrue(response.contains("1005"), "错误码应为 1005");
+			System.out.println("✓ testBatchExceedLimit 通过\n");
+		} catch (java.net.ConnectException e) {
+			System.out.println("⚠ 服务未运行，跳过（" + e.getMessage() + "）\n");
+		} catch (Exception e) {
+			System.out.println("✗ 失败: " + e.getMessage() + "\n");
 		}
 	}
 

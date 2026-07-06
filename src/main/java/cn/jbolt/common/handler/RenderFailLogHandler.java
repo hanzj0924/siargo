@@ -27,7 +27,7 @@ import java.io.*;
  * </ul>
  * </p>
  *
- * @author Siargo Team
+ * @author Hanzj
  * @date 2026-04-24
  */
 public class RenderFailLogHandler extends Handler {

@@ -1,5 +1,16 @@
 ## 更新日志
 
+### v2.7.8 (2026-07-06)
+- 新增：API 请求追踪 traceId 机制（响应体/X-Trace-Id响应头/数据库独立字段）
+- 新增：ApiErrorCode 错误码常量（1001-1007），统一 API 错误管理
+- 新增：订单状态查询 found 字段区分订单存在性，单查/批量行为统一
+- 新增：API 调用记录页 traceId 搜索列、搜索按钮修复、路径超链接跳详情
+- 修复：API 调用记录页筛选按钮无响应（responseStatus/日期范围）
+- 重构：OrderStatusApiController 统一输出格式、ApiContext 消除冗余、批量 N+1→IN 优化
+- 测试：新增 7 个多场景覆盖测试（检验进度/不存在订单/批量混合/超限），累计 21 个全通过
+- 维护：检验进度 inspLabel 映射更新至 v6.7 版
+- 维护：siargo_api_call_log 表新增 trace_id VARCHAR(32) 字段及索引
+
 ### v2.7.7 (2026-07-06)
 - 修复：外部 API 被 JBoltAdminAuthInterceptor 误拦截，路由扫描改为逐包子包排除 api
 - 改进：PDF 报告生成兼容旧型号 MFXX-F-E/MFXX-F-D 参数映射

@@ -31,7 +31,7 @@ import com.jfinal.kit.StrKit;
  *   批量token = SHA256(密钥 + 订单号排序拼接 + 当天日期YYYYMMDD)
  * </pre>
  * 
- * @author siargo
+ * @author Hanzj
  * @date 2026-04-13
  */
 public class SiargoApiTokenUtil {
