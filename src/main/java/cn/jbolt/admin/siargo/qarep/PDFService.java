@@ -267,8 +267,8 @@ public class PDFService {
 				map.put("fl", safeStr(report.getStr("sp_fl"), "sp_fl"));
 
 			}
-			// FD-E型号（工业表-脉冲型）：整机电流范围、脉冲电压、本地地址
-			else if (proModel.contains("FD-E")) {
+			// FD-E型号（工业表-脉冲型）、MFXX-F-E(旧型号)：整机电流范围、脉冲电压、本地地址
+			else if (proModel.contains("FD-E")||proModel.contains("-F-E")) {
 				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
 				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
 				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));
@@ -280,8 +280,8 @@ public class PDFService {
 				map.put("bv", "/");
 				
 			}
-			// FD-D型号（工业表-普通型）：无脉冲电压参数，有故障电平和电池电压
-			else if (proModel.contains("FD-D"))  {
+			// FD-D型号（工业表-普通型）、MFXX-F-D(旧型号)：无脉冲电压参数，有故障电平和电池电压
+			else if (proModel.contains("FD-D")||proModel.contains("-F-D"))  {
 				map.put("cucmax", safeStr(report.getStr("sp_cucmax"), "sp_cucmax"));
 				map.put("cucmin", safeStr(report.getStr("sp_cucmin"), "sp_cucmin"));
 				map.put("pv", safeStr(report.getStr("sp_pv"), "sp_pv"));

@@ -135,7 +135,14 @@ public class ProjectConfig extends JBoltProjectConfig {
 			public void config() {
 				this.addInterceptor(new SiargoTerminalOfflineInterceptor());
 				this.addInterceptor(new JBoltAdminAuthInterceptor());
-				this.scan("cn.jbolt.admin.siargo");
+				this.scan("cn.jbolt.admin.siargo.apicalllog");
+				this.scan("cn.jbolt.admin.siargo.cme");
+				this.scan("cn.jbolt.admin.siargo.customer");
+				this.scan("cn.jbolt.admin.siargo.dms");
+				this.scan("cn.jbolt.admin.siargo.equipment");
+				this.scan("cn.jbolt.admin.siargo.imi");
+				this.scan("cn.jbolt.admin.siargo.qarep");
+				this.scan("cn.jbolt.admin.siargo.supplier");
 			}
 		});
         // Siargo 对外API路由（无登录认证）

@@ -305,7 +305,7 @@
         <Logger name="net.sf.ehcache" level="error" />
         <Logger name="cn.hutool" level="error" />
         <Logger name="org.xnio" level="error" />
-        <Logger name="io.undertow" level="error" />
+        <Logger name="io.undertow" level="DEBUG" />
         <Logger name="org.apache.catalina.startup.DigesterFactory" level="error" />
         <Logger name="org.apache.catalina.util.LifecycleBase" level="error" />
         <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />
