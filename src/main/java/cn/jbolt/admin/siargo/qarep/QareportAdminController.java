@@ -213,7 +213,8 @@ public class QareportAdminController extends JBoltBaseController {
 	    	String outputDir = PathKit.getWebRootPath() + "/" + pdfsrc;
 	    	PDFService.writeFailLog(failList, outputDir);
 	    }
-			
+	    
+	    service.clearPaginateCache();
 	    renderJsonSuccess();
     }
 	
@@ -477,7 +478,11 @@ public class QareportAdminController extends JBoltBaseController {
 		}
 
     	product.setDes(StringUtil.isEmpty(prold.getDes())? "" : prold.getDes().trim());
-		renderJsonData(product.update());
+    	boolean success = product.update();
+    	if (success) {
+    		service.clearPaginateCache();
+    	}
+		renderJsonData(success);
 	}
     
    /**
