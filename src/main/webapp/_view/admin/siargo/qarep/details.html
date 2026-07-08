@@ -1,28 +1,9 @@
-#@jboltLayout() #define main()
-<style>
-.dt-wrap{padding:16px 18px;font-size:13px;color:#333;line-height:1.6}
-.dt-sec{margin-bottom:14px}
-.dt-hd{display:flex;align-items:center;margin-bottom:8px}
-.dt-hd span{font-size:14px;font-weight:600;color:#2c3e50}
-.dt-hd i{flex:1;height:1px;background:#dee2e6;margin-left:10px}
-.dt-card{border:1px solid #e9ecef;border-radius:6px;overflow:hidden}
-.dt-row{display:flex;border-bottom:1px solid #f1f3f5}
-.dt-row:last-child{border-bottom:none}
-.dt-lbl{width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef}
-.dt-lbl-m{width:110px;min-width:110px;padding:8px 12px;background:#f8f9fa;color:#6c757d;font-weight:500;font-size:12px;border-right:1px solid #e9ecef;border-left:1px solid #e9ecef}
-.dt-val{flex:1;padding:8px 12px;color:#212529}
-.dt-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #f1f3f5}
-.dt-grid:last-child{border-bottom:none}
-.dt-gcl{display:flex;border-right:1px solid #f1f3f5}
-.dt-gcr{display:flex}
-.dt-badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:12px;font-weight:600;font-size:12px}
-.insp-flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:2px 0}
-.insp-step{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:80px}
-.insp-step-name{font-size:11px;color:#6c757d;font-weight:500}
-.insp-step-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-weight:600;font-size:12px;white-space:nowrap}
-.insp-step-time{font-size:11px;color:#999;white-space:nowrap}
-.insp-arrow{color:#adb5bd;font-size:16px;line-height:1;margin:0 2px;align-self:center}
-</style>
+#@jboltLayout()
+#define css()
+<link rel="stylesheet" href="assets/css/siargo.css">
+#end
+
+#define main()
 <div class="dt-wrap">
 
   <!-- 报告单信息 -->
@@ -52,15 +33,15 @@
   <div class="dt-sec">
     <div class="dt-hd"><span>&#128230; 产品信息</span><i></i></div>
     #for(p : products)
-    <div class="dt-card" #if(for.index > 0) style="margin-top:8px;border-top:1px dashed #dee2e6;padding-top:8px;" #end>
+    <div class="dt-card#if(for.index > 0) dt-card-sep#end">
       <div class="dt-row">
         <div class="dt-lbl">产品类型</div>
         <div class="dt-val">#(p.type_name??)</div>
         <div class="dt-lbl-m">送检 / 检验</div>
         <div class="dt-val">
-          <span style="font-weight:500;">#(p.qsi??)</span>
-          <span style="color:#adb5bd;margin:0 4px;">/</span>
-          <span style="font-weight:500;">#(p.qi??)</span>
+          <span class="dt-qsi-val">#(p.qsi??)</span>
+          <span class="dt-qsi-sep">/</span>
+          <span class="dt-qsi-val">#(p.qi??)</span>
         </div>
       </div>
       <div class="dt-row">
@@ -69,23 +50,23 @@
       </div>
       <div class="dt-row">
         <div class="dt-lbl">编号</div>
-        <div class="dt-val" style="white-space:pre-wrap;word-break:break-all;">#(p.number??)</div>
+        <div class="dt-val dt-val-pre">#(p.number??)</div>
       </div>
       <div class="dt-row">
         <div class="dt-lbl">备注</div>
-        <div class="dt-val" style="color:#95a5a6;white-space:pre-wrap;word-break:break-all;">#(p.des??)</div>
+        <div class="dt-val dt-val-muted">#(p.des??)</div>
       </div>
       <div class="dt-row">
         <div class="dt-lbl">检验进度</div>
         <div class="dt-val">
           #if(p.insp == 1)
-          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(p.insp_name ??)</span>
+          <span class="dt-badge dt-badge-secondary">#(p.insp_name ??)</span>
           #else if(p.insp >= 2)
           <div class="insp-flow">
             <!-- 精度检验 -->
             <div class="insp-step">
               <span class="insp-step-name">精度检验</span>
-              <span class="insp-step-badge" style="background:#17a2b8;color:#fff;">#(p.accq_name ??)</span>
+              <span class="insp-step-badge insp-badge-accq">#(p.accq_name ??)</span>
               <span class="insp-step-time">#if(p.accq_time)#date(p.accq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #if(p.insp >= 3)
@@ -93,7 +74,7 @@
             <!-- 外观检验 -->
             <div class="insp-step">
               <span class="insp-step-name">外观检验</span>
-              <span class="insp-step-badge" style="background:#007bff;color:#fff;">#(p.funq_name ??)</span>
+              <span class="insp-step-badge insp-badge-funq">#(p.funq_name ??)</span>
               <span class="insp-step-time">#if(p.funq_time)#date(p.funq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
@@ -102,7 +83,7 @@
             <!-- 包装检验 -->
             <div class="insp-step">
               <span class="insp-step-name">包装检验</span>
-              <span class="insp-step-badge" style="background:#ffc107;color:#212529;">#(p.appq_name ??)</span>
+              <span class="insp-step-badge insp-badge-appq">#(p.appq_name ??)</span>
               <span class="insp-step-time">#if(p.appq_time)#date(p.appq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
@@ -111,13 +92,13 @@
             <!-- 批准 -->
             <div class="insp-step">
               <span class="insp-step-name">批准</span>
-              <span class="insp-step-badge" style="background:#dc3545;color:#fff;">&#10003; #(p.allq_name ??)</span>
+              <span class="insp-step-badge insp-badge-allq">&#10003; #(p.allq_name ??)</span>
               <span class="insp-step-time">#if(p.allq_time)#date(p.allq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
           </div>
           #else
-          <span class="dt-badge" style="background:#e2e3e5;color:#383d41;">#(p.insp_name ??)</span>
+          <span class="dt-badge dt-badge-secondary">#(p.insp_name ??)</span>
           #end
         </div>
       </div>

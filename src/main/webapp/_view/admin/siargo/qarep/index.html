@@ -1,4 +1,8 @@
 ﻿#@jboltLayout()
+#define css()
+<link rel="stylesheet" href="assets/css/siargo.css">
+#end
+
 #define main()
 #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page jb_vflex" data-key="#(pmkey)">
@@ -21,7 +25,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		<span class="text-muted">-</span>
 	{@else}
-		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
 			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
 			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
@@ -68,7 +72,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		<span class="text-muted">-</span>
 	{@else}
-		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
 			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
 			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
@@ -100,7 +104,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		<span class="text-muted">-</span>
 	{@else}
-		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
 			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
 			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
@@ -135,7 +139,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		<span class="text-muted">-</span>
 	{@else}
-		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
 			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
 			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
@@ -151,7 +155,7 @@
 </td>
 <td>
 	{@if data.funqName==null}
-		<span class="text-muted"><span class="text-muted">-</span></span>
+		<span class="text-muted">-</span>
 	{@else}
 		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
@@ -179,7 +183,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		<span class="text-muted">-</span>
 	{@else}
-		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
 			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
 			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
@@ -195,7 +199,7 @@
 </td>
 <td>
 	{@if data.funqName==null}
-		<span class="text-muted"><span class="text-muted">-</span></span>
+		<span class="text-muted">-</span>
 	{@else}
 		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
@@ -203,7 +207,7 @@
 </td>
 <td>
 	{@if data.appqName==null}
-		<span class="text-muted"><span class="text-muted">-</span></span>
+		<span class="text-muted">-</span>
 	{@else}
 		<span class="badge badge-warning">${data.appqName}</span>
 		<small class="text-muted d-block">${data.appqTime}</small>
@@ -230,7 +234,7 @@
 	{@if data.spDes==null || data.spDes==""}
 		<span class="text-muted">-</span>
 	{@else}
-		<span data-dialogbtn data-area="570,380" data-btn="close" data-title="产品备注"
+		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
 			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
 			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
 	{@/if}
@@ -246,7 +250,7 @@
 </td>
 <td>
 	{@if data.funqName==null}
-		<span class="text-muted"><span class="text-muted">-</span></span>
+		<span class="text-muted">-</span>
 	{@else}
 		<span class="badge badge-primary">${data.funqName}</span>
 		<small class="text-muted d-block">${data.funqTime}</small>
@@ -265,7 +269,7 @@
 		<span class="text-muted">-</span>
 	{@else}
 		<a  id="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
-			href="${data.spPdfstr}" onclick="loadPDF(this, '${data.spPdfstr}')">
+			href="${data.spPdfstr}" onclick="loadPDF(this, '${data.spPdfstr}', event)">
 		<i class="fa fa-eye"></i> 查看</a> 
 	{@/if}
 	
@@ -285,7 +289,7 @@
 					class="btn btn-outline-primary ">
 					<i class="fa fa-plus"></i> 新增
 				</button>
-				<button data-openpage="dialog" data-area="570,380"
+				<button data-openpage="dialog" data-area="570,350"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -393,7 +397,7 @@
 	<div class="row">
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="570,380"
+				<button data-openpage="dialog" data-area="570,350"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -442,7 +446,7 @@
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				
-				<button data-openpage="dialog" data-area="570,380"
+				<button data-openpage="dialog" data-area="570,350"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -491,7 +495,7 @@
 		<div class="col-sm-4 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
 				
-				<button data-openpage="dialog" data-area="570,380"
+				<button data-openpage="dialog" data-area="570,350"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -539,7 +543,7 @@
 	<div class="row">
 		<div class="col-sm-3 text-left">
 			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="570,380"
+				<button data-openpage="dialog" data-area="570,350"
 					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
 					data-check-handler="jboltTableGetCheckedId"
 					data-url="admin/siargo/qarep/editDes/"
@@ -885,251 +889,6 @@
 #end
 
 #define js()
-<style>
-/* ===== 流程步骤条导航 ===== */
-#qarepTabView > .jbolt_tab_links { display: none !important; }
-
-.flow-stepper-nav {
-	display: flex;
-	align-items: flex-start;
-	gap: 20px;
-	padding: 5px 15px;
-	background: #fff;
-	border-bottom: 1px solid #e9ecef;
-}
-
-/* 左侧汇总徽章 */
-.flow-summary-badge {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 10px 18px;
-	background: #f8f9fa;
-	border-radius: 24px;
-	cursor: pointer;
-	transition: all 0.25s;
-	border: 2px solid #e9ecef;
-	white-space: nowrap;
-	flex-shrink: 0;
-}
-.flow-summary-badge:hover {
-	background: #e9ecef;
-	border-color: #dee2e6;
-}
-.flow-summary-badge.active {
-	background: #fff;
-	border-color: #6c757d;
-	box-shadow: 0 2px 8px rgba(108,117,125,0.2);
-}
-.flow-summary-badge i {
-	font-size: 16px;
-	color: #6c757d;
-}
-.flow-summary-text {
-	font-size: 13px;
-	font-weight: 500;
-	color: #495057;
-}
-.flow-summary-count {
-	font-size: 18px;
-	font-weight: 700;
-	color: #6c757d;
-	margin-left: 4px;
-}
-
-/* 右侧步骤条 */
-.flow-stepper {
-	display: flex;
-	align-items: flex-start;
-	flex: 1;
-	padding-top: 2px;
-}
-
-/* 步骤项 */
-.flow-stepper-item {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	cursor: pointer;
-	flex-shrink: 0;
-	min-width: 72px;
-}
-
-/* 圆形节点 */
-.flow-node {
-	width: 42px;
-	height: 42px;
-	border-radius: 50%;
-	background: #fff;
-	border: 2.5px solid #dee2e6;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 16px;
-	color: #adb5bd;
-	transition: all 0.3s;
-	position: relative;
-}
-.flow-stepper-item:hover .flow-node {
-	transform: scale(1.1);
-}
-
-/* 节点下方标签 */
-.flow-node-label {
-	font-size: 11px;
-	color: #868e96;
-	margin-top: 6px;
-	text-align: center;
-	transition: all 0.25s;
-	white-space: nowrap;
-}
-
-/* 节点数量 */
-.flow-node-count {
-	font-size: 13px;
-	font-weight: 600;
-	color: #adb5bd;
-	margin-top: 2px;
-	transition: all 0.25s;
-}
-
-/* 连接线 */
-.flow-connector {
-	flex: 1;
-	height: 3px;
-	background: #bbb;
-	margin-top: 20px;
-	min-width: 20px;
-	position: relative;
-}
-.flow-connector::after {
-	content: '';
-	position: absolute;
-	right: -5px;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 0;
-	height: 0;
-	border-top: 7px solid transparent;
-	border-bottom: 7px solid transparent;
-	border-left: 9px solid #bbb;
-}
-
-/* ===== 各步骤主题色 ===== */
-/* 精度待检 */
-.flow-stepper-item:nth-of-type(1) .flow-node { border-color: #17a2b8; color: #17a2b8; }
-.flow-stepper-item:nth-of-type(1).active .flow-node { background: #17a2b8; color: #fff; box-shadow: 0 0 0 4px rgba(23,162,184,0.2); }
-.flow-stepper-item:nth-of-type(1).active .flow-node-count { color: #17a2b8; }
-
-/* 外观待检 */
-.flow-stepper-item:nth-of-type(3) .flow-node { border-color: #5b8def; color: #5b8def; }
-.flow-stepper-item:nth-of-type(3).active .flow-node { background: #5b8def; color: #fff; box-shadow: 0 0 0 4px rgba(91,141,239,0.2); }
-.flow-stepper-item:nth-of-type(3).active .flow-node-count { color: #5b8def; }
-
-/* 包装待检 */
-.flow-stepper-item:nth-of-type(5) .flow-node { border-color: #f5a962; color: #f5a962; }
-.flow-stepper-item:nth-of-type(5).active .flow-node { background: #f5a962; color: #fff; box-shadow: 0 0 0 4px rgba(245,169,98,0.2); }
-.flow-stepper-item:nth-of-type(5).active .flow-node-count { color: #d39e00; }
-
-/* 待批准 */
-.flow-stepper-item:nth-of-type(7) .flow-node { border-color: #e86a78; color: #e86a78; }
-.flow-stepper-item:nth-of-type(7).active .flow-node { background: #e86a78; color: #fff; box-shadow: 0 0 0 4px rgba(232,106,120,0.2); }
-.flow-stepper-item:nth-of-type(7).active .flow-node-count { color: #e86a78; }
-
-/* 已完成 */
-.flow-stepper-item:nth-of-type(9) .flow-node { border-color: #28a745; color: #28a745; }
-.flow-stepper-item:nth-of-type(9).active .flow-node { background: #28a745; color: #fff; box-shadow: 0 0 0 4px rgba(40,167,69,0.2); }
-.flow-stepper-item:nth-of-type(9).active .flow-node-count { color: #28a745; }
-
-/* 选中态通用 */
-.flow-stepper-item.active .flow-node {
-	transform: scale(1.15);
-}
-.flow-stepper-item.active .flow-node-label {
-	font-weight: 600;
-	color: #495057;
-}
-.flow-stepper-item.active .flow-node-count {
-	font-size: 15px;
-	font-weight: 700;
-}
-
-/* ===== 流程推进按钮 ===== */
-.flow-action-btn {
-	border-radius: 20px;
-	padding: 6px 18px;
-	font-weight: 500;
-	font-size: 13px;
-	color: #fff;
-	border: none;
-	transition: all 0.25s;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.flow-action-btn:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-	color: #fff;
-}
-.flow-action-btn .fa-chevron-right {
-	font-size: 11px;
-	margin-left: 4px;
-}
-.flow-action-btn .fa-check-circle {
-	margin-right: 2px;
-}
-/* 精度合格 */
-.flow-action-accq {
-	background: linear-gradient(135deg, #1fc8e0, #0e8a9e);
-}
-.flow-action-accq:hover { background: linear-gradient(135deg, #18b5cc, #0a7a8e); }
-/* 外观合格 */
-.flow-action-funq {
-	background: linear-gradient(135deg, #4a90f5, #1a60cc);
-}
-.flow-action-funq:hover { background: linear-gradient(135deg, #3a80e5, #1050bc); }
-/* 外观检验badge柔蓝色 */
-.badge-primary { background-color: #5b8def !important; }
-/* 包装合格 */
-.flow-action-appq {
-	background: linear-gradient(135deg, #ffa030, #d07010);
-}
-.flow-action-appq:hover { background: linear-gradient(135deg, #ef9020, #c06000); }
-/* 批准 */
-.flow-action-allq {
-	background: linear-gradient(135deg, #ef4050, #c02030);
-}
-.flow-action-allq:hover { background: linear-gradient(135deg, #df3040, #b01020); }
-/* 生成PDF */
-.flow-action-pdf {
-	background: #6f42c1;
-}
-.flow-action-pdf:hover { background: #5a32a3; }
-/* 批量导出PDF */
-.flow-action-pdf-batch {
-	background: #e83e8c;
-}
-.flow-action-pdf-batch:hover { background: #d63384; }
-
-/* 包装检验badge浅黄色背景 */
-.badge-warning { background-color: #f5a962 !important; color: #fff !important; }
-/* 批准badge柔红色 */
-.badge-danger { background-color: #e86a78 !important; }
-
-/* 报告单行合并 - 左侧固定列垂直居中 */
-.DTFC_LeftBodyWrapper td[rowspan] {
-    vertical-align: middle !important;
-}
-
-/* 报告单行合并 - 合并组交替背景色（区分相邻合并组） */
-.jbolt_table tbody tr.merge-group-odd > td,
-.jbolt_table_fixed_left .jbolt_table_body table tbody tr.merge-group-odd > td {
-    background-color: #f0f7ff !important;
-}
-.jbolt_table tbody tr.merge-group-even > td,
-.jbolt_table_fixed_left .jbolt_table_body table tbody tr.merge-group-even > td {
-    background-color: #f0fff4 !important;
-}
-</style>
 <script type="text/javascript">
 /**
  * 报告单行合并 - AJAX成功回调入口
@@ -1224,9 +983,16 @@ function mergeFixedLeftRows($tbody, colIndexes, formnumColIdx, currentPage, page
     });
 }
 
-// ===== Tab懒加载：追踪已加载的tab，避免首次打开时6个表格同时请求 =====
+// ===== Tab懒加载与脏标记 =====
 var loadedTabs_#(pageId) = {};
+var dirtyTabs_#(pageId) = {};
 var tableIds_#(pageId) = ['allreport', 'noq', 'accq', 'funq', 'appq', 'allq'];
+
+// 获取当前激活的Tab索引
+function getCurrentTabIndex_#(pageId)() {
+	var activeLink = $('#qarepTabView .jbolt_tab_link.active');
+	return activeLink.length ? $('#qarepTabView .jbolt_tab_link').index(activeLink) : 0;
+}
 
 // 切换Tab
 function switchTabByIndex(index) {
@@ -1239,9 +1005,16 @@ function switchTabByIndex(index) {
 		$('.flow-stepper-item').eq(index - 1).addClass('active');
 	}
 	
-	// 懒加载：首次切换到该tab时触发表格数据加载
+	// 懒加载 + 脏标记刷新
 	if (!loadedTabs_#(pageId)[index]) {
 		loadedTabs_#(pageId)[index] = true;
+		dirtyTabs_#(pageId)[index] = false;
+		var tableId = tableIds_#(pageId)[index] + '_mgrtable_#(pageId)';
+		setTimeout(function() {
+			refreshJBoltTableById(tableId);
+		}, 50);
+	} else if (dirtyTabs_#(pageId)[index]) {
+		dirtyTabs_#(pageId)[index] = false;
 		var tableId = tableIds_#(pageId)[index] + '_mgrtable_#(pageId)';
 		setTimeout(function() {
 			refreshJBoltTableById(tableId);
@@ -1288,27 +1061,22 @@ $(function() {
 	loadedTabs_#(pageId)[activeIndex] = true;
 	switchTabByIndex(activeIndex);
 	
-	// 定时刷新数量（每30秒）
-	setInterval(loadFlowCounts, 30000);
-});
-
-//点击时处理订单备注格式
-$(document).on('click', '[data-dialogbtn]', function() {
-    var $btn = $(this);
-    var content = $btn.data('content');
-    
-    if (content && $btn.data('title') === '产品备注') {
-        // 预处理内容，确保格式正确
-        $btn.data('content', '<div style="white-space: pre-wrap; word-wrap: break-word;">' 
-                           + content.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;') 
-                           + '</div>');
-    }
+	// 定时刷新数量（每30秒），页面不可见时暂停以节省资源
+	var flowCountTimer_#(pageId) = setInterval(loadFlowCounts, 30000);
+	document.addEventListener('visibilitychange', function() {
+		if (document.hidden) {
+			clearInterval(flowCountTimer_#(pageId));
+		} else {
+			loadFlowCounts();
+			flowCountTimer_#(pageId) = setInterval(loadFlowCounts, 30000);
+		}
+	});
 });
 
 //将PDF原本的href属性替换为带有时间戳的URL，以避免缓存
-function loadPDF (element, originalPdfUrl) {
+function loadPDF (element, originalPdfUrl, event) {
     // 阻止默认行为（如果链接已有默认行为）
-    event.preventDefault ? event.preventDefault() : (event.returnValue = false);
+    if (event) event.preventDefault ? event.preventDefault() : (event.returnValue = false);
     
     const timestamp = new Date().getTime();
     const pdfUrl = originalPdfUrl + '?t=' + timestamp;
@@ -1356,7 +1124,7 @@ function openDeleteDialog_#(pageId)(tableId) {
                         LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
                             top.location.href = '/admin';
                         });
-                    } else if (res.state == 'ok') {
+                    } else if ('ok' == res.state) {
                         LayerMsgBox.success('删除成功', 800, function() {
                             refreshAllQarepTables_#(pageId)();
                         });
@@ -1374,14 +1142,23 @@ function openDeleteDialog_#(pageId)(tableId) {
     });
 }
 
-// 刷新所有Tab表格数据
+// 刷新当前Tab + "全部"Tab，其余Tab标记为脏（切换时再刷新）
 function refreshAllQarepTables_#(pageId)() {
+    // 始终刷新"全部"Tab
     refreshJBoltTableById('allreport_mgrtable_#(pageId)');
-    refreshJBoltTableById('noq_mgrtable_#(pageId)');
-    refreshJBoltTableById('accq_mgrtable_#(pageId)');
-    refreshJBoltTableById('funq_mgrtable_#(pageId)');
-    refreshJBoltTableById('appq_mgrtable_#(pageId)');
-    refreshJBoltTableById('allq_mgrtable_#(pageId)');
+    var currentIdx = getCurrentTabIndex_#(pageId)();
+    // 刷新当前激活的Tab（非"全部"时）
+    if (currentIdx > 0) {
+        refreshJBoltTableById(tableIds_#(pageId)[currentIdx] + '_mgrtable_#(pageId)');
+    }
+    // 清除当前Tab的脏标记（已刷新，无需再标记）
+    dirtyTabs_#(pageId)[currentIdx] = false;
+    // 标记其余Tab为脏，切换时自动刷新
+    for (var i = 1; i < tableIds_#(pageId).length; i++) {
+        if (i !== currentIdx) {
+            dirtyTabs_#(pageId)[i] = true;
+        }
+    }
     loadFlowCounts();
 }
 
