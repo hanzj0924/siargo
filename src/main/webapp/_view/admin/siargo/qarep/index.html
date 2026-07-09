@@ -277,320 +277,6 @@
 </tr>
 {@/each}
 </script>
-
-<!-- 全部 工具条 toolbar -->
-<div class="jbolt_table_toolbar" id="allreport_toolbar_#(pageId)">
-	<div class="row">
-		<div class="col-sm-4 text-left">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="1060,870"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
-					data-url="admin/siargo/qarep/add"
-					class="btn btn-outline-primary ">
-					<i class="fa fa-plus"></i> 新增
-				</button>
-				<button data-openpage="dialog" data-area="570,350"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/qarep/editDes/"
-					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改产品备注
-				</button>
-				<button onclick="openDeleteDialog_#(pageId)('allreport_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
-					<i class="fa fa-trash"></i> 删除
-				</button>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary ">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
-			</div>
-		</div>
-		<div class="col-sm-4 text-center">
-			<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
-				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-					placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-				 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
-					data-url="admin/dictionary/options?key=siargo_prod_type"
-					data-value-attr="sn" 
-					data-text="=产品类型=" data-value=""></select>
-				<!--
-				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date"  
-					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)"> 
-				-->
-				
-				<button type="submit" class="btn btn-outline-secondary">
-					<i class="fa fa-search"></i> 查询
-				</button>
-			</form>
-		</div>
-		<div class="col-sm-4 text-right">
-			<button data-dialogbtn data-area="1300,760" data-title="已删除报告单列表"
-				data-url="admin/siargo/qarep/inactiveList"  type="button"
-				class="btn btn-outline-danger">
-				<i class="fa fa-trash"></i> 回收站
-			</button>
-			
-		</div>
-	</div>
-</div>
-
-<!-- 精度待检 工具条 toolbar -->
-<div class="jbolt_table_toolbar" id="noq_toolbar_#(pageId)">
-	<div class="row">
-		<div class="col-sm-4 text-left">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="1060,870"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
-					data-url="admin/siargo/qarep/add"
-					class="btn btn-outline-primary ">
-					<i class="fa fa-plus"></i> 新增
-				</button>
-				<button data-openpage="dialog" data-area="1060,830"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/qarep/edit/"
-					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改
-				</button>
-				<button onclick="openDeleteDialog_#(pageId)('noq_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
-					<i class="fa fa-trash"></i> 删除
-				</button>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary ">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
-			</div>
-		</div>
-		<div class="col-sm-4 text-center">
-			<form class="form-inline d-inline-block" id="noqForm_#(pageId)" onsubmit="return false;" method="post">
-				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-					placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-				<select class="form-control" name="prodType" data-autoload style="width: 130px;"
-					data-url="admin/dictionary/options?key=siargo_prod_type"
-					data-value-attr="sn" 
-					data-text="=产品类型=" data-value=""></select>
-				<!-- <input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date"  
-					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)"> -->
-				<button type="submit" class="btn btn-outline-secondary">
-					<i class="fa fa-search"></i> 查询
-				</button>
-			</form>
-		</div>
-		<div class="col-sm-4 text-right">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				#if(accuracy)
-				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
-					data-confirm="确定精度检验合格？" 
-					class="btn flow-action-btn flow-action-accq"><i class="fa fa-check-circle"></i> 精度合格 <i class="fa fa-chevron-right"></i>
-				</button>
-				#end
-			</div>
-		</div>
-	</div>
-	<div class="clearfix"></div>
-</div>
-
-<!-- 精度合格 工具条 toolbar -->
-<div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
-	<div class="row">
-		<div class="col-sm-4 text-left">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="570,350"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/qarep/editDes/"
-					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改产品备注
-				</button>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary ">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
-			</div>
-		</div>
-		<div class="col-sm-4 text-center">
-			<form class="form-inline d-inline-block" id="accqForm_#(pageId)" onsubmit="return false;" method="post">
-				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-					placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-				 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
-					data-url="admin/dictionary/options?key=siargo_prod_type"
-					data-value-attr="sn"
-					data-text="=产品类型=" data-value=""></select>
-				<!--<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-					 -->
-				<button type="submit" class="btn btn-outline-secondary">
-					<i class="fa fa-search"></i> 查询
-				</button>
-			</form>
-		</div>
-		<div class="col-sm-4 text-right">
-			#if(appearance)
-			<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-				data-check-handler="jboltTableGetCheckedIds" 
-				data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
-				data-confirm="确定外观检验合格？" 
-				class="btn flow-action-btn flow-action-funq"><i class="fa fa-check-circle"></i> 外观合格 <i class="fa fa-chevron-right"></i>
-			</button>
-			#end
-		</div>
-	</div>
-	<div class="clearfix"></div>
-</div>
-
-<!-- 包装待检 工具条 toolbar -->
-<div class="jbolt_table_toolbar" id="funq_toolbar_#(pageId)">
-	<div class="row">
-		<div class="col-sm-4 text-left">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				
-				<button data-openpage="dialog" data-area="570,350"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/qarep/editDes/"
-					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改产品备注
-				</button>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary ">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
-			</div>
-		</div>
-		<div class="col-sm-4 text-center">
-			<form class="form-inline d-inline-block" id="funqForm_#(pageId)" onsubmit="return false;" method="post">
-				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-					placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-				 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
-					data-url="admin/dictionary/options?key=siargo_prod_type"
-					data-value-attr="sn"
-					data-text="=产品类型=" data-value=""></select>
-				<!--<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-				 -->
-				<button type="submit" class="btn btn-outline-secondary">
-					<i class="fa fa-search"></i> 查询
-				</button>
-			</form>
-		</div>
-		<div class="col-sm-4 text-right">
-			#if(packaging)
-			<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
-					data-confirm="确定包装检验合格？" 
-					class="btn flow-action-btn flow-action-appq"><i class="fa fa-check-circle"></i> 包装合格 <i class="fa fa-chevron-right"></i>
-			</button>
-			#end
-		</div>
-	</div>
-	<div class="clearfix"></div>
-</div>
-
-<!-- 待批准 工具条 toolbar -->
-<div class="jbolt_table_toolbar" id="appq_toolbar_#(pageId)">
-	<div class="row">
-		<div class="col-sm-4 text-left">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				
-				<button data-openpage="dialog" data-area="570,350"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/qarep/editDes/"
-					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改产品备注
-				</button>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary ">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
-			</div>
-		</div>
-		<div class="col-sm-4 text-center">
-			<form class="form-inline d-inline-block" id="appqForm_#(pageId)" onsubmit="return false;" method="post">
-				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-					placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-				<select class="form-control" name="prodType" data-autoload style="width: 130px;"
-					data-url="admin/dictionary/options?key=siargo_prod_type"
-					data-value-attr="sn" 
-					data-text="=产品类型=" data-value=""></select>
-				<!-- <input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-				 -->
-				<button type="submit" class="btn btn-outline-secondary">
-					<i class="fa fa-search"></i> 查询
-				</button>
-			</form>
-		</div>
-		<div class="col-sm-4 text-right">
-			#if(approval)
-				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
-					data-confirm="确定批准选中数据？" 
-					class="btn flow-action-btn flow-action-allq"><i class="fa fa-check-circle"></i> 批准 <i class="fa fa-chevron-right"></i>
-				</button>
-			#end
-		</div>
-	</div>
-	<div class="clearfix"></div>
-</div>
-
-<!-- 已完成 工具条 toolbar -->
-<div class="jbolt_table_toolbar" id="allq_toolbar_#(pageId)">
-	<div class="row">
-		<div class="col-sm-3 text-left">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				<button data-openpage="dialog" data-area="570,350"
-					data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-					data-check-handler="jboltTableGetCheckedId"
-					data-url="admin/siargo/qarep/editDes/"
-					class="btn btn-outline-info ">
-					<i class="fa fa-edit"></i> 修改产品备注
-				</button>
-				<button onclick="jboltTableRefresh(this)"
-					class="btn btn-outline-secondary ">
-					<i class="fa fa-refresh"></i> 刷新
-				</button>
-			</div>
-		</div>
-		<div class="col-sm-6 text-center">
-			<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
-				<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-					placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-				<select class="form-control" name="prodType" data-autoload style="width: 130px;"
-					data-url="admin/dictionary/options?key=siargo_prod_type"
-					data-value-attr="sn" 
-					data-text="=产品类型=" data-value=""></select>
-				<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-					placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-				<button type="submit" class="btn btn-outline-secondary">
-					<i class="fa fa-search"></i> 查询
-				</button>
-			</form>
-		</div>
-		<div class="col-sm-3 text-right">
-			<div class="btn-group " role="group" aria-label="btn-group">
-				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-					data-check-handler="jboltTableGetCheckedIds" 
-					data-url="/admin/siargo/qarep/toPdf?ids=" 
-					data-confirm="确定生成选中数据？" 
-					class="btn flow-action-btn flow-action-pdf"><i class="jbicon2 jbi-file-pdf-fill"></i> 生成PDF
-				</button>
-				<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-					data-url="/admin/siargo/qarep/toPdfs" 
-					data-confirm="确定生成上月PDF？" 
-					data-success-time="15000"
-					class="btn flow-action-btn flow-action-pdf-batch"><i class="fa fa-download"></i> 一键导出上个月PDF
-				</button>
-			</div>
-		</div>
-	</div>
-	<div class="clearfix"></div>
-</div>
-
 <div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)" id="qarepTabView">
 	<div class="jbolt_tab_links jb_vheader">
 		<a class="jbolt_tab_link"  href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
@@ -642,6 +328,55 @@
 	</div>
 	<div class="jbolt_tab_contents jb_vbody">
 		<div class="jbolt_tab_content"  id="allreport_tabcontent">
+			<!-- 全部 工具条 toolbar -->
+			<div class="jbolt_table_toolbar" id="allreport_toolbar_#(pageId)">
+				<div class="row">
+					<div class="col-sm-4 text-left">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button data-openpage="dialog" data-area="1060,870"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
+								data-url="admin/siargo/qarep/add"
+								class="btn btn-outline-primary ">
+								<i class="fa fa-plus"></i> 新增
+							</button>
+							<button data-openpage="dialog" data-area="570,350"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
+								data-check-handler="jboltTableGetCheckedId"
+								data-url="admin/siargo/qarep/editDes/"
+								class="btn btn-outline-info ">
+								<i class="fa fa-edit"></i> 修改产品备注
+							</button>
+							<button onclick="openDeleteDialog_#(pageId)('allreport_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
+								<i class="fa fa-trash"></i> 删除
+							</button>
+							<button onclick="jboltTableRefresh(this)"
+								class="btn btn-outline-secondary ">
+								<i class="fa fa-refresh"></i> 刷新
+							</button>
+						</div>
+					</div>
+					<div class="col-sm-4 text-center">
+						<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
+							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
+							 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
+								data-url="admin/dictionary/options?key=siargo_prod_type"
+								data-value-attr="sn" 
+								data-text="=产品类型=" data-value=""></select>
+							<button type="submit" class="btn btn-outline-secondary">
+								<i class="fa fa-search"></i> 查询
+							</button>
+						</form>
+					</div>
+					<div class="col-sm-4 text-right">
+						<button data-dialogbtn data-area="1300,760" data-title="已删除报告单列表"
+							data-url="admin/siargo/qarep/inactiveList"  type="button"
+							class="btn btn-outline-danger">
+							<i class="fa fa-trash"></i> 回收站
+						</button>
+					</div>
+				</div>
+			</div>
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50"
@@ -681,6 +416,61 @@
 		</div>
 		
 		<div class="jbolt_tab_content"  id="noq_tabcontent">
+			<!-- 精度待检 工具条 toolbar -->
+			<div class="jbolt_table_toolbar" id="noq_toolbar_#(pageId)">
+				<div class="row">
+					<div class="col-sm-4 text-left">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button data-openpage="dialog" data-area="1060,870"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
+								data-url="admin/siargo/qarep/add"
+								class="btn btn-outline-primary ">
+								<i class="fa fa-plus"></i> 新增
+							</button>
+							<button data-openpage="dialog" data-area="1060,830"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改"
+								data-check-handler="jboltTableGetCheckedId"
+								data-url="admin/siargo/qarep/edit/"
+								class="btn btn-outline-info ">
+								<i class="fa fa-edit"></i> 修改
+							</button>
+							<button onclick="openDeleteDialog_#(pageId)('noq_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
+								<i class="fa fa-trash"></i> 删除
+							</button>
+							<button onclick="jboltTableRefresh(this)"
+								class="btn btn-outline-secondary ">
+								<i class="fa fa-refresh"></i> 刷新
+							</button>
+						</div>
+					</div>
+					<div class="col-sm-4 text-center">
+						<form class="form-inline d-inline-block" id="noqForm_#(pageId)" onsubmit="return false;" method="post">
+							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
+							<select class="form-control" name="prodType" data-autoload style="width: 130px;"
+								data-url="admin/dictionary/options?key=siargo_prod_type"
+								data-value-attr="sn" 
+								data-text="=产品类型=" data-value=""></select>
+							<button type="submit" class="btn btn-outline-secondary">
+								<i class="fa fa-search"></i> 查询
+							</button>
+						</form>
+					</div>
+					<div class="col-sm-4 text-right">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							#if(accuracy)
+							<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
+								data-check-handler="jboltTableGetCheckedIds" 
+								data-url="admin/siargo/qarep/batchInspection?insp=2&ids=" 
+								data-confirm="确定精度检验合格？" 
+								class="btn flow-action-btn flow-action-accq"><i class="fa fa-check-circle"></i> 精度合格 <i class="fa fa-chevron-right"></i>
+							</button>
+							#end
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
@@ -720,6 +510,50 @@
 		</div>
 		
 		<div class="jbolt_tab_content"  id="accq_tabcontent">
+			<!-- 精度合格 工具条 toolbar -->
+			<div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
+				<div class="row">
+					<div class="col-sm-4 text-left">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button data-openpage="dialog" data-area="570,350"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
+								data-check-handler="jboltTableGetCheckedId"
+								data-url="admin/siargo/qarep/editDes/"
+								class="btn btn-outline-info ">
+								<i class="fa fa-edit"></i> 修改产品备注
+							</button>
+							<button onclick="jboltTableRefresh(this)"
+								class="btn btn-outline-secondary ">
+								<i class="fa fa-refresh"></i> 刷新
+							</button>
+						</div>
+					</div>
+					<div class="col-sm-4 text-center">
+						<form class="form-inline d-inline-block" id="accqForm_#(pageId)" onsubmit="return false;" method="post">
+							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
+							 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
+								data-url="admin/dictionary/options?key=siargo_prod_type"
+								data-value-attr="sn"
+								data-text="=产品类型=" data-value=""></select>
+							<button type="submit" class="btn btn-outline-secondary">
+								<i class="fa fa-search"></i> 查询
+							</button>
+						</form>
+					</div>
+					<div class="col-sm-4 text-right">
+						#if(appearance)
+						<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
+							data-check-handler="jboltTableGetCheckedIds" 
+							data-url="admin/siargo/qarep/batchInspection?insp=3&ids=" 
+							data-confirm="确定外观检验合格？" 
+							class="btn flow-action-btn flow-action-funq"><i class="fa fa-check-circle"></i> 外观合格 <i class="fa fa-chevron-right"></i>
+						</button>
+						#end
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
@@ -759,6 +593,50 @@
 		</div>
 		
 		<div class="jbolt_tab_content"  id="funq_tabcontent">
+			<!-- 包装待检 工具条 toolbar -->
+			<div class="jbolt_table_toolbar" id="funq_toolbar_#(pageId)">
+				<div class="row">
+					<div class="col-sm-4 text-left">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button data-openpage="dialog" data-area="570,350"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
+								data-check-handler="jboltTableGetCheckedId"
+								data-url="admin/siargo/qarep/editDes/"
+								class="btn btn-outline-info ">
+								<i class="fa fa-edit"></i> 修改产品备注
+							</button>
+							<button onclick="jboltTableRefresh(this)"
+								class="btn btn-outline-secondary ">
+								<i class="fa fa-refresh"></i> 刷新
+							</button>
+						</div>
+					</div>
+					<div class="col-sm-4 text-center">
+						<form class="form-inline d-inline-block" id="funqForm_#(pageId)" onsubmit="return false;" method="post">
+							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
+							 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
+								data-url="admin/dictionary/options?key=siargo_prod_type"
+								data-value-attr="sn"
+								data-text="=产品类型=" data-value=""></select>
+							<button type="submit" class="btn btn-outline-secondary">
+								<i class="fa fa-search"></i> 查询
+							</button>
+						</form>
+					</div>
+					<div class="col-sm-4 text-right">
+						#if(packaging)
+						<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
+								data-check-handler="jboltTableGetCheckedIds" 
+								data-url="admin/siargo/qarep/batchInspection?insp=4&ids=" 
+								data-confirm="确定包装检验合格？" 
+								class="btn flow-action-btn flow-action-appq"><i class="fa fa-check-circle"></i> 包装合格 <i class="fa fa-chevron-right"></i>
+						</button>
+						#end
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
@@ -799,6 +677,50 @@
 		</div>
 		
 		<div class="jbolt_tab_content"  id="appq_tabcontent">
+			<!-- 待批准 工具条 toolbar -->
+			<div class="jbolt_table_toolbar" id="appq_toolbar_#(pageId)">
+				<div class="row">
+					<div class="col-sm-4 text-left">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button data-openpage="dialog" data-area="570,350"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
+								data-check-handler="jboltTableGetCheckedId"
+								data-url="admin/siargo/qarep/editDes/"
+								class="btn btn-outline-info ">
+								<i class="fa fa-edit"></i> 修改产品备注
+							</button>
+							<button onclick="jboltTableRefresh(this)"
+								class="btn btn-outline-secondary ">
+								<i class="fa fa-refresh"></i> 刷新
+							</button>
+						</div>
+					</div>
+					<div class="col-sm-4 text-center">
+						<form class="form-inline d-inline-block" id="appqForm_#(pageId)" onsubmit="return false;" method="post">
+							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
+							<select class="form-control" name="prodType" data-autoload style="width: 130px;"
+								data-url="admin/dictionary/options?key=siargo_prod_type"
+								data-value-attr="sn" 
+								data-text="=产品类型=" data-value=""></select>
+							<button type="submit" class="btn btn-outline-secondary">
+								<i class="fa fa-search"></i> 查询
+							</button>
+						</form>
+					</div>
+					<div class="col-sm-4 text-right">
+						#if(approval)
+							<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
+								data-check-handler="jboltTableGetCheckedIds" 
+								data-url="admin/siargo/qarep/batchInspection?insp=5&ids=" 
+								data-confirm="确定批准选中数据？" 
+								class="btn flow-action-btn flow-action-allq"><i class="fa fa-check-circle"></i> 批准 <i class="fa fa-chevron-right"></i>
+							</button>
+						#end
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
@@ -840,6 +762,58 @@
 		</div>
 		
 		<div class="jbolt_tab_content"  id="allq_tabcontent">
+			<!-- 已完成 工具条 toolbar -->
+			<div class="jbolt_table_toolbar" id="allq_toolbar_#(pageId)">
+				<div class="row">
+					<div class="col-sm-3 text-left">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button data-openpage="dialog" data-area="570,350"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
+								data-check-handler="jboltTableGetCheckedId"
+								data-url="admin/siargo/qarep/editDes/"
+								class="btn btn-outline-info ">
+								<i class="fa fa-edit"></i> 修改产品备注
+							</button>
+							<button onclick="jboltTableRefresh(this)"
+								class="btn btn-outline-secondary ">
+								<i class="fa fa-refresh"></i> 刷新
+							</button>
+						</div>
+					</div>
+					<div class="col-sm-6 text-center">
+						<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
+							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
+							<select class="form-control" name="prodType" data-autoload style="width: 130px;"
+								data-url="admin/dictionary/options?key=siargo_prod_type"
+								data-value-attr="sn" 
+								data-text="=产品类型=" data-value=""></select>
+							<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
+								placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
+							<button type="submit" class="btn btn-outline-secondary">
+								<i class="fa fa-search"></i> 查询
+							</button>
+						</form>
+					</div>
+					<div class="col-sm-3 text-right">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
+								data-check-handler="jboltTableGetCheckedIds" 
+								data-url="/admin/siargo/qarep/toPdf?ids=" 
+								data-confirm="确定生成选中数据？" 
+								class="btn flow-action-btn flow-action-pdf"><i class="jbicon2 jbi-file-pdf-fill"></i> 生成PDF
+							</button>
+							<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
+								data-url="/admin/siargo/qarep/toPdfs" 
+								data-confirm="确定生成上月PDF？" 
+								data-success-time="15000"
+								class="btn flow-action-btn flow-action-pdf-batch"><i class="fa fa-download"></i> 一键导出上个月PDF
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
 			<table class="jbolt_table jbolt_main_table table_striped table-center"
 				data-jbolttable
 				data-pagesize="50" 
@@ -1050,6 +1024,17 @@ function loadFlowCounts() {
 
 // 页面加载时获取数量
 $(function() {
+	// 清理 JBolt 初次直接访问时残留在默认标签页中的重复 qarep 内容
+	// 该内容由服务端首次渲染产生，PJAX 会在"报告单"标签页中重新加载，
+	// 但默认标签页中的残留 DOM 未自动清理，导致 data-autoload 和
+	// JBoltTable 初始化重复执行，造成请求翻倍和页面卡顿
+	$('#jbolt-container > .jbolt_tabcontent:not(.active)').each(function(){
+		var $tc = $(this);
+		if($tc.find('.jbolt_tab_view').length){
+			$tc.empty();
+		}
+	});
+	
 	setTimeout(function() {
 		loadFlowCounts();
 	}, 200);
