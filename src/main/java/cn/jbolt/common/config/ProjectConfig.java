@@ -136,6 +136,7 @@ public class ProjectConfig extends JBoltProjectConfig {
 				this.addInterceptor(new SiargoTerminalOfflineInterceptor());
 				this.addInterceptor(new JBoltAdminAuthInterceptor());
 				this.scan("cn.jbolt.admin.siargo.apicalllog");
+				this.scan("cn.jbolt.admin.siargo.changelog");
 				this.scan("cn.jbolt.admin.siargo.cme");
 				this.scan("cn.jbolt.admin.siargo.customer");
 				this.scan("cn.jbolt.admin.siargo.dms");

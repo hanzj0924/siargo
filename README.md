@@ -8,5 +8,5 @@ https://www.siargo.com.cn
 
 ## 更新日志
 
-详见 [CHANGELOG.md](CHANGELOG.md)
+详见 [CHANGELOG.md](src/main/java/cn/jbolt/admin/siargo/changelog/CHANGELOG.md)
 

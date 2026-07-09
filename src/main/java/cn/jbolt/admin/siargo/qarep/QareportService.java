@@ -340,9 +340,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 	         case 5:
-	        	 sql.orderBy("sp.allq_time", true);  // 主排序：上一个进度(批准)完成时间
-	        	 sql.orderBy("sq.create_time", true);
-	        	 sql.orderBy("sq.formnum", true);
+	        	 sql.orderBy("sq.formnum", true);    // 报告单标号倒序
+	        	 sql.orderBy("sq.order_id", true);   // 订单号倒序
+	        	 sql.orderBy("sp.type", true);       // 产品类型倒序
+	        	 sql.orderBy("sp.allq_time", true);  // 批准时间倒序（最新优先）
 	        	 break;
 	         default:
 	        	 sql.orderBy("sq.create_time", true);

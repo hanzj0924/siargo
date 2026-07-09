@@ -1236,7 +1236,7 @@
 
 /* --- 4.2 报告单详情 --- */
 /* ---- qarep\details.html: qarep\details.html ---- */
-.dt-wrap{padding:16px 18px;font-size:13px;color:#333;line-height:1.6;background:#f8f9fa;min-height:100vh;box-sizing:border-box}
+.dt-wrap{padding:16px 18px;font-size:13px;color:#333;line-height:1.6;background:#f8f9fa;box-sizing:border-box}
 .dt-sec{margin-bottom:14px}
 .dt-hd{display:flex;align-items:center;margin-bottom:8px}
 .dt-hd span{font-size:14px;font-weight:600;color:#2c3e50}
@@ -1400,31 +1400,26 @@
 	border-left: 9px solid #bbb;
 }
 
-/* ===== 各步骤主题色 ===== */
-/* 精度待检 */
-.flow-stepper-item:nth-of-type(1) .flow-node { border-color: #17a2b8; color: #17a2b8; }
-.flow-stepper-item:nth-of-type(1).active .flow-node { background: #17a2b8; color: #fff; box-shadow: 0 0 0 4px rgba(23,162,184,0.2); }
-.flow-stepper-item:nth-of-type(1).active .flow-node-count { color: #17a2b8; }
+/* ===== 各步骤主题色（通过 data-color 属性驱动，无需依赖 DOM 位置） ===== */
+.flow-stepper-item[data-color="#17a2b8"] .flow-node { border-color: #17a2b8; color: #17a2b8; }
+.flow-stepper-item[data-color="#17a2b8"].active .flow-node { background: #17a2b8; color: #fff; box-shadow: 0 0 0 4px rgba(23,162,184,0.2); }
+.flow-stepper-item[data-color="#17a2b8"].active .flow-node-count { color: #17a2b8; }
 
-/* 外观待检 */
-.flow-stepper-item:nth-of-type(3) .flow-node { border-color: #5b8def; color: #5b8def; }
-.flow-stepper-item:nth-of-type(3).active .flow-node { background: #5b8def; color: #fff; box-shadow: 0 0 0 4px rgba(91,141,239,0.2); }
-.flow-stepper-item:nth-of-type(3).active .flow-node-count { color: #5b8def; }
+.flow-stepper-item[data-color="#5b8def"] .flow-node { border-color: #5b8def; color: #5b8def; }
+.flow-stepper-item[data-color="#5b8def"].active .flow-node { background: #5b8def; color: #fff; box-shadow: 0 0 0 4px rgba(91,141,239,0.2); }
+.flow-stepper-item[data-color="#5b8def"].active .flow-node-count { color: #5b8def; }
 
-/* 包装待检 */
-.flow-stepper-item:nth-of-type(5) .flow-node { border-color: #f5a962; color: #f5a962; }
-.flow-stepper-item:nth-of-type(5).active .flow-node { background: #f5a962; color: #fff; box-shadow: 0 0 0 4px rgba(245,169,98,0.2); }
-.flow-stepper-item:nth-of-type(5).active .flow-node-count { color: #d39e00; }
+.flow-stepper-item[data-color="#f5a962"] .flow-node { border-color: #f5a962; color: #f5a962; }
+.flow-stepper-item[data-color="#f5a962"].active .flow-node { background: #f5a962; color: #fff; box-shadow: 0 0 0 4px rgba(245,169,98,0.2); }
+.flow-stepper-item[data-color="#f5a962"].active .flow-node-count { color: #d39e00; }
 
-/* 待批准 */
-.flow-stepper-item:nth-of-type(7) .flow-node { border-color: #e86a78; color: #e86a78; }
-.flow-stepper-item:nth-of-type(7).active .flow-node { background: #e86a78; color: #fff; box-shadow: 0 0 0 4px rgba(232,106,120,0.2); }
-.flow-stepper-item:nth-of-type(7).active .flow-node-count { color: #e86a78; }
+.flow-stepper-item[data-color="#e86a78"] .flow-node { border-color: #e86a78; color: #e86a78; }
+.flow-stepper-item[data-color="#e86a78"].active .flow-node { background: #e86a78; color: #fff; box-shadow: 0 0 0 4px rgba(232,106,120,0.2); }
+.flow-stepper-item[data-color="#e86a78"].active .flow-node-count { color: #e86a78; }
 
-/* 已完成 */
-.flow-stepper-item:nth-of-type(9) .flow-node { border-color: #28a745; color: #28a745; }
-.flow-stepper-item:nth-of-type(9).active .flow-node { background: #28a745; color: #fff; box-shadow: 0 0 0 4px rgba(40,167,69,0.2); }
-.flow-stepper-item:nth-of-type(9).active .flow-node-count { color: #28a745; }
+.flow-stepper-item[data-color="#28a745"] .flow-node { border-color: #28a745; color: #28a745; }
+.flow-stepper-item[data-color="#28a745"].active .flow-node { background: #28a745; color: #fff; box-shadow: 0 0 0 4px rgba(40,167,69,0.2); }
+.flow-stepper-item[data-color="#28a745"].active .flow-node-count { color: #28a745; }
 
 /* 选中态通用 */
 .flow-stepper-item.active .flow-node {
@@ -1516,7 +1511,21 @@
 }
 
 /* --- 4.4 其他 --- */
-/* ---- qarep\inactiveList.html: qarep\inactiveList.html ---- */
+
+/* ===== qarep 通用工具类 ===== */
+.qarep-search-input { width: 130px; }
+.qarep-search-select { width: 130px; }
+.qarep-des-link { cursor: pointer; color: #007bff; }
+.qarep-des-link:hover { color: #0056b3; text-decoration: underline; }
+/* 工具栏按钮组间距 */
+.qarep-toolbar .btn-group { gap: 6px; }
+
+/* ===== 步骤条 active 过渡增强 ===== */
+.flow-stepper-item.active .flow-node {
+	transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---- qarep\\inactiveList.html: qarep\\inactiveList.html ---- */
 .il-hd{display:flex;align-items:center;margin-bottom:10px;padding:0 2px}
 .il-hd span{font-size:14px;font-weight:600;color:#2c3e50}
 .il-hd i{flex:1;height:1px;background:#dee2e6;margin-left:10px}

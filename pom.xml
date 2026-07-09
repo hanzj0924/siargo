@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.siargo</groupId>
 	<artifactId>siargo</artifactId>
-	<version>2.7.10</version>
+	<version>2.7.13</version>
 	<packaging>jar</packaging>
 	<name>siargo</name>
 	<description>siargo</description>
@@ -580,6 +580,18 @@
 
 	<build>
 		<finalName>siargo</finalName>
+		<!-- 配置 resources，确保 src/main/java 下的非 Java 文件被复制到 target/classes -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>cn/jbolt/admin/siargo/changelog/CHANGELOG.md</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

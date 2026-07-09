@@ -5,13 +5,26 @@
 
 #define main()
 #set(pageId=RandomUtil.random(6))
-<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
 
-<div class="jbolt_page_content jb_vbody">
-<!-- 全部 表单数据 -->
-<script type="text/template" id="allreportRowtpl_#(pageId)">
-{@each datas as data,index}
-<tr data-id="${data.spid}">
+#-- ===== Enjoy 宏：共享搜索表单 ===== --#
+#define qarepSearchForm(tabPrefix)
+<div class="col-sm-4 text-center">
+	<form class="form-inline d-inline-block" id="#(tabPrefix)Form_#(pageId)" onsubmit="return false;" method="post">
+		<input type="text" autocomplete="off" class="form-control qarep-search-input" data-with-clearbtn="true"
+			placeholder="输入订单号" name="keywords" value=""/>
+		<select class="form-control qarep-search-select" name="prodType" data-autoload
+			data-url="admin/dictionary/options?key=siargo_prod_type"
+			data-value-attr="sn"
+			data-text="=产品类型=" data-value=""></select>
+		<button type="submit" class="btn btn-outline-secondary">
+			<i class="fa fa-search"></i> 查询
+		</button>
+	</form>
+</div>
+#end
+
+#-- ===== Enjoy 宏：共享行模板列（序号~客户名称，共11列） ===== --#
+#define sharedReportCols()
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
 	<a tooltip data-title="详情" data-dialogbtn data-area="675,860" data-btn="close"
@@ -27,7 +40,7 @@
 	{@else}
 		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
 			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
-			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
+			class="qarep-des-link">${data.spDes}</span>
 	{@/if}
 </td>
 <td>${data.spQsi}</td>
@@ -35,6 +48,15 @@
 <td>${data.spModel}</td>
 <td>${data.spNumber}</td>
 <td>${data.scName}</td>
+#end
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
+
+<div class="jbolt_page_content jb_vbody">
+<!-- 全部 表单数据 -->
+<script type="text/template" id="allreportRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+#@sharedReportCols()
 <td>
 	{@if data.insp==1}
 		<span class="badge badge-secondary">${data.inspName}</span>
@@ -59,29 +81,7 @@
 <script type="text/template" id="noqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
-<td>${pageNumber,pageSize,index | rownum}</td>
-<td>
-	<a tooltip data-title="详情" data-dialogbtn data-area="675,860" data-btn="close"
-		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
-	</a>
-</td>
-<td>${data.orderId}</td>
-<td>${data.retypeName}</td>
-<td>${data.typeName}</td>
-<td>
-	{@if data.spDes==null || data.spDes==""}
-		<span class="text-muted">-</span>
-	{@else}
-		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
-			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
-			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
-	{@/if}
-</td>
-<td>${data.spQsi}</td>
-<td>${data.spQi}</td>
-<td>${data.spModel}</td>
-<td>${data.spNumber}</td>
-<td>${data.scName}</td>
+#@sharedReportCols()
 <td>${data.createTime}</td>
 </tr>
 {@/each}
@@ -91,29 +91,7 @@
 <script type="text/template" id="accqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
-<td>${pageNumber,pageSize,index | rownum}</td>
-<td>
-	<a tooltip data-title="详情" data-dialogbtn data-area="675,860" data-btn="close"
-		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
-	</a>
-</td>
-<td>${data.orderId}</td>
-<td>${data.retypeName}</td>
-<td>${data.typeName}</td>
-<td>
-	{@if data.spDes==null || data.spDes==""}
-		<span class="text-muted">-</span>
-	{@else}
-		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
-			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
-			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
-	{@/if}
-</td>
-<td>${data.spQsi}</td>
-<td>${data.spQi}</td>
-<td>${data.spModel}</td>
-<td>${data.spNumber}</td>
-<td>${data.scName}</td>
+#@sharedReportCols()
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
@@ -126,29 +104,7 @@
 <script type="text/template" id="funqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
-<td>${pageNumber,pageSize,index | rownum}</td>
-<td>
-	<a tooltip data-title="详情" data-dialogbtn data-area="675,860" data-btn="close"
-		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
-	</a>
-</td>
-<td>${data.orderId}</td>
-<td>${data.retypeName}</td>
-<td>${data.typeName}</td>
-<td>
-	{@if data.spDes==null || data.spDes==""}
-		<span class="text-muted">-</span>
-	{@else}
-		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
-			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
-			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
-	{@/if}
-</td>
-<td>${data.spQsi}</td>
-<td>${data.spQi}</td>
-<td>${data.spModel}</td>
-<td>${data.spNumber}</td>
-<td>${data.scName}</td>
+#@sharedReportCols()
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
@@ -170,29 +126,7 @@
 <script type="text/template" id="appqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
-<td>${pageNumber,pageSize,index | rownum}</td>
-<td>
-	<a tooltip data-title="详情" data-dialogbtn data-area="675,860" data-btn="close"
-		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
-	</a>
-</td>
-<td>${data.orderId}</td>
-<td>${data.retypeName}</td>
-<td>${data.typeName}</td>
-<td>
-	{@if data.spDes==null || data.spDes==""}
-		<span class="text-muted">-</span>
-	{@else}
-		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
-			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
-			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
-	{@/if}
-</td>
-<td>${data.spQsi}</td>
-<td>${data.spQi}</td>
-<td>${data.spModel}</td>
-<td>${data.spNumber}</td>
-<td>${data.scName}</td>
+#@sharedReportCols()
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
@@ -221,29 +155,7 @@
 <script type="text/template" id="allqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
-<td>${pageNumber,pageSize,index | rownum}</td>
-<td>
-	<a tooltip data-title="详情" data-dialogbtn data-area="675,860" data-btn="close"
-		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
-	</a>
-</td>
-<td>${data.orderId}</td>
-<td>${data.retypeName}</td>
-<td>${data.typeName}</td>
-<td>
-	{@if data.spDes==null || data.spDes==""}
-		<span class="text-muted">-</span>
-	{@else}
-		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
-			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
-			style="cursor:pointer;color:#007bff;">${data.spDes}</span>
-	{@/if}
-</td>
-<td>${data.spQsi}</td>
-<td>${data.spQi}</td>
-<td>${data.spModel}</td>
-<td>${data.spNumber}</td>
-<td>${data.scName}</td>
+#@sharedReportCols()
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
@@ -355,19 +267,7 @@
 							</button>
 						</div>
 					</div>
-					<div class="col-sm-4 text-center">
-						<form class="form-inline d-inline-block" id="allreportForm_#(pageId)" onsubmit="return false;" method="post">
-							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-							 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
-								data-url="admin/dictionary/options?key=siargo_prod_type"
-								data-value-attr="sn" 
-								data-text="=产品类型=" data-value=""></select>
-							<button type="submit" class="btn btn-outline-secondary">
-								<i class="fa fa-search"></i> 查询
-							</button>
-						</form>
-					</div>
+					#@qarepSearchForm("allreport")
 					<div class="col-sm-4 text-right">
 						<button data-dialogbtn data-area="1300,760" data-title="已删除报告单列表"
 							data-url="admin/siargo/qarep/inactiveList"  type="button"
@@ -443,19 +343,7 @@
 							</button>
 						</div>
 					</div>
-					<div class="col-sm-4 text-center">
-						<form class="form-inline d-inline-block" id="noqForm_#(pageId)" onsubmit="return false;" method="post">
-							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-							<select class="form-control" name="prodType" data-autoload style="width: 130px;"
-								data-url="admin/dictionary/options?key=siargo_prod_type"
-								data-value-attr="sn" 
-								data-text="=产品类型=" data-value=""></select>
-							<button type="submit" class="btn btn-outline-secondary">
-								<i class="fa fa-search"></i> 查询
-							</button>
-						</form>
-					</div>
+					#@qarepSearchForm("noq")
 					<div class="col-sm-4 text-right">
 						<div class="btn-group " role="group" aria-label="btn-group">
 							#if(accuracy)
@@ -528,19 +416,7 @@
 							</button>
 						</div>
 					</div>
-					<div class="col-sm-4 text-center">
-						<form class="form-inline d-inline-block" id="accqForm_#(pageId)" onsubmit="return false;" method="post">
-							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-							 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
-								data-url="admin/dictionary/options?key=siargo_prod_type"
-								data-value-attr="sn"
-								data-text="=产品类型=" data-value=""></select>
-							<button type="submit" class="btn btn-outline-secondary">
-								<i class="fa fa-search"></i> 查询
-							</button>
-						</form>
-					</div>
+					#@qarepSearchForm("accq")
 					<div class="col-sm-4 text-right">
 						#if(appearance)
 						<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
@@ -611,19 +487,7 @@
 							</button>
 						</div>
 					</div>
-					<div class="col-sm-4 text-center">
-						<form class="form-inline d-inline-block" id="funqForm_#(pageId)" onsubmit="return false;" method="post">
-							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-							 <select class="form-control" name="prodType" data-autoload style="width: 130px;"
-								data-url="admin/dictionary/options?key=siargo_prod_type"
-								data-value-attr="sn"
-								data-text="=产品类型=" data-value=""></select>
-							<button type="submit" class="btn btn-outline-secondary">
-								<i class="fa fa-search"></i> 查询
-							</button>
-						</form>
-					</div>
+					#@qarepSearchForm("funq")
 					<div class="col-sm-4 text-right">
 						#if(packaging)
 						<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
@@ -695,19 +559,7 @@
 							</button>
 						</div>
 					</div>
-					<div class="col-sm-4 text-center">
-						<form class="form-inline d-inline-block" id="appqForm_#(pageId)" onsubmit="return false;" method="post">
-							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-							<select class="form-control" name="prodType" data-autoload style="width: 130px;"
-								data-url="admin/dictionary/options?key=siargo_prod_type"
-								data-value-attr="sn" 
-								data-text="=产品类型=" data-value=""></select>
-							<button type="submit" class="btn btn-outline-secondary">
-								<i class="fa fa-search"></i> 查询
-							</button>
-						</form>
-					</div>
+					#@qarepSearchForm("appq")
 					<div class="col-sm-4 text-right">
 						#if(approval)
 							<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
@@ -782,9 +634,9 @@
 					</div>
 					<div class="col-sm-6 text-center">
 						<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
-							<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-								placeholder="输入订单号" name="keywords" value="" style="width: 130px;"/> 
-							<select class="form-control" name="prodType" data-autoload style="width: 130px;"
+							<input type="text" autocomplete="off" class="form-control qarep-search-input" data-with-clearbtn="true"
+								placeholder="输入订单号" name="keywords" value=""/> 
+							<select class="form-control qarep-search-select" name="prodType" data-autoload
 								data-url="admin/dictionary/options?key=siargo_prod_type"
 								data-value-attr="sn" 
 								data-text="=产品类型=" data-value=""></select>
@@ -999,35 +851,38 @@ function switchTabByIndex(index) {
 	$('#qarepTabView .jbolt_tab_link').eq(index).trigger('click');
 }
 
-// 获取各流程阶段数量
+// 获取各流程阶段数量（带防抖，避免短时间内重复请求）
+var loadFlowCountsTimer_#(pageId) = null;
 function loadFlowCounts() {
-	$.ajax({
-		url: 'admin/siargo/qarep/getFlowCounts',
-		type: 'get',
-		success: function(res) {
-			if (res.msg && res.msg == 'jbolt_terminal_offline') {
-				showReloginDialog();
-				LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
-					top.location.href = '/admin';
-				});
-			} else if (res.state == 'ok') {
-				$('#count-all').text(res.data.all || 0);
-				$('#count-noq').text(res.data.noq || 0);
-				$('#count-accq').text(res.data.accq || 0);
-				$('#count-funq').text(res.data.funq || 0);
-				$('#count-appq').text(res.data.appq || 0);
-				$('#count-allq').text(res.data.allq || 0);
+	if (loadFlowCountsTimer_#(pageId)) clearTimeout(loadFlowCountsTimer_#(pageId));
+	loadFlowCountsTimer_#(pageId) = setTimeout(function() {
+		$.ajax({
+			url: 'admin/siargo/qarep/getFlowCounts',
+			type: 'get',
+			success: function(res) {
+				if (res.msg && res.msg == 'jbolt_terminal_offline') {
+					showReloginDialog();
+					LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
+						top.location.href = '/admin';
+					});
+				} else if (res.state == 'ok') {
+					$('#count-all').text(res.data.all || 0);
+					$('#count-noq').text(res.data.noq || 0);
+					$('#count-accq').text(res.data.accq || 0);
+					$('#count-funq').text(res.data.funq || 0);
+					$('#count-appq').text(res.data.appq || 0);
+					$('#count-allq').text(res.data.allq || 0);
+				}
 			}
-		}
-	});
+		});
+	}, 100);
 }
 
-// 页面加载时获取数量
+// 页面加载时获取数量（守卫：防止 JBolt 双重渲染导致重复初始化）
 $(function() {
+	if (window._qarepReady) return;
+	window._qarepReady = true;
 	// 清理 JBolt 初次直接访问时残留在默认标签页中的重复 qarep 内容
-	// 该内容由服务端首次渲染产生，PJAX 会在"报告单"标签页中重新加载，
-	// 但默认标签页中的残留 DOM 未自动清理，导致 data-autoload 和
-	// JBoltTable 初始化重复执行，造成请求翻倍和页面卡顿
 	$('#jbolt-container > .jbolt_tabcontent:not(.active)').each(function(){
 		var $tc = $(this);
 		if($tc.find('.jbolt_tab_view').length){
@@ -1035,16 +890,15 @@ $(function() {
 		}
 	});
 	
-	setTimeout(function() {
-		loadFlowCounts();
-	}, 200);
-	
-	// 初始化步骤条active状态
-	var activeIndex = $('#qarepTabView').data('active-index') || 0;
+	// 初始化步骤条active状态并触发首次流程数量加载（内建防抖）
+	const activeIndex = $('#qarepTabView').data('active-index') || 0;
 	
 	// 预标记默认tab为已加载，防止switchTabByIndex中重复触发
 	loadedTabs_#(pageId)[activeIndex] = true;
 	switchTabByIndex(activeIndex);
+	
+	// 首次加载流程数量（防抖100ms确保只发一次请求）
+	loadFlowCounts();
 	
 	// 定时刷新数量（每30秒），页面不可见时暂停以节省资源
 	var flowCountTimer_#(pageId) = setInterval(loadFlowCounts, 30000);
@@ -1072,7 +926,7 @@ function loadPDF (element, originalPdfUrl, event) {
 // 打开删除确认弹窗
 function openDeleteDialog_#(pageId)(tableId) {
     // 获取选中的ID
-    var ids = jboltTableGetCheckedIds(tableId);
+    const ids = jboltTableGetCheckedIds(tableId);
     if (!ids || ids.length === 0) {
         LayerMsgBox.alert('请先选择要删除的数据', 2);
         return;

@@ -194,5 +194,9 @@ public class PermissionKey {
 	 * 客户管理
 	 */
 	public static final String CUSTOMER = "customer";
+	/**
+	 * 更新日志
+	 */
+	public static final String SIARGO_CHANGE_LOG = "siargo_change_log";
 
 }
