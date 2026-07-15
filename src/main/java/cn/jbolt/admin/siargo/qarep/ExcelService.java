@@ -161,6 +161,22 @@ public class ExcelService {
         
         String models = String.join(",", modelSet);
         result.put("models", models);
+        
+        // 根据型号自动判定产品类型
+        Integer prodType = null;
+        if (!modelSet.isEmpty()) {
+            String firstModel = modelSet.iterator().next();
+            int classified = ProductModelClassifier.classify(firstModel);
+            // classifier → siargo_prod_type 字典 sn 映射：1(小流量)→2, 2(大流量)→3, 3(传感器)→1
+            if (classified == 1) {
+                prodType = 2;
+            } else if (classified == 2) {
+                prodType = 3;
+            } else if (classified == 3) {
+                prodType = 1;
+            }
+        }
+        result.put("prodType", prodType);
         		
         // ========== 按型号分组提取编号 ==========
         // 将每个型号对应的编号收集到列表中
@@ -257,8 +273,26 @@ public class ExcelService {
 			}
 		}
 		
-		result.put("orderId", null);
+		
+		// 根据型号规格自动判定产品类型
+		Integer prodType = null;
+		if (models != null && !models.isEmpty()) {
+			// 取第一个型号进行分类（多型号以逗号分隔时取首个）
+			String firstModel = models.split(",")[0].trim();
+			int classified = ProductModelClassifier.classify(firstModel);
+			// classifier → siargo_prod_type 字典 sn 映射：1(小流量)→2, 2(大流量)→3, 3(传感器)→1
+			if (classified == 1) {
+				prodType = 2;
+			} else if (classified == 2) {
+				prodType = 3;
+			} else if (classified == 3) {
+				prodType = 1;
+			}
+		}
+        
+        result.put("orderId", null);
 		result.put("repType", null);
+		result.put("prodType", prodType);
 		result.put("models", models);
 		result.put("numbers", numbers);
 		result.put("qsis", null);

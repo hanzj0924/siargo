@@ -1236,7 +1236,7 @@
 
 /* --- 4.2 报告单详情 --- */
 /* ---- qarep\details.html: qarep\details.html ---- */
-.dt-wrap{padding:16px 18px;font-size:13px;color:#333;line-height:1.6;background:#f8f9fa;box-sizing:border-box}
+.dt-wrap{padding:16px 18px;font-size:13px;color:#333;line-height:1.6;background:#eef1f5;box-sizing:border-box}
 .dt-sec{margin-bottom:14px}
 .dt-hd{display:flex;align-items:center;margin-bottom:8px}
 .dt-hd span{font-size:14px;font-weight:600;color:#2c3e50}

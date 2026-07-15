@@ -1,5 +1,10 @@
 ## 更新日志
 
+### v2.7.14 (2026-07-15)
+- feat(qarep): Excel导入自动判定产品类型，根据型号通过ProductModelClassifier分类并映射到siargo_prod_type字典sn，前端上传后自动选择产品类型下拉框并触发change事件联动送检/检验数量
+- feat(qarep): ProductModelClassifier新增MF3000S前缀映射为传感器类型(type=3)
+- fix(qarep): 报告单详情页html/body背景色统一为#eef1f5，dt-wrap容器背景色同步调整
+
 ### v2.7.13 (2026-07-09)
 - chore(changelog): CHANGELOG.md 从项目根目录移至 Controller 同包，改由 classpath getResourceAsStream 加载，消除文件系统路径依赖
 - chore(build): Maven resources 配置新增 src/main/java 资源目录，确保 CHANGELOG.md 随构建复制至 target/classes

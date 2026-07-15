@@ -335,6 +335,12 @@
 				if (data.repType != null) {
 					$('select[name="qareport.repType"]').val(data.repType);
 				}
+				if (data.prodType != null) {
+					$('select[name="product.type"]').val(data.prodType);
+					setTimeout(function() {
+						$('select[name="product.type"]').trigger('change');
+					}, 100);
+				}
 			}
 		</script>
 		#include("/_view/_admin/common/_formjs.html",formId="qareportForm")
