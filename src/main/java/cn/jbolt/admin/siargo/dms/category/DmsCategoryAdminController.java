@@ -132,6 +132,35 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	}
 	
 	/**
+	 * 进入“移动到”弹窗页面
+	 * URL: GET /admin/siargo/dms/category/moveTo/{id}
+	 * @param id 要移动的类别ID（从URL路径获取）
+	 */
+	public void moveTo() {
+		DmsCategory dmsCategory=service.findById(getLong(0));
+		if(dmsCategory == null){
+			renderFail(JBoltMsg.DATA_NOT_EXIST);
+			return;
+		}
+		set("dmsCategory",dmsCategory);
+		set("categories",service.getOtherCategories(dmsCategory.getId()));
+		render("moveTo.html");
+	}
+	
+	/**
+	 * 执行移动到指定位置
+	 * URL: POST /admin/siargo/dms/category/doMoveTo
+	 * @param id 要移动的类别ID
+	 * @param targetId 目标位置的类别ID
+	 * @param position 相对位置：before=之前 after=之后
+	 * @return 操作结果JSON
+	 */
+    @Before(Tx.class)
+	public void doMoveTo() {
+		renderJson(service.moveTo(getLong("id"),getLong("targetId"),get("position")));
+	}
+	
+	/**
 	 * 初始化所有类别的排序序号
 	 * URL: POST /admin/siargo/dms/category/initRank
 	 * @return 操作结果JSON

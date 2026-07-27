@@ -1,0 +1,52 @@
+<form onsubmit="return false;" id="pdfFolderForm" action="#(action)" method="post">
+<input type="hidden" name="pdfFolder.id" value="#(pdfFolder.id??)" />
+<div class="row">
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">版号(=jb_dictionary.name, type_key=siargo_pdfver)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入版号(如: G/2)" maxlength="10" name="pdfFolder.pdfver" value="#(pdfFolder.pdfver??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">关联字典ID</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off" class="form-control" data-rule="required;pint" placeholder="请输入关联字典ID(jb_dictionary.id)" data-tips="请输入关联字典ID" maxlength="19" name="pdfFolder.dictId" value="#(pdfFolder.dictId??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">模板存储路径(相对webapp,如: /_view/admin/siargo/pdf/templates/2)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入模板存储路径(相对webapp,如: /_view/admin/siargo/pdf/templates/2)" maxlength="255" name="pdfFolder.templatePath" value="#(pdfFolder.templatePath??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">日常PDF输出路径(相对webapp,如: /export/G/2)</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入日常PDF输出路径(相对webapp,如: /export/G/2)" maxlength="255" name="pdfFolder.exportPath" value="#(pdfFolder.exportPath??)"/>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">版本描述</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入版本描述" maxlength="200" name="pdfFolder.description" value="#(pdfFolder.description??)"/>
+		</div>
+	</div>
+	</div>
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-2 col-form-label">1=启用 0=停用</label>
+		<div class="col">
+			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="pnumber" placeholder="请输入1=启用 0=停用"  maxlength="3" name="pdfFolder.isActive" value="#(pdfFolder.isActive??)"/>
+		</div>
+	</div>
+	</div>
+</div>
+
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="pdfFolderForm")
+#end
+

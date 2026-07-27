@@ -1,5 +1,23 @@
 ## 更新日志
 
+### v2.7.15 (2026-07-24)
+- feat(pdffolder): 新增报告单模板管理模块（/admin/siargo/qarep/pdffolder），支持版号与PDF模板规则CRUD，含首页/分页/新增编辑版号/复制删除版号/规则增删改
+- feat(pdffolder): PdfRule 新增 error_hint 错误提示字段，规则编辑弹窗支持配置匹配失败时的提示信息
+- fix(layout): supplier/customer/dms category 页面分页消失，改用 jb_vflex + jb_vbody + fill_box 弹性布局恢复分页组件显示
+- improve(qarep): 报告单版号下拉框 data-value-attr 从 sn 改为 name，兼容字典新格式
+- improve(qarep): 新增报告单页面版号下拉框增加模板配置快捷入口（齿轮按钮），可快速跳转 pdffolder 管理
+- style(qarep): 新增/编辑报告单页面 input-group-append 改为 input-group-btn 统一样式
+
+### v2.7.14 (2026-07-15)
+- feat(qarep): Excel导入自动判定产品类型，根据型号通过ProductModelClassifier分类并映射到siargo_prod_type字典sn，前端上传后自动选择产品类型下拉框并触发change事件联动送检/检验数量
+- feat(qarep): ProductModelClassifier新增MF3000S前缀映射为传感器类型(type=3)
+- fix(qarep): 报告单详情页html/body背景色统一为#eef1f5，dt-wrap容器背景色同步调整
+
+### v2.7.13 (2026-07-09)
+- chore(changelog): CHANGELOG.md 从项目根目录移至 Controller 同包，改由 classpath getResourceAsStream 加载，消除文件系统路径依赖
+- chore(build): Maven resources 配置新增 src/main/java 资源目录，确保 CHANGELOG.md 随构建复制至 target/classes
+- chore(path): README 及 siargo_package SKILL.md 同步更新 CHANGELOG.md 引用路径
+
 ### v2.7.12 (2026-07-09)
 - feat(changelog): 新增更新日志显示页面（/admin/changelog），读取 CHANGELOG.md 以 Markdown→HTML 渲染，权限 siargo_change_log
 - feat(admin): ProjectConfig 新增 changelog 包扫描注册，确保 JFinal 路由自动发现

@@ -289,7 +289,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						+ "AND d_insp.enable = '1 '")
 				// ========== 关联字典表获取PDF版本名称 ==========
 				.leftJoin("jb_dictionary", "d_pdfver", "d_pdfver.type_key = 'siargo_pdfver' "
-						+ "AND d_pdfver.sn COLLATE utf8mb4_general_ci = CAST(sp.pdfver AS CHAR) "
+						+ "AND d_pdfver.name COLLATE utf8mb4_general_ci = sp.pdfver "
 						+ "AND d_pdfver.enable = '1 '")
 				// ========== 关联字典表获取流量范围名称 ==========
 				.leftJoin("jb_dictionary", "d_flow", "d_flow.type_key = 'siargo_flow_range' "
@@ -504,7 +504,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  AND d_insp.sn COLLATE utf8mb4_general_ci = CAST(sp.insp AS CHAR)\r\n"
 				+ "  AND d_insp.ENABLE = '1'\r\n"
 				+ "  LEFT JOIN `jb_dictionary` AS d_pdfver ON d_pdfver.type_key = 'siargo_pdfver'\r\n"
-				+ "  AND d_pdfver.sn COLLATE utf8mb4_general_ci = CAST(sp.pdfver AS CHAR)\r\n"
+				+ "  AND d_pdfver.name COLLATE utf8mb4_general_ci = sp.pdfver\r\n"
 				+ "  AND d_pdfver.ENABLE = '1'\r\n"
 				+ "  LEFT JOIN `jb_dictionary` AS d_flow ON d_flow.type_key = 'siargo_flow_range'\r\n"
 				+ "  AND d_flow.sn COLLATE utf8mb4_general_ci = sp.flow_range\r\n"
@@ -902,7 +902,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						+ "AND d_insp.enable = '1 '")
 				// ========== 关联字典表获取PDF版本名称 ==========
 				.leftJoin("jb_dictionary", "d_pdfver", "d_pdfver.type_key = 'siargo_pdfver' "
-						+ "AND d_pdfver.sn COLLATE utf8mb4_general_ci = CAST(sp.pdfver AS CHAR) "
+						+ "AND d_pdfver.name COLLATE utf8mb4_general_ci = sp.pdfver "
 						+ "AND d_pdfver.enable = '1 '")
 				// ========== 关联字典表获取流量范围名称 ==========
 				.leftJoin("jb_dictionary", "d_flow", "d_flow.type_key = 'siargo_flow_range' "

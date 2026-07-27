@@ -33,14 +33,23 @@
 										</select>
 									</div>
 									<label class="col-auto col-form-label">版号</label>
-									<div class="col input-group">
-										<select class="form-control" data-autoload
+									<div class="col input-group" style="height:34px;">
+										<select class="form-control" data-autoload style="height:34px;"
 											name="product.pdfver"
 											data-url="admin/dictionary/options?key=siargo_pdfver"
 											data-rule="select" data-tips="请选择版号" data-value=""
-											data-value-attr="sn"
+											data-value-attr="name"
 											data-select="#(qareport.pdfver ??)">
 										</select>
+										<span class="input-group-btn">
+											<button class="btn btn-default" type="button" style="height:34px;line-height:1;padding:6px 12px;border:1px solid #ccc;border-left:none;border-top-left-radius:0;border-bottom-left-radius:0;"
+											        data-dialogbtn data-area="1045,725"
+											        data-handler="refreshCustSelect"
+											        data-url="/admin/siargo/qarep/pdffolder">
+												<i class="fa fa-cog"></i>
+											</button>
+										</span>
+
 									</div>
 								</div>
 								<div class="form-group row">
@@ -62,14 +71,14 @@
 											data-select="#(qareport.custId ??)"
 											data-select-type="select2" id="custSelect">
 										</select>
-										<div class="input-group-append">
-											<button class="btn btn-outline-secondary" type="button"
+										<span class="input-group-btn">
+											<button class="btn btn-default" type="button" style="height:34px;border:1px solid #ccc;border-left:none;border-top-left-radius:0;border-bottom-left-radius:0;"
 												data-dialogbtn data-area="350,250"
 												data-handler="refreshCustSelect" data-title="新增客户"
 												data-url="admin/siargo/customer/add">
 												<i class="fa fa-plus"></i>
 											</button>
-										</div>
+										</span>
 									</div>
 								</div>
 								<div class="form-group row">

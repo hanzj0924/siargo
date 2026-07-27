@@ -2,6 +2,43 @@
 
 
 /* ================================================================ */
+/* 0. Global — 全局通用                                              */
+/* ================================================================ */
+
+/* --- 0.1 上移/下移按钮统一 UI（outline 边框按钮风格） --- */
+.jbolt_table td a[data-title="上移"],
+.jbolt_table td a[data-title="下移"] {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 28px;
+	padding: 0 7px;
+	margin: 0 2px;
+	font-size: 13px;
+	border: 1px solid #17a2b8;
+	border-radius: 4px;
+	color: #17a2b8;
+	background-color: transparent;
+	text-decoration: none;
+	transition: all 0.2s ease;
+}
+
+/* 图标颜色跟随按钮（覆盖 c-info 等着色类） */
+.jbolt_table td a[data-title="上移"] i,
+.jbolt_table td a[data-title="下移"] i {
+	color: inherit !important;
+	margin: 0;
+}
+
+/* hover 填充效果 */
+.jbolt_table td a[data-title="上移"]:hover,
+.jbolt_table td a[data-title="下移"]:hover {
+	background-color: #17a2b8;
+	color: #fff;
+}
+
+/* ================================================================ */
 /* 1. CME — 计量学学习模块                                         */
 /* ================================================================ */
 
@@ -548,6 +585,89 @@
 	color: #495057; /* 深灰色字体 */
 	border-radius: 10px; /* 圆角药丸形状 */
 	font-size: 12px; /* 小字号 */
+}
+
+/* ---- 通用居中卡片表格布局（dms/category、customer 等模块复用） ---- */
+/* 内容区 - 填充剩余高度并水平居中卡片，自身不滚动（滚动交给卡片内表格） */
+.jb-center-wrap {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+}
+
+/* 居中卡片 - 限制宽度并水平居中，纵向撑满可视区，内部自成滚动上下文 */
+.jb-center-card {
+	width: 100%;
+	max-width: 720px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: #fff;
+	border: 1px solid #e9ecef;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* 加宽变体 - 分页/工具条较宽的页面使用，避免分页换行 */
+.jb-center-card.is-wide {
+	max-width: 960px;
+}
+
+/* 卡片头部 - 标题栏，固定高度不压缩，底部分隔线 */
+.jb-center-card-header {
+	flex-shrink: 0;
+	padding: 16px 20px;
+	border-bottom: 1px solid #eef0f3;
+	background: linear-gradient(to right, #f8f9fb, #fff);
+}
+
+/* 卡片标题 */
+.jb-center-card-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: #343a40;
+}
+
+.jb-center-card-title i {
+	color: #f0ad4e;
+	margin-right: 6px;
+}
+
+/* 卡片说明小字 */
+.jb-center-card-desc {
+	margin-top: 4px;
+	font-size: 12px;
+	color: #999;
+}
+
+/* 卡片主体 - 填充剩余高度并作为表格 fill_box 的父容器，自身不滚动 */
+.jb-center-card-body {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	padding: 15px 20px 20px;
+}
+
+/* 工具条 - flex 一行布局：按钮组靠左、搜索靠右 */
+.jb-center-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.jb-center-toolbar .btn-group {
+	flex-wrap: wrap;
+}
+
+/* 搜索表单 */
+.jb-center-search {
+	margin: 0;
 }
 
 
@@ -1532,3 +1652,186 @@
 .il-search-bar{background:#f8f9fa;border:1px solid #e9ecef;border-radius:6px;padding:8px 12px;margin-bottom:10px}
 .il-search-bar .form-control{border-color:#dee2e6;border-radius:4px;font-size:13px}
 .il-search-bar .btn{border-radius:4px;font-size:13px}
+
+/* ===== 5. Changelog — 更新日志页面 ===== */
+
+/* 容器 — 居中卡片，留白呼吸 */
+.cl-wrap {
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 30px 24px 40px;
+}
+
+/* 页面标题 */
+.cl-h2 {
+	font-size: 26px;
+	font-weight: 700;
+	color: #1a1a2e;
+	padding-bottom: 14px;
+	margin: 0 0 6px 0;
+	border-bottom: 3px solid #4a6cf7;
+}
+
+/* 工具栏 — 右对齐 */
+.cl-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 20px;
+}
+
+/* 全部展开/折叠 按钮 */
+.cl-toggle {
+	font-size: 13px;
+	color: #4a6cf7;
+	cursor: pointer;
+	user-select: none;
+	padding: 5px 14px;
+	border: 1px solid #4a6cf7;
+	border-radius: 4px;
+	transition: all .2s;
+}
+
+.cl-toggle:hover {
+	background: #4a6cf7;
+	color: #fff;
+}
+
+/* ---- 折叠组 ---- */
+
+/* details 卡片容器 */
+.cl-group {
+	margin-bottom: 16px;
+	border: 1px solid #e4e8f0;
+	border-radius: 10px;
+	overflow: hidden;
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0,0,0,.04);
+	transition: box-shadow .2s, border-color .2s;
+}
+
+.cl-group:hover {
+	box-shadow: 0 2px 8px rgba(0,0,0,.07);
+}
+
+.cl-group[open] {
+	box-shadow: 0 2px 12px rgba(74,108,247,.1);
+	border-color: #cdd5f5;
+}
+
+/* summary 标题栏 */
+.cl-group-header {
+	padding: 16px 24px;
+	cursor: pointer;
+	list-style: none;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	user-select: none;
+	background: linear-gradient(135deg, #fafbfd 0%, #f2f4f8 100%);
+	transition: background .2s;
+}
+
+.cl-group-header:hover {
+	background: linear-gradient(135deg, #eef1f9 0%, #e4e8f3 100%);
+}
+
+.cl-group[open] > .cl-group-header {
+	background: linear-gradient(135deg, #eef2ff 0%, #e2e7ff 100%);
+}
+
+/* 隐藏默认 details marker */
+.cl-group-header::-webkit-details-marker {
+	display: none;
+}
+
+/* 自定义折叠箭头 */
+.cl-group-header::before {
+	content: "";
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-right: 2px solid #8896b5;
+	border-bottom: 2px solid #8896b5;
+	transform: rotate(-45deg) translateY(-2px);
+	transition: transform .25s;
+	flex-shrink: 0;
+}
+
+.cl-group[open] > .cl-group-header::before {
+	transform: rotate(45deg) translateY(2px);
+}
+
+/* 版本标签 — 弹性占据剩余空间 */
+.cl-group-label {
+	flex: 1;
+	font-size: 18px;
+	font-weight: 600;
+	color: #1a1a2e;
+}
+
+/* 计数徽章 — 右侧圆角数字 */
+.cl-group-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 24px;
+	height: 24px;
+	padding: 0 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #4a6cf7;
+	background: #eef2ff;
+	border-radius: 12px;
+}
+
+/* 展开后的内容区 */
+.cl-group-body {
+	padding: 6px 24px 20px;
+	background: #fafbfd;
+}
+
+/* 子版本标题 */
+.cl-h3 {
+	font-size: 16px;
+	font-weight: 600;
+	color: #374568;
+	margin-top: 20px;
+	margin-bottom: 8px;
+	padding-bottom: 5px;
+	border-bottom: 1px dashed #e4e8f0;
+}
+
+/* 列表 */
+.cl-list {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 16px 0;
+}
+
+.cl-list li {
+	position: relative;
+	padding: 5px 0 5px 20px;
+	font-size: 14px;
+	color: #556a86;
+	line-height: 1.7;
+}
+
+.cl-list li::before {
+	content: "";
+	position: absolute;
+	left: 4px;
+	top: 13px;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #c4cdd8;
+}
+
+.cl-list li code {
+	display: inline-block;
+	padding: 1px 6px;
+	background: #f1f3f6;
+	border-radius: 3px;
+	font-size: 13px;
+	color: #e83e8c;
+}

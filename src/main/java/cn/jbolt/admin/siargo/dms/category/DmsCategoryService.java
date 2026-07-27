@@ -26,14 +26,23 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	}
 		
 	/**
-	 * 后台管理分页查询
+	 * 后台管理分页查询（附带每个类别下的文件数量 fileCount）
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param keywords
 	 * @return
 	 */
-	public Page<DmsCategory> paginateAdminDatas(int pageNumber, int pageSize, String keywords) {
-		return paginateByKeywords("sort_rank","asc", pageNumber, pageSize, keywords, "name");
+	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords) {
+		String select = "SELECT c.id, c.name, c.sort_rank, COUNT(f.id) AS fileCount";
+		StringBuilder sqlExceptSelect = new StringBuilder(" FROM siargo_dms_category c ")
+				.append("LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 ");
+		if(isOk(keywords)) {
+			sqlExceptSelect.append("WHERE c.name LIKE CONCAT('%',?,'%') ");
+			sqlExceptSelect.append("GROUP BY c.id, c.name, c.sort_rank ORDER BY c.sort_rank ASC");
+			return Db.paginate(pageNumber, pageSize, true, select, sqlExceptSelect.toString(), keywords);
+		}
+		sqlExceptSelect.append("GROUP BY c.id, c.name, c.sort_rank ORDER BY c.sort_rank ASC");
+		return Db.paginate(pageNumber, pageSize, true, select, sqlExceptSelect.toString());
 	}
 	
 	/**
@@ -204,6 +213,62 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 		//if(rank==null||rank<=0){
 		//	return fail("顺序需要初始化");
 		//}
+		return SUCCESS;
+	}
+	
+	/**
+	 * 获取除指定类别外的所有类别（按排序序号升序）
+	 * 用于“移动到”弹窗的目标位置选择器
+	 * @param id 要排除的类别ID
+	 * @return 类别列表
+	 */
+	public List<DmsCategory> getOtherCategories(Long id) {
+		return find("SELECT * FROM siargo_dms_category WHERE id != ? ORDER BY sort_rank ASC", id);
+	}
+	
+	/**
+	 * 移动类别到指定类别的之前/之后
+	 * 业务逻辑：计算目标排序序号，中间类别的序号整体顺移，再更新当前类别序号
+	 * @param id 要移动的类别ID
+	 * @param targetId 目标位置的类别ID
+	 * @param position 相对位置：before=之前 after=之后
+	 * @return 操作结果
+	 */
+	public Ret moveTo(Long id, Long targetId, String position) {
+		if(notOk(id) || notOk(targetId) || id.equals(targetId)) {
+			return fail(JBoltMsg.PARAM_ERROR);
+		}
+		DmsCategory dmsCategory=findById(id);
+		if(dmsCategory==null){
+			return fail("数据不存在或已被删除");
+		}
+		DmsCategory target=findById(targetId);
+		if(target==null){
+			return fail("目标类别不存在或已被删除");
+		}
+		Integer curRank=dmsCategory.getSortRank();
+		Integer targetRank=target.getSortRank();
+		if(curRank==null||curRank<=0||targetRank==null||targetRank<=0){
+			return fail("顺序需要初始化");
+		}
+		// 计算新序号：之前=目标序号 之后=目标序号+1
+		int newRank="after".equals(position) ? targetRank+1 : targetRank;
+		// 当前项移除后，后方序号整体前移，目标位置需修正
+		if(curRank<newRank){
+			newRank--;
+		}
+		if(newRank==curRank){
+			return SUCCESS;
+		}
+		if(curRank<newRank){
+			// 向后移动：(curRank, newRank] 区间内的类别序号-1
+			Db.update("UPDATE siargo_dms_category SET sort_rank = sort_rank - 1 WHERE sort_rank > ? AND sort_rank <= ?", curRank, newRank);
+		}else{
+			// 向前移动：[newRank, curRank) 区间内的类别序号+1
+			Db.update("UPDATE siargo_dms_category SET sort_rank = sort_rank + 1 WHERE sort_rank >= ? AND sort_rank < ?", newRank, curRank);
+		}
+		dmsCategory.setSortRank(newRank);
+		dmsCategory.update();
 		return SUCCESS;
 	}
 	

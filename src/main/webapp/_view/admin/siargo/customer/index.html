@@ -1,33 +1,15 @@
 #@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
-<div class="jbolt_page" data-key="#(pmkey)">
+<div class="jbolt_page jb_vflex" data-key="#(pmkey)">
 
 	<div class="jbolt_page_title">
 		<div class="row">
-			<div class="col-md-auto"">
-				
-			</div>
-			<div class="col">
-				<form class="form-inline" id="customerForm_#(pageId)"
-					onsubmit="return false;" method="post">
-					<input type="text" data-with-clearbtn="true" autocomplete="off"
-						class="form-control" placeholder="输入关键字搜索" name="keywords"
-						value="" />
-					<button type="submit" class="btn btn-outline-secondary">
-						<i class="fa fa-search"></i> 查询
-					</button>
-				</form>
-			</div>
 			<div class="col-md-auto">
-				<button data-dialogbtn data-area="350,250"
-					data-handler="refreshJBoltTable" data-title="新增"
-					data-url="admin/siargo/customer/add"
-					class="btn btn-outline-primary btn-sm">
-					<i class="fa fa-plus"></i> 新增
-				</button>
+				<h1>客户管理</h1>
 			</div>
+			<div class="col-md-auto"></div>
 		</div>
 	</div>
-	<div class="jbolt_page_content">
+	<div class="jbolt_page_content jb_vbody">
 		<!-- JBoltTable的数据模板定义-->
 		<textarea class="jb_tpl_box" id="customerRowtpl_#(pageId)">
 {@each datas as data,index}
@@ -47,21 +29,48 @@
 </tr>
 {@/each}
 </textarea>
+
+		<!-- 工具条 toolbar -->
+		<div class="jbolt_table_toolbar" id="customer_toolbar_#(pageId)">
+			<div class="row">
+				<div class="col-sm-6 text-left">
+					<div class="btn-group" role="group" aria-label="btn-group">
+						<button data-dialogbtn data-area="350,250"
+							data-handler="refreshJBoltTable" data-title="新增"
+							data-url="admin/siargo/customer/add"
+							class="btn btn-outline-primary btn-sm">
+							<i class="fa fa-plus"></i> 新增
+						</button>
+					</div>
+				</div>
+				<div class="col-sm-6 text-right">
+					<form class="form-inline d-inline-block" id="customerForm_#(pageId)"
+					      onsubmit="return false;" method="post">
+						<input type="text" data-with-clearbtn="true" autocomplete="off"
+							class="form-control" placeholder="输入关键字搜索" name="keywords"
+							value="" />
+						<button type="submit" class="btn btn-outline-secondary">
+							<i class="fa fa-search"></i> 查询
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
 		<table class="jbolt_table jbolt_main_table table-center"
-			data-jbolttable data-height="fill" 
-			data-ajax="true"
-			data-url="admin/siargo/customer/datas" 
-			data-column-resize="true"
+			data-jbolttable data-ajax="true"
+			data-pagesize="100"
+		    data-height="fill_box"
+			data-url="admin/siargo/customer/datas"
 			data-conditions-form="customerForm_#(pageId)"
 			data-rowtpl="customerRowtpl_#(pageId)"
-			data-page="customerPage_#(pageId)" 
-			data-fixed-columns-left="1,2"
-			data-fixed-columns-right="-1">
+			data-page="customerPage_#(pageId)"
+			data-toolbar="customer_toolbar_#(pageId)">
 			<thead class="fw-normal">
 				<tr>
-					<th data-width="60">序号</th>
-					<th data-min-width="150" data-column="name">客户名称</th>
-					<th data-width="150">操作</th>
+					<th data-width="70">序号</th>
+					<th data-min-width="220" data-column="name">客户名称</th>
+					<th data-width="120">操作</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -70,4 +79,3 @@
 	</div>
 </div>
 #end
-

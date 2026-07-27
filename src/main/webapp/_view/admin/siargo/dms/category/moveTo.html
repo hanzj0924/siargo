@@ -1,0 +1,42 @@
+#@jboltLayout()
+#define main()
+<div class="jbolt_page">
+<div class="jbolt_page_content">
+<form onsubmit="return false;" id="dmsCategoryMoveToForm" action="admin/siargo/dms/category/doMoveTo" method="post">
+<input type="hidden" name="id" value="#(dmsCategory.id)" />
+<div class="row">
+	<div class="col">
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">当前类别</label>
+		<div class="col">
+			<input type="text" class="form-control" value="#(dmsCategory.name)" readonly />
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-3 col-form-label">移动到</label>
+		<div class="col">
+			<div class="d-flex">
+				<select name="targetId" class="form-control flex-grow-1" data-rule="required">
+					<option value="">=请选择目标类别=</option>
+					#for(category : categories)
+					<option value="#(category.id)">#(category.sortRank). #(category.name)</option>
+					#end
+				</select>
+				<select name="position" class="form-control ml-2" style="width: 90px; flex: none;">
+					<option value="before">之前</option>
+					<option value="after">之后</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	</div>
+</div>
+</form>
+</div>
+</div>
+#end
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="dmsCategoryMoveToForm")
+#end
