@@ -5,9 +5,9 @@
 /* 0. Global — 全局通用                                              */
 /* ================================================================ */
 
-/* --- 0.1 上移/下移按钮统一 UI（outline 边框按钮风格） --- */
-.jbolt_table td a[data-title="上移"],
-.jbolt_table td a[data-title="下移"] {
+/* --- 0.1 上移/下移按钮统一 UI（outline 边框按钮风格）；dms 类别页用 JBolt 裸图标风格，排除 --- */
+.jbolt_table:not(.dms-cat-table) td a[data-title="上移"],
+.jbolt_table:not(.dms-cat-table) td a[data-title="下移"] {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -25,15 +25,15 @@
 }
 
 /* 图标颜色跟随按钮（覆盖 c-info 等着色类） */
-.jbolt_table td a[data-title="上移"] i,
-.jbolt_table td a[data-title="下移"] i {
+.jbolt_table:not(.dms-cat-table) td a[data-title="上移"] i,
+.jbolt_table:not(.dms-cat-table) td a[data-title="下移"] i {
 	color: inherit !important;
 	margin: 0;
 }
 
 /* hover 填充效果 */
-.jbolt_table td a[data-title="上移"]:hover,
-.jbolt_table td a[data-title="下移"]:hover {
+.jbolt_table:not(.dms-cat-table) td a[data-title="上移"]:hover,
+.jbolt_table:not(.dms-cat-table) td a[data-title="下移"]:hover {
 	background-color: #17a2b8;
 	color: #fff;
 }
@@ -491,11 +491,20 @@
 	flex-direction: column;
 }
 
-/* 类别视图容器 - 填充剩余空间，内部可滚动 */
+/* 类别视图容器 - flex 纵向布局，内部左右面板各自滚动 */
 [id^="categoryView_"] {
 	flex: 1;
 	min-height: 0;
-	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+/* 类别视图内容区 - 填充剩余空间，高度传递给左右布局 */
+[id^="categoryView_"] > .jbolt_page_content {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
 }
 
 /* 页面标题栏 - 固定高度不被压缩 */
@@ -503,45 +512,340 @@
 	flex-shrink: 0;
 }
 
-/* ========== 类别文件夹卡片样式 ========== */
-.category-card {
-	background: #fff; /* 白色背景 */
-	border: 1px solid #e5e5e5; /* 浅灰色边框 */
-	border-radius: 8px; /* 圆角 */
-	padding: 15px 10px; /* 内边距：上下15px 左右10px */
-	margin-bottom: 20px; /* 卡片间底部间距 */
-	cursor: pointer; /* 鼠标悬浮变手型 */
-	transition: all 0.2s ease; /* 悬浮动画过渡 */
-	text-align: center; /* 内容居中 */
+/* ========== 树形导航 + 紧凑列表布局（新版） ========== */
+
+/* 顶部全局搜索框：相对整个标题行绝对定位，保证在页面中真正居中 */
+.dms-page-header-row {
+	position: relative;
+	/* 搜索框绝对定位不撑开行高，需保证行高足够容纳（38px 输入框 + 余量） */
+	min-height: 44px;
 }
 
-/* 卡片悬浮效果 */
-.category-card:hover {
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 阴影浮起效果 */
-	border-color: #007bff; /* 边框变蓝色高亮 */
-	transform: translateY(-2px); /* 向上微移2px */
+.dms-global-search {
+	width: 340px;
+	flex-wrap: nowrap;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1;
 }
 
-/* 文件夹图标 */
-.category-card .folder-icon {
-	font-size: 40px; /* 图标大小 */
-	color: #f0ad4e; /* 橙黄色 */
-	margin-bottom: 10px; /* 图标与名称间距 */
+/* 窄屏时列堆叠，取消绝对定位避免遮挡 */
+@media (max-width: 991px) {
+	.dms-global-search {
+		position: static;
+		transform: none;
+		margin: 0 auto;
+	}
 }
 
-/* 类别名称 */
-.category-card .category-name {
-	font-size: 18px; /* 字号 */
-	font-weight: 545; /* 中等粗细 */
-	color: #333; /* 深灰色字体 */
-	margin-bottom: 5px; /* 名称与计数间距 */
-	word-break: break-all; /* 长名称自动换行 */
+.dms-global-search .form-control:focus {
+	border-color: #5b8def;
+	box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.1);
 }
 
-/* 文件数量 */
-.category-card .file-count {
-	font-size: 12px; /* 小字号 */
-	color: #999; /* 浅灰色 */
+/* 全局搜索按钮：简洁白底细边，悬停仅描边文字变主题蓝 */
+.dms-global-search .input-group-append .btn {
+	background: #fff;
+	color: #495057;
+	border-color: #dee2e6;
+	transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.dms-global-search .input-group-append .btn:hover {
+	background: #fff;
+	color: #5b8def;
+	border-color: #5b8def;
+}
+
+/* 文件列表查询按钮：与全局搜索按钮同款简洁风格 */
+.dms-list-panel .jbolt_page_title .form-inline .btn[type="submit"] {
+	background: #fff;
+	color: #495057;
+	border-color: #dee2e6;
+	transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.dms-list-panel .jbolt_page_title .form-inline .btn[type="submit"]:hover {
+	background: #fff;
+	color: #5b8def;
+	border-color: #5b8def;
+}
+
+/* 查询表单默认隐藏（初始/全部类别/全局搜索态），仅进入具体分类后显示 */
+/* 精确匹配表单本身（属性选择器兼容 Enjoy 动态 id），不影响外层 .col-md 布局 */
+.dms-list-panel form[id^="dmsFileForm_"] {
+	display: none;
+}
+
+.dms-list-panel .in-category form[id^="dmsFileForm_"] {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	justify-content: center;
+}
+
+/* data-with-clearbtn 的包裹层（.ac_input_box）被 JBolt 强制 inline-block，
+   基线对齐产生底部空隙导致输入框偏下，改为 inline-flex 垂直居中 */
+.dms-list-panel form[id^="dmsFileForm_"] .ac_input_box {
+	display: inline-flex !important;
+	align-items: center;
+	vertical-align: middle;
+}
+
+/* 全局搜索结果中命中关键字高亮 */
+mark.dms-search-hit {
+	background: #ffeb3b;
+	color: inherit;
+	padding: 0 1px;
+	border-radius: 2px;
+}
+
+/* 左右布局容器 */
+.dms-category-layout {
+	display: flex;
+	height: 100%;
+	gap: 0;
+}
+
+/* 左侧树形导航面板 */
+.dms-tree-panel {
+	width: 260px;
+	flex-shrink: 0;
+	border-right: 1px solid #e9ecef;
+	display: flex;
+	flex-direction: column;
+	background: #f8f9fa;
+	overflow: hidden;
+	/* 底部留白 15px，与右侧 .jbolt_page 内边距一致，保证左右内容底部对齐 */
+	margin-bottom: 15px;
+}
+
+.dms-tree-header {
+	/* 上内边距 25px = 右侧 .jbolt_page 的 15px 页内边距 + .jbolt_page_title 的 10px 内边距，
+	   使搜索框与右侧表单控件水平对齐、底部分隔线连成一条 */
+	padding: 25px 12px 10px;
+	border-bottom: 1px solid #e9ecef;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+}
+
+.dms-tree-search {
+	position: relative;
+	display: flex;
+	align-items: center;
+	flex: 1;
+}
+
+.dms-tree-search i {
+	position: absolute;
+	left: 10px;
+	color: #adb5bd;
+	font-size: 13px;
+}
+
+.dms-tree-search input {
+	width: 100%;
+	box-sizing: border-box;
+	height: 30px;
+	padding: 4px 12px 4px 30px;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	font-size: 12px;
+	background: #fff;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dms-tree-search input:focus {
+	outline: none;
+	border-color: #5b8def;
+	box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.1);
+}
+
+.dms-tree-body {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 8px;
+}
+
+/* 树节点 */
+.dms-tree-node {
+	display: flex;
+	align-items: center;
+	padding: 8px 10px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 13px;
+	color: #495057;
+	transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+	margin-bottom: 2px;
+}
+
+.dms-tree-node:hover {
+	background: #e9ecef;
+	transform: translateX(2px);
+}
+
+.dms-tree-node.active {
+	background: #5b8def;
+	color: #fff;
+	box-shadow: 0 2px 6px rgba(91, 141, 239, 0.35);
+}
+
+.dms-tree-node.active .dms-tree-node-count {
+	background: rgba(255,255,255,0.25);
+	color: #fff;
+}
+
+.dms-tree-node i {
+	width: 18px;
+	margin-right: 8px;
+	font-size: 14px;
+	flex-shrink: 0;
+	/* 文件夹图标颜色由 JS 通过 --folder-color 变量按类别轮换分配 */
+	color: var(--folder-color, #868e96);
+}
+
+.dms-tree-node.active i {
+	color: #fff;
+}
+
+.dms-tree-node-name {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dms-tree-node-count {
+	background: #e9ecef;
+	color: #495057;
+	font-size: 11px;
+	padding: 2px 6px;
+	border-radius: 10px;
+	margin-left: 6px;
+	flex-shrink: 0;
+}
+
+/* 右侧文件列表面板（嵌入第二层文件列表页面） */
+.dms-list-panel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	overflow: hidden;
+}
+
+/* 嵌入的文件列表页面填满右侧面板 */
+.dms-list-panel > [id^="fileListView_"] {
+	flex: 1;
+	min-height: 0;
+}
+
+.dms-list-panel .jbolt_page_title {
+	padding: 10px 16px;
+	border-bottom: 1px solid #e9ecef;
+}
+
+/* 右侧标题栏查询表单紧凑化（高度 30px、小字号） */
+.dms-list-panel .jbolt_page_title .form-inline .form-control {
+	height: 30px;
+	padding: 4px 8px;
+	font-size: 12px;
+}
+
+.dms-list-panel .jbolt_page_title .form-inline .btn {
+	height: 30px;
+	padding: 4px 10px;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+/* 树骨架屏 */
+.dms-skeleton-item {
+	display: flex;
+	align-items: center;
+	padding: 10px 12px;
+	margin-bottom: 4px;
+}
+
+.dms-skeleton-item .dms-skeleton-icon {
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+	margin-right: 10px;
+	margin-bottom: 0;
+}
+
+.dms-skeleton-item .dms-skeleton-text {
+	flex: 1;
+	height: 14px;
+	margin-bottom: 0;
+}
+
+/* ========== 页面标题区 ========== */
+
+.dms-page-title {
+	font-size: 20px;
+	font-weight: 600;
+	color: #2c3e50;
+	margin: 0;
+}
+
+.dms-page-desc {
+	font-size: 12px;
+	color: #868e96;
+	margin-top: 4px;
+}
+
+/* 空状态美化 */
+.dms-empty-state {
+	text-align: center;
+	padding: 60px 20px;
+	color: #868e96;
+}
+
+.dms-empty-state i {
+	font-size: 48px;
+	color: #dee2e6;
+	margin-bottom: 16px;
+	display: block;
+}
+
+.dms-empty-state .empty-text {
+	font-size: 14px;
+	margin-bottom: 8px;
+}
+
+.dms-empty-state .empty-link {
+	color: #5b8def;
+	text-decoration: none;
+}
+
+.dms-empty-state .empty-link:hover {
+	text-decoration: underline;
+}
+
+/* 骨架屏加载动画 */
+.dms-skeleton-icon {
+	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+	background-size: 200% 100%;
+	animation: skeleton-loading 1.5s infinite;
+}
+
+.dms-skeleton-text {
+	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+	background-size: 200% 100%;
+	animation: skeleton-loading 1.5s infinite;
+	border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+	0% { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
 }
 
 /* ========== 面包屑导航样式 ========== */
@@ -585,6 +889,40 @@
 	color: #495057; /* 深灰色字体 */
 	border-radius: 10px; /* 圆角药丸形状 */
 	font-size: 12px; /* 小字号 */
+}
+
+/* ========== 类别管理页：限宽居中 + 表格视觉 ========== */
+/* JBoltTable 初始化时会把工具条移入自动生成的 .jbolt_table_view 容器内，
+   故通过工具条 id 前缀反向锁定该容器整体限宽（含工具条、表格、分页） */
+.jbolt_table_view:has(> [id^="dmsCategory_toolbar_"]) {
+	max-width: 960px;
+	margin-left: auto;
+	margin-right: auto;
+}
+/* 工具栏：与表格间距收紧，按钮统一 8px 圆角 */
+.dms-cat-toolbar { margin-bottom: 8px; }
+.dms-cat-toolbar .btn { border-radius: 8px; }
+/* 行：垂直居中、行高约 48px、悬停浅灰底 */
+.dms-cat-table tbody td { vertical-align: middle; height: 48px; }
+.dms-cat-table tbody tr:hover { background: #f8f9fa; }
+/* 黄色描边文件夹图标（fa-folder-o），与页面标题图标同色 */
+.dms-cat-folder { color: #ffc107; font-size: 16px; }
+.dms-cat-name { font-weight: 500; color: #343a40; }
+/* 文件数药丸徽标：中性灰不抢焦点；空类别虚线淡灰 */
+.dms-cat-count {
+	display: inline-block;
+	min-width: 36px;
+	text-align: center;
+	padding: 2px 10px;
+	border-radius: 999px;
+	background: #f1f3f5;
+	color: #495057;
+	font-size: 12px;
+}
+.dms-cat-count.is-empty {
+	background: transparent;
+	border: 1px dashed #dee2e6;
+	color: #adb5bd;
 }
 
 /* ---- 通用居中卡片表格布局（dms/category、customer 等模块复用） ---- */

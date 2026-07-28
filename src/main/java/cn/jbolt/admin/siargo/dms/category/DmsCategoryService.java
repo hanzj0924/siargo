@@ -301,13 +301,14 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	}
 	
 	/**
-	 * 获取所有类别列表，附带每个类别下的文件数量
+	 * 获取所有类别列表，附带每个类别下的文件数量和最近上传时间
 	 * 用于前端展示类别选择器或统计信息
-	 * @return 类别列表（Record格式），每项包含 id, name, sortRank, fileCount
+	 * @return 类别列表（Record格式），每项包含 id, name, sortRank, fileCount, lastupdatetime
 	 */
 	public List<Record> getCategoryListWithCount() {
 		// 使用驼峰风格别名，与前端 JavaScript 保持一致
-		String sql = "SELECT c.id, c.name, c.sort_rank AS sortRank, COUNT(f.id) AS fileCount " +
+		String sql = "SELECT c.id, c.name, c.sort_rank AS sortRank, COUNT(f.id) AS fileCount, " +
+				"MAX(f.upload_time) AS lastupdatetime " +
 				"FROM siargo_dms_category c " +
 				"LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 " +
 				"GROUP BY c.id, c.name, c.sort_rank " +

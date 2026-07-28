@@ -8,54 +8,66 @@
 	<!-- ==================== 第一层：类别文件夹视图 ==================== -->
 	<div id="categoryView_#(pageId)">
 		<div class="jbolt_page_title">
-			<div class="row">
+			<div class="row align-items-center dms-page-header-row">
+				<div class="col-md-auto">
+					<h1 class="dms-page-title">
+						<i class="fa fa-folder-open-o text-warning mr-2"></i>管理技术通知单
+					</h1>
+				</div>
+				<div class="col-md">
+					<div class="input-group dms-global-search">
+						<input type="text" id="globalSearchInput_#(pageId)" data-with-clearbtn="true"
+							autocomplete="off" class="form-control" placeholder="输入文件名或关键字搜索" />
+						<div class="input-group-append">
+							<button type="submit" class="btn btn-outline-secondary"
+								onclick="globalSearch_#(pageId)()">
+								<i class="fa fa-search"></i> 全局搜索
+							</button>
+						</div>
+					</div>
+
+				</div>
 				<div class="col-md-auto">
 					<a href="admin/siargo/dms/category" data-openpage
-						class="btn btn-outline-primary btn-sm"> <i class="fa fa-cog"></i>
-						管理技术通知单类别
+						class="btn btn-outline-primary btn-md mr-2">
+						<i class="fa fa-cog"></i> 管理类别
 					</a>
-				</div>
-				<div class="col">
-					<div class="form-inline">
-						<input type="text" id="globalSearchInput_#(pageId)"
-							autocomplete="off" class="form-control" placeholder="输入文件名或关键字搜索"
-							style="width: 250px;" data-with-clearbtn="true" />
-						<button type="button" class="btn btn-outline-secondary"
-							onclick="globalSearch_#(pageId)()">
-							<i class="fa fa-search"></i> 全局搜索
-						</button>
-					</div>
-				</div>
-				<div class="col-md-auto">
 					<button data-dialogbtn data-area="1300,800" data-title="失效文件列表"
 						data-url="admin/siargo/dms/file/inactiveList"
-						class="btn btn-outline-danger btn-sm ml-2">
-						<i class="fa fa-eye-slash"></i> 查看失效通知单
+						class="btn btn-outline-danger btn-md">
+						<i class="fa fa-eye-slash"></i> 失效通知单
 					</button>
 				</div>
 			</div>
 		</div>
 		<div class="jbolt_page_content">
-			<div class="row" id="categoryContainer_#(pageId)">
-				<!-- 类别卡片将通过 AJAX 动态加载 -->
-			</div>
-		</div>
-	</div>
-
-	<!-- ==================== 第二层：文件列表视图 ==================== -->
-	<!-- 添加 jbolt_page 类，让 JBolt 的 getFillHeight 能在此视图内正确查找 .jbolt_page_title -->
-	<div id="fileListView_#(pageId)" class="jbolt_page jb_vflex"
-		style="display: none;">
-		<div class="jbolt_page_title jb_vheader">
-			<div class="row">
-				<div class="col-md-auto">
-					<div class="breadcrumb-nav">
-						<a href="javascript:;" onclick="backToCategories_#(pageId)()">技术通知单</a>
-						<span class="separator">&gt;</span> <span class="current"
-							id="breadcrumbCategory_#(pageId)"></span>
+			<div class="dms-category-layout">
+				<!-- 左侧：树形导航 -->
+				<div class="dms-tree-panel">
+					<div class="dms-tree-header">
+						<div class="dms-tree-search">
+							<i class="fa fa-search"></i>
+							<input type="text" id="treeSearchInput_#(pageId)" placeholder="搜索类别..." autocomplete="off" />
+						</div>
+					</div>
+					<div class="dms-tree-body" id="categoryTree_#(pageId)">
+						<!-- 树形导航通过 JS 动态生成 -->
 					</div>
 				</div>
-				<div class="col">
+				<!-- 右侧：文件列表（第二层内容嵌入右侧面板） -->
+				<div class="dms-list-panel">
+					<!-- 保留 jbolt_page 类，让 JBolt 的 getFillHeight 能在此视图内正确查找 .jbolt_page_title -->
+					<div id="fileListView_#(pageId)" class="jbolt_page jb_vflex">
+		<div class="jbolt_page_title jb_vheader">
+			<div class="row">
+				<div class="col-md-3 text-left">
+					<div class="breadcrumb-nav">
+						<a href="javascript:;" onclick="enterAllCategories_#(pageId)()">技术通知单</a>
+						<span class="separator">&gt;</span> <span class="current"
+							id="breadcrumbCategory_#(pageId)">请选择类别</span>
+					</div>
+				</div>
+				<div class="col-md-6 text-center">
 					<form class="form-inline" id="dmsFileForm_#(pageId)"
 						onsubmit="return false;" method="get" action="">
 						<input type="hidden" name="categoryId"
@@ -63,33 +75,29 @@
 							name="isGlobalSearch" id="isGlobalSearchInput_#(pageId)" value="" />
 						<input type="text" data-with-clearbtn="true" autocomplete="off"
 							class="form-control" placeholder="搜索文件名或关键字" name="keywords"
-							value="" style="width: 150px;" /> <select class="form-control"
-							name="isActive" style="width: 100px;">
+							value="" style="width: 130px;" /> <select class="form-control"
+							name="isActive" style="width: 88px;">
 							<option value="">全部状态</option>
 							<option value="1">已生效</option>
 							<option value="0">未生效</option>
 						</select> <input type="text" data-with-clearbtn="true" class="form-control"
-							data-date data-type="month" placeholder="选择年月" data-width="130px"
+							data-date data-type="month" placeholder="选择年月" data-width="108px"
 							name="activeDate" />
 						<button type="submit" class="btn btn-outline-secondary">
 							<i class="fa fa-search"></i> 查询
 						</button>
 					</form>
 				</div>
-				<div class="col-md-auto">
+				<div class="col-md-3 text-right">
 					<button data-dialogbtn data-area="900,800"
 						data-handler="refreshJBoltTable" data-title="新增文件"
 						id="addFileBtn_#(pageId)" data-url="admin/siargo/dms/file/add"
-						class="btn btn-outline-primary btn-sm">
+						class="btn btn-outline-primary btn-sm" style="display: none;">
 						<i class="fa fa-plus"></i> 新增
 					</button>
 					<button onclick="jboltTableRefresh(this)"
 						class="btn btn-outline-secondary btn-sm">
 						<i class="fa fa-refresh"></i> 刷新
-					</button>
-					<button type="button" class="btn btn-outline-success btn-sm"
-						onclick="backToCategories_#(pageId)()">
-						<i class="fa fa-arrow-left"></i> 返回
 					</button>
 				</div>
 			</div>
@@ -103,6 +111,7 @@
 <td style="text-align: left">
 	<a id="pdfFrame" data-openpage="jboltlayer" data-resize="true"
 						data-load-type="iframe" href="${data.filepath}"
+						title="${data.filename}"
 						onclick="loadPDF(this, '${data.filepath}')">
 	${data.filename}
 	</a>
@@ -154,12 +163,12 @@
 			<thead class="fw-normal">
 				<tr>
 					<th data-width="60">序号</th>
-					<th data-min-width="500" data-column="file_name">文件名</th>
-					<th data-min-width="400">关键字</th>
+					<th data-min-width="400" data-column="file_name">文件名</th>
+					<th data-min-width="200">关键字</th>
 					<th data-width="120" class="category-col">所属类别</th>
-					<th data-width="80" data-column="description">备注</th>
-					<th data-width="120" data-column="active_date">生效日期</th>
-					<th data-width="120" data-column="uploaderName">上传人员</th>
+					<th data-width="100" data-column="description">备注</th>
+					<th data-width="110" data-column="active_date">生效日期</th>
+					<th data-width="110" data-column="uploaderName">上传人员</th>
 					<th data-width="160" data-column="upload_time">上传时间</th>
 					<th data-width="80">是否生效</th>
 					<th data-width="100">操作</th>
@@ -168,9 +177,12 @@
 			<tbody>
 			</tbody>
 		</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-</div>
-
 </div>
 #end #define js()
 <script type="text/javascript">
@@ -178,10 +190,28 @@
 var _currentCategoryId_#(pageId) = null;
 var _currentCategoryName_#(pageId) = '';
 var _pageId = '#(pageId)';
+var _allCategories_#(pageId) = []; // 存储所有类别数据
+var _treeSearchKeyword_#(pageId) = ''; // 树搜索关键字
+var _globalSearchKeywords_#(pageId) = ''; // 全局搜索关键字（用于结果高亮）
+// 根据类别 ID 计算稳定的伪随机色（同一类别颜色固定，相邻类别颜色分散）
+// HSL 程序化色板：100 个色相档位 × 柔和的饱和度/明度微调
+function getFolderColor_#(pageId)(id) {
+    var str = String(id);
+    var hash = 5381;
+    for (var i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0;
+    }
+    hash = Math.abs(hash);
+    var h = (hash % 100) * 3.6;              // 色相：100 档，覆盖整个色轮
+    var s = 55 + ((hash >> 7) % 21);         // 饱和度：55% ~ 75%，保持柔和
+    var l = 48 + ((hash >> 13) % 13);        // 明度：48% ~ 60%，避免过亮过暗
+    return 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
+}
 
 // 页面加载时
 $(function() {
     loadCategories_#(pageId)();
+    initSearchHitObserver_#(pageId)();
     
     // 检查 URL 参数，如果有 categoryId 则直接进入文件列表
     var urlCategoryId = getUrlParam('categoryId');
@@ -197,6 +227,17 @@ $(function() {
         }
     });
     
+    // 树搜索输入事件（防抖）
+    var treeSearchTimer;
+    $('#treeSearchInput_#(pageId)').on('input', function() {
+        clearTimeout(treeSearchTimer);
+        var $input = $(this);
+        treeSearchTimer = setTimeout(function() {
+            _treeSearchKeyword_#(pageId) = $input.val().trim();
+            renderCategoryTree_#(pageId)();
+        }, 200);
+    });
+    
     // 新增按钮点击前，动态刷新 data-url，防止 JBolt 对话框框架缓存旧的 categoryId
     $('#addFileBtn_#(pageId)').on('mousedown', function() {
         if (_currentCategoryId_#(pageId)) {
@@ -209,63 +250,213 @@ $(function() {
         }
     });
     
-    // 监听文件列表视图的显示，自动刷新表格
-    var fileListViewEl_#(pageId) = document.getElementById('fileListView_#(pageId)');
-    if (fileListViewEl_#(pageId)) {
-        var fileListObserver_#(pageId) = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    var $fileListView = $('#fileListView_#(pageId)');
-                    // 只有当视图变为可见时才刷新
-                    if ($fileListView.is(':visible')) {
-                        // 延迟让浏览器完成渲染，然后模拟点击刷新按钮
-                        setTimeout(function() {
-                            // 模拟点击刷新按钮（手动点击此按钮已验证能成功刷新）
-                            var $refreshBtn = $fileListView.find('button[onclick*="jboltTableRefresh"]');
-                            if ($refreshBtn.length) {
-                                $refreshBtn[0].click();
-                            }
-                        }, 100);
-                    }
-                }
-            });
-        });
-        fileListObserver_#(pageId).observe(fileListViewEl_#(pageId), {
-            attributes: true,
-            attributeFilter: ['style']
-        });
-    }
 });
 
-// 加载类别列表
-function loadCategories_#(pageId)() {
+// 刷新右侧文件表格（延迟等待条件表单值就绪后模拟点击刷新按钮）
+function refreshFileTable_#(pageId)() {
+    setTimeout(function() {
+        var $refreshBtn = $('#fileListView_#(pageId)').find('button[onclick*="jboltTableRefresh"]');
+        if ($refreshBtn.length) {
+            $refreshBtn[0].click();
+        }
+    }, 50);
+}
+
+// 对单个元素内的文本节点做关键字高亮（命中片段包裹 <mark>）
+function highlightTextIn_#(pageId)(el, regex) {
+    $(el).contents().each(function() {
+        if (this.nodeType !== 3) {
+            return;
+        }
+        // 用捕获组 split：奇数索引为命中片段，各段单独转义后拼接
+        var segs = this.nodeValue.split(regex);
+        if (segs.length < 2) {
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < segs.length; i++) {
+            html += (i % 2 === 1)
+                ? '<mark class="dms-search-hit">' + escapeHtml(segs[i]) + '</mark>'
+                : escapeHtml(segs[i]);
+        }
+        $(this).replaceWith(html);
+    });
+}
+
+// 高亮表格新增行中命中的搜索关键字（仅全局搜索模式下生效）
+function highlightSearchHits_#(pageId)() {
+    var keywords = _globalSearchKeywords_#(pageId);
+    if (!keywords || !$('#fileListView_#(pageId)').hasClass('global-search-mode')) {
+        return;
+    }
+    // 转义正则特殊字符，避免 C++、(测试) 等关键字报错；捕获组用于 split 保留命中片段
+    var escaped = keywords.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp('(' + escaped + ')', 'gi');
+    $('#fileListView_#(pageId) .jbolt_table tbody tr').not('[data-hl]').each(function() {
+        $(this).attr('data-hl', '1');
+        // 文件名链接文本
+        $(this).find('td:eq(1) a').each(function() {
+            highlightTextIn_#(pageId)(this, regex);
+        });
+        // 关键字徽标文本
+        $(this).find('.keyword-badge').each(function() {
+            highlightTextIn_#(pageId)(this, regex);
+        });
+    });
+}
+
+// 全局搜索模式下，用实际结果条数更新面包屑
+function updateSearchResultCount_#(pageId)() {
+    if (!$('#fileListView_#(pageId)').hasClass('global-search-mode')) {
+        return;
+    }
+    // 按 data-id 去重统计：冻结列会克隆行 DOM，同一文件可能存在多份 tr
+    var ids = {};
+    $('#fileListView_#(pageId) .jbolt_table tbody tr[data-id]').each(function() {
+        ids[$(this).attr('data-id')] = 1;
+    });
+    var count = Object.keys(ids).length;
+    $('#breadcrumbCategory_#(pageId)').text(count + ' 条搜索结果');
+}
+
+// 监听表格行变化，全局搜索结果渲染后自动高亮
+function initSearchHitObserver_#(pageId)() {
+    var tbody = $('#fileListView_#(pageId) .jbolt_table tbody')[0];
+    if (!tbody || !window.MutationObserver) {
+        return;
+    }
+    var countReloadTimer;
+    new MutationObserver(function() {
+        highlightSearchHits_#(pageId)();
+        updateSearchResultCount_#(pageId)();
+        // 表格重渲染（新增/删除/编辑后刷新）时，防抖静默更新左侧类别文件数量
+        clearTimeout(countReloadTimer);
+        countReloadTimer = setTimeout(function() {
+            reloadCategoryCounts_#(pageId)();
+        }, 300);
+    }).observe(tbody, { childList: true });
+}
+
+// 静默重载类别文件数量（不显示骨架屏，直接重渲染树）
+function reloadCategoryCounts_#(pageId)() {
     $.getJSON(actionUrl('admin/siargo/dms/category/getCategoryListWithCount'), function(ret) {
         if (ret.state === 'ok' && ret.data) {
-            renderCategoryCards_#(pageId)(ret.data);
-        } else {
-            $('#categoryContainer_#(pageId)').html('<div class="col-12 text-center text-muted py-5">暂无类别数据</div>');
+            _allCategories_#(pageId) = ret.data;
+            renderCategoryTree_#(pageId)();
         }
     });
 }
 
-// 渲染类别卡片
-function renderCategoryCards_#(pageId)(categories) {
-    var html = '';
-    if (!categories || categories.length === 0) {
-        html = '<div class="col-12 text-center text-muted py-5">暂无类别数据，请先<a href="admin/siargo/dms/category">添加类别</a></div>';
-    } else {
-        for (var i = 0; i < categories.length; i++) {
-            var cat = categories[i];
-            var fileCount = cat.filecount || 0;
-            html += '<div class="col-lg-2 col-md-3 col-sm-4 col-6">' +
-                '<div class="category-card" onclick="enterCategory_#(pageId)(\'' + cat.id + '\', \'' + escapeHtml(cat.name) + '\')">' +
-                '<div class="folder-icon"><i class="fa fa-folder"></i></div>' +
-                '<div class="category-name">' + escapeHtml(cat.name) + '</div>' +
-                '<div class="file-count">' + fileCount + ' 个文件</div>' +
-                '</div></div>';
-        }
+// 加载类别列表
+function loadCategories_#(pageId)() {
+    // 显示骨架屏
+    var skeletonHtml = '';
+    for (var i = 0; i < 8; i++) {
+        skeletonHtml += '<div class="dms-skeleton-item">' +
+            '<div class="dms-skeleton-icon"></div>' +
+            '<div class="dms-skeleton-text"></div>' +
+            '</div>';
     }
-    $('#categoryContainer_#(pageId)').html(html);
+    $('#categoryTree_#(pageId)').html(skeletonHtml);
+    
+    $.getJSON(actionUrl('admin/siargo/dms/category/getCategoryListWithCount'), function(ret) {
+        if (ret.state === 'ok' && ret.data) {
+            _allCategories_#(pageId) = ret.data;
+            renderCategoryTree_#(pageId)();
+        } else {
+            showEmptyState_#(pageId)('暂无类别数据', '点击添加类别');
+        }
+    }).fail(function() {
+        showEmptyState_#(pageId)('加载失败，请刷新重试', null);
+    });
+}
+
+// 显示空状态（树形导航区域）
+function showEmptyState_#(pageId)(text, linkText) {
+    var html = '<div class="dms-empty-state">' +
+        '<i class="fa fa-folder-open-o"></i>' +
+        '<div class="empty-text">' + text + '</div>';
+    if (linkText) {
+        html += '<a href="admin/siargo/dms/category" class="empty-link">' + linkText + '</a>';
+    }
+    html += '</div>';
+    $('#categoryTree_#(pageId)').html(html);
+}
+
+// 获取过滤后的类别列表（保持后端 sort_rank 排序）
+function getFilteredCategories_#(pageId)() {
+    var list = _allCategories_#(pageId).slice();
+    
+    // 搜索过滤
+    if (_treeSearchKeyword_#(pageId)) {
+        var kw = _treeSearchKeyword_#(pageId).toLowerCase();
+        list = list.filter(function(cat) {
+            return cat.name && cat.name.toLowerCase().indexOf(kw) !== -1;
+        });
+    }
+    
+    return list;
+}
+
+// 渲染树形导航
+function renderCategoryTree_#(pageId)() {
+    var list = getFilteredCategories_#(pageId)();
+    var totalFiles = 0;
+    for (var i = 0; i < list.length; i++) {
+        totalFiles += parseInt(list[i].filecount, 10) || 0;
+    }
+    
+    var html = '<div class="dms-tree-node' + (!_currentCategoryId_#(pageId) ? ' active' : '') + '" onclick="enterAllCategories_#(pageId)()">' +
+        '<i class="fa fa-th-large" style="--folder-color: #5b8def"></i>' +
+        '<span class="dms-tree-node-name">全部类别</span>' +
+        '<span class="dms-tree-node-count">' + totalFiles + '</span>' +
+        '</div>';
+    
+    for (var i = 0; i < list.length; i++) {
+        var cat = list[i];
+        var isActive = _currentCategoryId_#(pageId) == cat.id;
+        var color = getFolderColor_#(pageId)(cat.id);
+        html += '<div class="dms-tree-node' + (isActive ? ' active' : '') + '" onclick="enterCategory_#(pageId)(\'' + cat.id + '\', \'' + escapeHtml(cat.name) + '\')">' +
+            '<i class="fa fa-folder" style="--folder-color: ' + color + '"></i>' +
+            '<span class="dms-tree-node-name">' + escapeHtml(cat.name) + '</span>' +
+            '<span class="dms-tree-node-count">' + (parseInt(cat.filecount, 10) || 0) + '</span>' +
+            '</div>';
+    }
+    
+    $('#categoryTree_#(pageId)').html(html);
+}
+
+// 点击"全部类别"：清空选中，右侧保持空白
+function enterAllCategories_#(pageId)() {
+    _currentCategoryId_#(pageId) = null;
+    _currentCategoryName_#(pageId) = '';
+    
+    $('#breadcrumbCategory_#(pageId)').text('请选择类别');
+    $('#categoryIdInput_#(pageId)').val('');
+    $('#isGlobalSearchInput_#(pageId)').val('');
+    $('#addFileBtn_#(pageId)').hide();
+    
+    // 清空搜索条件
+    $('#dmsFileForm_#(pageId) input[name="keywords"]').val('');
+    $('#dmsFileForm_#(pageId) select[name="isActive"]').val('');
+    $('#dmsFileForm_#(pageId) input[name="activeDate"]').val('');
+    
+    // 退出全局搜索模式和分类态（隐藏查询表单）
+    _globalSearchKeywords_#(pageId) = '';
+    $('#fileListView_#(pageId)').removeClass('global-search-mode in-category');
+    
+    // 设置数据源 URL（categoryId 为空时后端返回空页）
+    var $table = $('#fileListView_#(pageId) .jbolt_table');
+    $table.attr('data-url', 'admin/siargo/dms/file/datas').data('url', 'admin/siargo/dms/file/datas');
+    
+    // 隐藏"所属类别"列
+    $('#fileListView_#(pageId)').removeClass('show-category');
+    
+    // 刷新表格以清空已有数据行
+    refreshFileTable_#(pageId)();
+    
+    // 更新树的 active 状态
+    renderCategoryTree_#(pageId)();
 }
 
 // 进入类别
@@ -289,6 +480,10 @@ function enterCategory_#(pageId)(id, name) {
     $('#dmsFileForm_#(pageId) select[name="isActive"]').val('');
     $('#dmsFileForm_#(pageId) input[name="activeDate"]').val('');
     
+    // 退出全局搜索模式，进入分类态（显示查询表单）
+    _globalSearchKeywords_#(pageId) = '';
+    $('#fileListView_#(pageId)').removeClass('global-search-mode').addClass('in-category');
+    
     // 设置数据源 URL
     var $table = $('#fileListView_#(pageId) .jbolt_table');
     $table.attr('data-url', 'admin/siargo/dms/file/datas').data('url', 'admin/siargo/dms/file/datas');
@@ -296,42 +491,24 @@ function enterCategory_#(pageId)(id, name) {
     // 隐藏"所属类别"列（分类文件列表不显示）
     $('#fileListView_#(pageId)').removeClass('show-category');
     
-    // 切换视图（MutationObserver 会自动检测并刷新表格）
-    $('#categoryView_#(pageId)').hide();
-    $('#fileListView_#(pageId)').show();
+    // 刷新右侧文件表格
+    refreshFileTable_#(pageId)();
     
-    // 对未初始化的清除按钮重新初始化（视图初始隐藏导致页面加载时未正确初始化）
-    $('#fileListView_#(pageId)').find('input[data-with-clearbtn]').each(function() {
-        if (!$(this).parent().hasClass('ac_input_box')) {
-            JBoltInputWithClearBtnUtil.initInput($(this));
-        }
-    });
-}
-
-// 返回类别视图
-function backToCategories_#(pageId)() {
-    // 切换视图
-    $('#fileListView_#(pageId)').hide();
-    $('#categoryView_#(pageId)').show();
-    
-    // 重新加载类别（更新文件计数）
-    loadCategories_#(pageId)();
-    
-    // 清空状态
-    _currentCategoryId_#(pageId) = null;
-    _currentCategoryName_#(pageId) = '';
+    // 更新树的 active 状态
+    renderCategoryTree_#(pageId)();
 }
 
 // 全局搜索
 function globalSearch_#(pageId)() {
     var keywords = $('#globalSearchInput_#(pageId)').val();
     if (!keywords || !keywords.trim()) {
-        jboltTip('请输入搜索关键字');
+        // 无有效内容时回到全部类别（初始态）
+        enterAllCategories_#(pageId)();
         return;
     }
     
-    // 更新面包屑
-    $('#breadcrumbCategory_#(pageId)').text('搜索结果: ' + keywords);
+    // 更新面包屑（结果渲染完成后由观察器替换为"N 条搜索结果"）
+    $('#breadcrumbCategory_#(pageId)').text('正在搜索: ' + keywords);
     
     // 设置隐藏字段 - 清空 categoryId，设置全局搜索标记（在切换视图前设置）
     $('#categoryIdInput_#(pageId)').val('');
@@ -339,6 +516,10 @@ function globalSearch_#(pageId)() {
     
     // 隐藏新增按钮（全局搜索时不显示）
     $('#addFileBtn_#(pageId)').hide();
+    
+    // 记录关键字（用于结果高亮），进入全局搜索模式并退出分类态（隐藏查询表单）
+    _globalSearchKeywords_#(pageId) = keywords.trim();
+    $('#fileListView_#(pageId)').addClass('global-search-mode').removeClass('in-category');
     
     // 设置搜索关键字
     $('#dmsFileForm_#(pageId) input[name="keywords"]').val(keywords);
@@ -352,16 +533,12 @@ function globalSearch_#(pageId)() {
     // 显示"所属类别"列（全局搜索结果需要显示）
     $('#fileListView_#(pageId)').addClass('show-category');
     
-    // 切换视图（MutationObserver 会自动检测并刷新表格）
-    $('#categoryView_#(pageId)').hide();
-    $('#fileListView_#(pageId)').show();
+    // 刷新右侧文件表格
+    refreshFileTable_#(pageId)();
     
-    // 对未初始化的清除按钮重新初始化（视图初始隐藏导致页面加载时未正确初始化）
-    $('#fileListView_#(pageId)').find('input[data-with-clearbtn]').each(function() {
-        if (!$(this).parent().hasClass('ac_input_box')) {
-            JBoltInputWithClearBtnUtil.initInput($(this));
-        }
-    });
+    // 更新树的 active 状态（搜索结果不高亮任何节点）
+    _currentCategoryId_#(pageId) = '__search__';
+    renderCategoryTree_#(pageId)();
 }
 
 // HTML 转义函数

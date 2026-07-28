@@ -1,5 +1,13 @@
 ## 更新日志
 
+### v2.7.16 (2026-07-28)
+- refactor(dms): 类别管理页（category/index.html）表格内重设计：四列布局（序号/类别名称/文件数/操作）消除空白区域，删除勾选列，操作列改为行内编辑/删除/上移/下移/移动到（JBolt 裸图标风格），工具栏简化为新增类别+初始化排序+刷新+搜索
+- feat(dms): 文件管理页左侧新增类别文件夹树导航，按类别 id 哈希着色文件夹图标，选中类别后右侧加载文件列表，未选择类别时右侧保持空白
+- improve(dms): DmsFileService.paginateAdminDatas 类别 ID 为空时返回带分页参数的空页对象（原裸 new Page 会导致前端分页组件异常），类别过滤条件改为动态拼接
+- improve(dms): DmsCategoryService.getCategoryListWithCount 增加 lastupdatetime（类别下文件最近上传时间），供文件页类别树展示
+- style(dms): 类别页引入 siargo.css（原页面从未加载导致自定义样式全部失效），新增 dms-cat-* 样式组：960px 限宽居中、48px 行高、黄色描边文件夹图标、文件数药丸徽标
+- style(global): 上移/下移全局 outline 边框按钮规则加 :not(.dms-cat-table) 排除类别页，类别页保持 JBolt 裸图标风格，supplier 等其他模块不受影响
+
 ### v2.7.15 (2026-07-24)
 - feat(pdffolder): 新增报告单模板管理模块（/admin/siargo/qarep/pdffolder），支持版号与PDF模板规则CRUD，含首页/分页/新增编辑版号/复制删除版号/规则增删改
 - feat(pdffolder): PdfRule 新增 error_hint 错误提示字段，规则编辑弹窗支持配置匹配失败时的提示信息

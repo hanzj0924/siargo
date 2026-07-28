@@ -1,4 +1,5 @@
 #@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
+<link rel="stylesheet" href="assets/css/siargo.css">
 <div class="jbolt_page jb_vflex" data-key="#(pmkey)">
 
 	<div class="jbolt_page_title">
@@ -14,79 +15,65 @@
 		<textarea class="jb_tpl_box" id="dmsCategoryRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.id}">
-<td>${pageNumber,pageSize,index | rownum}</td>
+<td class="text-center">${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<div class="d-flex align-items-center category-name-cell">
-		<div class="category-icon mr-3">
-			<i class="fa fa-folder-o"></i>
-		</div>
-		<span class="font-weight-medium text-dark mr-3">${data.name}</span>
-		{@if data.fileCount > 0}
-		<small class="text-muted ml-auto"><i class="fa fa-file-text-o mr-1"></i>${data.fileCount} 个文件</small>
-		{@else}
-		<small class="text-muted ml-auto"><i class="fa fa-inbox mr-1"></i>暂无文件</small>
-		{@/if}
-		<a href="javascript:;" data-openpage="dialog" data-area="290,320"
-			tooltip data-title="移动到指定位置" data-handler="refreshJBoltTable"
-			data-url="admin/siargo/dms/category/moveTo/${data.id}"
-			class="btn btn-outline-info btn-sm ml-3">
-			<i class="fa fa-arrows-v"></i> 移动到
-		</a>
+	<div class="d-flex align-items-center">
+		<i class="fa fa-folder-o dms-cat-folder mr-2"></i>
+		<span class="dms-cat-name">${data.name}</span>
 	</div>
 </td>
 <td>
-	<div class="btn-group btn-group-sm" role="group">
-		<a href="admin/siargo/dms/category/up/${data.id}" data-ajaxbtn
-			data-loading="执行中 " tooltip data-title="上移" data-handler="moveUp"
-			class="btn btn-outline-info">
-			<i class="fa fa-arrow-up"></i>
-		</a>
-		<a href="admin/siargo/dms/category/down/${data.id}" data-ajaxbtn
-			data-loading="执行中 " tooltip data-title="下移" data-handler="moveDown"
-			class="btn btn-outline-info">
-			<i class="fa fa-arrow-down"></i>
-		</a>
-	</div>
+	{@if data.filecount > 0}
+	<span class="dms-cat-count">${data.filecount}</span>
+	{@else}
+	<span class="dms-cat-count is-empty">空</span>
+	{@/if}
+</td>
+<td class="text-center">
+	<a href="admin/siargo/dms/category/edit/${data.id}"
+		data-area="350,250" tooltip data-title="编辑"
+		data-handler="refreshJBoltTable" data-dialog-title="编辑类别"
+		class="jbolt_table_editbtn"> <i class="fa fa-pencil"></i>
+	</a> <a href="admin/siargo/dms/category/deleteByIds?ids=${data.id}"
+		data-ajaxbtn data-loading="删除中" tooltip data-title="删除"
+		data-handler="refreshJBoltTable" data-confirm="确定删除类别「${data.name}」？"
+		class="jbolt_table_delbtn"> <i class="fa fa-remove c-danger"></i>
+	</a> <a href="admin/siargo/dms/category/up/${data.id}" data-ajaxbtn
+		data-loading="执行中" tooltip data-title="上移" data-handler="moveUp"
+		class="jbolt_table_btn"> <i class="fa fa-arrow-up"></i>
+	</a> <a href="admin/siargo/dms/category/down/${data.id}" data-ajaxbtn
+		data-loading="执行中" tooltip data-title="下移" data-handler="moveDown"
+		class="jbolt_table_btn"> <i class="fa fa-arrow-down"></i>
+	</a> <a href="javascript:;" data-openpage="dialog" data-area="290,320"
+		tooltip data-title="移动到指定位置" data-handler="refreshJBoltTable"
+		data-url="admin/siargo/dms/category/moveTo/${data.id}"
+		class="jbolt_table_btn"> <i class="fa fa-arrows-v"></i>
+	</a>
 </td>
 </tr>
 {@/each}
 </textarea>
 
 		<!-- 工具条 toolbar -->
-		<div class="jbolt_table_toolbar" id="dmsCategory_toolbar_#(pageId)">
+		<div class="jbolt_table_toolbar dms-cat-toolbar" id="dmsCategory_toolbar_#(pageId)">
 			<div class="row">
 				<div class="col-sm-6 text-left">
-					<div class="btn-group" role="group" aria-label="btn-group">
-						<button data-openpage="dialog" data-area="350,250"
-							data-handler="jboltTablePageToFirst" data-title="新增"
-							data-url="admin/siargo/dms/category/add"
-							class="btn btn-outline-primary btn-sm">
-							<i class="fa fa-plus"></i> 新增
-						</button>
-						<button data-openpage="dialog" data-area="350,250"
-							data-handler="refreshJBoltTable" data-title="修改"
-							data-check-handler="jboltTableGetCheckedId"
-							data-url="admin/siargo/dms/category/edit/"
-							class="btn btn-outline-info btn-sm">
-							<i class="fa fa-edit"></i> 修改
-						</button>
-						<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
-							data-check-handler="jboltTableGetCheckedIds"
-							data-url="admin/siargo/dms/category/deleteByIds?ids="
-							data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm">
-							<i class="fa fa-trash"></i> 删除
-						</button>
-						<button data-ajaxbtn data-confirm="确认初始化顺序吗？"
-							data-handler="jboltTablePageToFirst" data-title="初始化排序"
-							data-url="admin/siargo/dms/category/initRank"
-							class="btn btn-outline-success btn-sm">
-							<i class="fa fa-sort"></i> 初始化排序
-						</button>
-						<button onclick="jboltTableRefresh(this)"
-							class="btn btn-outline-secondary btn-sm">
-							<i class="fa fa-refresh"></i> 刷新
-						</button>
-					</div>
+					<button data-openpage="dialog" data-area="350,250"
+						data-handler="jboltTablePageToFirst" data-title="新增类别"
+						data-url="admin/siargo/dms/category/add"
+						class="btn btn-outline-primary btn-sm">
+						<i class="fa fa-plus"></i> 新增类别
+					</button>
+					<button data-ajaxbtn data-confirm="确认初始化顺序吗？"
+						data-handler="jboltTablePageToFirst" data-title="初始化排序"
+						data-url="admin/siargo/dms/category/initRank"
+						class="btn btn-outline-secondary btn-sm ml-2">
+						<i class="fa fa-sort"></i> 初始化排序
+					</button>
+					<button onclick="jboltTableRefresh(this)"
+						class="btn btn-outline-secondary btn-sm ml-2">
+						<i class="fa fa-refresh"></i> 刷新
+					</button>
 				</div>
 				<div class="col-sm-6 text-right">
 					<form class="form-inline d-inline-block" id="dmsCategoryForm_#(pageId)"
@@ -101,12 +88,11 @@
 			</div>
 		</div>
 
-		<table class="jbolt_table jbolt_main_table table-center"
+		<table class="jbolt_table jbolt_main_table dms-cat-table"
 			data-jbolttable data-ajax="true"
 			data-pagesize="100"
 			data-height="fill_box"
 			data-url="admin/siargo/dms/category/datas"
-			data-column-prepend="1:checkbox"
 			data-conditions-form="dmsCategoryForm_#(pageId)"
 			data-rowtpl="dmsCategoryRowtpl_#(pageId)"
 			data-page="dmsCategoryPage_#(pageId)"
@@ -114,39 +100,14 @@
 			<thead class="fw-normal">
 				<tr>
 					<th data-width="70">序号</th>
-					<th data-max-width="200" data-column="name">类别名称</th>
-					<th data-width="120">操作</th>
+					<th data-column="name">类别名称</th>
+					<th data-width="110">文件数</th>
+					<th data-width="220">操作</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="dmsCatTbody_#(pageId)">
 			</tbody>
 		</table>
 	</div>
 </div>
-#end
-
-#define css()
-<style>
-.category-icon {
-	width: 36px;
-	height: 36px;
-	border-radius: 8px;
-	background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #e0a800;
-	font-size: 16px;
-}
-.category-name-cell {
-	padding-left: 40px;
-	padding-right: 40px;
-}
-.category-icon i {
-	margin: 0;
-}
-.font-weight-medium {
-	font-weight: 500;
-}
-</style>
 #end

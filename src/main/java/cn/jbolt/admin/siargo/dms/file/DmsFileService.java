@@ -52,7 +52,7 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	 * 搜索逻辑：同时匹配文件名(file_name)和关键字表(keyword)中的内容
 	 * @param pageNumber 页码
 	 * @param pageSize 每页条数
-	 * @param categoryId 类别ID（必传）
+	 * @param categoryId 类别ID（为空时返回空页，前端未选择类别时右侧保持空白）
 	 * @param keywords 关键字（同时搜索 file_name 和 keyword）
 	 * @param isActive 生效状态（可选）
 	 * @param activeDate 生效日期（可选，格式：yyyy-MM）
@@ -60,8 +60,9 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, Long categoryId,
 			String keywords, Integer isActive, String activeDate) {
+		// 未选择类别时右侧保持空白
 		if (categoryId == null) {
-			return new Page<Record>();
+			return new Page<>(new ArrayList<>(), pageNumber, pageSize, 0, 0);
 		}
 		StringBuilder selectSql = new StringBuilder();
 		selectSql.append("SELECT f.id AS id, f.category_id AS categoryId, ")
@@ -75,11 +76,14 @@ public class DmsFileService extends JBoltBaseService<DmsFile> {
 		fromSql.append(" FROM siargo_dms_file f ")
 				.append("LEFT JOIN jb_user ju ON ju.id = f.uploader_id ")
 				.append("LEFT JOIN siargo_dms_file_keyword k ON k.file_id = f.id ")
-				.append("WHERE f.category_id = ? AND f.status = ?");
+				.append("WHERE f.status = ?");
 		
 		List<Object> params = new ArrayList<>();
-		params.add(categoryId);
 		params.add(STATUS_NORMAL);
+		
+		// 类别过滤
+		fromSql.append(" AND f.category_id = ?");
+		params.add(categoryId);
 		
 		// 关键字搜索逻辑：同时匹配文件名和关键字表
 		if (StrKit.notBlank(keywords)) {
