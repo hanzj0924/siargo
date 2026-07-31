@@ -1,6 +1,6 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css">
+<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
 
 #define main()
@@ -25,7 +25,7 @@
 									<label class="col-auto col-form-label">类型</label>
 									<div class="col input-group">
 										<select class="form-control" data-autoload
-											name="qareport.repType"
+											name="qareport.rep_type"
 											data-url="admin/dictionary/options?key=siargo_rep_type"
 											data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
 											data-value="" data-value-attr="sn"
@@ -57,7 +57,7 @@
 									<div class="col">
 										<input type="text" data-with-clearbtn="true"
 											autocomplete="off" class="form-control" data-rule="pint"
-											placeholder="=请填写=" maxlength="10" name="qareport.orderId"
+											placeholder="=请填写=" maxlength="10" name="qareport.order_id"
 											value="#(qareport.orderId??)" />
 									</div>
 								</div>
@@ -66,7 +66,7 @@
 									<div class="col input-group">
 										<select class="form-control " data-autoload
 											data-refresh="true" data-url="admin/siargo/qarep/getCustName"
-											name="qareport.custId" data-text="=请选择=" data-value-attr="id"
+											name="qareport.cust_id" data-text="=请选择=" data-value-attr="id"
 											data-rule="select" data-text-attr="name"
 											data-select="#(qareport.custId ??)"
 											data-select-type="select2" id="custSelect">
@@ -292,6 +292,11 @@
 		#define js()
 		<script>
 			$(function() {
+				// 脆弱性说明：以下为跨窗口 DOM 注入——本页在 layui iframe 弹窗中渲染，
+				// 通过 parent.document 找到弹窗按钮栏（.layui-layer-btn）后追加"注意编号!"红字提示。
+				// JBolt 的 data-openpage="dialog" 声明式弹窗未暴露自定义 footer/按钮栏内容的配置项，
+				// 暂无稳妥替代方案，只能依赖 layui 的内部类名与 300ms 延时；若 layui 升级改类名
+				// 或按钮栏延迟渲染，此提示会静默失效（已用 try/catch 包裹，不影响主流程）。
 				setTimeout(
 						function() {
 							try {
@@ -327,7 +332,7 @@
 
 				// 填充数据（使用 != null 精确判断，区分 null 和空字符串）
 				if (data.orderId != null) {
-					$('input[name="qareport.orderId"]').val(data.orderId);
+					$('input[name="qareport.order_id"]').val(data.orderId);
 				}
 				if (data.models != null) {
 					$('textarea[name="models"]').val(data.models);
@@ -342,7 +347,7 @@
 					$('textarea[name="qis"]').val(data.qis);
 				}
 				if (data.repType != null) {
-					$('select[name="qareport.repType"]').val(data.repType);
+					$('select[name="qareport.rep_type"]').val(data.repType);
 				}
 				if (data.prodType != null) {
 					$('select[name="product.type"]').val(data.prodType);

@@ -197,6 +197,7 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 
 	/**
 	 * 根据版号删除folder记录及关联的模板规则
+	 * <p>先执行DB删除，全部成功后再删除物理目录，避免DB删除失败时文件已被删的不一致</p>
 	 * @param pdfver 版号
 	 * @return Ret
 	 */
@@ -209,17 +210,18 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 		if (folder == null) {
 			return fail("版号 [" + pdfver + "] 对应的文件夹不存在");
 		}
-		// 删除关联的模板规则
+		// 1. 删除关联的模板规则（DB）
 		Db.delete("DELETE FROM siargo_pdf_template WHERE pdfver = ?", pdfver);
-		// 删除物理目录（模板目录 + 输出目录）
+		// 2. 删除folder记录（DB）
+		boolean success = folder.delete();
+		if (!success) {
+			return fail("删除版号 [" + pdfver + "] 记录失败");
+		}
+		clearCache();
+		// 3. DB删除成功后，再删除物理目录（模板目录 + 输出目录）
 		deletePhysicalDir(folder.getTemplatePath());
 		deletePhysicalDir(folder.getExportPath());
-		// 删除folder记录
-		boolean success = folder.delete();
-		if (success) {
-			clearCache();
-		}
-		return ret(success);
+		return Ret.ok();
 	}
 
 	/**

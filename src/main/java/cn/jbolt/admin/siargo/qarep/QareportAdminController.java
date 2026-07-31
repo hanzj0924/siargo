@@ -8,11 +8,14 @@ import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt._admin.role.RoleService;
 import cn.jbolt.admin.siargo.customer.CustomerService;
-import cn.jbolt.common.util.StringUtil;
+import cn.jbolt.core.base.config.JBoltConfig;
 
 import com.jfinal.core.Path;
 import com.jfinal.kit.PathKit;
+import com.jfinal.kit.Ret;
 import com.jfinal.kit.StrKit;
+import com.jfinal.log.Log;
+
 import java.time.LocalDate;
 
 import java.io.File;
@@ -24,12 +27,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 import cn.jbolt.core.base.JBoltMsg;
-import cn.jbolt.siargo.model.Customer;
 import cn.jbolt.siargo.model.Product;
 import cn.jbolt.siargo.model.Qareport;
 /**
@@ -43,6 +44,8 @@ import cn.jbolt.siargo.model.Qareport;
 @Path(value = "/admin/siargo/qarep", viewPath = "/_view/admin/siargo/qarep")
 
 public class QareportAdminController extends JBoltBaseController {
+
+	private static final Log LOG = Log.getLog(QareportAdminController.class);
 
 	/** 检验报告单服务 */
 	@Inject
@@ -62,7 +65,27 @@ public class QareportAdminController extends JBoltBaseController {
 	/** 角色服务 */
 	@Inject
 	private RoleService roleService;
-	
+	/** 产品驳回历史服务 */
+	@Inject
+	private ProductRejectLogService productRejectLogService;
+
+	/**
+	 * 解析逗号分隔的ID字符串为List&lt;Long&gt;
+	 * @param idsJson 逗号分隔的ID字符串
+	 * @return ID列表；格式非法（含非数字）时返回null
+	 */
+	private List<Long> parseIds(String idsJson) {
+		try {
+			return Arrays.stream(idsJson.split(","))
+					.map(String::trim)
+					.filter(s -> !s.isEmpty())
+					.map(Long::parseLong)
+					.collect(Collectors.toList());
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
    /**
 	* 首页
 	*/
@@ -70,10 +93,10 @@ public class QareportAdminController extends JBoltBaseController {
 		Long userId = JBoltUserKit.getUserId();
 		
 		// 报告单子权限：管理员/报告单 角色可覆盖，或直接拥有该子角色
-		set("accuracy",  roleService.hasRoleOrAbove(userId, 211));
-		set("appearance", roleService.hasRoleOrAbove(userId, 212));
-		set("packaging",  roleService.hasRoleOrAbove(userId, 213));
-		set("approval",   roleService.hasRoleOrAbove(userId, 214));
+		set("accuracy",  roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_ACCURACY));
+		set("appearance", roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_APPEARANCE));
+		set("packaging",  roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_PACKAGING));
+		set("approval",   roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_APPROVAL));
 		
 		render("index.html");
 	}
@@ -103,7 +126,16 @@ public class QareportAdminController extends JBoltBaseController {
         try {
             // 获取上传的文件
             UploadFile uploadFile = getFile();
+            if (uploadFile == null) {
+                renderJsonFail("请上传excel文件");
+                return;
+            }
             if(notExcel(uploadFile)){
+            	// 非Excel文件早退时删除已上传的临时文件，避免临时目录堆积
+            	File tempFile = uploadFile.getFile();
+            	if (tempFile != null && tempFile.exists() && !tempFile.delete()) {
+            		LOG.warn("Excel导入临时文件删除失败: " + tempFile.getAbsolutePath());
+            	}
     			renderJsonFail("请上传excel文件");
     			return;
     		}
@@ -123,7 +155,7 @@ public class QareportAdminController extends JBoltBaseController {
             renderJsonData(result);
             
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Excel导入失败", e);
             renderFail("导入失败：" + e.getMessage());
             return;
         }
@@ -133,6 +165,7 @@ public class QareportAdminController extends JBoltBaseController {
 	 * 批量生成上个月已放行报告单的PDF
 	 * URL: /admin/siargo/qarep/toPdfs
 	 * <p>用于月度归档，将上个月已完成最终放行的报告单批量生成PDF文件</p>
+	 * <p>WinRAR 路径从 config.properties 的 winrar_exe_path 配置读取</p>
 	 * @throws Exception PDF生成异常
 	 */
 	public void toPdfs() throws Exception {
@@ -142,6 +175,18 @@ public class QareportAdminController extends JBoltBaseController {
 	    	renderFail("无上月数据!");
 	    	return;
 	    }
+
+	    // ========== 压缩程序配置前置校验（避免PDF生成完才发现无法压缩） ==========
+	    String winrarExe = JBoltConfig.prop.get("winrar_exe_path");
+	    if (StrKit.isBlank(winrarExe)) {
+	    	renderFail("未配置 WinRAR 路径，请在 config.properties 中添加 winrar_exe_path 配置项！");
+	    	return;
+	    }
+	    if (!new File(winrarExe).exists()) {
+	    	renderFail("WinRAR 程序不存在：" + winrarExe + "，请检查 winrar_exe_path 配置！");
+	    	return;
+	    }
+
 	    List<String> failList = new ArrayList<>();
 	    for (Record record : records) {
 	    	Long id = record.getLong("id");
@@ -161,7 +206,6 @@ public class QareportAdminController extends JBoltBaseController {
 	    String exportDir = PathKit.getWebRootPath() + "/export/LastMonthPDF/";
 	    String rarPath = exportDir + rarName;
 	    String srcDir = PathKit.getWebRootPath() + "/export/LastMonthPDF/*";
-	    String winrarExe = "C:\\Program Files\\WinRAR\\WinRAR.exe";
 	    
 	    try {
 	    	String[] cmd = { winrarExe, "a", "-r", rarPath, srcDir };
@@ -178,7 +222,7 @@ public class QareportAdminController extends JBoltBaseController {
 	    		return;
 	    	}
 	    } catch (Exception e) {
-	    	e.printStackTrace();
+	    	LOG.error("WinRAR 压缩PDF失败", e);
 	    	renderFail("压缩失败：" + e.getMessage());
 	    	return;
 	    }
@@ -197,10 +241,15 @@ public class QareportAdminController extends JBoltBaseController {
 	    String pdfsrc = "export/PDF";
 		// 解析前端传入的产品ID列表（逗号分隔）
 		String idsJson = getPara("ids");
-	    List<Long> ids = Arrays.stream(idsJson.split(","))
-	            .map(String::trim)
-	            .map(Long::parseLong)
-	            .collect(Collectors.toList());
+		if (StrKit.isBlank(idsJson)) {
+			renderJsonFail("请选择要生成PDF的数据");
+			return;
+		}
+	    List<Long> ids = parseIds(idsJson);
+	    if (ids == null || ids.isEmpty()) {
+	    	renderJsonFail("参数格式错误");
+	    	return;
+	    }
 	    
 	    List<String> failList = new ArrayList<>();
 	    for (int i =0; i < ids.size() ; i++) {
@@ -246,8 +295,9 @@ public class QareportAdminController extends JBoltBaseController {
 					startTime = sdf.parse(dates[0].trim());
 					endTime = sdf.parse(dates[1].trim());
 				} catch (ParseException e) {
-					e.printStackTrace();
-					renderError(0, "日期格式错误");
+					// 日期解析失败直接返回错误，避免带着null条件继续查询
+					renderJsonFail("日期格式错误");
+					return;
 				}
 			}
 		}
@@ -286,7 +336,8 @@ public class QareportAdminController extends JBoltBaseController {
 	 * @param id 产品ID（URL路径参数）
 	 */
 	public void editDes() {
-		Product product = getModel(Product.class, "product").findById(getLong(0));
+		// 查询走ProductService，Controller不直接操作Model
+		Product product = proservice.findById(getLong(0));
 		if(product == null){
 			renderFail(JBoltMsg.DATA_NOT_EXIST);
 			return;
@@ -302,7 +353,12 @@ public class QareportAdminController extends JBoltBaseController {
 	 * @param id 产品ID（请求参数）
 	 */
 	public void details() {
-		Qareport qareport=service.qareportFindByProId(Long.parseLong(getPara("id"))); 
+		Long proId = getParaToLong("id");
+		if (proId == null) {
+			renderFail("参数错误");
+			return;
+		}
+		Qareport qareport=service.qareportFindByProId(proId); 
 		if(qareport == null){
 			renderFail(JBoltMsg.DATA_NOT_EXIST);
 			return;
@@ -324,30 +380,146 @@ public class QareportAdminController extends JBoltBaseController {
 	 *   <li>insp=4：批准检验</li>
 	 *   <li>insp=5：最终放行</li>
 	 * </ul>
+	 * <p>服务端会按目标环节校验当前用户角色（211~214，超管豁免），并使用条件更新防并发</p>
 	 */
-	@Before(Tx.class)
 	public void batchInspection() {
         Integer insp = getParaToInt("insp");
         String idsJson = getPara("ids");
-        
-        // 将字符串转换为List<Long>
-        List<Long> ids = Arrays.stream(idsJson.split(","))
-                .map(String::trim)
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
+        // 参数校验：目标阶段与ID列表必填
+        if (insp == null || StrKit.isBlank(idsJson)) {
+        	renderJsonFail("参数错误");
+        	return;
+        }
+        List<Long> ids = parseIds(idsJson);
+        if (ids == null || ids.isEmpty()) {
+        	renderJsonFail("参数格式错误");
+        	return;
+        }
 
-            service.batchUpdateInspStatus(ids, insp);
-            service.clearFlowCountsCache();
-            // 批量检验完成后，为下一阶段对应权限用户创建待办通知
-            service.notifyNextStageUsers(insp);
-            renderJsonSuccess();
+        // Db.tx() 手动事务 —— 缓存清理和通知均在事务提交后执行
+        final Ret[] retHolder = {null};
+        boolean txOk = Db.tx(() -> {
+            retHolder[0] = service.batchUpdateInspStatus(ids, insp);
+            return retHolder[0] != null && retHolder[0].isOk();
+        });
+        if (!txOk) {
+            renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "操作失败");
+            return;
+        }
+        // === afterCommit: 缓存清理 + 异步通知 ===
+        service.clearFlowCountsCache();
+        service.notifyNextStageUsers(insp);
+        String msg = retHolder[0].getStr("msg");
+        if (StrKit.notBlank(msg)) {
+        	// 部分成功：把未成功的单号信息反馈给前端
+        	renderJsonSuccess(msg);
+        } else {
+        	renderJsonSuccess();
+        }
+	}
+	
+	/**
+	 * 审批工作台页面（JBoltLayer抽屉iframe加载）
+	 * URL: /admin/siargo/qarep/approval
+	 * <p>根据目标检验阶段和选中产品ID列表加载待审批产品数据：</p>
+	 * <ul>
+	 *   <li>insp=2：精度检验批准</li>
+	 *   <li>insp=3：功能检验批准</li>
+	 *   <li>insp=4：批准检验</li>
+	 *   <li>insp=5：最终放行</li>
+	 * </ul>
+	 */
+	public void approval() {
+		Integer insp = getParaToInt("insp");
+		String idsJson = getPara("ids");
+
+		// 参数校验：目标阶段必须在2~5范围内，且产品ID列表不能为空
+		if (insp == null || insp < QarepConst.INSP_APPROVE_MIN || insp > QarepConst.INSP_APPROVE_MAX
+				|| StrKit.isBlank(idsJson)) {
+			renderFail("参数错误");
+			return;
+		}
+
+		List<Long> ids = parseIds(idsJson);
+		if (ids == null || ids.isEmpty()) {
+			renderFail("参数格式错误");
+			return;
+		}
+
+		set("insp", insp);
+		set("products", service.findApprovalProducts(ids));
+		render("approval.html");
+	}
+
+	/**
+	 * 批量驳回至上一阶段
+	 * URL: /admin/siargo/qarep/batchReject
+	 * <p>将选中产品的检验进度回退到上一阶段，同时记录驳回原因、驳回人和驳回时间</p>
+	 * <p>服务端会按当前环节校验当前用户角色（212~214，超管豁免），并使用条件更新防并发</p>
+	 */
+	public void batchReject() {
+		String idsJson = getPara("ids");
+		String rejectDes = getPara("rejectDes");
+
+		// 参数校验：产品ID列表不能为空
+		if (StrKit.isBlank(idsJson)) {
+			renderJsonFail("请选择要驳回的数据");
+			return;
+		}
+		// 参数校验：驳回原因必填
+		if (StrKit.isBlank(rejectDes)) {
+			renderJsonFail("请填写驳回原因");
+			return;
+		}
+
+		List<Long> ids = parseIds(idsJson);
+		if (ids == null || ids.isEmpty()) {
+			renderJsonFail("参数格式错误");
+			return;
+		}
+
+		// Db.tx() 手动事务 —— 缓存清理在事务提交后执行
+		final String trimmedDes = rejectDes.trim();
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.batchRejectInspStatus(ids, trimmedDes);
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "操作失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
+		service.clearFlowCountsCache();
+		String msg = retHolder[0].getStr("msg");
+		if (StrKit.notBlank(msg)) {
+			renderJsonSuccess(msg);
+		} else {
+			renderJsonSuccess();
+		}
+	}
+
+	/**
+	 * 产品驳回历史弹窗
+	 * URL: /admin/siargo/qarep/rejectHistory?productId=xxx
+	 * <p>展示指定产品的全部驳回记录（按时间倒序）</p>
+	 */
+	public void rejectHistory() {
+		Long productId = getParaToLong("productId");
+		if (productId == null) {
+			renderFail("参数错误");
+			return;
+		}
+		set("logs", productRejectLogService.findLogsByProductId(productId));
+		render("reject_history.html");
 	}
 	
 	
    /**
 	* 保存
+	* <p>Db.tx() 包裹事务：先完成全部参数校验与四个列表（models/numbers/qis/qsis）长度一致性校验，
+	* 再统一落库；Service写库失败返回Ret.fail，Db.tx()回滚；缓存清理在事务提交后执行</p>
 	*/
-    @Before(Tx.class)
 	public void save() {
     	
     	String qisJson = getPara("qis");
@@ -355,6 +527,13 @@ public class QareportAdminController extends JBoltBaseController {
     	String dessJson = getPara("dess");
     	String modelsJson = getPara("models");
     	String numbersJson = getPara("numbers");
+
+    	// ========== 参数判空（防NPE） ==========
+    	if (StrKit.isBlank(qisJson) || StrKit.isBlank(qsisJson)
+    			|| StrKit.isBlank(modelsJson) || StrKit.isBlank(numbersJson)) {
+    		renderJsonFail("参数不完整，请检查型号/编号/送检数量/检验数量！");
+    		return;
+    	}
 
     	if (!qisJson.matches("^[0-9,]*$")) {
     		renderFail("检验数量格式不对，重新输入！");
@@ -366,21 +545,30 @@ public class QareportAdminController extends JBoltBaseController {
 			return;
 		}
     	
-    	List<Long> qis = Arrays.stream(qisJson.split(","))
-                .map(String::trim)
-                .map(Long::parseLong)
-                .toList();
-    	List<Long> qsis = Arrays.stream(qsisJson.split(","))
-                .map(String::trim)
-                .map(Long::parseLong)
-                .toList();
+    	List<Long> qis;
+    	List<Long> qsis;
+    	try {
+    		qis = Arrays.stream(qisJson.split(","))
+	                .map(String::trim)
+	                .map(Long::parseLong)
+	                .toList();
+    		qsis = Arrays.stream(qsisJson.split(","))
+	                .map(String::trim)
+	                .map(Long::parseLong)
+	                .toList();
+    	} catch (NumberFormatException e) {
+    		renderJsonFail("数量格式不对，重新输入！");
+    		return;
+    	}
     	
-    	List<String> dess = new ArrayList<String>();
+    	final List<String> dess;
     	if (!StrKit.isBlank(dessJson)) {
     		dess = Arrays.stream(dessJson.split(","))
                     .map(String::trim)
                     .map(String::valueOf)
                     .toList();
+		} else {
+			dess = List.of();
 		}
 
     	List<String> models = Arrays.stream(modelsJson.split(","))
@@ -391,11 +579,28 @@ public class QareportAdminController extends JBoltBaseController {
                 .map(String::trim)
                 .map(String::valueOf)
                 .toList();
+
+    	// ========== 四个列表长度一致性校验 ==========
+    	int rowCount = models.size();
+    	if (rowCount == 0 || numbers.size() != rowCount || qis.size() != rowCount || qsis.size() != rowCount) {
+    		renderJsonFail("型号/编号/送检数量/检验数量条数不一致，请检查输入！");
+    		return;
+    	}
     	
     	Qareport qareport = getModel(Qareport.class, "qareport");
     	Product product = getModel(Product.class, "product");
-    	
-    	if (product.getFlowRange() == null && product.getType() == 3) {
+
+    	// ========== 产品公共参数校验 ==========
+    	if (product.getInsp() == null) {
+    		renderJsonFail("请选择检验进度！");
+    		return;
+    	}
+    	if (product.getInsp() > QarepConst.INSP_PENDING_APPEARANCE) {
+    		renderJsonFail("未检验精度，请重新选择检验进度！");
+    		return;
+    	}
+    	if (product.getFlowRange() == null && product.getType() != null
+    			&& product.getType() == QarepConst.PROD_TYPE_LARGE_FLOW) {
 			renderFail("请输入流量范围！");
 			return;
 		}
@@ -436,81 +641,112 @@ public class QareportAdminController extends JBoltBaseController {
 			return;
 		}
 
-    	for (int i = 0; i < models.size() && i < numbers.size(); i++) {
-    		
-    		if (qsis.get(i) < qis.get(i)) {
-    			renderFail("送检数量小于检验数量，重新输入！");
-    			return;
-    		}
-    		
-    		product.setQi(qis.get(i));
-    		product.setQsi(qsis.get(i));
-    		product.setModel(models.get(i));
-    		product.setNumber(numbers.get(i));
-    		
-    		if (i>= 0 && i < dess.size()) {
-        		product.setDes(dess.get(i));
+		// ========== 逐行预校验：送检数量不能小于检验数量（全部通过后才开始落库） ==========
+		for (int i = 0; i < rowCount; i++) {
+			if (qsis.get(i) < qis.get(i)) {
+				renderFail("送检数量小于检验数量，重新输入！");
+				return;
 			}
-    		service.save(qareport,product);
-        }
+		}
+
+		// ========== 校验全部通过，统一落库（Db.tx() 包裹事务） ==========
+		final Ret[] retHolder = {Ret.ok()};
+		boolean txOk = Db.tx(() -> {
+			for (int i = 0; i < rowCount; i++) {
+				product.setQi(qis.get(i).intValue());
+				product.setQsi(qsis.get(i).intValue());
+				product.setModel(models.get(i));
+				product.setNumber(numbers.get(i));
+
+				if (i < dess.size()) {
+					product.setDes(dess.get(i));
+				}
+				Ret ret = service.save(qareport, product);
+				if (ret.isFail()) {
+					retHolder[0] = ret;
+					return false; // 触发回滚
+				}
+			}
+			return true;
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0].getStr("msg") != null ? retHolder[0].getStr("msg") : "保存失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
+		service.clearFlowCountsCache();
     	renderJsonSuccess();
 	}
 	
    /**
 	* 更新
+	* <p>Db.tx() 包裹事务，更新成功后清缓存</p>
 	*/
-    @Before(Tx.class)
 	public void update() {
-		renderJson(service.update(getModel(Qareport.class, "qareport"),getModel(Product.class, "product")));
+		Qareport qareport = getModel(Qareport.class, "qareport");
+		Product product = getModel(Product.class, "product");
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.update(qareport, product);
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (txOk) {
+			// === afterCommit: 缓存清理 ===
+			service.clearFlowCountsCache();
+		}
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("更新失败"));
 	}
     
     /**
 	* 更新Des
+	* <p>Db.tx() 包裹事务，更新成功后清分页缓存</p>
 	*/
-    @Before(Tx.class)
 	public void updateDes() {
-    	Product prold = getModel(Product.class, "product");
-
-    	Product product = proservice.findById(prold.getId());
-    	if(product == null){
-			renderFail(JBoltMsg.DATA_NOT_EXIST);
+		Product prold = getModel(Product.class, "product");
+		if (prold == null || notOk(prold.getId())) {
+			renderJsonFail(JBoltMsg.PARAM_ERROR);
 			return;
 		}
-
-    	product.setDes(StringUtil.isEmpty(prold.getDes())? "" : prold.getDes().trim());
-    	boolean success = product.update();
-    	if (success) {
-    		service.clearPaginateCache();
-    	}
-		renderJsonData(success);
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.updateDes(prold.getId(), prold.getDes());
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (txOk) {
+			service.clearPaginateCache();
+		}
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("更新失败"));
 	}
     
    /**
 	* 删除（软删除到回收站）
 	*/
-    @Before(Tx.class)
 	public void deleteByIds() {
-    	String idsJson = getPara("ids");
-    	if (StrKit.isBlank(idsJson)) {
-    		renderFail("请选择要删除的数据");
-    		return;
-    	}
-    	String deleteDes = getPara("delete_des"); // 删除原因，可为空
+		String idsJson = getPara("ids");
+		if (StrKit.isBlank(idsJson)) {
+			renderFail("请选择要删除的数据");
+			return;
+		}
+		String deleteDes = getPara("delete_des"); // 删除原因，可为空
 
-        List<Long> ids = Arrays.stream(idsJson.split(","))
-                .filter(s -> !s.trim().isEmpty())
-                .map(String::trim)
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
+		List<Long> ids = parseIds(idsJson);
+		if (ids == null || ids.isEmpty()) {
+			renderFail("请选择要删除的数据");
+			return;
+		}
 
-        if (ids.isEmpty()) {
-        	renderFail("请选择要删除的数据");
-        	return;
-        }
-
-        service.batchSoftDeleteProduct(ids, deleteDes);
-        service.clearFlowCountsCache();
-        renderJsonSuccess();
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.batchSoftDeleteProduct(ids, deleteDes);
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
+		service.clearFlowCountsCache();
+		renderJsonSuccess();
 	}
 
 	/**
@@ -533,18 +769,22 @@ public class QareportAdminController extends JBoltBaseController {
 	 * 恢复报告单（从回收站还原）
 	 * URL: /admin/siargo/qarep/restore/:id
 	 */
-	@Before(Tx.class)
 	public void restore() {
 		Long id = getLong(0);
 		if (id == null) {
 			renderFail("参数错误");
 			return;
 		}
-		boolean success = service.restoreProduct(id);
-		if (!success) {
+		final boolean[] successHolder = {false};
+		boolean txOk = Db.tx(() -> {
+			successHolder[0] = service.restoreProduct(id);
+			return successHolder[0];
+		});
+		if (!txOk || !successHolder[0]) {
 			renderFail("数据不存在");
 			return;
 		}
+		// === afterCommit: 缓存清理 ===
 		service.clearFlowCountsCache();
 		renderJsonSuccess();
 	}
@@ -552,44 +792,30 @@ public class QareportAdminController extends JBoltBaseController {
 	/**
 	 * 永久删除报告单（物理删除）
 	 * URL: /admin/siargo/qarep/permanentDelete
+	 * <p>业务下沉：级联删除逻辑（驳回历史/PDF文件/空报告单）移入QareportService.permanentDelete，
+	 * 在事务内执行，DB删除失败抛RuntimeException触发回滚</p>
 	 */
-	@Before(Tx.class)
 	public void permanentDelete() {
 		String idsJson = getPara("ids");
 		if (StrKit.isBlank(idsJson)) {
 			renderFail("参数错误");
 			return;
 		}
-		List<Long> ids = Arrays.stream(idsJson.split(","))
-				.map(String::trim)
-				.map(Long::parseLong)
-				.collect(Collectors.toList());
-		for (Long id : ids) {
-			Product product = proservice.findById(id);
-			if (product != null) {
-				// 删除前获取关联信息用于日志记录
-				String logDesc = "";
-				Qareport qareport = service.findById(product.getReportId());
-				if (qareport != null) {
-					String formnum = qareport.getFormnum() != null ? String.valueOf(qareport.getFormnum()) : "";
-					String orderId = qareport.getOrderId() != null ? String.valueOf(qareport.getOrderId()) : "";
-					String model = product.getModel() != null ? product.getModel() : "";
-					String number = product.getNumber() != null ? product.getNumber() : "";
-					String customerName = "";
-					if (qareport.getCustId() != null) {
-						Customer customer = custservice.findById(qareport.getCustId());
-						if (customer != null) {
-							customerName = customer.getName();
-						}
-					}
-					String deleteDes = product.getDeleteDes() != null ? product.getDeleteDes() : "";
-					logDesc = " 报告单编号：" + formnum + " ==订单号：" + orderId + " ==型号：" + model + " ==编号：" + number + " ==客户：" + customerName + " ==删除原因：" + deleteDes;
-				}
-				product.delete();
-				// 记录永久删除操作日志
-				service.logDelete(id, JBoltUserKit.getUserId(), logDesc);
-			}
+		List<Long> ids = parseIds(idsJson);
+		if (ids == null || ids.isEmpty()) {
+			renderFail("参数格式错误");
+			return;
 		}
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.permanentDelete(ids);
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
 		service.clearFlowCountsCache();
 		renderJsonSuccess();
 	}

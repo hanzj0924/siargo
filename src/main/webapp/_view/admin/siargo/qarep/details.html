@@ -1,9 +1,24 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css">
+<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
 <style>
 	html, body { overflow-y: auto !important; background: #eef1f5; }
 </style>
+#end
+
+#-- 驳回小角标（已重新通过的环节步骤内使用）：点击弹窗查看全部驳回历史 --#
+#define rejectMark(p)
+<span class="insp-step-reject-flag" data-dialogbtn data-area="560,520" data-btn="close" data-title="驳回历史" data-url="admin/siargo/qarep/rejectHistory?productId=#(p.id)">驳</span>
+#end
+
+#-- 红色已驳回节点（驳回后尚未重新通过该环节时追加在流程图末尾） --#
+#define rejectStepNode(p)
+<span class="insp-arrow insp-arrow-rejected">&#8594;</span>
+<div class="insp-step insp-step-rejected" tooltip data-html="true" data-title="<div class='qa-tip-left'>驳回原因：#(p.reject_des)。<br>#(p.reject_name??) #(p.reject_time??)</div>">
+  <span class="insp-step-name">#(p.reject_insp_name??)</span>
+  <span class="insp-step-badge insp-badge-rejected">已驳回</span>
+  <span class="insp-step-time">#(p.reject_time??)</span>
+</div>
 #end
 
 #define main()
@@ -63,29 +78,41 @@
         <div class="dt-lbl">检验进度</div>
         <div class="dt-val">
           #if(p.insp == 1)
-          <span class="dt-badge dt-badge-secondary">#(p.insp_name ??)</span>
-          #else if(p.insp >= 2)
+          #if(p.reject_insp == 2 && p.reject_des != null)
+          #-- 精度检验被驳回重检中（最新驳回来自外观环节）：灰色重检节点 + 红色已驳回节点 --#
           <div class="insp-flow">
-            <!-- 精度检验 -->
             <div class="insp-step">
               <span class="insp-step-name">精度检验</span>
+              <span class="insp-step-badge insp-badge-redo">重检中</span>
+              <span class="insp-step-time">&nbsp;</span>
+            </div>
+            #@rejectStepNode(p)
+          </div>
+          #else
+          <span class="dt-badge dt-badge-secondary">#(p.insp_name ??)</span>
+          #end
+          #else if(p.insp >= 2)
+          <div class="insp-flow">
+            <!-- 精度检验（reject_insp=2 表示精度曾被外观环节驳回重做） -->
+            <div class="insp-step">
+              <span class="insp-step-name">精度检验#if(p.reject_count_2 > 0) #@rejectMark(p)#end</span>
               <span class="insp-step-badge insp-badge-accq">#(p.accq_name ??)</span>
               <span class="insp-step-time">#if(p.accq_time)#date(p.accq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #if(p.insp >= 3)
             <span class="insp-arrow">&#8594;</span>
-            <!-- 外观检验 -->
+            <!-- 外观检验（reject_insp=3 表示外观曾被包装环节驳回重做） -->
             <div class="insp-step">
-              <span class="insp-step-name">外观检验</span>
+              <span class="insp-step-name">外观检验#if(p.reject_count_3 > 0) #@rejectMark(p)#end</span>
               <span class="insp-step-badge insp-badge-funq">#(p.funq_name ??)</span>
               <span class="insp-step-time">#if(p.funq_time)#date(p.funq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
             #if(p.insp >= 4)
             <span class="insp-arrow">&#8594;</span>
-            <!-- 包装检验 -->
+            <!-- 包装检验（reject_insp=4 表示包装曾被批准环节驳回重做） -->
             <div class="insp-step">
-              <span class="insp-step-name">包装检验</span>
+              <span class="insp-step-name">包装检验#if(p.reject_count_4 > 0) #@rejectMark(p)#end</span>
               <span class="insp-step-badge insp-badge-appq">#(p.appq_name ??)</span>
               <span class="insp-step-time">#if(p.appq_time)#date(p.appq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
@@ -98,6 +125,16 @@
               <span class="insp-step-badge insp-badge-allq">&#10003; #(p.allq_name ??)</span>
               <span class="insp-step-time">#if(p.allq_time)#date(p.allq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
+            #end
+            #-- 驳回后重检尚未提交（insp == reject_insp-1）：灰色重检节点 + 红色已驳回节点 --#
+            #if(p.reject_insp != null && p.reject_des != null && p.insp == p.reject_insp - 1)
+            <span class="insp-arrow">&#8594;</span>
+            <div class="insp-step">
+              <span class="insp-step-name">#if(p.insp == 2)外观检验#else if(p.insp == 3)包装检验#else 未知环节#end</span>
+              <span class="insp-step-badge insp-badge-redo">重检中</span>
+              <span class="insp-step-time">&nbsp;</span>
+            </div>
+            #@rejectStepNode(p)
             #end
           </div>
           #else

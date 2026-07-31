@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.jfinal.log.Log;
+
 /**
  * 产品型号分类工具类
  * <p>
@@ -15,6 +17,8 @@ import java.util.regex.Pattern;
  * @date 2026-07-03
  */
 public class ProductModelClassifier {
+
+    private static final Log LOG = Log.getLog(ProductModelClassifier.class);
 
     /** 合法前缀（型号以此集合中任一字符串开头方可继续分析，否则返回 0） */
     private static final String[] GATE_PREFIXES = {"MF", "FS", "MFC", "BC", "PFLOW"};
@@ -192,6 +196,6 @@ public class ProductModelClassifier {
      * 记录未匹配的型号，便于后续人工确认并补充规则
      */
     private static void logUnmatched(String model) {
-        System.err.println("[ProductModelClassifier] 未匹配型号: " + model);
+        LOG.warn("[ProductModelClassifier] 未匹配型号: " + model);
     }
 }

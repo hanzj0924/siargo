@@ -1,13 +1,13 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css">
+<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
 
 #define main()
 #set(pageId=RandomUtil.random(6))
-<div class="jbolt_page" data-key="#(pmkey)">
+#-- qarep-scope：qarep 模块 badge 换色（siargo.css 4.3 区 .qarep-scope .badge-*）的作用域容器，防止污染其他模块 --#
+<div class="jbolt_page qarep-scope" data-key="#(pmkey)">
 	<div class="jbolt_page_title">
-		<div class="il-hd"><span>&#128451; 废弃报告单</span><i></i></div>
 		<div class="row">
 			<div class="col">
 				<div class="il-search-bar">

@@ -1,10 +1,11 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css">
+<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
 
 #define main()
-<div class="jbolt_page">
+#-- editdes-page：前缀类隔离本页 .fm-wrap/.fm-sec 的 14px 紧凑变体（siargo.css 4.1 区），避免污染 add/edit 共用的 16px 18px 通用版 --#
+<div class="jbolt_page editdes-page">
 	<div class="jbolt_page_content">
 		<form onsubmit="return false;" id="qareportUpdateDesForm"
 			action="admin/siargo/qarep/updateDes" method="post">

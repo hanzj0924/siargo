@@ -123,6 +123,30 @@ public class ExcelService {
                 return "";
         }
     }
+
+    /**
+     * 根据首个型号自动判定产品类型（siargo_prod_type 字典 sn）
+     * <p>classifier → 字典 sn 映射：1(小流量)→2, 2(大流量)→3, 3(传感器)→1</p>
+     * <p>两个模板（旧模板/检定记录模板）共用此映射，避免重复维护</p>
+     * @param firstModel 首个型号字符串
+     * @return 产品类型字典 sn；无法判定时返回null
+     */
+    private Integer resolveProdType(String firstModel) {
+        if (firstModel == null || firstModel.isEmpty()) {
+            return null;
+        }
+        int classified = ProductModelClassifier.classify(firstModel);
+        if (classified == 1) {
+            return QarepConst.PROD_TYPE_SMALL_FLOW;
+        }
+        if (classified == 2) {
+            return QarepConst.PROD_TYPE_LARGE_FLOW;
+        }
+        if (classified == 3) {
+            return QarepConst.PROD_TYPE_SENSOR;
+        }
+        return null;
+    }
     
     /**
      * 处理Excel数据，提取检验报告单所需的订单和产品信息
@@ -162,19 +186,10 @@ public class ExcelService {
         String models = String.join(",", modelSet);
         result.put("models", models);
         
-        // 根据型号自动判定产品类型
+        // 根据型号自动判定产品类型（统一映射逻辑见 resolveProdType）
         Integer prodType = null;
         if (!modelSet.isEmpty()) {
-            String firstModel = modelSet.iterator().next();
-            int classified = ProductModelClassifier.classify(firstModel);
-            // classifier → siargo_prod_type 字典 sn 映射：1(小流量)→2, 2(大流量)→3, 3(传感器)→1
-            if (classified == 1) {
-                prodType = 2;
-            } else if (classified == 2) {
-                prodType = 3;
-            } else if (classified == 3) {
-                prodType = 1;
-            }
+            prodType = resolveProdType(modelSet.iterator().next());
         }
         result.put("prodType", prodType);
         		
@@ -274,20 +289,11 @@ public class ExcelService {
 		}
 		
 		
-		// 根据型号规格自动判定产品类型
+		// 根据型号规格自动判定产品类型（统一映射逻辑见 resolveProdType）
+		// 取第一个型号进行分类（多型号以逗号分隔时取首个）
 		Integer prodType = null;
 		if (models != null && !models.isEmpty()) {
-			// 取第一个型号进行分类（多型号以逗号分隔时取首个）
-			String firstModel = models.split(",")[0].trim();
-			int classified = ProductModelClassifier.classify(firstModel);
-			// classifier → siargo_prod_type 字典 sn 映射：1(小流量)→2, 2(大流量)→3, 3(传感器)→1
-			if (classified == 1) {
-				prodType = 2;
-			} else if (classified == 2) {
-				prodType = 3;
-			} else if (classified == 3) {
-				prodType = 1;
-			}
+			prodType = resolveProdType(models.split(",")[0].trim());
 		}
         
         result.put("orderId", null);

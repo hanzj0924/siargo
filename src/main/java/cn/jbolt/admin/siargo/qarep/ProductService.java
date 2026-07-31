@@ -1,5 +1,7 @@
 package cn.jbolt.admin.siargo.qarep;
 
+import java.util.List;
+
 import com.jfinal.plugin.activerecord.Page;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
@@ -26,7 +28,7 @@ public class ProductService extends JBoltBaseService<Product> {
 	 * @param id 报告单ID
 	 * @return 产品记录，未找到时返回null
 	 */
-	public Product producutFindByQaId(Long id) {
+	public Product productFindByQaId(Long id) {
 		String sql = "SELECT * \n"
 				+ "FROM\n"
 				+ "  `siargo_product` sp\n"
@@ -36,6 +38,54 @@ public class ProductService extends JBoltBaseService<Product> {
 				
 		
 		return dao.findFirst(sql,id);
+	}
+
+	/**
+	 * 根据报告单ID查询该报告单下的全部有效产品信息（含字典翻译、各环节检验人姓名、各环节驳回计数、最新驳回记录）
+	 * <p>从 QareportService 收敛而来：Product 相关查询统一走本 Service</p>
+	 * <p>驳回数据分两部分：</p>
+	 * <ul>
+	 *   <li>reject_count_2/3/4：各环节历史驳回次数（>0 时前端显示"驳"角标）</li>
+	 *   <li>reject_insp/reject_des/reject_time/reject_name/reject_insp_name：最新一条驳回记录（用于当前驳回状态节点展示）</li>
+	 * </ul>
+	 * @param reportId 报告单ID
+	 * @return 产品列表
+	 */
+	public List<Product> findProductsByReportId(Long reportId) {
+		String sql = "SELECT sp.*, "
+			+ "d_type.NAME AS type_name, "
+			+ "d_insp.NAME AS insp_name, "
+			+ "accq_user.NAME AS accq_name, "
+			+ "funq_user.NAME AS funq_name, "
+			+ "appq_user.NAME AS appq_name, "
+			+ "allq_user.NAME AS allq_name, "
+			// 各环节驳回历史计数（用于角标显示）
+			+ "(SELECT COUNT(*) FROM siargo_product_reject_log r2 WHERE r2.product_id = sp.id AND r2.reject_insp = 2) AS reject_count_2, "
+			+ "(SELECT COUNT(*) FROM siargo_product_reject_log r3 WHERE r3.product_id = sp.id AND r3.reject_insp = 3) AS reject_count_3, "
+			+ "(SELECT COUNT(*) FROM siargo_product_reject_log r4 WHERE r4.product_id = sp.id AND r4.reject_insp = 4) AS reject_count_4, "
+			// 最新一条驳回记录（用于当前驳回状态节点详情）
+			+ "rl.reject_insp, rl.reject_des, "
+			+ "DATE_FORMAT(rl.reject_time, '%Y-%m-%d %H:%i') AS reject_time, "
+			+ "reject_user.NAME AS reject_name, "
+			+ "CASE rl.reject_insp WHEN 2 THEN '外观检验' WHEN 3 THEN '包装检验' WHEN 4 THEN '批准' ELSE '未知环节' END AS reject_insp_name "
+			+ "FROM siargo_product sp "
+			+ "LEFT JOIN jb_dictionary AS d_type ON d_type.type_key = 'siargo_prod_type' "
+			+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+			+ "AND d_type.enable = '1' "
+			+ "LEFT JOIN jb_dictionary AS d_insp ON d_insp.type_key = 'siargo_insp' "
+			+ "AND d_insp.sn COLLATE utf8mb4_general_ci = CAST(sp.insp AS CHAR) "
+			+ "AND d_insp.enable = '1' "
+			+ "LEFT JOIN jb_user AS accq_user ON accq_user.id = sp.accq_uid "
+			+ "LEFT JOIN jb_user AS funq_user ON funq_user.id = sp.funq_uid "
+			+ "LEFT JOIN jb_user AS appq_user ON appq_user.id = sp.appq_uid "
+			+ "LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid "
+			// 关联最新一条驳回日志（按 id DESC 取第一条）
+			+ "LEFT JOIN siargo_product_reject_log AS rl ON rl.id = "
+			+ "(SELECT rl2.id FROM siargo_product_reject_log rl2 WHERE rl2.product_id = sp.id ORDER BY rl2.id DESC LIMIT 1) "
+			+ "LEFT JOIN jb_user AS reject_user ON reject_user.id = rl.reject_uid "
+			+ "WHERE sp.report_id = ? AND sp.vd = 1 "
+			+ "ORDER BY sp.id ASC";
+		return dao.find(sql, reportId);
 	}
 		
 	/**

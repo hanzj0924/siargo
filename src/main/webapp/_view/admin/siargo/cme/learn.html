@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一级注册计量师 - 学习界面</title>
+    <link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
+    <style>
+        /* ---------- JBolt 容器覆盖（页面渲染在后台标签页内，需去掉内边距与滚动） ---------- */
+        /* 全局选择器无法安全限定作用域，故保留在页面内，不迁入共享的 siargo.css */
+        .jbolt_admin_main_container {
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="cme-learn-wrap">
+
+    <!-- ==================== 左侧面板 ==================== -->
+    <aside class="cme-learn-side">
+        <div class="cme-learn-side-head">
+            <h2 class="cme-learn-side-title">
+                <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zm-7 9.99V16c0 2.21 3.13 4 7 4s7-1.79 7-4v-3.01l-7 3.82-7-3.82z"/></svg>
+                学习资料
+            </h2>
+            <p class="cme-learn-side-sub">一级注册计量师 · 备考资料库</p>
+            <div class="cme-learn-search" id="cmeLearnSearch">
+                <svg class="cme-learn-search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <input type="text" class="cme-learn-search-input" id="cmeLearnSearchInput"
+                       placeholder="搜索资料名称" autocomplete="off"/>
+                <button type="button" class="cme-learn-search-clear" id="cmeLearnSearchClear" title="清空">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="cme-learn-tree-scroll" id="cmeLearnTreeScroll">
+            <div class="cme-learn-tree-tip" id="cmeLearnTreeTip">正在加载资料目录...</div>
+            <ul class="cme-learn-tree" id="cmeLearnTree"></ul>
+        </div>
+    </aside>
+
+    <!-- ==================== 右侧查看区 ==================== -->
+    <main class="cme-learn-main">
+        <div class="cme-learn-viewer-head">
+            <svg class="cme-learn-viewer-fileicon cme-learn-none" id="cmeLearnHeadIcon" viewBox="0 0 24 24"></svg>
+            <div class="cme-learn-viewer-crumb" id="cmeLearnCrumb">
+                <span class="cme-learn-viewer-crumb-empty">未打开文件</span>
+            </div>
+        </div>
+        <div class="cme-learn-viewer-body" id="cmeLearnViewerBody">
+            <!-- 空状态占位 -->
+            <div class="cme-learn-empty" id="cmeLearnEmpty">
+                <svg class="cme-learn-empty-art" viewBox="0 0 220 170">
+                    <defs>
+                        <linearGradient id="cmeLnGradBook" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#4f6ee8"/>
+                            <stop offset="55%" stop-color="#38a3a5"/>
+                            <stop offset="100%" stop-color="#8b6fd0"/>
+                        </linearGradient>
+                        <linearGradient id="cmeLnGradPage" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="100%" stop-color="#eef1fb"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- 底部投影 -->
+                    <ellipse cx="110" cy="148" rx="66" ry="9" fill="rgba(90,110,180,0.10)"/>
+                    <!-- 装饰圆环与点 -->
+                    <circle cx="34" cy="38" r="9" fill="none" stroke="rgba(79,110,232,0.30)" stroke-width="2"/>
+                    <circle cx="190" cy="52" r="5" fill="rgba(139,111,208,0.30)"/>
+                    <circle cx="176" cy="24" r="3" fill="rgba(43,157,143,0.35)"/>
+                    <circle cx="22" cy="96" r="4" fill="rgba(43,157,143,0.25)"/>
+                    <path d="M196 96l4 8 8 4-8 4-4 8-4-8-8-4 8-4z" fill="rgba(79,110,232,0.22)"/>
+                    <!-- 翻开的书 -->
+                    <g class="cme-learn-empty-float">
+                        <path d="M110 52c-14-9-34-12-52-9v76c18-3 38 0 52 9V52z" fill="url(#cmeLnGradPage)" stroke="rgba(110,130,210,0.35)" stroke-width="2"/>
+                        <path d="M110 52c14-9 34-12 52-9v76c-18-3-38 0-52 9V52z" fill="#ffffff" stroke="rgba(110,130,210,0.35)" stroke-width="2"/>
+                        <path d="M110 52v76" stroke="rgba(110,130,210,0.30)" stroke-width="2"/>
+                        <!-- 左页文字线（三学科主题色） -->
+                        <line x1="68" y1="66" x2="100" y2="62" stroke="#4f6ee8" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+                        <line x1="68" y1="80" x2="100" y2="76" stroke="rgba(110,130,210,0.35)" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="68" y1="94" x2="100" y2="90" stroke="rgba(110,130,210,0.35)" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="68" y1="108" x2="92" y2="105" stroke="rgba(110,130,210,0.25)" stroke-width="3" stroke-linecap="round"/>
+                        <!-- 右页文字线 -->
+                        <line x1="120" y1="62" x2="152" y2="66" stroke="#2b9d8f" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+                        <line x1="120" y1="76" x2="152" y2="80" stroke="rgba(110,130,210,0.35)" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="120" y1="90" x2="152" y2="94" stroke="rgba(110,130,210,0.35)" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="120" y1="105" x2="144" y2="108" stroke="#8b6fd0" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+                        <!-- 书签丝带 -->
+                        <path d="M134 45v-22h14v22l-7-6z" fill="url(#cmeLnGradBook)" opacity="0.85"/>
+                    </g>
+                </svg>
+                <p class="cme-learn-empty-title">从左侧选择资料开始学习</p>
+                <p class="cme-learn-empty-sub">
+                    推荐学习顺序：<span class="cme-learn-em-fagui">法规</span><span class="cme-learn-em-sep">→</span><span class="cme-learn-em-shiwu">实务</span><span class="cme-learn-em-sep">→</span><span class="cme-learn-em-anli">案例</span>
+                </p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ==================== 常量与状态 ==================== */
+
+    // 根节点主题色（法规蓝 / 实务青绿 / 案例紫 / 补充知识琥珀 / 计算器说明书灰蓝）
+    var ROOT_THEMES = {
+        '法规':       { accent: '#4f6ee8', soft: 'rgba(79, 110, 232, 0.10)' },
+        '实务':       { accent: '#2b9d8f', soft: 'rgba(43, 157, 143, 0.10)' },
+        '案例':       { accent: '#8b6fd0', soft: 'rgba(139, 111, 208, 0.11)' },
+        '补充知识':   { accent: '#c98f3d', soft: 'rgba(201, 143, 61, 0.11)' },
+        '计算器说明书': { accent: '#7a88ad', soft: 'rgba(122, 136, 173, 0.12)' }
+    };
+    var DEFAULT_THEME = { accent: '#7a88ad', soft: 'rgba(122, 136, 173, 0.12)' };
+
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+
+    var treeUl     = document.getElementById('cmeLearnTree');
+    var treeTip    = document.getElementById('cmeLearnTreeTip');
+    var searchBox  = document.getElementById('cmeLearnSearch');
+    var searchInput = document.getElementById('cmeLearnSearchInput');
+    var searchClear = document.getElementById('cmeLearnSearchClear');
+    var viewerBody = document.getElementById('cmeLearnViewerBody');
+    var emptyBox   = document.getElementById('cmeLearnEmpty');
+    var crumbBox   = document.getElementById('cmeLearnCrumb');
+    var headIcon   = document.getElementById('cmeLearnHeadIcon');
+
+    var dirNodes  = [];   // 所有目录 li 节点
+    var fileNodes = [];   // 所有文件 li 节点（含元数据引用）
+    var activeFileLi = null;
+
+    /* ==================== 工具函数 ==================== */
+
+    /** 创建 SVG 元素并写入 path 数据（内联图标统一入口，规避 innerHTML 注入） */
+    function makeSvg(className, viewBox, shapes) {
+        var svg = document.createElementNS(SVG_NS, 'svg');
+        if (className) { svg.setAttribute('class', className); }
+        svg.setAttribute('viewBox', viewBox);
+        for (var i = 0; i < shapes.length; i++) {
+            var s = shapes[i];
+            var el = document.createElementNS(SVG_NS, s.tag);
+            for (var k in s.attrs) {
+                if (Object.prototype.hasOwnProperty.call(s.attrs, k)) {
+                    el.setAttribute(k, s.attrs[k]);
+                }
+            }
+            svg.appendChild(el);
+        }
+        return svg;
+    }
+
+    /** 展开箭头图标 */
+    function arrowIcon() {
+        return makeSvg('cme-learn-arrow', '0 0 24 24', [
+            { tag: 'path', attrs: { d: 'M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z' } }
+        ]);
+    }
+
+    /** 文件夹图标（fill 由 CSS 变量控制） */
+    function folderIcon() {
+        return makeSvg('cme-learn-node-icon', '0 0 24 24', [
+            { tag: 'path', attrs: { d: 'M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z' } }
+        ]);
+    }
+
+    /** PDF 文件图标：红色系文档 + 折角 + 横线 */
+    function pdfIconShapes() {
+        return [
+            { tag: 'path', attrs: { d: 'M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z', fill: '#fdeaea' } },
+            { tag: 'path', attrs: { d: 'M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z', fill: 'none', stroke: '#e05d5d', 'stroke-width': '1.6' } },
+            { tag: 'path', attrs: { d: 'M15 2v5h5', fill: 'none', stroke: '#e05d5d', 'stroke-width': '1.6', 'stroke-linejoin': 'round' } },
+            { tag: 'line', attrs: { x1: '7.5', y1: '12', x2: '16.5', y2: '12', stroke: '#e05d5d', 'stroke-width': '1.5', 'stroke-linecap': 'round' } },
+            { tag: 'line', attrs: { x1: '7.5', y1: '15.5', x2: '16.5', y2: '15.5', stroke: '#e05d5d', 'stroke-width': '1.5', 'stroke-linecap': 'round' } },
+            { tag: 'line', attrs: { x1: '7.5', y1: '19', x2: '13', y2: '19', stroke: '#eda2a2', 'stroke-width': '1.5', 'stroke-linecap': 'round' } }
+        ];
+    }
+
+    /** PNG 图片图标：绿色系文档 + 山峰太阳 */
+    function pngIconShapes() {
+        return [
+            { tag: 'path', attrs: { d: 'M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z', fill: '#e7f6ef' } },
+            { tag: 'path', attrs: { d: 'M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z', fill: 'none', stroke: '#3aa876', 'stroke-width': '1.6' } },
+            { tag: 'path', attrs: { d: 'M15 2v5h5', fill: 'none', stroke: '#3aa876', 'stroke-width': '1.6', 'stroke-linejoin': 'round' } },
+            { tag: 'circle', attrs: { cx: '9.4', cy: '12.2', r: '1.4', fill: '#7fcda6' } },
+            { tag: 'path', attrs: { d: 'M6.8 19.5l3.6-4.6 2.4 2.8 2-2.4 2.8 4.2z', fill: '#3aa876' } }
+        ];
+    }
+
+    /** 生成文件类型图标 */
+    function fileIcon(fileType) {
+        var shapes = fileType === 'pdf' ? pdfIconShapes() : pngIconShapes();
+        return makeSvg('cme-learn-node-icon', '0 0 24 24', shapes);
+    }
+
+    /** 统计目录节点后代文件数 */
+    function countFiles(node) {
+        if (node.type === 'file') { return 1; }
+        var total = 0;
+        var children = node.children || [];
+        for (var i = 0; i < children.length; i++) {
+            total += countFiles(children[i]);
+        }
+        return total;
+    }
+
+    /* ==================== 目录树渲染 ==================== */
+
+    /**
+     * 递归渲染节点
+     * @param node    数据节点
+     * @param depth   层级（根为 0）
+     * @param theme   所属根节点主题
+     * @param parentUl 父 ul
+     */
+    function renderNode(node, depth, theme, parentUl) {
+        var li = document.createElement('li');
+        li.className = 'cme-learn-node';
+        var row = document.createElement('div');
+        row.className = 'cme-learn-row';
+        row.style.paddingLeft = (8 + depth * 16) + 'px';
+
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'cme-learn-row-name';
+        nameSpan.textContent = node.name; // textContent 防 XSS
+
+        if (node.type === 'dir') {
+            li.classList.add('cme-learn-dir');
+            row.classList.add('cme-learn-dirrow');
+            li.style.setProperty('--cme-ln-accent', theme.accent);
+            li.style.setProperty('--cme-ln-accent-soft', theme.soft);
+
+            row.appendChild(arrowIcon());
+            if (depth === 0) {
+                li.classList.add('cme-learn-root');
+                var dot = document.createElement('span');
+                dot.className = 'cme-learn-root-dot';
+                row.appendChild(dot);
+            } else {
+                row.appendChild(folderIcon());
+            }
+            row.appendChild(nameSpan);
+
+            if (depth === 0) {
+                var count = document.createElement('span');
+                count.className = 'cme-learn-count';
+                count.textContent = countFiles(node);
+                row.appendChild(count);
+            }
+            li.appendChild(row);
+
+            // 子级容器（grid 动画结构：children > inner > ul）
+            var childrenBox = document.createElement('div');
+            childrenBox.className = 'cme-learn-children';
+            var inner = document.createElement('div');
+            inner.className = 'cme-learn-children-inner';
+            var ul = document.createElement('ul');
+            var children = node.children || [];
+            for (var i = 0; i < children.length; i++) {
+                renderNode(children[i], depth + 1, theme, ul);
+            }
+            inner.appendChild(ul);
+            childrenBox.appendChild(inner);
+            li.appendChild(childrenBox);
+
+            row.addEventListener('click', function () {
+                li.classList.toggle('cme-learn-node-expanded');
+            });
+            dirNodes.push(li);
+        } else {
+            li.classList.add('cme-learn-file');
+            row.classList.add('cme-learn-filerow');
+            li.style.setProperty('--cme-ln-accent', theme.accent);
+            li.style.setProperty('--cme-ln-accent-soft', theme.soft);
+
+            row.appendChild(fileIcon(node.fileType));
+            row.appendChild(nameSpan);
+            li.appendChild(row);
+
+            row.addEventListener('click', function () {
+                openFile(node, li);
+            });
+            fileNodes.push({ li: li, name: node.name });
+        }
+        parentUl.appendChild(li);
+    }
+
+    /** 渲染整棵树 */
+    function renderTree(data) {
+        treeUl.textContent = '';
+        dirNodes = [];
+        fileNodes = [];
+        if (!data || data.length === 0) {
+            treeTip.textContent = '暂无学习资料';
+            treeTip.style.display = '';
+            return;
+        }
+        treeTip.style.display = 'none';
+        for (var i = 0; i < data.length; i++) {
+            var theme = ROOT_THEMES[data[i].name] || DEFAULT_THEME;
+            renderNode(data[i], 0, theme, treeUl);
+        }
+    }
+
+    /* ==================== 搜索过滤 ==================== */
+
+    /** 恢复默认状态：全部可见、全部折叠 */
+    function resetTree() {
+        var i;
+        var all = treeUl.querySelectorAll('.cme-learn-node');
+        for (i = 0; i < all.length; i++) {
+            all[i].classList.remove('cme-learn-hidden');
+        }
+        for (i = 0; i < dirNodes.length; i++) {
+            dirNodes[i].classList.remove('cme-learn-node-expanded');
+        }
+    }
+
+    /** 显示某节点整棵子树并展开其中的目录 */
+    function showSubtree(li) {
+        li.classList.remove('cme-learn-hidden');
+        if (li.classList.contains('cme-learn-dir')) {
+            li.classList.add('cme-learn-node-expanded');
+            var childLis = li.querySelectorAll(':scope > .cme-learn-children .cme-learn-node');
+            for (var i = 0; i < childLis.length; i++) {
+                childLis[i].classList.remove('cme-learn-hidden');
+                if (childLis[i].classList.contains('cme-learn-dir')) {
+                    childLis[i].classList.add('cme-learn-node-expanded');
+                }
+            }
+        }
+    }
+
+    /**
+     * 递归过滤：返回该节点子树内是否有可见内容
+     * 目录自身命中 → 显示整棵子树；文件命中 → 自身可见（祖先由返回值链式展开）
+     */
+    function filterNode(li, kw) {
+        var nameEl = li.querySelector(':scope > .cme-learn-row .cme-learn-row-name');
+        var name = (nameEl ? nameEl.textContent : '').toLowerCase();
+        var selfMatch = name.indexOf(kw) !== -1;
+
+        if (li.classList.contains('cme-learn-file')) {
+            li.classList.toggle('cme-learn-hidden', !selfMatch);
+            return selfMatch;
+        }
+        // 目录节点
+        if (selfMatch) {
+            showSubtree(li);
+            return true;
+        }
+        var visible = false;
+        var childUl = li.querySelector(':scope > .cme-learn-children > .cme-learn-children-inner > ul');
+        if (childUl) {
+            var children = childUl.children;
+            for (var i = 0; i < children.length; i++) {
+                if (filterNode(children[i], kw)) {
+                    visible = true;
+                }
+            }
+        }
+        li.classList.toggle('cme-learn-hidden', !visible);
+        li.classList.toggle('cme-learn-node-expanded', visible);
+        return visible;
+    }
+
+    /** 执行搜索 */
+    function doSearch() {
+        var kw = searchInput.value.trim().toLowerCase();
+        searchBox.classList.toggle('cme-learn-has-kw', kw.length > 0);
+        if (!kw) {
+            resetTree();
+            return;
+        }
+        var anyVisible = false;
+        var roots = treeUl.children;
+        for (var i = 0; i < roots.length; i++) {
+            if (filterNode(roots[i], kw)) {
+                anyVisible = true;
+            }
+        }
+        if (fileNodes.length > 0) {
+            treeTip.textContent = '没有匹配的资料';
+            treeTip.style.display = anyVisible ? 'none' : '';
+        }
+    }
+
+    var searchTimer = null;
+    searchInput.addEventListener('input', function () {
+        if (searchTimer) { clearTimeout(searchTimer); }
+        searchTimer = setTimeout(doSearch, 200);
+    });
+    searchClear.addEventListener('click', function () {
+        searchInput.value = '';
+        searchBox.classList.remove('cme-learn-has-kw');
+        if (fileNodes.length > 0) { treeTip.style.display = 'none'; }
+        resetTree();
+        searchInput.focus();
+    });
+
+    /* ==================== 右侧查看器 ==================== */
+
+    /** 更新顶部标题栏：文件类型图标 + 路径面包屑 */
+    function updateHead(node) {
+        // 图标
+        var newIcon = fileIcon(node.fileType);
+        newIcon.setAttribute('class', 'cme-learn-viewer-fileicon');
+        newIcon.id = 'cmeLearnHeadIcon';
+        headIcon.parentNode.replaceChild(newIcon, headIcon);
+        headIcon = newIcon;
+        // 面包屑
+        crumbBox.textContent = '';
+        var segs = node.path.split('/');
+        for (var i = 0; i < segs.length; i++) {
+            if (i > 0) {
+                var sep = document.createElement('span');
+                sep.className = 'cme-learn-crumb-sep';
+                sep.textContent = '/';
+                crumbBox.appendChild(sep);
+            }
+            var seg = document.createElement('span');
+            seg.className = (i === segs.length - 1) ? 'cme-learn-crumb-file' : 'cme-learn-crumb-seg';
+            seg.textContent = segs[i]; // textContent 防 XSS
+            crumbBox.appendChild(seg);
+        }
+    }
+
+    /** 打开文件 */
+    function openFile(node, li) {
+        // 选中态切换
+        if (activeFileLi) { activeFileLi.classList.remove('cme-learn-file-active'); }
+        li.classList.add('cme-learn-file-active');
+        activeFileLi = li;
+
+        updateHead(node);
+
+        // 相对路径请求（依赖 JBolt 页面 base href 机制，与 index.html 链接写法一致）
+        var url = 'admin/siargo/cme/viewFile?path=' + encodeURIComponent(node.path);
+
+        // 清空内容区（含空状态占位）
+        viewerBody.textContent = '';
+        if (node.fileType === 'pdf') {
+            var embed = document.createElement('embed');
+            embed.className = 'cme-learn-embed';
+            embed.setAttribute('src', url);
+            embed.setAttribute('type', 'application/pdf');
+            viewerBody.appendChild(embed);
+        } else {
+            var scroll = document.createElement('div');
+            scroll.className = 'cme-learn-img-scroll';
+            var img = document.createElement('img');
+            img.setAttribute('src', url);
+            img.setAttribute('alt', node.name);
+            scroll.appendChild(img);
+            viewerBody.appendChild(scroll);
+        }
+    }
+
+    /* ==================== 目录数据加载 ==================== */
+
+    function loadTree() {
+        $.getJSON('admin/siargo/cme/listFiles')
+            .done(function (res) {
+                if (res && res.state === 'ok') {
+                    renderTree(res.data);
+                } else {
+                    treeTip.textContent = (res && res.msg) ? res.msg : '目录加载失败，请稍后重试';
+                    treeTip.classList.add('cme-learn-tip-error');
+                }
+            })
+            .fail(function () {
+                treeTip.textContent = '目录加载失败，请检查网络后重试';
+                treeTip.classList.add('cme-learn-tip-error');
+            });
+    }
+
+    loadTree();
+})();
+</script>
+</body>
+</html>

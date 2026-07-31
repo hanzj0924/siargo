@@ -1,0 +1,45 @@
+#@jboltLayout()
+#define css()
+<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
+<style>
+	html, body { overflow-y: auto !important; background: #f7f8fa; }
+</style>
+#end
+
+#define main()
+<div class="rjh-wrap">
+	#if(logs == null || logs.size() == 0)
+	<div class="rjh-empty"><i class="fa fa-info-circle"></i> 该产品暂无驳回记录</div>
+	#else
+	<div class="rjh-count">共 #(logs.size()) 次驳回，按时间顺序排列</div>
+	<div class="rjh-timeline">
+		#for(log : logs)
+		<div class="rjh-item">
+			<div class="rjh-dot"></div>
+			<div class="rjh-card">
+				<div class="rjh-hd">
+					#-- 发起驳回环节 → 退回重检环节，各环节背景色与流程图主题色一致（2=外观驳回退精度 3=包装驳回退外观 4=批准驳回退包装） --#
+					<span class="rjh-flow">
+						#if(log.reject_insp == 2)
+						<span class="insp-step-badge insp-badge-funq">外观检验</span><span class="rjh-flow-arrow">&#8594;</span><span class="insp-step-badge insp-badge-accq">精度检验</span>
+						#else if(log.reject_insp == 3)
+						<span class="insp-step-badge insp-badge-appq">包装检验</span><span class="rjh-flow-arrow">&#8594;</span><span class="insp-step-badge insp-badge-funq">外观检验</span>
+						#else if(log.reject_insp == 4)
+						<span class="insp-step-badge insp-badge-allq">批准</span><span class="rjh-flow-arrow">&#8594;</span><span class="insp-step-badge insp-badge-appq">包装检验</span>
+						#else
+						<span class="rjh-stage">#(log.reject_insp_name??"未知环节")</span>
+						#end
+					</span>
+					<span class="rjh-time"><i class="fa fa-clock-o"></i> #(log.reject_time??)</span>
+				</div>
+				#-- 注意转义差异：Enjoy 服务端 #(xxx) 输出会自动做 HTML 转义（用户输入的驳回原因在此是安全的）；
+				     而 JBolt 前端行模板（{@each}...${xxx}）的 ${} 是浏览器端字符串拼接、不转义，两者勿混淆 --#
+				<div class="rjh-des">#(log.reject_des??)</div>
+				<div class="rjh-ft"><i class="fa fa-user-o"></i> 驳回人：#(log.reject_name??"-")</div>
+			</div>
+		</div>
+		#end
+	</div>
+	#end
+</div>
+#end

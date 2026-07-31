@@ -1,5 +1,31 @@
 ## 更新日志
 
+### v2.8.0 (2026-07-31)
+- refactor(qarep): 全部 Controller 写操作改用手动 `Db.tx()` + afterCommit 缓存清理模式，彻底消除事务内清缓存导致的并发脏读风险（替代原 `@Before(Tx.class)` 声明式事务）
+- refactor(qarep): Service 写方法（save/update/permanentDelete）失败时返回 `Ret.fail()` 而非抛 RuntimeException，修复 try/catch 吞异常导致事务不回滚的潜在 bug
+- refactor(qarep): `clearFlowCountsCache()` 统一收敛至 Controller afterCommit 节点，Service 内不再调用，消除职责分散问题
+- feat(qarep): 新增审批工作台页面 approval.html（JBoltLayer 抽屉 iframe 加载），支持按 formnum 分组卡片、全选/单选、通过/驳回二态操作、驳回原因输入 + 两次点击确认
+- feat(qarep): 新增产品驳回历史记录服务 ProductRejectLogService + 弹窗页面 reject_history.html（紫色时间线 UI）
+- feat(qarep): 新增 QarepConst 常量类，消除全模块魔法数字（insp 1~5、角色 SN 211~214、产品类型等）
+- feat(qarep): 列表页同 formnum 产品自动合并行（rowspan）+ 主表与固定列双向 hover 同步（基于 .jbolt_table_box 容器委托）
+- feat(qarep): 流程计数 DCL 缓存（flowCounts 30min TTL + paginate 30s TTL）、Tab 懒加载 + 脏标记、visibilitychange 暂停刷新
+- feat(qarep): 详情页检验流程图显示 per-stage 驳回角标（reject_count_2/3/4 > 0）+ 重检中/已驳回状态节点
+- feat(qarep): 产品表新增 `reject_count` 冗余字段，列表/审批查询改读字段替代子查询，消除 N+1 性能问题
+- improve(qarep): batchSoftDeleteProduct 改为返回 Ret，删除失败时可感知并回滚
+- improve(qarep): 审批页跨 iframe 通知 `_qarepRefresh` 增加 try/catch 兜底，父页未注册时降级为关闭弹窗
+- improve(qarep): notifyNextStageUsers 移至事务提交后执行，确保通知读到已提交数据
+- fix(qarep): 详情页驳回显示消失——ProductService LEFT JOIN siargo_product_reject_log 取最新驳回记录 + 每环节独立计数
+- fix(qarep): SQL CASE 缺少 ELSE 兜底导致未知环节返回 NULL，增加 `ELSE '未知环节'`
+- style(qarep): 审批页全套 CSS 设计（卡片分组、勾选高亮、驳回输入框、动画箭头、主题色适配）
+- style(qarep): 驳回历史时间线 CSS（紫色圆点+卡片+左侧线）、合并组视觉（accent 边框+悬停高亮+计数徽标）
+- style(qarep): siargo.css qarep 分区大幅重组，新增 flow 按钮渐变色、搜索栏、回收站、驳回角标等样式组
+- refactor(cme): 首页 index.html 重设计为学习门户介绍页——Hero 大标题 + 三学科介绍卡片（法规蓝/实务青绿/案例紫主题色，含核心知识点列表）+ 学习路径流程图（法规→实务→案例），唯一入口"进入学习"，移除原知识点/思维导图 6 个入口按钮
+- feat(cme): 新增学习界面（/admin/siargo/cme/learn），左侧目录树按法规→实务→案例→补充知识→计算器说明书固定顺序展示（默认全折叠、根节点主题色、关键词搜索过滤自动展开祖先），右侧复用 embed 机制查看 PDF、img 查看 PNG，含空状态插画与面包屑路径
+- feat(cme): CMEController 新增 listFiles 目录树 JSON 接口（递归扫描 pdf/png、目录在前文件在后按拼音排序、排除空目录）与 viewFile 动态文件流接口（canonicalPath 路径穿越校验加分隔符防同前缀绕过 + pdf/png 扩展名白名单）
+- fix(cme): 重复点击"进入学习"新开第二个空白标签页，CTA 链接增加 data-key="cme_learn" 固定标识触发 JBolt 标签页去重，再次点击切换至已打开的学习页
+- style(cme): siargo.css CME 分区整体重写——清除旧首页/思维导图/PDF viewer 废弃样式（含污染全局的裸 * 与 body 选择器），新增 cme-/cme-learn- 前缀样式组，learn.html 页内仅保留 JBolt 容器全局覆盖，同步更新 siargo.min.css
+- chore(cme): 学习资料库重组为五大分类目录（法规/实务/案例/补充知识/计算器说明书，60+ 份 PDF/PNG），移除旧版三科合集 PDF 及 viewer 页面
+
 ### v2.7.16 (2026-07-28)
 - refactor(dms): 类别管理页（category/index.html）表格内重设计：四列布局（序号/类别名称/文件数/操作）消除空白区域，删除勾选列，操作列改为行内编辑/删除/上移/下移/移动到（JBolt 裸图标风格），工具栏简化为新增类别+初始化排序+刷新+搜索
 - feat(dms): 文件管理页左侧新增类别文件夹树导航，按类别 id 哈希着色文件夹图标，选中类别后右侧加载文件列表，未选择类别时右侧保持空白

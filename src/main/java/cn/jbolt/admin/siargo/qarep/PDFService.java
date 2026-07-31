@@ -12,16 +12,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.jbolt.siargo.model.Product;
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.PathKit;
+import com.jfinal.log.Log;
 
 import cn.jbolt.admin.siargo.qarep.pdffolder.PdfFolderService;
 import cn.jbolt.admin.siargo.qarep.pdffolder.PdfTemplateService;
-import cn.jbolt.siargo.model.Product;
 import cn.jbolt.siargo.model.Qareport;
 
 /**
@@ -32,6 +33,9 @@ import cn.jbolt.siargo.model.Qareport;
  * @date: 2025-12-02 14:14
  */
 public class PDFService {
+
+	private static final Log LOG = Log.getLog(PDFService.class);
+
 	/** 检验报告单服务，用于查询报告单数据 */
 	@Inject
 	private QareportService qaservice;
@@ -90,20 +94,20 @@ public class PDFService {
 		//如果目标PDF文件已存在，先删除
 		File oldPdfFile = new File(webRootPath + report.getStr("sp_pdfstr"));
 	    if (oldPdfFile.exists()) {
-	        boolean oldFileScuess= oldPdfFile.delete();
-	        
-	        // 如果删除失败，尝试强制删除（释放文件句柄）
-	        if (!oldFileScuess) {
-	        	
-	            System.gc(); // 触发垃圾回收，释放文件句柄
-	            
+	        boolean oldFileDeleted = oldPdfFile.delete();
+
+	        // 如果删除失败（可能文件句柄被短暂占用），稍等后重试一次
+	        // 生成PDF时所有流句柄均在 finally 中确保关闭，此处不再依赖 System.gc()
+	        if (!oldFileDeleted) {
 	            try {
-	                Thread.sleep(200); // 等待一下
+	                Thread.sleep(200);
 	            } catch (InterruptedException e) {
 	                Thread.currentThread().interrupt();
 	            }
-	            
-            }
+	            if (!oldPdfFile.delete()) {
+	                LOG.warn("旧PDF文件删除失败（将被后续生成覆盖）: " + oldPdfFile.getAbsolutePath());
+	            }
+	        }
 	    }
         
 		// ========== 生成PDF文件 ==========
@@ -141,25 +145,24 @@ public class PDFService {
 			}
     		
         } catch (Exception e) {
-            System.out.println("===============PDF导出失败=============");
-            e.printStackTrace();
+            LOG.error("PDF导出失败, 报告单号：" + formnum + " ; 订单号：" + orderId, e);
             String failKey = "报告单号：" + formnum + " ； 订单号：" + orderId;
             return failKey + " ;  失败原因：" + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
         } finally {
             try {
                 if (ps != null) ps.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.warn("关闭PdfStamper失败", e);
             }
             try {
                 if (reader != null) reader.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.warn("关闭PdfReader失败", e);
             }
             try {
                 if (os != null) os.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.warn("关闭输出流失败", e);
             }
         }
         return null;
@@ -187,8 +190,7 @@ public class PDFService {
 				writer.newLine();
 			}
 		} catch (IOException e) {
-			System.out.println("===============写入失败记录文件失败=============");
-			e.printStackTrace();
+			LOG.error("写入失败记录文件失败: " + fileName, e);
 		}
 	}
 
