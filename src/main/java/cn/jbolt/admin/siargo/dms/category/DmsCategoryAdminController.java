@@ -6,10 +6,12 @@ import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
-import com.jfinal.aop.Before;
-import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.kit.Ret;
+import com.jfinal.plugin.activerecord.Db;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.DmsCategory;
+
+import java.util.function.Supplier;
 /**
  * 文件类别表管理 Controller
  * @ClassName: DmsCategoryAdminController
@@ -71,9 +73,9 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 * URL: POST /admin/siargo/dms/category/save
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void save() {
-		renderJson(service.save(getModel(DmsCategory.class, "dmsCategory")));
+		DmsCategory dmsCategory = getModel(DmsCategory.class, "dmsCategory");
+		renderJsonInTx(() -> service.save(dmsCategory));
 	}
 	
 	/**
@@ -81,9 +83,9 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 * URL: POST /admin/siargo/dms/category/update
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void update() {
-		renderJson(service.update(getModel(DmsCategory.class, "dmsCategory")));
+		DmsCategory dmsCategory = getModel(DmsCategory.class, "dmsCategory");
+		renderJsonInTx(() -> service.update(dmsCategory));
 	}
 	
 	/**
@@ -92,9 +94,9 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 * @param ids 类别ID列表（逗号分隔）
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void deleteByIds() {
-		renderJson(service.deleteByBatchIds(get("ids")));
+		String ids = get("ids");
+		renderJsonInTx(() -> service.deleteByBatchIds(ids));
 	}
 	
 	/**
@@ -103,9 +105,9 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 * @param id 类别ID（从URL路径获取）
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void up() {
-		renderJson(service.up(getLong(0)));
+		Long id = getLong(0);
+		renderJsonInTx(() -> service.up(id));
 	}
 	
 	/**
@@ -114,21 +116,9 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 * @param id 类别ID（从URL路径获取）
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void down() {
-		renderJson(service.down(getLong(0)));
-	}
-	
-	/**
-	 * 灵活移动类别排序位置
-	 * URL: POST /admin/siargo/dms/category/move
-	 * @param id 要移动的类别ID
-	 * @param otherId 目标位置的类别ID
-	 * @return 操作结果JSON
-	 */
-    @Before(Tx.class)
-	public void move() {
-		renderJson(service.move(getLong("id"),getLong("otherId")));
+		Long id = getLong(0);
+		renderJsonInTx(() -> service.down(id));
 	}
 	
 	/**
@@ -155,9 +145,11 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 * @param position 相对位置：before=之前 after=之后
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void doMoveTo() {
-		renderJson(service.moveTo(getLong("id"),getLong("targetId"),get("position")));
+		Long id = getLong("id");
+		Long targetId = getLong("targetId");
+		String position = get("position");
+		renderJsonInTx(() -> service.moveTo(id, targetId, position));
 	}
 	
 	/**
@@ -165,9 +157,8 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 * URL: POST /admin/siargo/dms/category/initRank
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void initRank() {
-		renderJson(service.initRank());
+		renderJsonInTx(() -> service.initRank());
 	}
 	
 	/**
@@ -177,6 +168,24 @@ public class DmsCategoryAdminController extends JBoltBaseController {
 	 */
 	public void getCategoryListWithCount() {
 		renderJsonData(service.getCategoryListWithCount());
+	}
+	
+	/**
+	 * 在手动事务中执行服务调用并渲染结果
+	 * 服务返回失败时事务整体回滚
+	 * @param action 服务调用
+	 */
+	private void renderJsonInTx(Supplier<Ret> action) {
+		final Ret[] retHolder = {null};
+		Db.tx(() -> {
+			retHolder[0] = action.get();
+			return retHolder[0].isOk();
+		});
+		if (retHolder[0] != null) {
+			renderJson(retHolder[0]);
+		} else {
+			renderJsonFail("操作失败");
+		}
 	}
 	
 	

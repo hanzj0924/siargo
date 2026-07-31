@@ -1,12 +1,9 @@
 package cn.jbolt.index;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import com.alibaba.fastjson.JSON;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
@@ -93,33 +90,17 @@ public class AdminIndexController extends JBoltBaseController {
 	@CheckPermission("dashboard")
 	@UnCheckIfSystemAdmin
 	public void dashboard(){
-		Map<String, String> map = new HashMap<>();
-		
-		map.put("currentMonthTotal", 
-				String.format("%,d", qareportservice.getTotalQSI(0)==null? 0:qareportservice.getTotalQSI(0))
-				+"(送)/"
-				+String.format("%,d", qareportservice.getTotalQI(0)==null? 0:qareportservice.getTotalQI(0))
-				+"(检)");
-		map.put("cTotal", 
-				String.format("%,d", qareportservice.getTotalQSI(1)==null? 0:qareportservice.getTotalQSI(1))
-				+"/"
-				+String.format("%,d", qareportservice.getTotalQI(1)==null? 0:qareportservice.getTotalQI(1))
-				);
-		map.put("xTotal", 
-				String.format("%,d", qareportservice.getTotalQSI(2)==null? 0:qareportservice.getTotalQSI(2))
-				+"/"
-				+String.format("%,d", qareportservice.getTotalQI(2)==null? 0:qareportservice.getTotalQI(2))
-				);
-		map.put("dTotal", 
-				String.format("%,d", qareportservice.getTotalQSI(3)==null? 0:qareportservice.getTotalQSI(3))
-				+"/"
-				+String.format("%,d", qareportservice.getTotalQI(3)==null? 0:qareportservice.getTotalQI(3))
-				);
+		// 流程环节看板数据（带30分钟缓存）：all/noq/accq/funq/appq/allq
+		set("flowCounts", qareportservice.getFlowCounts());
+		// 本年度送检/检验总量（hero 头部副标题展示）
+		set("totalQsi", String.format("%,d", qareportservice.getTotalQSI(0)==null? 0:qareportservice.getTotalQSI(0)));
+		set("totalQi", String.format("%,d", qareportservice.getTotalQI(0)==null? 0:qareportservice.getTotalQI(0)));
 
 		set("donutData",qareportservice.getDonutData());
 		set("repalldata",qareportservice.getRepAllData());
 		set("repfixdata",qareportservice.getRepData());
-		set("dashboard",map);
+		// 季度同比：今年 vs 去年各季度送检只数
+		set("quarterData",qareportservice.getQuarterCompareData());
 		render("dashboard.html");
 	}
 

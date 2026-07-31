@@ -459,7 +459,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	private Map<String, Long> loadFlowCountsFromDb() {
 		Map<String, Long> counts = new java.util.HashMap<>();
-		// 合并为单条SQL：使用SUM(CASE WHEN)一次性统计所有指标
+		// 合并为单条SQL：使用SUM(CASE WHEN)一次性统计所有指标（单量 + 各环节送检只数）
 		String sql = "SELECT"
 				+ "  COUNT(*) AS all_count"
 				+ ", SUM(CASE WHEN insp = 1 THEN 1 ELSE 0 END) AS insp_1"
@@ -467,6 +467,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ ", SUM(CASE WHEN insp = 3 THEN 1 ELSE 0 END) AS insp_3"
 				+ ", SUM(CASE WHEN insp = 4 THEN 1 ELSE 0 END) AS insp_4"
 				+ ", SUM(CASE WHEN insp = 5 THEN 1 ELSE 0 END) AS insp_5"
+				+ ", SUM(CASE WHEN insp = 1 THEN sp.qsi ELSE 0 END) AS qsi_1"
+				+ ", SUM(CASE WHEN insp = 2 THEN sp.qsi ELSE 0 END) AS qsi_2"
+				+ ", SUM(CASE WHEN insp = 3 THEN sp.qsi ELSE 0 END) AS qsi_3"
+				+ ", SUM(CASE WHEN insp = 4 THEN sp.qsi ELSE 0 END) AS qsi_4"
+				+ ", SUM(CASE WHEN insp = 5 THEN sp.qsi ELSE 0 END) AS qsi_5"
 				+ " FROM siargo_product sp WHERE sp.vd = 1";
 		Record row = Db.findFirst(sql);
 		if (row != null) {
@@ -476,6 +481,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			counts.put("funq", row.getLong("insp_3") != null ? row.getLong("insp_3") : 0L);
 			counts.put("appq", row.getLong("insp_4") != null ? row.getLong("insp_4") : 0L);
 			counts.put("allq", row.getLong("insp_5") != null ? row.getLong("insp_5") : 0L);
+			counts.put("noq_qsi", row.getLong("qsi_1") != null ? row.getLong("qsi_1") : 0L);
+			counts.put("accq_qsi", row.getLong("qsi_2") != null ? row.getLong("qsi_2") : 0L);
+			counts.put("funq_qsi", row.getLong("qsi_3") != null ? row.getLong("qsi_3") : 0L);
+			counts.put("appq_qsi", row.getLong("qsi_4") != null ? row.getLong("qsi_4") : 0L);
+			counts.put("allq_qsi", row.getLong("qsi_5") != null ? row.getLong("qsi_5") : 0L);
 		} else {
 			counts.put("all", 0L);
 			counts.put("noq", 0L);
@@ -483,6 +493,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			counts.put("funq", 0L);
 			counts.put("appq", 0L);
 			counts.put("allq", 0L);
+			counts.put("noq_qsi", 0L);
+			counts.put("accq_qsi", 0L);
+			counts.put("funq_qsi", 0L);
+			counts.put("appq_qsi", 0L);
+			counts.put("allq_qsi", 0L);
 		}
 		return counts;
 	}
@@ -960,7 +975,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 		boolean prodSuccess = dbProduct.update();
 		if (!prodSuccess) {
-			return fail("产品信息更新失败，请重试！");
+			return fail("产品信息更新失败，请联系开发人员！");
 		}
 		return Ret.ok();
 	}
@@ -986,7 +1001,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				rangeStart, rangeEnd);
 		long seq = (maxFormnum == null) ? 1 : (maxFormnum % 1000) + 1;
 		if (seq > 999) {
-			return fail("当月报告单号已用尽（超过999），请联系开发人员！");
+			return fail("当月报告单号已用尽（超过999单），请联系开发人员！");
 		}
 		return Ret.ok().set("data", fornum * 1000 + seq);
 	}
@@ -1103,43 +1118,48 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	}
 	
 	/**
-	 * 获取每月返修品送检数量统计数据
-	 * <p>用于生成首页图表，展示全年各月的返修品数量趋势</p>
-	 * <p>SQL说明：按月份分组统计rep_type=2（返修品）的送检数量</p>
-	 * @return 1-12月的返修品数量数据列表
+	 * 获取每月返修品送检数量统计数据（含今年与去年）
+	 * <p>用于生成首页图表，展示全年各月的返修品数量趋势，支持年度切换</p>
+	 * <p>SQL说明：按年份+月份分组统计rep_type=2（返修品）的送检数量，一次查出两年数据</p>
+	 * @return {curYear今年年份, lastYear去年年份, cur今年[1..12月], last去年[1..12月]}
 	 */
-	public List<Map<String, Object>> getRepData() {
+	public Map<String, Object> getRepData() {
 	    String sql = "SELECT "
+	    		+ "  YEAR(sq.create_time) AS yr, "
 	    		+ "  MONTH(sq.create_time) AS MONTH, "
 	    		+ "  SUM(sp.qsi) AS qsi_reTotal "
 	    		+ "FROM "
 	    		+ "  siargo_product sp "
 	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
 	    		+ "WHERE "
-	    		+ "  YEAR(sq.create_time) = YEAR(CURDATE()) "
+	    		+ "  YEAR(sq.create_time) IN (YEAR(CURDATE()), YEAR(CURDATE()) - 1) "
 	    		+ "  AND sp.vd = 1 AND sq.rep_type = 2  "
 	    		+ "GROUP BY "
-	    		+ "  MONTH(sq.create_time) "
-	    		+ "ORDER BY "
-	    		+ "  MONTH(sq.create_time) ";
+	    		+ "  YEAR(sq.create_time), MONTH(sq.create_time) ";
 
 	    List<Record> records = Db.find(sql);
 	    
-	    // 转换为月份为key的Map
-	    Map<Integer, Integer> monthData = new LinkedHashMap<>();
+	    int curYear = java.time.Year.now().getValue();
+	    long[] cur = new long[12];
+	    long[] last = new long[12];
 	    for (Record record : records) {
-	        monthData.put(record.getInt("MONTH"), record.getInt("qsi_reTotal"));
+	    	Integer month = record.getInt("MONTH");
+	    	if (month == null || month < 1 || month > 12) {
+	    		continue;
+	    	}
+	    	Long qsi = record.getLong("qsi_reTotal");
+	    	if (record.getInt("yr") == curYear) {
+	    		cur[month - 1] = qsi == null ? 0L : qsi;
+	    	} else {
+	    		last[month - 1] = qsi == null ? 0L : qsi;
+	    	}
 	    }
 	    
-	    // 生成1-12月的完整数据，使用LinkedHashMap保持特定顺序
-	    List<Map<String, Object>> result = new ArrayList<>();
-	    for (int month = 1; month <= 12; month++) {
-	    	String monthKey = String.format("%s-%02d", String.valueOf(java.time.Year.now().getValue()), month);
-	        Map<String, Object> item = new LinkedHashMap<>();
-	        item.put("x", monthKey); 
-	        item.put("a", monthData.getOrDefault(month, 0)); 
-	        result.add(item);
-	    }
+	    Map<String, Object> result = new LinkedHashMap<>();
+	    result.put("curYear", curYear);
+	    result.put("lastYear", curYear - 1);
+	    result.put("cur", cur);
+	    result.put("last", last);
 	    return result;
 	}
 	
@@ -1188,6 +1208,64 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	        item.put("c", largeFlowData.getOrDefault(month, 0));   // 大流量数据
 	        result.add(item);
 	    }
+	    return result;
+	}
+	
+	/**
+	 * 获取今年与去年各季度送检数量对比数据（按产品类型细分）
+	 * <p>用于首页仪表盘季度同比图表</p>
+	 * <p>SQL说明：按年份+季度分组，CASE WHEN按产品类型分列统计送检数量，一次查出两年数据</p>
+	 * @return {curYear今年年份, lastYear去年年份, curA/curB/curC今年各类型[Q1..Q4], lastA/lastB/lastC去年各类型[Q1..Q4]}（A=传感器 B=小流量 C=大流量）
+	 */
+	public Map<String, Object> getQuarterCompareData() {
+	    String sql = "SELECT "
+	    		+ "  YEAR(sq.create_time) AS yr, "
+	    		+ "  QUARTER(sq.create_time) AS qt, "
+	    		+ "  SUM(CASE WHEN sp.type = 1 THEN sp.qsi ELSE 0 END) AS sensor_qsi, "
+	    		+ "  SUM(CASE WHEN sp.type = 2 THEN sp.qsi ELSE 0 END) AS small_flow_qsi, "
+	    		+ "  SUM(CASE WHEN sp.type = 3 THEN sp.qsi ELSE 0 END) AS large_flow_qsi "
+	    		+ "FROM "
+	    		+ "  siargo_product sp "
+	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
+	    		+ "WHERE "
+	    		+ "  sp.vd = 1 "
+	    		+ "  AND YEAR(sq.create_time) IN (YEAR(CURDATE()), YEAR(CURDATE()) - 1) "
+	    		+ "GROUP BY "
+	    		+ "  YEAR(sq.create_time), QUARTER(sq.create_time) ";
+	    List<Record> records = Db.find(sql);
+	    
+	    int curYear = java.time.LocalDate.now().getYear();
+	    long[] curA = new long[4], curB = new long[4], curC = new long[4];
+	    long[] lastA = new long[4], lastB = new long[4], lastC = new long[4];
+	    for (Record record : records) {
+	    	Integer qt = record.getInt("qt");
+	    	if (qt == null || qt < 1 || qt > 4) {
+	    		continue;
+	    	}
+	    	int i = qt - 1;
+	    	Long a = record.getLong("sensor_qsi");
+	    	Long b = record.getLong("small_flow_qsi");
+	    	Long c = record.getLong("large_flow_qsi");
+	    	if (record.getInt("yr") == curYear) {
+	    		curA[i] = a == null ? 0L : a;
+	    		curB[i] = b == null ? 0L : b;
+	    		curC[i] = c == null ? 0L : c;
+	    	} else {
+	    		lastA[i] = a == null ? 0L : a;
+	    		lastB[i] = b == null ? 0L : b;
+	    		lastC[i] = c == null ? 0L : c;
+	    	}
+	    }
+	    
+	    Map<String, Object> result = new LinkedHashMap<>();
+	    result.put("curYear", curYear);
+	    result.put("lastYear", curYear - 1);
+	    result.put("curA", curA);
+	    result.put("curB", curB);
+	    result.put("curC", curC);
+	    result.put("lastA", lastA);
+	    result.put("lastB", lastB);
+	    result.put("lastC", lastC);
 	    return result;
 	}
 	

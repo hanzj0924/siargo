@@ -109,10 +109,10 @@
 <tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td style="text-align: left">
-	<a id="pdfFrame" data-openpage="jboltlayer" data-resize="true"
+	<a class="pdfFrame" data-openpage="jboltlayer" data-resize="true"
 						data-load-type="iframe" href="${data.filepath}"
 						title="${data.filename}"
-						onclick="loadPDF(this, '${data.filepath}')">
+						onclick="loadPDF(event, this, '${data.filepath}')">
 	${data.filename}
 	</a>
 </td>
@@ -141,7 +141,7 @@
 		<td>${data.uploadtime}</td>
 		<td><img data-switchbtn data-confirm="确定切换此文件时效性？"
 			data-value="${data.isactive}" data-handler="refreshJBoltTable"
-			data-url="/admin/siargo/dms/file/changeActive/${data.id}" /></td>
+			data-url="/admin/siargo/dms/file/toggleActive/${data.id}" /></td>
 		<td><a href="admin/siargo/dms/file/edit/${data.id}"
 			data-area="700,500" tooltip data-title="编辑"
 			data-handler="refreshJBoltTable" data-dialog-title="编辑文件"
@@ -565,7 +565,7 @@ function getUrlParam(name) {
 }
 
 //将PDF原本的href属性替换为带有时间戳的URL，以避免缓存
-function loadPDF (element, originalPdfUrl) {
+function loadPDF (event, element, originalPdfUrl) {
     // 阻止默认行为（如果链接已有默认行为）
     event.preventDefault ? event.preventDefault() : (event.returnValue = false);
     

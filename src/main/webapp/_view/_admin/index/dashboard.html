@@ -1,290 +1,141 @@
 #@jboltLayout()
+#define css()
+<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
+#end
 #define main()
 #set(pageId=RandomUtil.random(6))
-<style>
-/* ========================================
-   Dashboard 精致工业仪表盘 - 局部样式
-   前缀 db- 防止污染全局
-   ======================================== */
-
-/* 页面背景 */
-.db-wrapper {
-    background: linear-gradient(135deg, #f0f4ff 0%, #f5f7fa 50%, #eef2f7 100%);
-    min-height: 100%;
-    padding: 16px 0 8px;
-}
-
-/* ---- 统计卡片 ---- */
-.db-stat-card {
-    background: #ffffff;
-    border-radius: 12px !important;
-    border: none !important;
-    overflow: hidden;
-    transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.28s ease;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    margin-bottom: 16px;
-}
-.db-stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.10);
-}
-
-/* 图标容器（圆角方块，淡色背景） */
-.db-icon-wrap {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.db-icon-wrap.db-ic1 { background: #eef2ff; }
-.db-icon-wrap.db-ic1 i { color: #4361ee !important; }
-.db-icon-wrap.db-ic2 { background: #ecfdf5; }
-.db-icon-wrap.db-ic2 i { color: #10b981 !important; }
-.db-icon-wrap.db-ic3 { background: #fff7ed; }
-.db-icon-wrap.db-ic3 i { color: #f59e0b !important; }
-.db-icon-wrap.db-ic4 { background: #fef2f2; }
-.db-icon-wrap.db-ic4 i { color: #ef4444 !important; }
-.db-icon-wrap i { font-size: 22px; }
-
-/* 卡片数值与标签 */
-.db-stat-body {
-    display: flex;
-    align-items: center;
-    padding: 20px 20px 20px 20px;
-    gap: 0;
-}
-.db-stat-info {
-    flex: 1;
-    text-align: right;
-}
-.db-stat-num {
-    display: block;
-    font-size: 24px;
-    font-weight: 700;
-    color: #1e293b;
-    letter-spacing: 0.3px;
-    line-height: 1.25;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #f1f5f9;
-}
-.db-stat-label {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    font-size: 12.5px;
-    color: #94a3b8;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    margin-top: 6px;
-    gap: 6px;
-}
-.db-stat-label::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.db-c1 .db-stat-label::before { background: #4361ee; }
-.db-c2 .db-stat-label::before { background: #10b981; }
-.db-c3 .db-stat-label::before { background: #f59e0b; }
-.db-c4 .db-stat-label::before { background: #ef4444; }
-
-/* ---- 图表卡片 ---- */
-.db-chart-card {
-    border-radius: 12px !important;
-    border: none !important;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    margin-bottom: 16px;
-    overflow: hidden;
-    background: #ffffff;
-}
-.db-chart-card .card-body {
-    padding: 18px 20px 14px;
-}
-.db-chart-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f2f5;
-}
-.db-chart-title-text {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    font-weight: 600;
-    color: #344563;
-    letter-spacing: 0.2px;
-}
-.db-chart-title-text::before {
-    content: '';
-    display: inline-block;
-    width: 3px;
-    height: 16px;
-    background: linear-gradient(180deg, #4361ee, #7289ff);
-    border-radius: 2px;
-    margin-right: 8px;
-    flex-shrink: 0;
-}
-.db-chart-title-text.db-line-accent::before {
-    background: linear-gradient(180deg, #e71d36, #ff5c72);
-}
-.db-chart-title-text.db-donut-accent::before {
-    background: linear-gradient(180deg, #2ec4b6, #6eddd6);
-}
-.db-fullscreen-btn {
-    color: #b0bac9;
-    transition: color 0.2s, transform 0.2s;
-    line-height: 1;
-}
-.db-fullscreen-btn:hover {
-    color: #4361ee;
-    transform: scale(1.15);
-    text-decoration: none;
-}
-
-/* ---- 入场动画 ---- */
-@keyframes db-fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes db-fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-.db-anim-card {
-    animation: db-fadeInUp 0.5s ease both;
-}
-.db-anim-chart {
-    animation: db-fadeIn 0.6s ease both;
-}
-.db-delay-1 { animation-delay: 0.05s; }
-.db-delay-2 { animation-delay: 0.15s; }
-.db-delay-3 { animation-delay: 0.25s; }
-.db-delay-4 { animation-delay: 0.35s; }
-.db-delay-5 { animation-delay: 0.1s; }
-.db-delay-6 { animation-delay: 0.2s; }
-.db-delay-7 { animation-delay: 0.15s; }
-
-/* Morris 图表容器 */
-.db-morris-wrap {
-    width: 100%;
-}
-/* 修正 Morris SVG 文字颜色 */
-.db-chart-card .morris-hover {
-    border-radius: 8px;
-    font-size: 12px;
-}
-</style>
 <!--主页面内容显示区域 start-->
-<div class="jbolt_page shadow-none bg-transparent" data-key="#(pmkey)" data-require-plugin="morris" data-init-handler="initDashboard_#(pageId)" style="padding:0px 4px;">
-<div class="jbolt_page_content p-0">
+<div class="jbolt_page shadow-none bg-transparent" data-key="#(pmkey)" data-require-plugin="echarts" data-init-handler="initDashboard_#(pageId)" style="padding:0px 4px;">
+<div class="jbolt_page_content p-0 db-scroll">
     <div class="db-wrapper">
 
-        <!-- ===== 统计卡片行 ===== -->
-        <div class="row mx-0">
-            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
-                <div class="db-stat-card db-c1 db-anim-card db-delay-1 hand">
-                    <div class="db-stat-body">
-                        <div class="db-icon-wrap db-ic1">
-                            <i class="jbicon jb-zhiliangrenwu"></i>
-                        </div>
-                        <div class="db-stat-info">
-                            <span class="db-stat-num" id="currentMonthTotal">#(dashboard.currentMonthTotal ??)</span>
-                            <span class="db-stat-label">本年度送检总量/只</span>
-                        </div>
+        <!-- ===== 流程环节看板（hero） ===== -->
+        <div class="db-hero db-anim db-d1">
+            <div class="db-hero-head">
+                <div>
+                    <h4 class="db-hero-title">报告单流程总览<span class="db-hero-year" id="dbYear_#(pageId)"></span></h4>
+                    <p class="db-hero-sub">本年度累计送检 <b>#(totalQsi ?? '0')</b> 只 · 检验 <b>#(totalQi ?? '0')</b> 只</p>
+                </div>
+                <div class="db-hero-stats">
+                    <div class="db-hero-stat">
+                        <span class="db-hero-stat-num">#(flowCounts.all ?? 0)</span>
+                        <span class="db-hero-stat-label">在流程报告单</span>
+                    </div>
+                    <div class="db-hero-stat is-pend">
+                        <span class="db-hero-stat-num" id="dbPend_#(pageId)">0</span>
+                        <span class="db-hero-stat-label">待处理报告单</span>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
-                <div class="db-stat-card db-c2 db-anim-card db-delay-2 hand">
-                    <div class="db-stat-body">
-                        <div class="db-icon-wrap db-ic2">
-                            <i class="jbicon jb-zhiliangbz"></i>
-                        </div>
-                        <div class="db-stat-info">
-                            <span class="db-stat-num">#(dashboard.cTotal ??)</span>
-                            <span class="db-stat-label">本年度传感器总量/只</span>
-                        </div>
+            <!-- pipeline：5 环节，语义色 data-color 驱动（siargo.css --flow-*） -->
+            <div class="db-flow">
+                <div class="db-stage db-anim db-d1" data-color="acc">
+                    <div class="db-stage-head">
+                        <span class="db-stage-icon"><i class="jbicon2 jbi-linechart"></i></span>
+                        <i class="db-stage-step">01</i>
                     </div>
+                    <div class="db-stage-num" data-count="#(flowCounts.noq ?? 0)">0<small>单</small></div>
+                    <div class="db-stage-label">精度待检</div>
+                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</div>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
-                <div class="db-stat-card db-c3 db-anim-card db-delay-3 hand">
-                    <div class="db-stat-body">
-                        <div class="db-icon-wrap db-ic3">
-                            <i class="jbicon jb-suyuanzhijianbz"></i>
-                        </div>
-                        <div class="db-stat-info">
-                            <span class="db-stat-num">#(dashboard.xTotal ??)</span>
-                            <span class="db-stat-label">本年度小流量总量/只</span>
-                        </div>
+                <div class="db-flow-arrow"></div>
+                <div class="db-stage db-anim db-d2" data-color="vis">
+                    <div class="db-stage-head">
+                        <span class="db-stage-icon"><i class="fa fa-eye"></i></span>
+                        <i class="db-stage-step">02</i>
                     </div>
+                    <div class="db-stage-num" data-count="#(flowCounts.accq ?? 0)">0<small>单</small></div>
+                    <div class="db-stage-label">外观待检</div>
+                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</div>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-12 px-2">
-                <div class="db-stat-card db-c4 db-anim-card db-delay-4 hand">
-                    <div class="db-stat-body">
-                        <div class="db-icon-wrap db-ic4">
-                            <i class="jbicon jb-zlgl"></i>
-                        </div>
-                        <div class="db-stat-info">
-                            <span class="db-stat-num">#(dashboard.dTotal ??)</span>
-                            <span class="db-stat-label">本年大流量总量/只</span>
-                        </div>
+                <div class="db-flow-arrow"></div>
+                <div class="db-stage db-anim db-d3" data-color="pack">
+                    <div class="db-stage-head">
+                        <span class="db-stage-icon"><i class="jbicon2 jbi-gift"></i></span>
+                        <i class="db-stage-step">03</i>
                     </div>
+                    <div class="db-stage-num" data-count="#(flowCounts.funq ?? 0)">0<small>单</small></div>
+                    <div class="db-stage-label">包装待检</div>
+                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</div>
+                </div>
+                <div class="db-flow-arrow"></div>
+                <div class="db-stage db-anim db-d4" data-color="appr">
+                    <div class="db-stage-head">
+                        <span class="db-stage-icon"><i class="jbicon2 jbi-edit-fill"></i></span>
+                        <i class="db-stage-step">04</i>
+                    </div>
+                    <div class="db-stage-num" data-count="#(flowCounts.appq ?? 0)">0<small>单</small></div>
+                    <div class="db-stage-label">待批准</div>
+                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</div>
+                </div>
+                <div class="db-flow-arrow"></div>
+                <div class="db-stage db-anim db-d5" data-color="done">
+                    <div class="db-stage-head">
+                        <span class="db-stage-icon"><i class="jbicon jb-xiangmushouxubeian"></i></span>
+                        <i class="db-stage-step">05</i>
+                    </div>
+                    <div class="db-stage-num" data-count="#(flowCounts.allq ?? 0)">0<small>单</small></div>
+                    <div class="db-stage-label">已完成</div>
+                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.allq_qsi ?? 0)">0</b> 只</div>
                 </div>
             </div>
         </div>
 
-        <!-- ===== 柱状图行 ===== -->
-        <div class="row mx-0 mt-1">
-            <div class="col-lg-12 col-sm-12 px-2">
-                <div class="db-chart-card db-anim-chart db-delay-5">
-                    <div class="card-body" style="height:340px;">
+        <!-- ===== 月度送检柱状图 + 季度同比 ===== -->
+        <div class="row mx-0">
+            <div class="col-lg-7 col-sm-12 px-2">
+                <div class="db-chart-card db-anim db-d6">
+                    <div class="card-body" style="height:330px;">
                         <div class="db-chart-title">
                             <span class="db-chart-title-text">送检总量（包含退修）/ 只</span>
                             <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
                                 <i class="jbicon2 jbi-fullscreen"></i>
                             </a>
                         </div>
-                        <div id="morris-bar_#(pageId)" class="db-morris-wrap" style="height:calc(100% - 50px);"></div>
+                        <div id="dbBar_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-12 px-2">
+                <div class="db-chart-card db-anim db-d7">
+                    <div class="card-body" style="height:330px;">
+                        <div class="db-chart-title">
+                            <span class="db-chart-title-text db-quarter-accent">季度送检同比 / 只</span>
+                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                <i class="jbicon2 jbi-fullscreen"></i>
+                            </a>
+                        </div>
+                        <div id="dbQuarter_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ===== 折线图 + 甜甜圈图行 ===== -->
-        <div class="row mx-0 mt-1">
+        <!-- ===== 退修趋势折线 + 产品占比环形 ===== -->
+        <div class="row mx-0">
             <div class="col-lg-9 col-sm-12 px-2">
-                <div class="db-chart-card db-anim-chart db-delay-6">
-                    <div class="card-body" style="height:270px;">
+                <div class="db-chart-card db-anim db-d7">
+                    <div class="card-body" style="height:280px;">
                         <div class="db-chart-title">
                             <span class="db-chart-title-text db-line-accent">退修总量 / 只</span>
                             <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
                                 <i class="jbicon2 jbi-fullscreen"></i>
                             </a>
                         </div>
-                        <div id="morris-line_#(pageId)" class="db-morris-wrap" style="height:calc(100% - 50px);"></div>
+                        <div id="dbLine_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-12 px-2">
-                <div class="db-chart-card db-anim-chart db-delay-7">
-                    <div class="card-body" style="height:270px;">
+                <div class="db-chart-card db-anim db-d8">
+                    <div class="card-body" style="height:280px;">
                         <div class="db-chart-title">
                             <span class="db-chart-title-text db-donut-accent">本年度报告单来源 / 订单</span>
                             <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
                                 <i class="jbicon2 jbi-fullscreen"></i>
                             </a>
                         </div>
-                        <div id="morris-donut_#(pageId)" class="db-morris-wrap" style="height:calc(100% - 50px);"></div>
+                        <div id="dbDonut_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
                     </div>
                 </div>
             </div>
@@ -297,104 +148,274 @@
 #end
 #define js()
 <script type="text/javascript">
-var DashBoardUtil_#(pageId)={
-	init:function(){
-            //creating line chart
-            var $lineData = #json(repfixdata);
-            this.createLineChart('morris-line_#(pageId)',  $lineData, 'x', ['a'], ['返修单量']);
+var DashBoard_#(pageId) = {
+	charts: {},
+	resizeObserver: null,
+	flow: #json(flowCounts),
+	barData: #json(repalldata),
+	lineData: #json(repfixdata),
+	donutData: #json(donutData),
+	quarterData: #json(quarterData),
+	// 产品类型语义色（与柱状图 series 保持一致）
+	prodColors: {'传感器': '#4361ee', '小流量': '#2ec4b6', '大流量': '#e71d36'},
 
-            //creating bar chart
-            var $barData = #json(repalldata);
-            
-            this.createBarChart('morris-bar_#(pageId)', $barData, 'y', ['a', 'b', 'c'], ['传感器', '小流量', '大流量'], ['#4361ee', '#2ec4b6', '#e71d36'])
-
-            //creating donut chart
-            var $donutData = #json(donutData);
-            this.createDonutChart('morris-donut_#(pageId)', $donutData, ['#0ea5e9', '#f97316', '#ec4899', '#84cc16']);
-
+	init: function () {
+		$('#dbYear_#(pageId)').text(new Date().getFullYear() + ' 年度');
+		this.initStages();
+		this.initBarChart();
+		this.initQuarterChart();
+		this.initLineChart();
+		this.initDonutChart();
+		this.observeResize();
 	},
-	createAreaChart :function (element, pointSize, lineWidth, data, xkey, ykeys, labels, lineColors) {
-	        Morris.Area({
-	            element: element,
-	            pointSize: 0,
-	            lineWidth: 0,
-	            data: data,
-	            xkey: xkey,
-	            ykeys: ykeys,
-	            labels: labels,
-	            resize: true,
-	            gridLineColor: '#f0f2f5',
-	            hideHover: 'auto',
-	            lineColors: lineColors,
-	            fillOpacity: .6,
-	            behaveLikeLine: true
-	        });
-	    },
-	      createBarChart :function (element, data, xkey, ykeys, labels, lineColors) {
-	            // 动态计算合理的 Y 轴最大值
-	            var maxValue = 0;
-	            for (var i = 0; i < data.length; i++) {
-	                for (var j = 0; j < ykeys.length; j++) {
-	                    var val = data[i][ykeys[j]];
-	                    if (val > maxValue) {
-	                        maxValue = val;
-	                    }
-	                }
-	            }
-	            // 统一按 1000 粒度向上取整，最小保证 ymax >= 1000
-	            var ymax = Math.ceil(maxValue / 1000) * 1000;
-	            if (ymax < 1000) { ymax = 1000; }
-	                  
-	            Morris.Bar({
-	                element: element,
-	                data: data,
-	                xkey: xkey,
-	                ykeys: ykeys,
-	                labels: labels,
-	                gridLineColor: '#f0f2f5',
-	                barSizeRatio: 0.6,
-	                resize: true,
-	                hideHover: 'auto',
-	                barColors: lineColors,
-	                stacked: false,
-	                ymax: ymax
-	            });
-	        },
-	        
-	         //creates Line chart
-	       createLineChart : function (element, data, xkey, ykeys, labels) {
-	            Morris.Line({
-	                element: element,
-		            data: data,
-		            xkey: xkey,
-		            ykeys: ykeys,
-		            labels: labels,
-		             resize: true,
-	                hideHover: 'auto',
-	                lineColors: ['#e71d36'],
-	                pointFillColors: ['#e71d36'],
-	                gridLineColor: '#f0f2f5'
-	            });
-	        },createDonutChart : function (element, data, colors) {
-	            Morris.Donut({
-	                element: element,
-	                data: data,
-	                resize: true,
-	                colors: colors,
-	            });
-	        }
 
+	// ---- 流程看板：数字滚动 + 各环节送检只数 + 待处理总数 ----
+	initStages: function () {
+		var flow = this.flow || {};
+		$('.db-stage').each(function () {
+			var $stage = $(this);
+			var count = Number($stage.find('.db-stage-num').attr('data-count')) || 0;
+			// 数字滚动入场（600ms ease-out）
+			var $num = $stage.find('.db-stage-num');
+			var start = null;
+			function step(ts) {
+				if (!start) start = ts;
+				var p = Math.min((ts - start) / 600, 1);
+				var eased = 1 - Math.pow(1 - p, 3);
+				$num.html(Math.round(count * eased).toLocaleString() + '<small>单</small>');
+				if (p < 1) requestAnimationFrame(step);
+			}
+			requestAnimationFrame(step);
+			// 该环节送检只数（千分位格式化）
+			var $qsi = $stage.find('[data-qsi]');
+			$qsi.text((Number($qsi.attr('data-qsi')) || 0).toLocaleString());
+		});
+		// 待处理总数 = 精度 + 外观 + 包装 + 待批准
+		var pending = (Number(flow.noq) || 0) + (Number(flow.accq) || 0) + (Number(flow.funq) || 0) + (Number(flow.appq) || 0);
+		$('#dbPend_#(pageId)').text(pending.toLocaleString());
+	},
+
+	// ---- 通用：初始化/重建 ECharts 实例 ----
+	buildChart: function (key, domId, option) {
+		var dom = document.getElementById(domId);
+		if (!dom) return;
+		var old = echarts.getInstanceByDom(dom);
+		if (old) old.dispose();
+		var chart = echarts.init(dom);
+		chart.setOption(option);
+		this.charts[key] = chart;
+	},
+
+	// ---- 月度送检柱状图 ----
+	initBarChart: function () {
+		var months = [], sa = [], sb = [], sc = [];
+		(this.barData || []).forEach(function (d) {
+			months.push(d.y);
+			sa.push(d.a); sb.push(d.b); sc.push(d.c);
+		});
+		function series(name, data, color) {
+			return {
+				name: name, type: 'bar', data: data, barMaxWidth: 22,
+				itemStyle: { color: color, borderRadius: [5, 5, 0, 0] },
+				emphasis: { itemStyle: { opacity: .82 } }
+			};
+		}
+		this.buildChart('bar', 'dbBar_#(pageId)', {
+			grid: { left: 8, right: 8, top: 34, bottom: 0, containLabel: true },
+			tooltip: {
+				trigger: 'axis', axisPointer: { type: 'shadow' },
+				formatter: function (params) {
+					var total = 0, html = params[0].name + '<br/>';
+					params.forEach(function (p) {
+						total += (p.value || 0);
+						html += p.marker + p.seriesName + '：<b>' + (p.value || 0).toLocaleString() + '</b> 只<br/>';
+					});
+					return html + '合计：<b>' + total.toLocaleString() + '</b> 只';
+				}
+			},
+			legend: { right: 0, top: 0, itemWidth: 12, itemHeight: 8, icon: 'roundRect', textStyle: { color: '#64748b', fontSize: 12 } },
+			xAxis: { type: 'category', data: months, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { color: '#94a3b8' } },
+			yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#94a3b8' } },
+			series: [
+				series('传感器', sa, '#4361ee'),
+				series('小流量', sb, '#2ec4b6'),
+				series('大流量', sc, '#e71d36')
+			]
+		});
+	},
+
+	// ---- 季度送检同比柱状图（今年 vs 去年，按产品类型堆叠） ----
+	initQuarterChart: function () {
+		var qd = this.quarterData || {};
+		var curName = (qd.curYear || new Date().getFullYear()) + ' 年';
+		var lastName = (qd.lastYear || new Date().getFullYear() - 1) + ' 年';
+		var types = ['传感器', '小流量', '大流量'];
+		var colors = this.prodColors;
+		// 两年同用产品实色：去年靠 opacity 压淡，legend 强制 opacity=1 保证图例色与送检总量图一致
+		var lastData = [qd.lastA || [0,0,0,0], qd.lastB || [0,0,0,0], qd.lastC || [0,0,0,0]];
+		var curData = [qd.curA || [0,0,0,0], qd.curB || [0,0,0,0], qd.curC || [0,0,0,0]];
+		var series = [];
+		types.forEach(function (t, i) {
+			series.push({
+				name: t, type: 'bar', stack: 'last', data: lastData[i], barMaxWidth: 20,
+				itemStyle: { color: colors[t], opacity: .38 },
+				emphasis: { itemStyle: { opacity: .6 } }
+			});
+		});
+		types.forEach(function (t, i) {
+			series.push({
+				name: t, type: 'bar', stack: 'cur', data: curData[i], barMaxWidth: 20,
+				itemStyle: { color: colors[t] },
+				emphasis: { itemStyle: { opacity: .82 } }
+			});
+		});
+		// 每堆叠顶部圆角：取该 stack 最后一个非零系列不好判，统一给最上层（大流量）加圆角
+		series[2].itemStyle.borderRadius = [5, 5, 0, 0];
+		series[5].itemStyle.borderRadius = [5, 5, 0, 0];
+		this.buildChart('quarter', 'dbQuarter_#(pageId)', {
+			grid: { left: 8, right: 8, top: 34, bottom: 0, containLabel: true },
+			tooltip: {
+				trigger: 'axis', axisPointer: { type: 'shadow' },
+				formatter: function (params) {
+					// seriesIndex 0~2 = 去年，3~5 = 今年；按产品类型合并展示「去年 → 今年」
+					var byType = {};
+					var lastTotal = 0, curTotal = 0;
+					params.forEach(function (p) {
+						var row = byType[p.seriesName] || (byType[p.seriesName] = { marker: p.marker, last: 0, cur: 0 });
+						if (p.seriesIndex < 3) { row.last = p.value || 0; lastTotal += (p.value || 0); }
+						else { row.cur = p.value || 0; row.marker = p.marker; curTotal += (p.value || 0); }
+					});
+					var html = params[0].name + '（' + lastName + ' → ' + curName + '）<br/>';
+					// 同比百分比片段（去年为 0：有增量标「新增」，否则不展示）
+					function yoy(lastVal, curVal) {
+						if (lastVal <= 0) {
+							return curVal > 0 ? '（<span style="color:#94a3b8">新增</span>）' : '';
+						}
+						var diff = Math.round((curVal - lastVal) * 1000 / lastVal) / 10;
+						return '（<b style="color:' + (diff >= 0 ? '#28a745' : '#e71d36') + '">'
+							+ (diff >= 0 ? '+' : '') + diff + '%</b>）';
+					}
+					types.forEach(function (t) {
+						var row = byType[t];
+						if (!row) return;
+						html += row.marker + t + '：' + row.last.toLocaleString() + ' → <b>' + row.cur.toLocaleString() + '</b> 只' + yoy(row.last, row.cur) + '<br/>';
+					});
+					html += '合计：' + lastTotal.toLocaleString() + ' → <b>' + curTotal.toLocaleString() + '</b> 只' + yoy(lastTotal, curTotal);
+					return html;
+				}
+			},
+			legend: {
+				// 去年系列带 opacity，图例强制不透明展示实色
+				itemStyle: { opacity: 1 },
+				right: 0, top: 0, itemWidth: 12, itemHeight: 8, icon: 'roundRect', textStyle: { color: '#64748b', fontSize: 12 }
+			},
+			xAxis: { type: 'category', data: ['Q1', 'Q2', 'Q3', 'Q4'], axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { color: '#94a3b8' } },
+			yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#94a3b8' } },
+			series: series
+		});
+	},
+
+	// ---- 退修趋势折线图（今年/去年双线，legend 切换） ----
+	initLineChart: function () {
+		var qd = this.lineData || {};
+		var months = [];
+		for (var m = 1; m <= 12; m++) months.push(m + '月');
+		var curName = (qd.curYear || new Date().getFullYear()) + ' 年';
+		var lastName = (qd.lastYear || new Date().getFullYear() - 1) + ' 年';
+		this.buildChart('line', 'dbLine_#(pageId)', {
+			grid: { left: 8, right: 16, top: 34, bottom: 0, containLabel: true },
+			tooltip: {
+				trigger: 'axis',
+				formatter: function (params) {
+					var html = params[0].name + '<br/>';
+					params.forEach(function (p) {
+						html += p.marker + p.seriesName + '：<b>' + (p.value || 0).toLocaleString() + '</b> 只<br/>';
+					});
+					return html;
+				}
+			},
+			legend: { right: 0, top: 0, itemWidth: 12, itemHeight: 8, icon: 'roundRect', textStyle: { color: '#64748b', fontSize: 12 } },
+			xAxis: { type: 'category', boundaryGap: false, data: months, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { color: '#94a3b8' } },
+			yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f0f2f5' } }, axisLabel: { color: '#94a3b8' } },
+			series: [
+				{
+					name: lastName, type: 'line', data: qd.last || [], smooth: true,
+					symbol: 'circle', symbolSize: 7, showSymbol: false,
+					lineStyle: { width: 2.5, color: '#94a3b8', type: 'dashed' },
+					itemStyle: { color: '#94a3b8', borderColor: '#fff', borderWidth: 2 }
+				},
+				{
+					name: curName, type: 'line', data: qd.cur || [], smooth: true,
+					symbol: 'circle', symbolSize: 7, showSymbol: false,
+					lineStyle: { width: 3, color: '#e71d36' },
+					itemStyle: { color: '#e71d36', borderColor: '#fff', borderWidth: 2 },
+					areaStyle: {
+						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+							{ offset: 0, color: 'rgba(231,29,54,.22)' },
+							{ offset: 1, color: 'rgba(231,29,54,0)' }
+						])
+					}
+				}
+			]
+		});
+	},
+
+	// ---- 产品类型占比环形图 ----
+	initDonutChart: function () {
+		var self = this;
+		var total = 0;
+		var data = (this.donutData || []).map(function (d) {
+			total += (d.value || 0);
+			return { name: d.label, value: d.value, itemStyle: { color: self.prodColors[d.label] || '#94a3b8' } };
+		});
+		this.buildChart('donut', 'dbDonut_#(pageId)', {
+			tooltip: { trigger: 'item', formatter: '{b}：<b>{c}</b> 单（{d}%）' },
+			legend: { bottom: 0, itemWidth: 12, itemHeight: 8, icon: 'roundRect', textStyle: { color: '#64748b', fontSize: 12 } },
+			title: {
+				text: total.toLocaleString(), subtext: '报告单',
+				left: 'center', top: '38%',
+				textStyle: { fontSize: 22, fontWeight: 700, color: '#1e293b' },
+				subtextStyle: { fontSize: 11, color: '#94a3b8' }
+			},
+			series: [{
+				type: 'pie', radius: ['56%', '78%'], center: ['50%', '46%'],
+				avoidLabelOverlap: true,
+				itemStyle: { borderColor: '#fff', borderWidth: 3, borderRadius: 5 },
+				label: { show: false },
+				emphasis: { scaleSize: 6 },
+				data: data
+			}]
+		});
+	},
+
+	// ---- 尺寸自适应（含全屏切换、窗口缩放） ----
+	observeResize: function () {
+		var self = this;
+		if (this.resizeObserver) { this.resizeObserver.disconnect(); this.resizeObserver = null; }
+		if (window.ResizeObserver) {
+			this.resizeObserver = new ResizeObserver(function () {
+				Object.keys(self.charts).forEach(function (k) {
+					var c = self.charts[k];
+					if (c && !c.isDisposed()) c.resize();
+				});
+			});
+			['dbBar_#(pageId)', 'dbQuarter_#(pageId)', 'dbLine_#(pageId)', 'dbDonut_#(pageId)'].forEach(function (id) {
+				var dom = document.getElementById(id);
+				if (dom) self.resizeObserver.observe(dom);
+			});
+		} else {
+			$(window).off('resize.dashboard_#(pageId)').on('resize.dashboard_#(pageId)', function () {
+				Object.keys(self.charts).forEach(function (k) {
+					var c = self.charts[k];
+					if (c && !c.isDisposed()) c.resize();
+				});
+			});
+		}
+	}
+};
+
+function initDashboard_#(pageId)() {
+	DashBoard_#(pageId).init();
 }
-
-function initDashboard_#(pageId)(){
-	$("#morris-line_#(pageId)").empty();
-	$("#morris-bar_#(pageId)").empty();
-	$("#morris-donut_#(pageId)").empty();
-	DashBoardUtil_#(pageId).init();
-}
-
-
 </script>
 #end
-
-

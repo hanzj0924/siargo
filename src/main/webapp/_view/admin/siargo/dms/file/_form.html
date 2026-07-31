@@ -79,6 +79,7 @@
 						data-accept="pdf"
 					></div>
 					<small class="text-muted mt-2 d-block">提示：仅支持pdf，最大100MB</small>
+					<div id="replaceFileTip" class="text-info mt-1" style="display:none"></div>
 					#end
 				</div>
 			</div>
@@ -187,12 +188,11 @@
 
 	// ── 文件上传成功回调（仅编辑模式使用） ──────────────────────────────────
 	function dmsFileUploadHandler(uploader, type, fileInput, result) {
-		console.log('DMS file upload success:', result);
 		if (result && result.data) {
-			// 提取文件名并填充到文件名字段
+			// 提示用户新文件将在保存后替换原文件
 			var filePath = result.data;
 			var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-			$('#dmsFileName').val(fileName);
+			$('#replaceFileTip').text('已选择新文件：' + fileName + '（保存后替换原文件）').show();
 		}
 	}
 

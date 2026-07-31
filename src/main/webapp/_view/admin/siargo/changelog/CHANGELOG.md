@@ -1,5 +1,16 @@
 ## 更新日志
 
+### v2.8.1 (2026-07-31)
+- refactor(dashboard): 首页数据看板整体重构——顶部 hero 流程看板（精度→外观→包装→批准→完成五环节卡片，引用 --flow-* 共享色库）+ ECharts 四图表（送检总量柱状/季度同比堆叠柱/退修趋势双年折线/产品占比环图），替代原静态数字卡片
+- feat(dashboard): 环节卡展示在制报告单数 + 送检只数（flowCounts 统计 SQL 并入 SUM(qsi)，复用 30 分钟缓存），hero 右侧展示在流程/待处理报告单双统计
+- feat(dashboard): 新增季度送检同比图——QareportService.getQuarterCompareData() 单 SQL 查两年按季度×产品类型（传感器/小流量/大流量）分列统计，去年淡色/今年实色双堆叠柱，tooltip 逐类型及合计展示同比涨跌百分比（去年为 0 标「新增」）
+- feat(dashboard): 退修总量折线图增加去年对比——getRepData() 重写为一次查两年返回 {curYear,lastYear,cur[12],last[12]}，今年红色实线+渐变面积、去年灰色虚线，ECharts 原生 legend 切换显隐
+- improve(dashboard): 页面内容区增加竖向滚动（.db-scroll 仅本页生效），环节卡尺寸缩小、底色/边框加深提升识别度；图表 dispose 重建 + ResizeObserver 自适应，侧边栏折叠/全屏无变形
+- improve(dashboard): 季度图 legend 强制不透明实色，与送检总量图产品三色（蓝/青/红）完全一致；同名系列合并 legend，点击联动切换两年同类型
+- refactor(admin): AdminIndexController.dashboard() 移除旧 dashboard map 拼接逻辑，改为 flowCounts/totalQsi/quarterData 结构化数据直出
+- style(dashboard): siargo.css 新增 Dashboard 独立分区（db-* 前缀样式组：hero/环节卡/图表卡/入场动画），同步更新 siargo.min.css
+- chore(config): WinRAR 可执行文件路径外置为 winrar_exe_path 配置项（config/config-pro.properties），报告单批量导出 PDF 压缩前增加配置与程序存在性前置校验
+
 ### v2.8.0 (2026-07-31)
 - refactor(qarep): 全部 Controller 写操作改用手动 `Db.tx()` + afterCommit 缓存清理模式，彻底消除事务内清缓存导致的并发脏读风险（替代原 `@Before(Tx.class)` 声明式事务）
 - refactor(qarep): Service 写方法（save/update/permanentDelete）失败时返回 `Ret.fail()` 而非抛 RuntimeException，修复 try/catch 吞异常导致事务不回滚的潜在 bug

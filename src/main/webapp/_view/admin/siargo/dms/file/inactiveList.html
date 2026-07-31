@@ -41,8 +41,8 @@
 				<tr style="text-align:center">
 					<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
 					<td style="text-align:left">
-						<a  id="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
-							href="#(data.filepath??)" onclick="loadPDF(this, '#(data.filepath??)')">
+						<a  class="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
+							href="#(data.filepath??)" onclick="loadPDF(event, this, '#(data.filepath??)')">
 						#(data.filename??)
 						</a>
 					</td>
@@ -108,8 +108,8 @@ function renderInactiveTable(pageData) {
 		var tr = '<tr style="text-align:center">' +
 			'<td>' + rowNum + '</td>' +
 			'<td style="text-align:left">' +
-				'<a id="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" ' +
-					'href="' + (data.filepath || '') + '" onclick="loadPDF(this, \'' + (data.filepath || '') + '\')">' +
+				'<a class="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" ' +
+					'href="' + (data.filepath || '') + '" onclick="loadPDF(event, this, \'' + (data.filepath || '') + '\')">' +
 					(data.filename || '') +
 				'</a>' +
 			'</td>' +
@@ -145,7 +145,7 @@ function refreshInactiveList() {
 }
 
 //将PDF原本的href属性替换为带有时间戳的URL，以避免缓存
-function loadPDF (element, originalPdfUrl) {
+function loadPDF (event, element, originalPdfUrl) {
     // 阻止默认行为（如果链接已有默认行为）
     event.preventDefault ? event.preventDefault() : (event.returnValue = false);
     

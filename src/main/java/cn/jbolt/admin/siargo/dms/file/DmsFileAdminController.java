@@ -7,14 +7,12 @@ import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt.common.config.JBoltUploadFolder;
-import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
-import cn.jbolt.core.kit.JBoltUserKit;
 import com.jfinal.core.Path;
 import com.jfinal.kit.PathKit;
+import com.jfinal.kit.Ret;
 import com.jfinal.kit.StrKit;
-import com.jfinal.aop.Before;
-import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.upload.UploadFile;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.DmsFile;
@@ -23,10 +21,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -163,9 +159,17 @@ public class DmsFileAdminController extends JBoltBaseController {
 			return;
 		}
 		
-		// 校验文件类型
+		// 净化文件名：截取路径分隔符后的纯文件名，剔除路径穿越片段
 		String originalFileName = uploadFile.getOriginalFileName();
-		String extension = getFileExtension(originalFileName);
+		String fileName = sanitizeFileName(StrKit.notBlank(originalFileName) ? originalFileName : uploadFile.getFileName());
+		if (StrKit.isBlank(fileName)) {
+			uploadFile.getFile().delete();
+			renderJsonFail("文件名不合法");
+			return;
+		}
+		
+		// 校验文件类型
+		String extension = getFileExtension(fileName);
 		if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
 			// 删除不允许的文件
 			uploadFile.getFile().delete();
@@ -173,10 +177,21 @@ public class DmsFileAdminController extends JBoltBaseController {
 			return;
 		}
 		
-		// 重命名为原始文件名
+		// 重命名为净化后的原始文件名，并二次校验目标仍位于临时目录内
 		File currentFile = uploadFile.getFile();
-		String fileName = StrKit.notBlank(originalFileName) ? originalFileName : uploadFile.getFileName();
 		File targetFile = new File(currentFile.getParent(), fileName);
+		try {
+			String canonicalParent = currentFile.getParentFile().getCanonicalPath();
+			if (!targetFile.getCanonicalPath().startsWith(canonicalParent + File.separator)) {
+				currentFile.delete();
+				renderJsonFail("文件名不合法");
+				return;
+			}
+		} catch (IOException e) {
+			currentFile.delete();
+			renderJsonFail("路径解析失败");
+			return;
+		}
 		
 		if (!currentFile.renameTo(targetFile)) {
 			targetFile = currentFile;
@@ -284,39 +299,32 @@ public class DmsFileAdminController extends JBoltBaseController {
 	}
 	
 	/**
-	 * 切换文件生效状态
+	 * 切换文件生效状态（列表开关按钮 / 失效列表恢复生效调用）
 	 * URL: POST /admin/siargo/dms/file/toggleActive/{id}
 	 * @param id 文件ID（从URL路径获取）
 	 * @return 操作结果JSON
 	 */
-	@Before(Tx.class)
 	public void toggleActive() {
-		renderJson(service.toggleActive(getLong(0)));
-	}
-	
-	/**
-	 * 切换文件是否生效（前端开关按钮调用）
-	 * URL: POST /admin/siargo/dms/file/changeActive/{id}
-	 * @param id 文件ID（从URL路径获取）
-	 * @return 操作结果JSON
-	 */
-	@Before(Tx.class)
-	public void changeActive() {
-		renderJson(service.toggleActive(getLong(0)));
+		Long id = getLong(0);
+		final Ret[] retHolder = {null};
+		Db.tx(() -> {
+			retHolder[0] = service.toggleActive(id);
+			return retHolder[0].isOk();
+		});
+		if (retHolder[0] != null) {
+			renderJson(retHolder[0]);
+		} else {
+			renderJsonFail("操作失败");
+		}
 	}
 	
 	/**
 	 * 保存文件记录（支持批量文件保存）
 	 * URL: POST /admin/siargo/dms/file/save
-	 * 业务流程：
-	 * 1. 解析临时文件路径（支持多个文件，逗号分隔）
-	 * 2. 将临时文件移动到正式目录（/upload/siargo/dms/{categoryId}/）
-	 * 3. 创建文件记录并保存到数据库
-	 * 4. 保存文件关键字关联
-	 * 5. 异常时回滚：将已移动的文件移回临时目录
+	 * 事务与文件移动逻辑由 Service 内部 Db.tx() 管理，
+	 * 失败时数据库整体回滚且已移动的文件移回临时目录
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void save() {
 		DmsFile dmsFileTemplate = getModel(DmsFile.class, "dmsFile");
 		String keywordsStr = getPara("keywords");
@@ -328,113 +336,73 @@ public class DmsFileAdminController extends JBoltBaseController {
 		}
 		
 		// 支持多文件：逗号分隔
-		String[] tempPaths = tempFilePath.split(",");
-		// 记录已移动的文件，异常时尝试回滚（移回 temp 目录）
-		List<File[]> movedFiles = new ArrayList<>();
-		
-		try {
-			for (String path : tempPaths) {
-				String singlePath = path.trim();
-				if (StrKit.isBlank(singlePath)) continue;
-				
-				String normalizedPath = singlePath.replace("\\", "/");
-				File tempFile = new File(webRootPath + normalizedPath);
-				if (!tempFile.exists() || !tempFile.isFile()) {
-					throw new RuntimeException("临时文件不存在: " + tempFile.getName());
-				}
-				
-				// 目标目录
-				String targetDir = UPLOAD_PATH_PREFIX + JBoltUploadFolder.SIARGO_UPLOAD_DMS + "/"
-						+ dmsFileTemplate.getCategoryId() + "/";
-				File targetFolder = new File(webRootPath + targetDir);
-				if (!targetFolder.exists()) {
-					targetFolder.mkdirs();
-				}
-				
-				String targetPath = targetDir + tempFile.getName();
-				File targetFile = new File(webRootPath + targetPath);
-				
-				try {
-					Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					movedFiles.add(new File[]{targetFile, tempFile});
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new RuntimeException("文件移动失败: " + e.getMessage());
-				}
-				
-				// 创建新的 DmsFile 记录
-				DmsFile dmsFile = new DmsFile();
-				dmsFile.setCategoryId(dmsFileTemplate.getCategoryId());
-				dmsFile.setActiveDate(dmsFileTemplate.getActiveDate());
-				dmsFile.setDescription(dmsFileTemplate.getDescription());
-				Integer isActive = dmsFileTemplate.getIsActive();
-				dmsFile.setIsActive(isActive != null ? isActive : 1);
-				dmsFile.setFilePath(targetPath);
-				dmsFile.setFileExt(getFileExtension(tempFile.getName()));
-				
-				// 文件名去掉后缀
-				String originalName = tempFile.getName();
-				String nameWithoutExt = originalName.contains(".")
-						? originalName.substring(0, originalName.lastIndexOf("."))
-						: originalName;
-				dmsFile.setFileName(nameWithoutExt);
-				
-				// 设置上传时间和上传者
-				dmsFile.setUploadTime(new java.util.Date());
-				dmsFile.setUploaderId(JBoltUserKit.getUserId());
-				dmsFile.setStatus(1);
-				
-				boolean success = dmsFile.save();
-				if (!success) {
-					throw new RuntimeException("数据库保存失败");
-				}
-				
-				// 保存关键字
-				service.saveKeywords(dmsFile.getId(), keywordsStr);
-			}
-		} catch (RuntimeException e) {
-			// 尝试将已移动的文件回滚到 temp 目录
-			for (File[] pair : movedFiles) {
-				File moved = pair[0];
-				File original = pair[1];
-				try {
-					if (moved.exists()) {
-						Files.move(moved.toPath(), original.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					}
-				} catch (IOException ioe) {
-					ioe.printStackTrace();
-				}
-			}
-			renderJsonFail(e.getMessage());
-			return;
-		}
-		
-		renderJsonSuccess();
+		renderJson(service.saveBatch(dmsFileTemplate, keywordsStr, tempFilePath.split(",")));
 	}
 	
 	/**
-	 * 更新文件信息
+	 * 更新文件信息（支持替换物理文件）
 	 * URL: POST /admin/siargo/dms/file/update
+	 * 事务提交后再删除被替换的旧物理文件，避免回滚时文件无法恢复
 	 * @param dmsFile 文件信息模型
 	 * @param keywords 关键字（逗号分隔）
+	 * @param tempFilePath 新上传的临时文件路径（可选，非空时替换原文件）
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void update() {
 		DmsFile dmsFile = getModel(DmsFile.class, "dmsFile");
 		String keywordsStr = getPara("keywords");
-		renderJson(service.update(dmsFile, keywordsStr));
+		String tempFilePath = getPara("tempFilePath");
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.update(dmsFile, keywordsStr, tempFilePath);
+			return retHolder[0].isOk();
+		});
+		if (txOk && retHolder[0] != null) {
+			// 事务提交后删除被替换的旧物理文件
+			String oldFilePath = retHolder[0].getStr("oldFilePath");
+			if (StrKit.notBlank(oldFilePath)) {
+				service.deletePhysicalFiles(Collections.singletonList(oldFilePath));
+			}
+			renderJsonSuccess();
+			return;
+		}
+		if (retHolder[0] != null) {
+			renderJson(retHolder[0]);
+		} else {
+			renderJsonFail("更新失败");
+		}
 	}
 	
 	/**
 	 * 批量删除文件
 	 * URL: POST /admin/siargo/dms/file/deleteByIds
+	 * 事务内仅删除数据库记录与关键字关联，
+	 * 物理文件在事务提交后删除，避免回滚时文件无法恢复
 	 * @param ids 文件ID列表（逗号分隔）
 	 * @return 操作结果JSON
 	 */
-    @Before(Tx.class)
 	public void deleteByIds() {
-		renderJson(service.deleteByBatchIds(get("ids")));
+		String ids = get("ids");
+		if (StrKit.isBlank(ids)) {
+			renderJsonFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		// 事务前先收集物理文件路径（删除后无法再查）
+		List<String> filePaths = service.getFilePathsByIds(ids);
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.deleteByBatchIds(ids);
+			return retHolder[0].isOk();
+		});
+		if (txOk) {
+			// 事务提交后删除物理文件
+			service.deletePhysicalFiles(filePaths);
+		}
+		if (retHolder[0] != null) {
+			renderJson(retHolder[0]);
+		} else {
+			renderJsonFail("删除失败");
+		}
 	}
 	
 	/**
@@ -448,6 +416,24 @@ public class DmsFileAdminController extends JBoltBaseController {
 		}
 		int dotIndex = fileName.lastIndexOf('.');
 		return dotIndex > 0 ? fileName.substring(dotIndex + 1) : "";
+	}
+	
+	/**
+	 * 净化上传文件名：只保留最后一个路径分隔符之后的纯文件名，剔除 .. 片段，防止路径穿越
+	 * @param fileName 原始文件名（可能含路径）
+	 * @return 净化后的纯文件名，不合法时返回空字符串
+	 */
+	private String sanitizeFileName(String fileName) {
+		if (StrKit.isBlank(fileName)) {
+			return "";
+		}
+		String name = fileName.replace("\\", "/");
+		int slashIndex = name.lastIndexOf('/');
+		if (slashIndex >= 0) {
+			name = name.substring(slashIndex + 1);
+		}
+		name = name.replace("..", "").trim();
+		return name;
 	}
 	
 	

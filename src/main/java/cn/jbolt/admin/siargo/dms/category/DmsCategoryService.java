@@ -33,7 +33,8 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	 * @return
 	 */
 	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords) {
-		String select = "SELECT c.id, c.name, c.sort_rank, COUNT(f.id) AS fileCount";
+		// CAST 防止雪花ID在前端 JSON 反序列化时精度丢失
+		String select = "SELECT CAST(c.id AS CHAR) AS id, c.name, c.sort_rank, COUNT(f.id) AS fileCount";
 		StringBuilder sqlExceptSelect = new StringBuilder(" FROM siargo_dms_category c ")
 				.append("LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 ");
 		if(isOk(keywords)) {
@@ -196,27 +197,6 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	}
 	
 	/**
-	 * 灵活移动类别排序位置
-	 * 业务场景：将类别移动到另一个类别的位置，中间的类别相应调整
-	 * 注意：当前方法尚未完整实现，待后续补充移动逻辑
-	 * @param id 要移动的类别ID
-	 * @param otherId 目标位置的类别ID
-	 * @return 操作结果
-	 */
-	public Ret move(Long id,Long otherId) {
-	//TODO 未完整实现 有待底层实现
-		//DmsCategory dmsCategory=findById(id);
-		//if(dmsCategory==null){
-		//	return fail("数据不存在或已被删除");
-		//}
-		//Integer rank=dmsCategory.getSortRank();
-		//if(rank==null||rank<=0){
-		//	return fail("顺序需要初始化");
-		//}
-		return SUCCESS;
-	}
-	
-	/**
 	 * 获取除指定类别外的所有类别（按排序序号升序）
 	 * 用于“移动到”弹窗的目标位置选择器
 	 * @param id 要排除的类别ID
@@ -274,9 +254,10 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	
 	/**
 	 * 初始化排序
+	 * 按现有排序序号升序重排，保持现有顺序不变，仅修复序号空洞/重复
 	 */
 	public Ret initRank(){
-		List<DmsCategory> allList=findAll();
+		List<DmsCategory> allList=find("SELECT * FROM siargo_dms_category ORDER BY sort_rank ASC, id ASC");
 		if(allList.size()>0){
 			for(int i=0;i<allList.size();i++){
 				allList.get(i).setSortRank(i+1);
@@ -289,14 +270,18 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	}
 	
 	/**
-	 * 检测是否可以删除
+	 * 检测类别是否仍被文件引用
+	 * 存在有效文件时阻止删除，避免文件成为孤儿数据（列表不可见但记录与物理文件残留）
 	 * @param dmsCategory model
 	 * @param kv 携带额外参数一般用不上
-	 * @return
+	 * @return 阻止删除的提示信息，null 表示可删除
 	 */
 	@Override
 	public String checkInUse(DmsCategory dmsCategory, Kv kv) {
-		//这里用来覆盖 检测DmsCategory是否被其它表引用
+		Long fileCount = Db.queryLong("SELECT COUNT(*) FROM siargo_dms_file WHERE category_id = ? AND status = 1", dmsCategory.getId());
+		if (fileCount != null && fileCount > 0) {
+			return "类别【" + dmsCategory.getName() + "】下仍有 " + fileCount + " 个文件，不能删除";
+		}
 		return null;
 	}
 	
@@ -306,8 +291,8 @@ public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
 	 * @return 类别列表（Record格式），每项包含 id, name, sortRank, fileCount, lastupdatetime
 	 */
 	public List<Record> getCategoryListWithCount() {
-		// 使用驼峰风格别名，与前端 JavaScript 保持一致
-		String sql = "SELECT c.id, c.name, c.sort_rank AS sortRank, COUNT(f.id) AS fileCount, " +
+		// 使用驼峰风格别名，与前端 JavaScript 保持一致；CAST 防止雪花ID精度丢失
+		String sql = "SELECT CAST(c.id AS CHAR) AS id, c.name, c.sort_rank AS sortRank, COUNT(f.id) AS fileCount, " +
 				"MAX(f.upload_time) AS lastupdatetime " +
 				"FROM siargo_dms_category c " +
 				"LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 " +
