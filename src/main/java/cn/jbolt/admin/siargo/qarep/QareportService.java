@@ -55,6 +55,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	private volatile long flowCountsCacheTimestamp;
 	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
 
+	// ========== 年度数量总计缓存（30分钟有效期，key = 列名+类型） ==========
+	private static final long TOTAL_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
+	private volatile Map<String, Long> cachedTotalCounts;
+	private volatile long totalCountsCacheTimestamp;
+	private final ReentrantLock totalCountsCacheLock = new ReentrantLock();
+
 	// ========== 管理端分页数据缓存（30秒有效期，降低重复查询开销） ==========
 	// 仅缓存"空关键字 + 无日期范围 + 第一页"的查询，key空间有限（prodType×insp×pageSize），防止无限增长
 	private static final long PAGINATE_CACHE_TTL = 30 * 1000L;
@@ -112,10 +118,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 主动清除流程统计缓存（数据变更时调用）
+	 * <p>联动清理：年度数量总计缓存（getTotalQSI/getTotalQI）与流程统计同源，一并失效</p>
 	 */
 	public void clearFlowCountsCache() {
 		cachedFlowCounts = null;
 		flowCountsCacheTimestamp = 0;
+		cachedTotalCounts = null;
+		totalCountsCacheTimestamp = 0;
 		clearPaginateCache();
 	}
 
@@ -363,8 +372,8 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 *   <li>删除 siargo_product_reject_log 对应驳回历史</li>
 	 *   <li>删除产品记录</li>
 	 *   <li>若报告单下已无产品，一并删除 siargo_qareport</li>
-	 *   <li>删除已生成的PDF物理文件（DB操作成功后执行，带路径穿越检测）</li>
 	 * </ol>
+	 * <p>物理文件删除不可回滚，已移至 Controller afterCommit 统一执行（规范 6.3）</p>
 	 * <p>DB删除失败时抛出RuntimeException触发事务回滚（需在事务中调用）</p>
 	 * @param ids 产品ID列表
 	 * @return 操作结果
@@ -374,7 +383,6 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
 		Long userId = JBoltUserKit.getUserId();
-		String webRoot = PathKit.getWebRootPath();
 		for (Long id : ids) {
 			if (id == null) {
 				continue;
@@ -399,12 +407,59 @@ public class QareportService extends JBoltBaseService<Qareport> {
 					Db.deleteById("siargo_qareport", reportId);
 				}
 			}
-			// 4. 删除已生成的PDF物理文件（放在DB操作成功之后）
-			deleteGeneratedPdf(webRoot, product.getPdfstr());
-			// 5. 记录永久删除系统日志
+			// 4. 记录永久删除系统日志
 			addDeleteSystemLog(id, userId, logDesc);
 		}
 		return Ret.ok();
+	}
+
+	/**
+	 * 事务外收集产品PDF物理文件绝对路径（供 Controller afterCommit 统一删除）
+	 * <p>文件删除不可回滚，必须在 Db.tx() 提交成功后执行（规范 6.3）</p>
+	 * @param ids 产品ID列表
+	 * @return PDF文件绝对路径列表（不含空值/穿越路径）
+	 */
+	public List<String> getPdfPathsByIds(List<Long> ids) {
+		List<String> paths = new ArrayList<>();
+		if (ids == null || ids.isEmpty()) {
+			return paths;
+		}
+		String webRoot = PathKit.getWebRootPath();
+		for (Long id : ids) {
+			if (id == null) {
+				continue;
+			}
+			String pdfstr = Db.queryStr("SELECT pdfstr FROM siargo_product WHERE id = ?", id);
+			if (pdfstr == null || pdfstr.isEmpty() || pdfstr.contains("..")) {
+				if (pdfstr != null && pdfstr.contains("..")) {
+					LOG.warn("检测到非法PDF路径，跳过删除: " + pdfstr);
+				}
+				continue;
+			}
+			paths.add(webRoot + (pdfstr.startsWith("/") ? pdfstr : "/" + pdfstr));
+		}
+		return paths;
+	}
+
+	/**
+	 * 批量删除PDF物理文件（带路径穿越二次检测）
+	 * <p>由 Controller 在 Db.tx() 提交成功后调用（规范 6.3：文件删除不可回滚）</p>
+	 * @param pdfPaths 待删除的PDF文件绝对路径列表（getPdfPathsByIds 收集）
+	 */
+	public void deletePhysicalPdfs(List<String> pdfPaths) {
+		if (pdfPaths == null || pdfPaths.isEmpty()) {
+			return;
+		}
+		for (String path : pdfPaths) {
+			if (path == null || path.contains("..")) {
+				LOG.warn("检测到非法PDF路径，跳过删除: " + path);
+				continue;
+			}
+			File pdfFile = new File(path);
+			if (pdfFile.exists() && pdfFile.isFile() && !pdfFile.delete()) {
+				LOG.warn("PDF文件删除失败: " + pdfFile.getAbsolutePath());
+			}
+		}
 	}
 
 	/**
@@ -431,26 +486,6 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		String deleteDes = product.getDeleteDes() != null ? product.getDeleteDes() : "";
 		return " 报告单编号：" + formnum + " ==订单号：" + orderId + " ==型号：" + model
 				+ " ==编号：" + number + " ==客户：" + customerName + " ==删除原因：" + deleteDes;
-	}
-
-	/**
-	 * 删除产品已生成的PDF物理文件（带路径穿越检测）
-	 * @param webRoot Web根目录
-	 * @param pdfstr PDF相对路径
-	 */
-	private void deleteGeneratedPdf(String webRoot, String pdfstr) {
-		if (pdfstr == null || pdfstr.isEmpty()) {
-			return;
-		}
-		// 路径穿越检测
-		if (pdfstr.contains("..")) {
-			LOG.warn("检测到非法PDF路径，跳过删除: " + pdfstr);
-			return;
-		}
-		File pdfFile = new File(webRoot + (pdfstr.startsWith("/") ? pdfstr : "/" + pdfstr));
-		if (pdfFile.exists() && pdfFile.isFile() && !pdfFile.delete()) {
-			LOG.warn("PDF文件删除失败: " + pdfFile.getAbsolutePath());
-		}
 	}
 
 	/**
@@ -728,22 +763,30 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 			// 设置创建时间和自动生成报告单编号
 			qareport.set("create_time", DateUtil.getDateString(DateUtil.YMDHMS));
-			Ret formnumRet = creatFormnum();
-			if (formnumRet.isFail()) {
-				return formnumRet;
-			}
-			qareport.set("formnum", formnumRet.get("data"));
-
-			boolean qaSaved;
-			try {
-				qaSaved = qareport.save();
-			} catch (Exception e) {
-				// UNIQUE索引冲突时给出可读报错（formnum唯一索引由DBA维护）
-				String msg = e.getMessage();
-				if (msg != null && msg.contains("Duplicate")) {
-					return fail("报告单编号生成冲突（并发操作），请重试！");
+			// 并发重号重试：creatFormnum 的 FOR UPDATE 聚合查询在 InnoDB 下不产生行锁，
+			// 并发时可能生成相同编号，捕获 UNIQUE 索引冲突后重新生成（最多 FORMNUM_RETRY_MAX 次）
+			boolean qaSaved = false;
+			for (int attempt = 1; attempt <= QarepConst.FORMNUM_RETRY_MAX; attempt++) {
+				Ret formnumRet = creatFormnum();
+				if (formnumRet.isFail()) {
+					return formnumRet;
 				}
-				return fail("报告单保存失败：" + (msg != null ? msg : e.getClass().getSimpleName()));
+				qareport.set("formnum", formnumRet.get("data"));
+				try {
+					qaSaved = qareport.save();
+					if (qaSaved) {
+						break;
+					}
+				} catch (Exception e) {
+					// UNIQUE索引冲突时重新生成编号重试，其他异常直接失败
+					String msg = e.getMessage();
+					boolean duplicate = msg != null && msg.contains("Duplicate");
+					if (duplicate && attempt < QarepConst.FORMNUM_RETRY_MAX) {
+						continue;
+					}
+					return fail(duplicate ? "报告单编号生成冲突（并发操作），请重试！"
+							: "报告单保存失败：" + (msg != null ? msg : e.getClass().getSimpleName()));
+				}
 			}
 			if (!qaSaved) {
 				return fail("报告单保存失败，请重试！");
@@ -913,9 +956,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 更新报告单和产品数据
-	 * <p>安全说明（编辑白名单）：不信任前端提交的 insp 及各环节 uid/time 签名字段；
-	 * 以库内记录为基准，仅拷贝允许编辑的业务字段（型号/编号/qi/qsi/描述/电气参数等），
-	 * insp 相关字段一律以库内值为准（检验进度变更只能走批准/驳回流程）</p>
+	 * <p>安全说明（编辑白名单）：不信任前端提交的各环节 uid/time 签名字段；
+	 * 以库内记录为基准，仅拷贝允许编辑的业务字段（型号/编号/qi/qsi/描述/电气参数等）；
+	 * insp 支持服务端更新：服务端校验合法范围（1~5）后，按状态机语义联动维护各环节签名
+	 * （前进补签缺失环节/回退清空超出环节），签名列一律以服务端生成为准</p>
 	 * <p>所有业务校验在任何写库操作之前完成；产品更新失败抛RuntimeException触发事务回滚</p>
 	 * @param qareport 报告单对象（前端提交）
 	 * @param product 产品对象（前端提交）
@@ -949,7 +993,22 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		dbQareport.set("cust_id", qareport.getCustId());
 		dbQareport.set("rep_type", qareport.getRepType());
 
-		// ========== 白名单拷贝：产品允许编辑的业务字段（insp/各环节uid/time以库内值为准，不拷贝） ==========
+		// ========== 检验进度更新（服务端支持，保持状态机一致） ==========
+		// 前端 select 可绕过，服务端兜底校验合法范围（1~5）
+		Integer insp = product.getInsp();
+		if (insp == null || insp < QarepConst.INSP_PENDING_ACCURACY || insp > QarepConst.INSP_COMPLETED) {
+			return fail("检验进度参数非法！");
+		}
+		Integer dbInsp = dbProduct.getInt("insp");
+		if (dbInsp != null && !insp.equals(dbInsp)) {
+			// 进度变更：联动维护各环节签名（前进补签缺失环节/回退清空超出环节），
+			// 条件更新（WHERE insp=库内旧值）防并发覆盖他人已推进的状态
+			if (!syncInspWithSignatures(product.getId(), dbInsp, insp)) {
+				return fail("检验进度更新失败（状态已变化），请刷新后重试！");
+			}
+		}
+
+		// ========== 白名单拷贝：产品允许编辑的业务字段（各环节 uid/time 以服务端生成为准，不拷贝） ==========
 		dbProduct.set("type", product.getType());
 		dbProduct.set("model", product.getModel());
 		dbProduct.set("number", product.getNumber());
@@ -978,6 +1037,52 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			return fail("产品信息更新失败，请联系开发人员！");
 		}
 		return Ret.ok();
+	}
+
+	/**
+	 * 检验进度变更时的签名一致性维护（编辑页服务端支持）
+	 * <p>状态机语义（与批准/驳回流程一致）：insp=N 时，环节 2~N 的签名必须完整，
+	 * 否则详情页/PDF 生成（safeStr 强校验）会因缺签名异常</p>
+	 * <ul>
+	 *   <li>前进（newInsp > oldInsp）：为 [oldInsp+1, newInsp] 各环节补齐签名（COALESCE 仅补缺失，不覆盖已有签名）</li>
+	 *   <li>回退（newInsp < oldInsp）：清空 [newInsp+1, 5] 各环节签名</li>
+	 * </ul>
+	 * <p>条件更新（WHERE insp=库内旧值）保证并发下不会覆盖他人已推进的状态</p>
+	 * @param productId 产品ID
+	 * @param oldInsp 库内当前进度
+	 * @param newInsp 目标进度
+	 * @return 是否更新成功（false=状态已被他人变更）
+	 */
+	private boolean syncInspWithSignatures(Long productId, Integer oldInsp, Integer newInsp) {
+		Long userId = JBoltUserKit.getUserId();
+		String now = DateUtil.getDateString(DateUtil.YMDHMS);
+		StringBuilder sql = new StringBuilder("UPDATE siargo_product SET insp = ?");
+		List<Object> params = new ArrayList<>();
+		params.add(newInsp);
+		if (newInsp > oldInsp) {
+			// 前进：补齐缺失环节签名（COALESCE 仅补空，不覆盖已有签名）
+			for (int stage = oldInsp + 1; stage <= newInsp; stage++) {
+				String col = QarepConst.approveStageColumn(stage);
+				if (col != null) {
+					sql.append(", ").append(col).append("_uid = COALESCE(").append(col).append("_uid, ?)")
+						.append(", ").append(col).append("_time = COALESCE(").append(col).append("_time, ?)");
+					params.add(userId);
+					params.add(now);
+				}
+			}
+		} else {
+			// 回退：清空超出目标进度的环节签名
+			for (int stage = newInsp + 1; stage <= QarepConst.INSP_COMPLETED; stage++) {
+				String col = QarepConst.approveStageColumn(stage);
+				if (col != null) {
+					sql.append(", ").append(col).append("_uid = NULL, ").append(col).append("_time = NULL");
+				}
+			}
+		}
+		sql.append(" WHERE id = ? AND insp = ? AND vd = ").append(QarepConst.VD_VALID);
+		params.add(productId);
+		params.add(oldInsp);
+		return Db.update(sql.toString(), params.toArray()) > 0;
 	}
 
 	/**
@@ -1080,41 +1185,69 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	
 	/**
 	 * 获取本年度送检数量总计
-	 * <p>统计当年所有有效产品的送检数量总和</p>
+	 * <p>统计当年所有有效产品的送检数量总和（带30分钟缓存）</p>
 	 * @param proType 产品类型（0=全部，1=传感器，2=小流量，3=大流量）
 	 * @return 送检数量总计
 	 */
 	public Long getTotalQSI(int proType) {
-		String sql = "SELECT SUM( sp.qsi ) AS qsi_Total "
-				+ "FROM siargo_product sp "
-				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
-				+ "AND sp.vd = 1 ";
-		if (proType > 0) {
-			// 参数化占位符，避免SQL拼接
-			return Db.queryLong(sql + " AND sp.type = ?", proType);
-		}
-		return Db.queryLong(sql);
+		return getTotalCount("qsi", proType);
 	}
 	
 	
 	/**
 	 * 获取本年度检验数量总计
-	 * <p>统计当年所有有效产品的检验数量总和</p>
+	 * <p>统计当年所有有效产品的检验数量总和（带30分钟缓存）</p>
 	 * @param proType 产品类型（0=全部，1=传感器，2=小流量，3=大流量）
 	 * @return 检验数量总计
 	 */
 	public Long getTotalQI(int proType) {
-		String sql = "SELECT SUM( sp.qi ) AS qi_Total "
-				+ "FROM siargo_product sp "
-				+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-				+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
-				+ "AND sp.vd = 1 ";
-		if (proType > 0) {
-			// 参数化占位符，避免SQL拼接
-			return Db.queryLong(sql + " AND sp.type = ?", proType);
+		return getTotalCount("qi", proType);
+	}
+
+	/**
+	 * 年度数量总计统一查询入口（带30分钟 DCL+TTL 缓存）
+	 * <p>缓存 key = 统计列 + 产品类型，数据变更时由 clearFlowCountsCache 联动失效</p>
+	 * @param column 统计列（qsi=送检数量 / qi=检验数量）
+	 * @param proType 产品类型（0=全部，1=传感器，2=小流量，3=大流量）
+	 * @return 数量总计
+	 */
+	private Long getTotalCount(String column, int proType) {
+		String cacheKey = column + "_" + proType;
+		// 先检查缓存是否有效（无锁快速路径）
+		if (cachedTotalCounts != null && (System.currentTimeMillis() - totalCountsCacheTimestamp) < TOTAL_COUNTS_CACHE_TTL) {
+			Long cached = cachedTotalCounts.get(cacheKey);
+			if (cached != null) {
+				return cached;
+			}
 		}
-		return Db.queryLong(sql);
+		// 缓存失效，加锁查询并刷新缓存
+		totalCountsCacheLock.lock();
+		try {
+			// 双重检查：防止多线程同时穿透
+			if (cachedTotalCounts != null && (System.currentTimeMillis() - totalCountsCacheTimestamp) < TOTAL_COUNTS_CACHE_TTL) {
+				Long cached = cachedTotalCounts.get(cacheKey);
+				if (cached != null) {
+					return cached;
+				}
+			}
+			Map<String, Long> counts = new java.util.HashMap<>();
+			// 参数化占位符，避免SQL拼接
+			String sql = "SELECT SUM( sp." + column + " ) AS total "
+					+ "FROM siargo_product sp "
+					+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
+					+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
+					+ "AND sp.vd = 1 ";
+			if (proType > 0) {
+				counts.put(cacheKey, Db.queryLong(sql + " AND sp.type = ?", proType));
+			} else {
+				counts.put(cacheKey, Db.queryLong(sql));
+			}
+			cachedTotalCounts = counts;
+			totalCountsCacheTimestamp = System.currentTimeMillis();
+			return counts.get(cacheKey);
+		} finally {
+			totalCountsCacheLock.unlock();
+		}
 	}
 	
 	/**

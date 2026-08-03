@@ -2087,6 +2087,25 @@ mark.dms-search-hit {
 	border-color: #80bdff;
 	box-shadow: 0 0 0 .15rem rgba(0, 123, 255, .15)
 }
+
+/* 表单顶部提示条（qarep\add.html 编号填写提醒） */
+.fm-notice {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px;
+	margin-bottom: 14px;
+	border-radius: 6px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #856404;
+	background: #fff3cd;
+	border: 1px solid #ffeeba;
+}
+.fm-notice i {
+	font-size: 14px;
+	color: #f0ad4e;
+}
 /* ---- qarep\editdes.html：.editdes-page 前缀隔离的紧凑变体（页面根元素带 class="editdes-page"），
    避免覆盖 add/edit 共用的 16px 18px 通用版；原同名 .fm-hd 三条为死代码（editdes.html 不含 .fm-hd）已删除 ---- */
 .editdes-page .fm-wrap{padding:14px 16px;font-size:13px;color:#333}
@@ -2182,12 +2201,6 @@ mark.dms-search-hit {
 	font-size: 13px;
 	font-weight: 500;
 	color: #495057;
-}
-.flow-summary-count {
-	font-size: 18px;
-	font-weight: 700;
-	color: #6c757d;
-	margin-left: 4px;
 }
 
 /* 右侧步骤条 */

@@ -804,24 +804,13 @@ var loadFlowCountsTimer_#(pageId) = null;
 function loadFlowCounts() {
 	if (loadFlowCountsTimer_#(pageId)) clearTimeout(loadFlowCountsTimer_#(pageId));
 	loadFlowCountsTimer_#(pageId) = setTimeout(function() {
-		$.ajax({
-			url: 'admin/siargo/qarep/getFlowCounts',
-			type: 'get',
-			success: function(res) {
-				if (res.msg && res.msg == 'jbolt_terminal_offline') {
-					showReloginDialog();
-					LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
-						top.location.href = '/admin';
-					});
-				} else if (res.state == 'ok') {
-					$('#count-all').text(res.data.all || 0);
-					$('#count-noq').text(res.data.noq || 0);
-					$('#count-accq').text(res.data.accq || 0);
-					$('#count-funq').text(res.data.funq || 0);
-					$('#count-appq').text(res.data.appq || 0);
-					$('#count-allq').text(res.data.allq || 0);
-				}
-			}
+		// 规范 98：使用平台 Ajax 对象族（自动处理登录失效/系统锁定/终端离线等全局状态）
+		Ajax.get('admin/siargo/qarep/getFlowCounts', function(res) {
+			$('#count-noq').text(res.data.noq || 0);
+			$('#count-accq').text(res.data.accq || 0);
+			$('#count-funq').text(res.data.funq || 0);
+			$('#count-appq').text(res.data.appq || 0);
+			$('#count-allq').text(res.data.allq || 0);
 		});
 	}, 100);
 }

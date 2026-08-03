@@ -64,8 +64,13 @@ public class PDFService {
 		String proModel = report.getStr("sp_model");
 		String prodType = report.getStr("prod_type");
 		String pdfver = report.getStr("sp_pdfver");
-		String orderId = report.getOrderId().toString();
-		String formnum = report.getFormnum().toString();
+		// 空安全转换（order_id/formnum 为 Long，历史脏数据可能为 null，避免 NPE）
+		String orderId = report.getOrderId() != null ? report.getOrderId().toString() : null;
+		String formnum = report.getFormnum() != null ? report.getFormnum().toString() : null;
+		String failKey = "报告单号：" + (formnum != null ? formnum : "空") + " ； 订单号：" + (orderId != null ? orderId : "空");
+		if (orderId == null || formnum == null) {
+			return failKey + " ;  失败原因：报告单数据不完整（订单号或编号为空）";
+		}
 		
 		OutputStream os = null;
         PdfStamper ps = null;
@@ -76,24 +81,42 @@ public class PDFService {
         // 获取完整模板路径
         String inputFileName = getInputFile(webRootPath, prodType, pdfver, proModel);
 
-        // 确定输出目录
+        // 确定输出目录（来自 DB 配置，必须做路径穿越校验）
         String outputDir;
         if ("export/PDF".equals(pdfsrc)) {
-            outputDir = pdfFolderService.getExportPath(pdfver);
+            outputDir = safeRelativePath(pdfFolderService.getExportPath(pdfver), "输出目录(exportPath)");
         } else {
-            outputDir = pdfFolderService.getBatchPath();
+            outputDir = safeRelativePath(pdfFolderService.getBatchPath(), "输出目录(batchPath)");
+        }
+        if (outputDir == null) {
+            return failKey + " ;  失败原因：输出目录配置非法";
         }
         // 确保输出目录存在
-        File outputDirFile = new File(webRootPath + outputDir);
+        File outputDirFile = new File(webRootPath + "/" + outputDir);
         if (!outputDirFile.exists()) {
             outputDirFile.mkdirs();
         }
-        String outputFileName = webRootPath + outputDir + "/" + orderId + "_" + id + ".pdf";
+        // 第三层校验：canonical 路径二次确认（防符号链接/编码绕过，见规范 6.5）
+        try {
+            File webRootFile = new File(webRootPath);
+            if (!outputDirFile.getCanonicalPath().startsWith(webRootFile.getCanonicalPath())) {
+                LOG.warn("检测到非法输出目录（canonical越界）: " + outputDir);
+                return failKey + " ;  失败原因：输出目录配置非法";
+            }
+        } catch (IOException e) {
+            LOG.warn("输出目录canonical校验失败: " + outputDir, e);
+            return failKey + " ;  失败原因：输出目录配置非法";
+        }
+        String outputFileName = webRootPath + "/" + outputDir + "/" + orderId + "_" + id + ".pdf";
 		
 		// ========== 清理旧文件 ==========
-		//如果目标PDF文件已存在，先删除
-		File oldPdfFile = new File(webRootPath + report.getStr("sp_pdfstr"));
-	    if (oldPdfFile.exists()) {
+		//如果目标PDF文件已存在，先删除（sp_pdfstr 可能为空/含穿越标记，跳过清理，新文件会覆盖写入）
+		String oldPdfstr = report.getStr("sp_pdfstr");
+		File oldPdfFile = null;
+		if (oldPdfstr != null && !oldPdfstr.isEmpty() && !oldPdfstr.contains("..")) {
+			oldPdfFile = new File(webRootPath + (oldPdfstr.startsWith("/") ? oldPdfstr : "/" + oldPdfstr));
+		}
+	    if (oldPdfFile != null && oldPdfFile.exists()) {
 	        boolean oldFileDeleted = oldPdfFile.delete();
 
 	        // 如果删除失败（可能文件句柄被短暂占用），稍等后重试一次
@@ -146,7 +169,6 @@ public class PDFService {
     		
         } catch (Exception e) {
             LOG.error("PDF导出失败, 报告单号：" + formnum + " ; 订单号：" + orderId, e);
-            String failKey = "报告单号：" + formnum + " ； 订单号：" + orderId;
             return failKey + " ;  失败原因：" + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
         } finally {
             try {
@@ -210,18 +232,21 @@ public class PDFService {
 		if (proModel == null || proModel.isEmpty()) {
 			throw new RuntimeException("产品型号为空，无法选择模板");
 		}
-		// 1. 从 folder 配置表获取模板存储路径
-		String templatePath = pdfFolderService.getTemplatePath(pdfver);
+		// 1. 从 folder 配置表获取模板存储路径（来自 DB 配置，必须做路径穿越校验）
+		String templatePath = safeRelativePath(pdfFolderService.getTemplatePath(pdfver), "模板目录(templatePath)");
 		if (templatePath == null) {
-			throw new RuntimeException("版号 " + pdfver + " 未配置，请在模板管理中添加");
+			throw new RuntimeException("版号 " + pdfver + " 未配置或配置非法，请在模板管理中添加");
 		}
-		// 2. 从 template 规则表匹配模板文件名
+		// 2. 从 template 规则表匹配模板文件名（必须为单段文件名，拒绝路径穿越）
 		String templateFile = pdfTemplateService.matchTemplate(pdfver, prodType, proModel);
 		if (templateFile == null) {
 			throw new RuntimeException("未找到对应模板，请检查型号是否有错(区分大小写)： " + proModel);
 		}
-		// 3. 拼接完整路径（路径来自DB，非硬编码）
-		return webRootPath + templatePath + "/" + templateFile;
+		if (templateFile.contains("/") || templateFile.contains("\\") || templateFile.contains("..")) {
+			throw new RuntimeException("模板文件名配置非法: " + templateFile);
+		}
+		// 3. 拼接完整路径（路径来自DB，经校验后使用）
+		return webRootPath + "/" + templatePath + "/" + templateFile;
 	}
 
 	// ==================== 数据映射构建 ====================
@@ -394,6 +419,40 @@ public class PDFService {
 	 */
 	private String optionalStr(Object value) {
 		return value == null ? "" : value.toString();
+	}
+
+	/**
+	 * 规范化并校验相对路径（来自 DB 配置，防路径穿越，见规范 6.5）
+	 * <p>校验规则：</p>
+	 * <ol>
+	 *   <li>拒绝包含 ".." 的路径穿越</li>
+	 *   <li>拒绝绝对路径（/ 或 \ 开头、盘符开头）</li>
+	 *   <li>统一去尾部斜杠，避免拼接出双斜杠</li>
+	 * </ol>
+	 * @param path 原始相对路径
+	 * @param desc 配置项描述（用于告警日志）
+	 * @return 规范化后的相对路径（无尾部斜杠），非法时返回 null
+	 */
+	private String safeRelativePath(String path, String desc) {
+		if (path == null || path.isEmpty()) {
+			return null;
+		}
+		String dir = path.trim();
+		// 第一层：拒绝路径穿越
+		if (dir.contains("..")) {
+			LOG.warn("检测到非法" + desc + "（含..）: " + path);
+			return null;
+		}
+		// 第二层：拒绝绝对路径（/ 或 \ 开头、盘符开头）
+		if (dir.startsWith("/") || dir.startsWith("\\") || dir.matches("^[a-zA-Z]:.*")) {
+			LOG.warn("检测到非法" + desc + "（绝对路径）: " + path);
+			return null;
+		}
+		// 第三层：统一去尾部斜杠，避免拼接出双斜杠
+		while (dir.endsWith("/") || dir.endsWith("\\")) {
+			dir = dir.substring(0, dir.length() - 1);
+		}
+		return dir;
 	}
 
 }

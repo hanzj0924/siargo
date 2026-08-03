@@ -83,6 +83,10 @@ public final class QarepConst {
 	/** 已删除（回收站） */
 	public static final int VD_DELETED = 0;
 
+	// ==================== 报告单编号 ====================
+	/** 报告单编号并发冲突最大重试次数（creatFormnum 撞号后重新生成） */
+	public static final int FORMNUM_RETRY_MAX = 3;
+
 	/**
 	 * 批准操作：目标 insp → 需要签名的环节列前缀（accq/funq/appq/allq）
 	 * @param targetInsp 目标 insp（2~5）

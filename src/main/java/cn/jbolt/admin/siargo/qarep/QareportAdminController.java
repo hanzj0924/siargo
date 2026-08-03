@@ -590,6 +590,28 @@ public class QareportAdminController extends JBoltBaseController {
     	Qareport qareport = getModel(Qareport.class, "qareport");
     	Product product = getModel(Product.class, "product");
 
+    	// ========== 报告单基础信息服务端校验（前端 data-rule 可绕过，必须服务端兜底） ==========
+    	if (qareport == null) {
+    		renderJsonFail("参数不完整，请检查报告单信息！");
+    		return;
+    	}
+    	// 防注入：新增场景不允许携带报告单ID（若前端注入已有ID，会跳过创建直接绑定/覆盖已有报告单）
+    	if (isOk(qareport.getId())) {
+    		renderJsonFail("参数错误：新增报告单不允许携带报告单ID！");
+    		return;
+    	}
+    	// 订单号必填（PDF 文件名以订单号拼接，空值会导致输出文件异常；列类型为数字，天然无路径穿越风险）
+    	Long orderId = qareport.getOrderId();
+    	if (orderId == null || orderId <= 0) {
+    		renderJsonFail("订单号必填！");
+    		return;
+    	}
+    	// 客户必填
+    	if (notOk(qareport.getCustId())) {
+    		renderJsonFail("请选择客户！");
+    		return;
+    	}
+
     	// ========== 产品公共参数校验 ==========
     	if (product.getInsp() == null) {
     		renderJsonFail("请选择检验进度！");
@@ -727,7 +749,12 @@ public class QareportAdminController extends JBoltBaseController {
 			renderFail("请选择要删除的数据");
 			return;
 		}
-		String deleteDes = getPara("delete_des"); // 删除原因，可为空
+		String deleteDes = getPara("delete_des"); // 删除原因
+		// 服务端强制必填（前端弹窗已校验，此处兜底防绕过）
+		if (StrKit.isBlank(deleteDes)) {
+			renderJsonFail("请填写删除原因！");
+			return;
+		}
 
 		List<Long> ids = parseIds(idsJson);
 		if (ids == null || ids.isEmpty()) {
@@ -792,8 +819,12 @@ public class QareportAdminController extends JBoltBaseController {
 	/**
 	 * 永久删除报告单（物理删除）
 	 * URL: /admin/siargo/qarep/permanentDelete
-	 * <p>业务下沉：级联删除逻辑（驳回历史/PDF文件/空报告单）移入QareportService.permanentDelete，
-	 * 在事务内执行，DB删除失败抛RuntimeException触发回滚</p>
+	 * <p>afterCommit 模式：物理文件删除不可回滚，必须在事务提交后执行——</p>
+	 * <ol>
+	 *   <li>事务外收集 PDF 物理文件路径（getPdfPathsByIds）</li>
+	 *   <li>Db.tx() 仅删除数据库记录（驳回历史/产品/空报告单，Service.permanentDelete）</li>
+	 *   <li>事务提交成功后统一删除物理文件（deletePhysicalPdfs）+ 清理缓存</li>
+	 * </ol>
 	 */
 	public void permanentDelete() {
 		String idsJson = getPara("ids");
@@ -806,6 +837,9 @@ public class QareportAdminController extends JBoltBaseController {
 			renderFail("参数格式错误");
 			return;
 		}
+		// 1. 事务外收集 PDF 物理文件路径（文件删除不可回滚，见规范 6.3）
+		List<String> pdfPaths = service.getPdfPathsByIds(ids);
+		// 2. 手动事务：仅删除数据库记录
 		final Ret[] retHolder = {null};
 		boolean txOk = Db.tx(() -> {
 			retHolder[0] = service.permanentDelete(ids);
@@ -815,8 +849,9 @@ public class QareportAdminController extends JBoltBaseController {
 			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
 			return;
 		}
-		// === afterCommit: 缓存清理 ===
+		// 3. === afterCommit: 缓存清理 + 物理文件删除 ===
 		service.clearFlowCountsCache();
+		service.deletePhysicalPdfs(pdfPaths);
 		renderJsonSuccess();
 	}
 

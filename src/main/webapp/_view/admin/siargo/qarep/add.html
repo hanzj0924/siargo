@@ -10,6 +10,8 @@
 			action="admin/siargo/qarep/save" method="post">
 			<input type="hidden" name="qareport.id" value="#(qareport.id??)" />
 			<div class="fm-wrap">
+				<!-- 编号填写提示（页面内提示条，替代原跨窗口 DOM 注入） -->
+				<div class="fm-notice"><i class="fa fa-exclamation-circle"></i> 注意编号！请按实际情况填写产品编号</div>
 
 				<!-- 上半部分：左右两栏 -->
 				<div class="row">
@@ -292,26 +294,9 @@
 		#define js()
 		<script>
 			$(function() {
-				// 脆弱性说明：以下为跨窗口 DOM 注入——本页在 layui iframe 弹窗中渲染，
-				// 通过 parent.document 找到弹窗按钮栏（.layui-layer-btn）后追加"注意编号!"红字提示。
-				// JBolt 的 data-openpage="dialog" 声明式弹窗未暴露自定义 footer/按钮栏内容的配置项，
-				// 暂无稳妥替代方案，只能依赖 layui 的内部类名与 300ms 延时；若 layui 升级改类名
-				// 或按钮栏延迟渲染，此提示会静默失效（已用 try/catch 包裹，不影响主流程）。
-				setTimeout(
-						function() {
-							try {
-								var $btnContainer = $(parent.document).find(
-										'.layui-layer-btn:last');
-								if ($btnContainer.length > 0
-										&& $btnContainer
-												.find('.mindray-notice').length === 0) {
-									$btnContainer.css('position', 'relative');
-									$btnContainer
-											.append('<span class="mindray-notice" style="position:absolute;left:40%;top:50%;transform:translateY(-50%);color:red;font-size:30px;line-height:42px;pointer-events:none;">注意编号!</span>');
-								}
-							} catch (e) {
-							}
-						}, 300);
+				// 编号提示已由页面内 .fm-notice 提示条承载（见 .fm-wrap 顶部），
+				// 原跨窗口 DOM 注入（parent.document 操作 layui 按钮栏）已废弃——依赖 layui
+				// 内部类名与渲染时机，升级即失效，且违反"页面自包含"原则。
 			});
 
 			function refreshCustSelect() {

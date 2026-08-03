@@ -1,5 +1,22 @@
 ## 更新日志
 
+### v2.8.2 (2026-08-03)
+- refactor(qarep): 报告单模块全栈审查修复——PDFService 输出目录/模板路径三层路径穿越校验（拒绝 `..`、强制相对路径、canonical 二次确认），生成/批量导出失败返回明确原因
+- fix(qarep): PDFService 空值 NPE——订单号/报告单编号缺失时提前返回失败信息，不再进入模板渲染；sp_pdfstr 异常值跳过旧文件删除
+- fix(qarep): 新增/删除报告单服务端校验——id 注入拦截、订单号/客户必填、批量删除必填删除原因
+- fix(qarep): 报告单编号并发冲突自动重试（捕获 Duplicate 重试上限 3 次，FORMNUM_RETRY_MAX 常量化），消除并发创建偶发失败
+- refactor(qarep): 永久删除物理文件移至事务提交后统一删除（getPdfPathsByIds 事务外收集 + deletePhysicalPdfs 带穿越二次检测），符合 afterCommit 纪律
+- perf(qarep): 首页年度送检/检验总量统一 getTotalCount 30 分钟 DCL+TTL 缓存，clearFlowCountsCache 联动失效
+- feat(qarep): 编辑报告单检验进度服务端支持——select 五个环节可选，update() 校验合法范围（1~5）并联动维护环节签名（前进 COALESCE 补签缺失环节/回退清空超出环节，条件更新防并发覆盖）
+- improve(qarep): 首页流程计数改用 Ajax.get 平台对象族（自动处理登录失效/锁定/离线）；新增页删除跨窗口 DOM 注入 hack 改为表单顶部编号提示条；删除 flow-summary-count 死代码，siargo.css/.min.css 同步
+- refactor(dms): 类别/文件 Controller 全部写操作 @Before(Tx.class) → 手动 Db.tx() + afterCommit（save/update/deleteByIds/toggleActive/up/down），删除未实现的 move 端点与重复端点 changeActive（统一 toggleActive）
+- feat(dms): 文件编辑支持替换物理文件——新文件事务内落位、旧文件事务提交后删除（oldFilePath 带出），编辑表单上传时提示"保存后替换原文件"
+- fix(dms): 上传安全加固——文件名净化 sanitizeFileName + validateTempFile 三层路径校验（拒绝 `..`、强制 temp 目录前缀、canonical 二次确认）；批量保存事务化，失败时数据库回滚且已移动文件移回临时目录（moveFilesBack 补偿）
+- fix(dms): 文件/类别列表雪花 ID 统一 CAST AS CHAR 防前端精度丢失；关键字搜索改 EXISTS 子查询，GROUP_CONCAT 关键字聚合不再丢失
+- feat(dms): 类别删除保护——类别下仍有有效文件时阻止删除（checkInUse 覆盖）；初始化排序按 sort_rank, id 稳定重排
+- fix(dms): PDF 链接重复 id="pdfFrame" 改 class（多行渲染 id 冲突），加载统一时间戳防缓存
+- chore: 清理 upload/equipment_certificate 目录 3 个测试图片
+
 ### v2.8.1 (2026-07-31)
 - refactor(dashboard): 首页数据看板整体重构——顶部 hero 流程看板（精度→外观→包装→批准→完成五环节卡片，引用 --flow-* 共享色库）+ ECharts 四图表（送检总量柱状/季度同比堆叠柱/退修趋势双年折线/产品占比环图），替代原静态数字卡片
 - feat(dashboard): 环节卡展示在制报告单数 + 送检只数（flowCounts 统计 SQL 并入 SUM(qsi)，复用 30 分钟缓存），hero 右侧展示在流程/待处理报告单双统计
