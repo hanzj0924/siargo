@@ -55,6 +55,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	private volatile long flowCountsCacheTimestamp;
 	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
 
+	// ========== 看板报告单级流程统计缓存（30分钟有效期，与列表页产品级 flowCounts 分开） ==========
+	private static final long DASHBOARD_FLOW_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
+	private volatile Map<String, Long> cachedDashboardFlowCounts;
+	private volatile long dashboardFlowCountsCacheTimestamp;
+	private final ReentrantLock dashboardFlowCountsCacheLock = new ReentrantLock();
+
 	// ========== 年度数量总计缓存（30分钟有效期，key = 列名+类型） ==========
 	private static final long TOTAL_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
 	private volatile Map<String, Long> cachedTotalCounts;
@@ -117,12 +123,45 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	}
 
 	/**
+	 * 获取首页看板报告单级流程统计（本年度，带30分钟缓存）
+	 * <p>产品级、本年度口径：查询当年创建报告单下的全部有效产品（vd=1），按 insp 分环节，
+	 * 不去重；allq 即当年 insp=5 的产品数，与环形图“本年度报告单来源”总数一致。</p>
+	 * @return Map包含各阶段数量：all(本年度产品总数), noq/accq/funq/appq/allq(按 insp 分环节),
+	 *         noq_qsi~allq_qsi(各环节产品送检只数)
+	 */
+	public java.util.Map<String, Long> getDashboardFlowCounts() {
+		// 先检查缓存是否有效（无锁快速路径）
+		if (cachedDashboardFlowCounts != null
+				&& (System.currentTimeMillis() - dashboardFlowCountsCacheTimestamp) < DASHBOARD_FLOW_COUNTS_CACHE_TTL) {
+			return cachedDashboardFlowCounts;
+		}
+		// 缓存失效，加锁查询并刷新缓存
+		dashboardFlowCountsCacheLock.lock();
+		try {
+			// 双重检查：防止多线程同时穿透
+			if (cachedDashboardFlowCounts != null
+					&& (System.currentTimeMillis() - dashboardFlowCountsCacheTimestamp) < DASHBOARD_FLOW_COUNTS_CACHE_TTL) {
+				return cachedDashboardFlowCounts;
+			}
+			// 存入不可变视图，getDashboardFlowCounts 对外始终只读
+			Map<String, Long> counts = Collections.unmodifiableMap(loadDashboardFlowCountsFromDb());
+			cachedDashboardFlowCounts = counts;
+			dashboardFlowCountsCacheTimestamp = System.currentTimeMillis();
+			return counts;
+		} finally {
+			dashboardFlowCountsCacheLock.unlock();
+		}
+	}
+
+	/**
 	 * 主动清除流程统计缓存（数据变更时调用）
 	 * <p>联动清理：年度数量总计缓存（getTotalQSI/getTotalQI）与流程统计同源，一并失效</p>
 	 */
 	public void clearFlowCountsCache() {
 		cachedFlowCounts = null;
 		flowCountsCacheTimestamp = 0;
+		cachedDashboardFlowCounts = null;
+		dashboardFlowCountsCacheTimestamp = 0;
 		cachedTotalCounts = null;
 		totalCountsCacheTimestamp = 0;
 		clearPaginateCache();
@@ -508,6 +547,57 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ ", SUM(CASE WHEN insp = 4 THEN sp.qsi ELSE 0 END) AS qsi_4"
 				+ ", SUM(CASE WHEN insp = 5 THEN sp.qsi ELSE 0 END) AS qsi_5"
 				+ " FROM siargo_product sp WHERE sp.vd = 1";
+		Record row = Db.findFirst(sql);
+		if (row != null) {
+			counts.put("all", row.getLong("all_count") != null ? row.getLong("all_count") : 0L);
+			counts.put("noq", row.getLong("insp_1") != null ? row.getLong("insp_1") : 0L);
+			counts.put("accq", row.getLong("insp_2") != null ? row.getLong("insp_2") : 0L);
+			counts.put("funq", row.getLong("insp_3") != null ? row.getLong("insp_3") : 0L);
+			counts.put("appq", row.getLong("insp_4") != null ? row.getLong("insp_4") : 0L);
+			counts.put("allq", row.getLong("insp_5") != null ? row.getLong("insp_5") : 0L);
+			counts.put("noq_qsi", row.getLong("qsi_1") != null ? row.getLong("qsi_1") : 0L);
+			counts.put("accq_qsi", row.getLong("qsi_2") != null ? row.getLong("qsi_2") : 0L);
+			counts.put("funq_qsi", row.getLong("qsi_3") != null ? row.getLong("qsi_3") : 0L);
+			counts.put("appq_qsi", row.getLong("qsi_4") != null ? row.getLong("qsi_4") : 0L);
+			counts.put("allq_qsi", row.getLong("qsi_5") != null ? row.getLong("qsi_5") : 0L);
+		} else {
+			counts.put("all", 0L);
+			counts.put("noq", 0L);
+			counts.put("accq", 0L);
+			counts.put("funq", 0L);
+			counts.put("appq", 0L);
+			counts.put("allq", 0L);
+			counts.put("noq_qsi", 0L);
+			counts.put("accq_qsi", 0L);
+			counts.put("funq_qsi", 0L);
+			counts.put("appq_qsi", 0L);
+			counts.put("allq_qsi", 0L);
+		}
+		return counts;
+	}
+	
+	/**
+	 * 从数据库加载首页看板报告单级流程统计（本年度）
+	 * <p>产品级统计：当年创建报告单（YEAR(sq.create_time)=YEAR(CURDATE())）下的
+	 * 全部有效产品（vd=1），按产品 insp 分环节，不去重。</p>
+	 */
+	private Map<String, Long> loadDashboardFlowCountsFromDb() {
+		Map<String, Long> counts = new java.util.HashMap<>();
+		String sql = "SELECT"
+				+ "  COUNT(*) AS all_count"
+				+ ", SUM(CASE WHEN insp = 1 THEN 1 ELSE 0 END) AS insp_1"
+				+ ", SUM(CASE WHEN insp = 2 THEN 1 ELSE 0 END) AS insp_2"
+				+ ", SUM(CASE WHEN insp = 3 THEN 1 ELSE 0 END) AS insp_3"
+				+ ", SUM(CASE WHEN insp = 4 THEN 1 ELSE 0 END) AS insp_4"
+				+ ", SUM(CASE WHEN insp = 5 THEN 1 ELSE 0 END) AS insp_5"
+				+ ", SUM(CASE WHEN insp = 1 THEN sp.qsi ELSE 0 END) AS qsi_1"
+				+ ", SUM(CASE WHEN insp = 2 THEN sp.qsi ELSE 0 END) AS qsi_2"
+				+ ", SUM(CASE WHEN insp = 3 THEN sp.qsi ELSE 0 END) AS qsi_3"
+				+ ", SUM(CASE WHEN insp = 4 THEN sp.qsi ELSE 0 END) AS qsi_4"
+				+ ", SUM(CASE WHEN insp = 5 THEN sp.qsi ELSE 0 END) AS qsi_5"
+				+ " FROM siargo_product sp"
+				+ " INNER JOIN siargo_qareport sq ON sq.id = sp.report_id"
+				+ " WHERE YEAR(sq.create_time) = YEAR(CURDATE()) AND sp.vd = 1";
 		Record row = Db.findFirst(sql);
 		if (row != null) {
 			counts.put("all", row.getLong("all_count") != null ? row.getLong("all_count") : 0L);
@@ -1266,7 +1356,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
 	    		+ "WHERE "
 	    		+ "  YEAR(sq.create_time) IN (YEAR(CURDATE()), YEAR(CURDATE()) - 1) "
-	    		+ "  AND sp.vd = 1 AND sq.rep_type = 2  "
+	    		+ "  AND sp.vd = 1 AND sq.rep_type = " + QarepConst.REP_TYPE_REPAIR + "  "
 	    		+ "GROUP BY "
 	    		+ "  YEAR(sq.create_time), MONTH(sq.create_time) ";
 
@@ -1560,16 +1650,18 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 获取本年度产品类型分布统计数据
-	 * <p>用于生成首页饼图，展示各类产品报告单数量占比</p>
-	 * <p>SQL说明：按产品类型分组统计报告单数量</p>
+	 * <p>用于生成首页环形图“本年度报告单来源/订单”</p>
+	 * <p>SQL说明：查询当年（YEAR(sq.create_time)=YEAR(CURDATE())）insp=5、vd=1 的
+	 * 全部产品行，按产品类型分组计数，不去重；扇区合计即“已完成”产品总数。</p>
 	 * @return 产品类型分布数据列表（传感器、小流量、大流量）
 	 */
 	public List<Map<String, Object>> getDonutData() {
-	    String sql = "SELECT sp.type AS type, COUNT(DISTINCT sp.report_id) AS count "
+	    String sql = "SELECT sp.type AS type, COUNT(*) AS count "
 	    		+ "FROM siargo_product sp "
-	    		+ "LEFT JOIN siargo_qareport sq ON sq.id = sp.report_id "
-	    		+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
-	    		+ "AND sp.vd = 1 GROUP BY sp.type ";
+	    		+ "INNER JOIN siargo_qareport sq ON sq.id = sp.report_id "
+	    		+ "WHERE YEAR(sq.create_time) = YEAR(CURDATE()) "
+	    		+ "AND sp.vd = 1 AND sp.insp = " + QarepConst.INSP_COMPLETED + " "
+	    		+ "GROUP BY sp.type ";
 	    
 	    List<Record> records = Db.find(sql);
 	    

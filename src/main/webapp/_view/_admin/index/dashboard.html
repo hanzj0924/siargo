@@ -11,15 +11,24 @@
 
         <!-- ===== 流程环节看板（hero） ===== -->
         <div class="db-hero db-anim db-d1">
+            <div class="db-hero-grid"></div>
+            <div class="db-hero-glow db-hero-glow-a"></div>
+            <div class="db-hero-glow db-hero-glow-b"></div>
+            <div class="db-hero-glow db-hero-glow-c"></div>
             <div class="db-hero-head">
-                <div>
-                    <h4 class="db-hero-title">报告单流程总览<span class="db-hero-year" id="dbYear_#(pageId)"></span></h4>
-                    <p class="db-hero-sub">本年度累计送检 <b>#(totalQsi ?? '0')</b> 只 · 检验 <b>#(totalQi ?? '0')</b> 只</p>
+                <div class="db-hero-title-group">
+                    <h4 class="db-hero-title">
+                        <span class="db-hero-title-icon"><i class="fa fa-tasks"></i></span>
+                        报告单流程总览
+                        <span class="db-hero-year" id="dbYear_#(pageId)"></span>
+                    </h4>
+                    <div class="db-hero-divider"></div>
+                    <p class="db-hero-sub"><i class="fa fa-cube"></i> 本年度累计送检 <b>#(totalQsi ?? '0')</b> 只 · 检验 <b>#(totalQi ?? '0')</b> 只</p>
                 </div>
                 <div class="db-hero-stats">
-                    <div class="db-hero-stat">
-                        <span class="db-hero-stat-num">#(flowCounts.all ?? 0)</span>
-                        <span class="db-hero-stat-label">在流程报告单</span>
+                    <div class="db-hero-stat is-done">
+                        <span class="db-hero-stat-num">#(flowCounts.allq ?? 0)</span>
+                        <span class="db-hero-stat-label">已完成报告单</span>
                     </div>
                     <div class="db-hero-stat is-pend">
                         <span class="db-hero-stat-num" id="dbPend_#(pageId)">0</span>
@@ -27,56 +36,73 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 本年度完成进度 -->
+            <div class="db-progress">
+                <div class="db-progress-head">
+                    <span><i class="fa fa-line-chart"></i> 本年度完成进度</span>
+                    <b id="dbDonePct_#(pageId)">0%</b>
+                </div>
+                <div class="db-progress-track">
+                    <div class="db-progress-fill" id="dbDoneBar_#(pageId)"></div>
+                </div>
+            </div>
+
             <!-- pipeline：5 环节，语义色 data-color 驱动（siargo.css --flow-*） -->
             <div class="db-flow">
                 <div class="db-stage db-anim db-d1" data-color="acc">
+                    <div class="db-stage-watermark"><i class="jbicon2 jbi-linechart"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-linechart"></i></span>
                         <i class="db-stage-step">01</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.noq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">精度待检</div>
-                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</div>
+                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</div>
                 </div>
-                <div class="db-flow-arrow"></div>
+                <div class="db-flow-arrow" data-from="acc" data-to="vis"></div>
                 <div class="db-stage db-anim db-d2" data-color="vis">
+                    <div class="db-stage-watermark"><i class="fa fa-eye"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="fa fa-eye"></i></span>
                         <i class="db-stage-step">02</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.accq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">外观待检</div>
-                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</div>
+                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</div>
                 </div>
-                <div class="db-flow-arrow"></div>
+                <div class="db-flow-arrow" data-from="vis" data-to="pack"></div>
                 <div class="db-stage db-anim db-d3" data-color="pack">
+                    <div class="db-stage-watermark"><i class="jbicon2 jbi-gift"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-gift"></i></span>
                         <i class="db-stage-step">03</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.funq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">包装待检</div>
-                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</div>
+                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</div>
                 </div>
-                <div class="db-flow-arrow"></div>
+                <div class="db-flow-arrow" data-from="pack" data-to="appr"></div>
                 <div class="db-stage db-anim db-d4" data-color="appr">
+                    <div class="db-stage-watermark"><i class="jbicon2 jbi-edit-fill"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-edit-fill"></i></span>
                         <i class="db-stage-step">04</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.appq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">待批准</div>
-                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</div>
+                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</div>
                 </div>
-                <div class="db-flow-arrow"></div>
+                <div class="db-flow-arrow" data-from="appr" data-to="done"></div>
                 <div class="db-stage db-anim db-d5" data-color="done">
+                    <div class="db-stage-watermark"><i class="jbicon jb-xiangmushouxubeian"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon jb-xiangmushouxubeian"></i></span>
                         <i class="db-stage-step">05</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.allq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">已完成</div>
-                    <div class="db-stage-qsi">送检 <b data-qsi="#(flowCounts.allq_qsi ?? 0)">0</b> 只</div>
+                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.allq_qsi ?? 0)">0</b> 只</div>
                 </div>
             </div>
         </div>
@@ -87,7 +113,7 @@
                 <div class="db-chart-card db-anim db-d6">
                     <div class="card-body" style="height:330px;">
                         <div class="db-chart-title">
-                            <span class="db-chart-title-text">送检总量（包含退修）/ 只</span>
+                            <span class="db-chart-title-text"><i class="fa fa-bar-chart"></i> 送检总量（含退修）/ 只</span>
                             <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
                                 <i class="jbicon2 jbi-fullscreen"></i>
                             </a>
@@ -100,7 +126,7 @@
                 <div class="db-chart-card db-anim db-d7">
                     <div class="card-body" style="height:330px;">
                         <div class="db-chart-title">
-                            <span class="db-chart-title-text db-quarter-accent">季度送检同比 / 只</span>
+                            <span class="db-chart-title-text db-quarter-accent"><i class="fa fa-calendar"></i> 季度送检同比 / 只</span>
                             <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
                                 <i class="jbicon2 jbi-fullscreen"></i>
                             </a>
@@ -117,7 +143,7 @@
                 <div class="db-chart-card db-anim db-d7">
                     <div class="card-body" style="height:280px;">
                         <div class="db-chart-title">
-                            <span class="db-chart-title-text db-line-accent">退修总量 / 只</span>
+                            <span class="db-chart-title-text db-line-accent"><i class="fa fa-line-chart"></i> 退修总量 / 只</span>
                             <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
                                 <i class="jbicon2 jbi-fullscreen"></i>
                             </a>
@@ -130,7 +156,7 @@
                 <div class="db-chart-card db-anim db-d8">
                     <div class="card-body" style="height:280px;">
                         <div class="db-chart-title">
-                            <span class="db-chart-title-text db-donut-accent">本年度报告单来源 / 订单</span>
+                            <span class="db-chart-title-text db-donut-accent"><i class="fa fa-pie-chart"></i> 本年度报告单来源 / 订单</span>
                             <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
                                 <i class="jbicon2 jbi-fullscreen"></i>
                             </a>
@@ -193,6 +219,12 @@ var DashBoard_#(pageId) = {
 		// 待处理总数 = 精度 + 外观 + 包装 + 待批准
 		var pending = (Number(flow.noq) || 0) + (Number(flow.accq) || 0) + (Number(flow.funq) || 0) + (Number(flow.appq) || 0);
 		$('#dbPend_#(pageId)').text(pending.toLocaleString());
+		// 完成进度条：已完成 / 本年度总量
+		var allCnt = Number(flow.all) || 0;
+		var doneCnt = Number(flow.allq) || 0;
+		var donePct = allCnt > 0 ? Math.round(doneCnt * 10000 / allCnt) / 100 : 0;
+		$('#dbDonePct_#(pageId)').text(donePct.toLocaleString() + '%');
+		$('#dbDoneBar_#(pageId)').css('width', donePct + '%');
 	},
 
 	// ---- 通用：初始化/重建 ECharts 实例 ----
@@ -341,8 +373,13 @@ var DashBoard_#(pageId) = {
 				{
 					name: lastName, type: 'line', data: qd.last || [], smooth: true,
 					symbol: 'circle', symbolSize: 7, showSymbol: false,
-					lineStyle: { width: 2.5, color: '#94a3b8', type: 'dashed' },
-					itemStyle: { color: '#94a3b8', borderColor: '#fff', borderWidth: 2 }
+					lineStyle: { width: 2.5, color: '#94a3b8' },
+					itemStyle: { color: '#94a3b8', borderColor: '#fff', borderWidth: 2 },
+					// 去年：灰色实线；hover 保持原样式，避免鼠标移入时线型/粗细变化累眼
+					emphasis: {
+						lineStyle: { width: 2.5, color: '#94a3b8' },
+						itemStyle: { color: '#94a3b8', borderColor: '#fff', borderWidth: 2 }
+					}
 				},
 				{
 					name: curName, type: 'line', data: qd.cur || [], smooth: true,

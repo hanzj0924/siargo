@@ -1,5 +1,14 @@
 ## 更新日志
 
+### v2.8.3 (2026-08-03)
+- feat(dashboard): 首页看板流程统计改为报告单级本年度口径——QareportService 新增 getDashboardFlowCounts（当年创建报告单下全部有效产品按 insp 分环节，含各环节送检只数），带 30 分钟 DCL+TTL 缓存，clearFlowCountsCache 联动失效；hero 右卡由"在流程报告单"改为"已完成报告单"，与环形图口径一致
+- feat(dashboard): hero 新增"本年度完成进度"进度条（已完成/本年度总量百分比，db-progress 样式 + 动效，prefers-reduced-motion 降级）
+- fix(dashboard): 环形图统计口径修正——getDonutData 改为统计当年 insp=5（已完成）的有效产品数（COUNT(*) 不去重 + INNER JOIN），修复扇区合计与看板"已完成"总数不一致
+- fix(dashboard): 退修趋势图去年对比线改灰色实线并固定 emphasis 样式，消除鼠标移入时线型/粗细跳动
+- fix(qarep): 报告单列表页多标签页清理逻辑增加 data-page-id 判断，F5 后 JBolt 从 sessionStorage 恢复标签页时不再清空当前实例，修复报告单页面空白
+- refactor(qarep): QarepConst 新增 REP_TYPE_NORMAL/REPAIR 报告单类型常量，退修月度统计 SQL 魔法数字替换为 QarepConst.REP_TYPE_REPAIR
+- style(dashboard): siargo.css 新增 hero 网格/光晕背景、环节卡水印图标、db-flow-arrow 语义色渐变箭头等样式（+117/-50），同步 siargo.min.css
+
 ### v2.8.2 (2026-08-03)
 - refactor(qarep): 报告单模块全栈审查修复——PDFService 输出目录/模板路径三层路径穿越校验（拒绝 `..`、强制相对路径、canonical 二次确认），生成/批量导出失败返回明确原因
 - fix(qarep): PDFService 空值 NPE——订单号/报告单编号缺失时提前返回失败信息，不再进入模板渲染；sp_pdfstr 异常值跳过旧文件删除

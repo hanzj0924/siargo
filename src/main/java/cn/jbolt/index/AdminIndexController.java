@@ -91,7 +91,8 @@ public class AdminIndexController extends JBoltBaseController {
 	@UnCheckIfSystemAdmin
 	public void dashboard(){
 		// 流程环节看板数据（带30分钟缓存）：all/noq/accq/funq/appq/allq
-		set("flowCounts", qareportservice.getFlowCounts());
+		// 看板使用报告单级、本年度口径（与环形图“本年度报告单来源/订单”保持一致）
+		set("flowCounts", qareportservice.getDashboardFlowCounts());
 		// 本年度送检/检验总量（hero 头部副标题展示）
 		set("totalQsi", String.format("%,d", qareportservice.getTotalQSI(0)==null? 0:qareportservice.getTotalQSI(0)));
 		set("totalQi", String.format("%,d", qareportservice.getTotalQI(0)==null? 0:qareportservice.getTotalQI(0)));

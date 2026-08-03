@@ -79,7 +79,7 @@
 	#end
 #end
 #-- qarep-scope：qarep 模块 badge 换色（siargo.css 4.3 区 .qarep-scope .badge-*）的作用域容器，防止污染其他模块 --#
-<div class="jbolt_page jb_vflex qarep-scope" data-key="#(pmkey)">
+<div class="jbolt_page jb_vflex qarep-scope" data-key="#(pmkey)" data-page-id="#(pageId)">
 
 <div class="jbolt_page_content jb_vbody">
 <!-- 全部 表单数据 -->
@@ -820,9 +820,12 @@ $(function() {
 	if (window.__siargo_qarepReady) return;
 	window.__siargo_qarepReady = true;
 	// 清理 JBolt 初次直接访问时残留在默认标签页中的重复 qarep 内容
+	// 仅清理“其他”标签页里的旧 qarep 实例，绝不能清空当前实例所在的标签页：
+	// F5 后 JBolt 从 sessionStorage 恢复多标签页时，报告单页会在非激活的
+	// jbolt_tabcontent 中被重新注入，此时若按旧逻辑清理，会把刚注入的内容清空，导致报告单空白。
 	$('#jbolt-container > .jbolt_tabcontent:not(.active)').each(function(){
 		var $tc = $(this);
-		if($tc.find('.jbolt_tab_view').length){
+		if($tc.find('.jbolt_tab_view').length && !$tc.find('.jbolt_page[data-page-id="#(pageId)"]').length){
 			$tc.empty();
 		}
 	});

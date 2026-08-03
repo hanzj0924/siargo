@@ -77,6 +77,12 @@ public final class QarepConst {
 	/** 大流量 */
 	public static final int PROD_TYPE_LARGE_FLOW = 3;
 
+	// ==================== 报告单类型（siargo_qareport.rep_type） ====================
+	/** 正常/产成品报告单 */
+	public static final int REP_TYPE_NORMAL = 1;
+	/** 返修品报告单 */
+	public static final int REP_TYPE_REPAIR = 2;
+
 	// ==================== 软删除标记（siargo_product.vd） ====================
 	/** 有效数据 */
 	public static final int VD_VALID = 1;
