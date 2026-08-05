@@ -11,10 +11,12 @@
 
         <!-- ===== 流程环节看板（hero） ===== -->
         <div class="db-hero db-anim db-d1">
-            <div class="db-hero-grid"></div>
-            <div class="db-hero-glow db-hero-glow-a"></div>
-            <div class="db-hero-glow db-hero-glow-b"></div>
-            <div class="db-hero-glow db-hero-glow-c"></div>
+            <div class="db-hero-ruler"></div>
+            <div class="db-hero-top">
+                <span class="db-hero-top-item"><i class="fa fa-sitemap"></i> PIPELINE <b>5</b> STAGES</span>
+                <span class="db-hero-top-item"><i class="fa fa-shield"></i> STATUS <b>NORMAL</b></span>
+                <span class="db-hero-top-item"><i class="fa fa-clock-o"></i> UPDATE <b id="dbMetaTime_#(pageId)">--:--:--</b></span>
+            </div>
             <div class="db-hero-head">
                 <div class="db-hero-title-group">
                     <h4 class="db-hero-title">
@@ -49,9 +51,21 @@
             </div>
 
             <!-- pipeline：5 环节，语义色 data-color 驱动（siargo.css --flow-*） -->
+            <div class="db-flow-title"><i class="fa fa-random"></i> PIPELINE // 环节流转</div>
             <div class="db-flow">
+                <!-- 托盘装饰层 -->
+                <div class="db-flow-top-line"></div>
+                <div class="db-flow-bottom-line"></div>
+                <div class="db-flow-left-bar"></div>
+                <div class="db-flow-right-bar"></div>
+                <div class="db-flow-ticks-top"></div>
+                <div class="db-flow-ticks-bottom"></div>
+                <div class="db-flow-center-glow"></div>
+                <div class="db-flow-rivet db-flow-rivet-tl"></div>
+                <div class="db-flow-rivet db-flow-rivet-tr"></div>
+                <div class="db-flow-rivet db-flow-rivet-bl"></div>
+                <div class="db-flow-rivet db-flow-rivet-br"></div>
                 <div class="db-stage db-anim db-d1" data-color="acc">
-                    <div class="db-stage-watermark"><i class="jbicon2 jbi-linechart"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-linechart"></i></span>
                         <i class="db-stage-step">01</i>
@@ -62,7 +76,6 @@
                 </div>
                 <div class="db-flow-arrow" data-from="acc" data-to="vis"></div>
                 <div class="db-stage db-anim db-d2" data-color="vis">
-                    <div class="db-stage-watermark"><i class="fa fa-eye"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="fa fa-eye"></i></span>
                         <i class="db-stage-step">02</i>
@@ -73,7 +86,6 @@
                 </div>
                 <div class="db-flow-arrow" data-from="vis" data-to="pack"></div>
                 <div class="db-stage db-anim db-d3" data-color="pack">
-                    <div class="db-stage-watermark"><i class="jbicon2 jbi-gift"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-gift"></i></span>
                         <i class="db-stage-step">03</i>
@@ -84,7 +96,6 @@
                 </div>
                 <div class="db-flow-arrow" data-from="pack" data-to="appr"></div>
                 <div class="db-stage db-anim db-d4" data-color="appr">
-                    <div class="db-stage-watermark"><i class="jbicon2 jbi-edit-fill"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-edit-fill"></i></span>
                         <i class="db-stage-step">04</i>
@@ -95,7 +106,6 @@
                 </div>
                 <div class="db-flow-arrow" data-from="appr" data-to="done"></div>
                 <div class="db-stage db-anim db-d5" data-color="done">
-                    <div class="db-stage-watermark"><i class="jbicon jb-xiangmushouxubeian"></i></div>
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon jb-xiangmushouxubeian"></i></span>
                         <i class="db-stage-step">05</i>
@@ -225,6 +235,10 @@ var DashBoard_#(pageId) = {
 		var donePct = allCnt > 0 ? Math.round(doneCnt * 10000 / allCnt) / 100 : 0;
 		$('#dbDonePct_#(pageId)').text(donePct.toLocaleString() + '%');
 		$('#dbDoneBar_#(pageId)').css('width', donePct + '%');
+		// 刷新时间
+		var _d = new Date(), _p = function (n) { return n < 10 ? '0' + n : '' + n; };
+		var _t = _p(_d.getHours()) + ':' + _p(_d.getMinutes()) + ':' + _p(_d.getSeconds());
+		$('#dbMetaTime_#(pageId)').text(_t);
 	},
 
 	// ---- 通用：初始化/重建 ECharts 实例 ----

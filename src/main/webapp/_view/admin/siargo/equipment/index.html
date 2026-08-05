@@ -1,10 +1,10 @@
-#@jboltLayout() #define css()
+﻿#@jboltLayout() #define css()
 <link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
 
 #define main() #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page jb_vflex" data-key="#(pmkey)">
-	<div class="jbolt_page_content jb_vbody">
+	<div class="jbolt_page_content jb_vbody equip-page-content">
 
 		<!-- ===== 共用行模板 ===== -->
 		<script type="text/template" id="equipmentRowtpl_#(pageId)">
@@ -13,49 +13,15 @@
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>{@if data.name}${data.name}{@else}<span class="text-muted">-</span>{@/if}</td>
 <td>
-  <a tooltip data-title="对比/维修记录" data-dialog-title="<i class='fa fa-wrench' style='color:#5b8def;margin-right:6px;'></i>维修校准记录" data-dialogbtn data-area="1200,880" data-btn="close" data-cdrfp="true" data-close-handler="refreshCurrentTab_#(pageId)" data-tips="维修校准记录"
+  <a tooltip data-title="对比/维修记录" data-dialog-title="<i class='fa fa-wrench text-primary' style='margin-right:6px;'></i>维修校准记录" data-dialogbtn data-area="1200,880" data-btn="close" data-cdrfp="true" data-close-handler="refreshEquipmentTables_#(pageId)" data-tips="维修校准记录"
     href="admin/siargo/equipment/timeline?equipmentId=${data.id}">${data.equipment_no}</a>
 </td>
 <td>{@if data.model}${data.model}{@else}<span class="text-muted">-</span>{@/if}</td>
-<td>
-  {@if data.cert_image || data.cert_date}
-    {@if data.cert_image}
-      <a href="javascript:;" class="btn btn-sm btn-outline-primary" tooltip data-title="查看证书"
-        onclick="viewCertPhoto_#(pageId)('${data.cert_image}')">
-        <i class="jbicon jb-21ok"></i>
-      </a>
-    {@/if}
-    {@if data.cert_date}
-      <small class="text-muted d-block">${data.cert_date.substring(0, 10)}</small>
-    {@/if}
-  {@else}
-    <span class="text-muted">-</span>
-  {@/if}
-</td>
-<td>{@if data.factory_no}${data.factory_no}{@else}<span class="text-muted">-</span>{@/if}</td>
 <td>{@if data.inspection_method}${data.inspection_method}{@else}<span class="text-muted">-</span>{@/if}</td>
 <td>{@if data.inspection_cycle}${data.inspection_cycle}${data.inspection_cycle_unit}{@else}<span class="text-muted">-</span>{@/if}</td>
 <td>{@if data.last_inspection_date}${data.last_inspection_date.substring(0, 10)}{@else}<span class="text-muted">-</span>{@/if}</td>
 <td><span class="next-date-cell" data-date="${data.next_inspection_date ? data.next_inspection_date.substring(0, 10) : ''}">{@if data.next_inspection_date}${data.next_inspection_date.substring(0, 10)}{@else}<span class="text-muted">-</span>{@/if}</span></td>
 <td>{@if data.responsible_person}${data.responsible_person}{@else}<span class="text-muted">-</span>{@/if}</td>
-<td>
-  {@if data.creator_name}
-    <span class="badge badge-info">${data.creator_name}</span>
-    <small class="text-muted d-block">${data.creator_time ? data.creator_time.substring(0, 16) : ''}</small>
-  {@else}
-    <span class="text-muted">-</span>
-  {@/if}
-</td>
-<td>
-  {@if data.audit_status==2}
-    <span class="badge badge-success">${data.auditor_name}</span>
-    <small class="text-muted d-block">${data.auditor_time ? data.auditor_time.substring(0, 16) : ''}</small>
-  {@else if data.audit_status==1}
-    <span class="badge badge-danger">待审核</span>
-  {@else}
-    <span class="text-muted">-</span>
-  {@/if}
-</td>
 <td>
   {@if data.inspection_status==1}<span class="badge badge-success">合格</span>
   {@else if data.inspection_status==2}<span class="badge badge-danger">不合格</span>
@@ -67,335 +33,225 @@
   {@else if data.status==3}<span class="badge badge-secondary">已封存</span>
   {@else if data.status==4}<span class="badge badge-secondary">报废</span>
   {@else if data.status==5}<span class="badge badge-danger">异常</span>
+  {@else}<span class="text-muted">-</span>{@/if}
+</td>
+<td class="text-nowrap">
+  {@if data.cert_image}
+  <a href="javascript:;" class="btn btn-sm btn-outline-primary" tooltip data-title="查看证书"
+    onclick="viewCertPhoto_#(pageId)('${data.cert_image}')"><i class="jbicon jb-21ok"></i></a>
   {@/if}
+  <button type="button" class="btn btn-sm btn-outline-secondary" tooltip data-title="详情"
+    onclick="showEquipmentDetail_#(pageId)(this)"><i class="fa fa-eye"></i></button>
+  <a href="admin/siargo/equipment/edit/${data.id}" data-dialogbtn data-area="850,850"
+    data-handler="refreshEquipmentTables_#(pageId)" tooltip data-title="编辑"
+    class="jbolt_table_editbtn"><i class="fa fa-pencil"></i></a>
+  <a href="admin/siargo/equipment/deleteByIds?ids=${data.id}" data-ajaxbtn
+    data-confirm="确定删除该设备？" data-handler="refreshEquipmentTables_#(pageId)"
+    tooltip data-title="删除" class="jbolt_table_delbtn c-danger"><i class="fa fa-trash"></i></a>
 </td>
 </tr>
 {@/each}
-</script>
+		</script>
 
-		<!-- ===== 全部设备 工具条 ===== -->
-		<div class="jbolt_table_toolbar" id="all_toolbar_#(pageId)">
-			<div class="row">
-				<div class="col-sm-3 text-left">
-					<div class="btn-group">
-						<button data-openpage="dialog" data-area="850,850"
-							data-handler="jboltTablePageToFirst" data-title="新增设备"
-							data-url="admin/siargo/equipment/add"
-							class="btn btn-outline-primary">
-							<i class="fa fa-plus"></i> 新增
-						</button>
-						<button data-openpage="dialog" data-area="850,850"
-							data-handler="refreshJBoltTable"
-							data-check-handler="jboltTableGetCheckedId"
-							data-url="admin/siargo/equipment/edit/"
-							class="btn btn-outline-info">
-							<i class="fa fa-edit"></i> 编辑
-						</button>
-						<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
-							data-check-handler="jboltTableGetCheckedIds"
-							data-url="admin/siargo/equipment/deleteByIds?ids="
-							data-confirm="确定删除选中数据？" class="btn btn-outline-danger">
-							<i class="fa fa-trash"></i> 删除
-						</button>
-						<button onclick="jboltTableRefresh(this)"
-							class="btn btn-outline-secondary">
-							<i class="fa fa-refresh"></i> 刷新
-						</button>
-					</div>
+		<!-- ===== 顶部统计卡（8 张，点击快筛，再点取消） ===== -->
+		<div class="equip-dashboard" id="equipDashboard_#(pageId)">
+			<div class="equip-stat-card" data-card="total" onclick="clearAllFilters_#(pageId)()" tooltip data-title="点击查看全部设备">
+				<div class="equip-stat-icon"><i class="fa fa-th-large"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-total_#(pageId)">-</div>
+					<div class="equip-stat-label">设备总数</div>
 				</div>
-				<div class="col-sm-6 text-center">
-					<form class="form-inline d-inline-block" id="allForm_#(pageId)"
-						onsubmit="return false;" method="post">
-						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号/出厂编号" name="keywords"
-							value="" style="width: 270px;" /> 
-						<select class="form-control"
-							data-autoload name="category" style="width: 100px;"
-							data-url="admin/dictionary/options?key=siargo_equipment_category"
-							data-text="全部分类" data-value="" data-value-attr="sn">
-						</select>
-						<select class="form-control" name="status" style="width: 100px;">
-							<option value="">全部状态</option>
-							<option value="1">正常</option>
-							<option value="2">维修中</option>
-							<option value="3">已封存</option>
-							<option value="4">报废</option>
-							<option value="5">异常</option>
-						</select>
-						<select class="form-control" name="inspectionMethod" style="width: 100px;">
-							<option value="">全部方式</option>
-							<option value="外检">外检</option>
-							<option value="自校">自校</option>
-							<option value="自检">自检</option>
-						</select>
-						<select class="form-control" name="inspectionCycle" style="width: 100px;">
-							<option value="">全部周期</option>
-							<option value="年">年</option>
-							<option value="月">月</option>
-						</select>
-						<button type="submit" class="btn btn-outline-secondary">
-							<i class="fa fa-search"></i> 查询
-						</button>
-					</form>
+			</div>
+			<div class="equip-stat-card" data-card="normal" onclick="setQuickFilter_#(pageId)('normal', null, '1')" tooltip data-title="筛选正常设备">
+				<div class="equip-stat-icon"><i class="fa fa-check-circle"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-normal_#(pageId)">-</div>
+					<div class="equip-stat-label">正常</div>
 				</div>
-				<div class="col-sm-3 text-right">
-					<button data-openpage="dialog" data-area="260,370"
-						data-handler="refreshAllEquipmentTables_#(pageId)"
-						data-check-handler="jboltTableGetCheckedIds"
-						data-title="批量更改状态"
-						data-url="admin/siargo/equipment/batchStatusForm?ids="
-						class="btn btn-outline-info">
-						<i class="fa fa-exchange"></i> 批量更改状态
-					</button>
-					<button data-openpage="dialog" data-area="320,650"
-						data-handler="refreshAllEquipmentTables_#(pageId)"
-						data-check-handler="jboltTableGetCheckedIds"
-						data-title="批量定期对比"
-						data-url="admin/siargo/equipment/batchInspectionForm?ids="
-						class="btn btn-outline-success">
-						<i class="fa fa-wrench"></i> 批量定期对比
-					</button>
-					#if(audit)
-					<button type="button" data-ajaxbtn
-						data-handler="refreshAllEquipmentTables_#(pageId)"
-						data-check-handler="jboltTableGetCheckedIds"
-						data-url="admin/siargo/equipment/batchAudit?ids="
-						data-confirm="确定审核选中的设备？"
-						class="btn btn-outline-danger">
-						<i class="fa fa-check-circle"></i> 一键审核
-					</button>
-					#end
+			</div>
+			<div class="equip-stat-card" data-card="repairing" onclick="setQuickFilter_#(pageId)('repairing', 'repairing', null)" tooltip data-title="筛选维修中设备">
+				<div class="equip-stat-icon"><i class="fa fa-wrench"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-repairing_#(pageId)">-</div>
+					<div class="equip-stat-label">维修中</div>
+				</div>
+			</div>
+			<div class="equip-stat-card" data-card="audit" onclick="setQuickFilter_#(pageId)('audit', 'audit', null)" tooltip data-title="筛选待审核设备">
+				<div class="equip-stat-icon"><i class="jbicon jb-daishenhe"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-audit_#(pageId)">-</div>
+					<div class="equip-stat-label">待审核</div>
+				</div>
+			</div>
+			<div class="equip-stat-card" data-card="expired" onclick="setQuickFilter_#(pageId)('expired', 'expired', null)" tooltip data-title="筛选临近/已过期设备">
+				<div class="equip-stat-icon"><i class="fa fa-exclamation-triangle"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-expired_#(pageId)">-</div>
+					<div class="equip-stat-label">设备临近过期</div>
+				</div>
+			</div>
+			<div class="equip-stat-card" data-card="cert_expired" onclick="setQuickFilter_#(pageId)('cert_expired', 'cert_expired', null)" tooltip data-title="筛选证书临近/已过期设备">
+				<div class="equip-stat-icon"><i class="fa fa-certificate"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-cert_expired_#(pageId)">-</div>
+					<div class="equip-stat-label">证书临近过期</div>
+				</div>
+			</div>
+			<div class="equip-stat-card" data-card="sealed" onclick="setQuickFilter_#(pageId)('sealed', 'sealed', null)" tooltip data-title="筛选已封存/报废设备">
+				<div class="equip-stat-icon"><i class="fa fa-lock"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-sealed_#(pageId)">-</div>
+					<div class="equip-stat-label">已封存报废</div>
+				</div>
+			</div>
+			<div class="equip-stat-card" data-card="abnormal" onclick="setQuickFilter_#(pageId)('abnormal', 'abnormal', null)" tooltip data-title="筛选异常设备">
+				<div class="equip-stat-icon"><i class="fa fa-exclamation-circle"></i></div>
+				<div>
+					<div class="equip-stat-num" id="count-abnormal_#(pageId)">-</div>
+					<div class="equip-stat-label">异常</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- ===== 动态分类工具条 ===== -->
-		#for(cat : categories)
-		<div class="jbolt_table_toolbar" id="cat#(cat.sn)_toolbar_#(pageId)">
-			<div class="row">
-				<div class="col-sm-3 text-left">
-					<div class="btn-group">
-						<button data-openpage="dialog" data-area="850,850"
-							data-handler="jboltTablePageToFirst" data-title="新增设备"
-							data-url="admin/siargo/equipment/add"
-							class="btn btn-outline-primary">
-							<i class="fa fa-plus"></i> 新增
-						</button>
-						<button data-openpage="dialog" data-area="850,850"
-							data-handler="refreshJBoltTable"
-							data-check-handler="jboltTableGetCheckedId"
-							data-url="admin/siargo/equipment/edit/"
-							class="btn btn-outline-info">
-							<i class="fa fa-edit"></i> 编辑
-						</button>
-						<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
-							data-check-handler="jboltTableGetCheckedIds"
-							data-url="admin/siargo/equipment/deleteByIds?ids="
-							data-confirm="确定删除选中数据？" class="btn btn-outline-danger">
-							<i class="fa fa-trash"></i> 删除
-						</button>
-						<button onclick="jboltTableRefresh(this)"
-							class="btn btn-outline-secondary">
-							<i class="fa fa-refresh"></i> 刷新
-						</button>
-					</div>
+		<!-- ===== 左侧分类导航 + 右侧内容 ===== -->
+		<div class="equip-layout">
+			<div class="equip-sidebar" id="equipSidebar_#(pageId)">
+				<div class="equip-category-search">
+					<i class="fa fa-search"></i>
+					<input type="text" id="equipCategorySearch_#(pageId)" placeholder="搜索类别..." autocomplete="off" />
 				</div>
-				<div class="col-sm-6 text-center">
-					<form class="form-inline d-inline-block" id="cat#(cat.sn)Form_#(pageId)"
-						onsubmit="return false;" method="post">
-						<input type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号/出厂编号" name="keywords"
-							value="" style="width: 270px;" />
-						<select class="form-control" name="status" style="width: 100px;">
-							<option value="">全部状态</option>
-							<option value="1">正常</option>
-							<option value="2">维修中</option>
-							<option value="3">已封存</option>
-							<option value="4">报废</option>
-							<option value="5">异常</option>
-						</select>
-						<select class="form-control" name="inspectionMethod" style="width: 100px;">
-							<option value="">全部方式</option>
-							<option value="外检">外检</option>
-							<option value="自校">自校</option>
-							<option value="自检">自检</option>
-						</select>
-						<select class="form-control" name="inspectionCycle" style="width: 100px;">
-							<option value="">全部周期</option>
-							<option value="年">年</option>
-							<option value="月">月</option>
-						</select>
-						<button type="submit" class="btn btn-outline-secondary">
-							<i class="fa fa-search"></i> 查询
-						</button>
-					</form>
-				</div>
-				<div class="col-sm-3 text-right">
-					<button data-openpage="dialog" data-area="260,370"
-						data-handler="refreshAllEquipmentTables_#(pageId)"
-						data-check-handler="jboltTableGetCheckedIds"
-						data-title="批量更改状态"
-						data-url="admin/siargo/equipment/batchStatusForm?ids="
-						class="btn btn-outline-info">
-						<i class="fa fa-exchange"></i> 批量更改状态
-					</button>
-					<button data-openpage="dialog" data-area="320,650"
-						data-handler="refreshAllEquipmentTables_#(pageId)"
-						data-check-handler="jboltTableGetCheckedIds"
-						data-title="批量定期对比"
-						data-url="admin/siargo/equipment/batchInspectionForm?ids="
-						class="btn btn-outline-success">
-						<i class="fa fa-wrench"></i> 批量定期对比
-					</button>
-					#if(audit)
-					<button type="button" data-ajaxbtn
-						data-handler="refreshAllEquipmentTables_#(pageId)"
-						data-check-handler="jboltTableGetCheckedIds"
-						data-url="admin/siargo/equipment/batchAudit?ids="
-						data-confirm="确定审核选中的设备？"
-						class="btn btn-outline-danger">
-						<i class="fa fa-check-circle"></i> 一键审核
-					</button>
-					#end
-				</div>
-			</div>
-		</div>
-		#end
-
-		<!-- ===== Tab结构 ===== -->
-		<div class="jbolt_tab_view jb_vflex" id="equipmentTabView_#(pageId)">
-			<div class="jbolt_tab_links jb_vheader" style="display:none;">
-				<a class="jbolt_tab_link" href="#all_tabcontent_#(pageId)">全部设备</a>
-				#for(cat : categories)
-				<a class="jbolt_tab_link" href="#cat#(cat.sn)_tabcontent_#(pageId)">#(cat.name)</a>
-				#end
-			</div>
-			<!-- ===== 统一概览导航区 ===== -->
-			<div class="equipment-overview-nav">
-				<div class="category-cards-row">
-					<div class="category-card active" data-index="0"
-						onclick="switchCategory_#(pageId)(0)"
-						style="border-top: 4px solid #6c757d">
-						<i class="fa fa-th-large" style="color: #6c757d; font-size: 24px"></i>
-						<div class="card-label">全部设备</div>
-						<div class="card-count" style="color: #6c757d"
-							id="count-total_#(pageId)">-</div>
+				<div class="equip-sidebar-list" id="equipSidebarList_#(pageId)">
+					<div class="equip-sidebar-item active" data-category="" onclick="clearAllFilters_#(pageId)()">
+						<span class="equip-sidebar-name">全部设备</span>
+						<span class="sidebar-count" id="count-all_#(pageId)">0</span>
 					</div>
 					#for(cat : categories)
-					<div class="category-card" data-index="#(cat.index)"
-						onclick="switchCategory_#(pageId)(#(cat.index))"
-						style="border-top: 4px solid #(cat.color)">
-						<i class="fa #(cat.icon)" style="color: #(cat.color); font-size: 24px"></i>
-						<div class="card-label">#(cat.name)</div>
-						<div class="card-count" style="color: #(cat.color)"
-							id="count-cat#(cat.sn)_#(pageId)">-</div>
+					<div class="equip-sidebar-item" data-category="#(cat.sn)" onclick="switchCategory_#(pageId)('#(cat.sn)')">
+						<span class="equip-sidebar-name" title="#(cat.name)">#(cat.name)</span>
+						<span class="sidebar-count" id="count-cat#(cat.sn)_#(pageId)">0</span>
 					</div>
 					#end
-
-				</div>
-				<div class="filter-pills-row" id="filterPillsRow_#(pageId)">
-					<div class="filter-pill filter-pill-audit" data-filter="audit"
-						onclick="toggleFilter_#(pageId)('audit')">
-						<i class="fa fa-clipboard-check"></i> 待审核 <span class="pill-badge"
-							id="count-audit_#(pageId)">0</span>
-					</div>
-					<div class="filter-pill filter-pill-expired" data-filter="expired"
-						onclick="toggleFilter_#(pageId)('expired')">
-						<i class="fa fa-exclamation-triangle"></i> 设备(临近/已过期) <span
-							class="pill-badge" id="count-expired_#(pageId)">0</span>
-					</div>
-					<div class="filter-pill filter-pill-cert_expired" data-filter="cert_expired"
-						onclick="toggleFilter_#(pageId)('cert_expired')">
-						<i class="fa fa-certificate"></i> 证书(临近/已过期) <span
-							class="pill-badge" id="count-cert_expired_#(pageId)">0</span>
-					</div>
-					<div class="filter-pill filter-pill-repairing"
-						data-filter="repairing"
-						onclick="toggleFilter_#(pageId)('repairing')">
-						<i class="fa fa-wrench"></i> 维修中 <span class="pill-badge"
-							id="count-repairing_#(pageId)">0</span>
-					</div>
-					<div class="filter-pill filter-pill-abnormal" data-filter="abnormal"
-						onclick="toggleFilter_#(pageId)('abnormal')">
-						<i class="fa fa-exclamation-circle"></i> 异常 <span class="pill-badge"
-							id="count-abnormal_#(pageId)">0</span>
-					</div>
-					<div class="filter-pill filter-pill-sealed" data-filter="sealed"
-						onclick="toggleFilter_#(pageId)('sealed')">
-						<i class="fa fa-lock"></i> 已封存/报废 <span class="pill-badge"
-							id="count-sealed_#(pageId)">0</span>
-					</div>
 				</div>
 			</div>
-			<div class="jbolt_tab_contents jb_vbody">
-				<!-- 全部设备 -->
-				<div class="jbolt_tab_content" id="all_tabcontent_#(pageId)">
-					<table
-						class="jbolt_table jbolt_main_table table_striped table-center"
-						data-jbolttable data-pagesize="100" id="all_mgrtable_#(pageId)"
-						data-height="fill_box" data-ajax="true"
-						data-url="admin/siargo/equipment/datas" data-column-resize="true"
-						data-column-prepend="1:checkbox"
-						data-conditions-form="allForm_#(pageId)"
-						data-rowtpl="equipmentRowtpl_#(pageId)"
-						data-page="allPage_#(pageId)" data-toolbar="all_toolbar_#(pageId)"
-						 >
-						<thead class="fw-normal">
-							<tr>
-								<th data-width="60">序号</th>
-								<th data-width="120" data-column="name">名称</th>
-								<th data-width="140" data-column="equipment_no">器具编号</th>
-								<th data-min-width="120" data-column="model">规格型号</th>
-								<th data-width="100" data-column="">证书</th>
-								<th data-width="150" data-column="factory_no">出厂编号</th>
-								<th data-width="80" data-column="inspection_method">检定方式</th>
-								<th data-width="80" data-column="inspection_cycle">检校周期</th>
-								<th data-width="110" data-column="last_inspection_date">最近检校</th>
-								<th data-width="110" data-column="next_inspection_date">下次检校</th>
-								<th data-width="80" data-column="responsible_person">责任人</th>
-								<th data-width="110" data-column="creator_id">编制</th>
-								<th data-width="110" data-column="auditor_id">审核</th>
-								<th data-width="80" data-column="inspection_status">检校结果</th>
-								<th data-width="70" data-column="status">状态</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
+
+			<div class="equip-main-content">
+				<!-- 单行工具栏 -->
+				<div class="jbolt_table_toolbar" id="equipmentToolbar_#(pageId)">
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="btn-group">
+								<button data-openpage="dialog" data-area="850,850"
+									data-handler="jboltTablePageToFirst" data-title="新增设备"
+									data-url="admin/siargo/equipment/add"
+									class="btn btn-outline-primary">
+									<i class="fa fa-plus"></i> 新增
+								</button>
+								<button data-openpage="dialog" data-area="850,850"
+									data-handler="refreshEquipmentTables_#(pageId)"
+									data-check-handler="jboltTableGetCheckedId"
+									data-url="admin/siargo/equipment/edit/"
+									class="btn btn-outline-info">
+									<i class="fa fa-edit"></i> 编辑
+								</button>
+								<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+									data-check-handler="jboltTableGetCheckedIds"
+									data-url="admin/siargo/equipment/deleteByIds?ids="
+									data-confirm="确定删除选中数据？" class="btn btn-outline-danger">
+									<i class="fa fa-trash"></i> 删除
+								</button>
+								<button data-openpage="dialog" data-area="400,600"
+									data-handler="refreshEquipmentTables_#(pageId)"
+									data-check-handler="jboltTableGetCheckedIds"
+									data-title="批量更改状态"
+									data-url="admin/siargo/equipment/batchStatusForm?ids="
+									class="btn btn-outline-info">
+									<i class="fa fa-exchange"></i> 批量更改状态
+								</button>
+								<button data-openpage="dialog" data-area="460,760"
+									data-handler="refreshEquipmentTables_#(pageId)"
+									data-check-handler="jboltTableGetCheckedIds"
+									data-title="批量定期对比"
+									data-url="admin/siargo/equipment/batchInspectionForm?ids="
+									class="btn btn-outline-success">
+									<i class="fa fa-wrench"></i> 批量定期对比
+								</button>
+								#if(audit)
+								<button type="button" data-ajaxbtn
+									data-handler="refreshEquipmentTables_#(pageId)"
+									data-check-handler="jboltTableGetCheckedIds"
+									data-url="admin/siargo/equipment/batchAudit?ids="
+									data-confirm="确定审核选中的设备？"
+									class="btn btn-outline-danger">
+									<i class="fa fa-check-circle"></i> 一键审核
+								</button>
+								#end
+								<button onclick="jboltTableRefresh(this)"
+									class="btn btn-outline-secondary">
+									<i class="fa fa-refresh"></i> 刷新
+								</button>
+							</div>
+						</div>
+					</div>
 				</div>
-				<!-- 动态分类 tab 内容区 -->
-				#for(cat : categories)
-				<div class="jbolt_tab_content" id="cat#(cat.sn)_tabcontent_#(pageId)">
-					<table
-						class="jbolt_table jbolt_main_table table_striped table-center"
-						data-jbolttable data-pagesize="100" id="cat#(cat.sn)_mgrtable_#(pageId)"
-						data-height="fill_box" data-ajax="true"
-						data-url="admin/siargo/equipment/datas?category=#(cat.sn)"
-						data-column-resize="true" data-column-prepend="1:checkbox"
-						data-conditions-form="cat#(cat.sn)Form_#(pageId)"
-						data-rowtpl="equipmentRowtpl_#(pageId)"
-						data-page="cat#(cat.sn)Page_#(pageId)"
-						data-toolbar="cat#(cat.sn)_toolbar_#(pageId)">
-						<thead class="fw-normal"><tr>
+
+				<!-- 搜索行 -->
+				<form class="equip-search-row form-inline" id="equipmentSearchForm_#(pageId)"
+					onsubmit="return false;" method="post">
+					<input type="text" autocomplete="off" class="form-control"
+						data-with-clearbtn="true" placeholder="输入名称/器具编号/规格型号/出厂编号" name="keywords"
+						value="" style="width: 270px;" />
+					<select class="form-control" name="status" style="width: 110px;">
+						<option value="">全部状态</option>
+						<option value="1">正常</option>
+						<option value="2">维修中</option>
+						<option value="3">已封存</option>
+						<option value="4">报废</option>
+						<option value="5">异常</option>
+					</select>
+					<select class="form-control" name="inspectionMethod" style="width: 100px;">
+						<option value="">全部方式</option>
+						<option value="外检">外检</option>
+						<option value="自校">自校</option>
+						<option value="自检">自检</option>
+					</select>
+					<select class="form-control" name="inspectionCycle" style="width: 100px;">
+						<option value="">全部周期</option>
+						<option value="年">年</option>
+						<option value="月">月</option>
+					</select>
+					<button type="submit" class="btn btn-outline-secondary">
+						<i class="fa fa-search"></i> 查询
+					</button>
+				</form>
+
+				<!-- 唯一设备表格 -->
+				<table
+					class="jbolt_table jbolt_main_table table_striped table-center"
+					data-jbolttable data-pagesize="100" id="equipmentMgrtable_#(pageId)"
+					data-height="fill_box" data-ajax="true"
+					data-url="admin/siargo/equipment/datas" data-column-resize="true"
+					data-column-prepend="1:checkbox" data-fixed-columns-left="1,2,3,4"
+					data-conditions-form="equipmentSearchForm_#(pageId)"
+					data-rowtpl="equipmentRowtpl_#(pageId)"
+					data-page="equipmentPage_#(pageId)" data-toolbar="equipmentToolbar_#(pageId)">
+					<thead class="fw-normal">
+						<tr>
 							<th data-width="60">序号</th>
 							<th data-width="120" data-column="name">名称</th>
 							<th data-width="140" data-column="equipment_no">器具编号</th>
 							<th data-min-width="120" data-column="model">规格型号</th>
-							<th data-width="100" data-column="">证书</th>
-							<th data-width="150" data-column="factory_no">出厂编号</th>
 							<th data-width="80" data-column="inspection_method">检定方式</th>
 							<th data-width="80" data-column="inspection_cycle">检校周期</th>
 							<th data-width="110" data-column="last_inspection_date">最近检校</th>
 							<th data-width="110" data-column="next_inspection_date">下次检校</th>
 							<th data-width="80" data-column="responsible_person">责任人</th>
-							<th data-width="110" data-column="creator_id">编制</th>
-							<th data-width="110" data-column="auditor_id">审核</th>
 							<th data-width="80" data-column="inspection_status">检校结果</th>
 							<th data-width="70" data-column="status">状态</th>
-						</tr></thead>
-						<tbody></tbody>
-					</table>
-				</div>
-				#end
+							<th data-width="170">操作</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
 			</div>
 		</div>
 
@@ -405,119 +261,227 @@
 <script type="text/javascript">
 // 动态分类数据（由服务端注入）
 var categories_#(pageId) = #(categoriesJson);
-var activeTabIndex_#(pageId) = 0;
-var currentFilter_#(pageId) = null;
-var tableIds_#(pageId) = ['all_mgrtable_#(pageId)'];
-for (var i = 0; i < categories_#(pageId).length; i++) {
-  tableIds_#(pageId).push('cat' + categories_#(pageId)[i].sn + '_mgrtable_#(pageId)');
-}
+var activeCard_#(pageId) = null;
 
-// 切换分类卡片 -> 切换 Tab
-function switchCategory_#(pageId)(index) {
-  activeTabIndex_#(pageId) = index;
-  // 更新卡片激活状态
-  $('.category-card').removeClass('active');
-  var $card = $('.category-card[data-index="' + index + '"]');
-  $card.addClass('active');
-  // 动态设置激活态颜色
-  var color = (index === 0) ? '#6c757d' : categories_#(pageId)[index - 1].color;
-  $('.category-card.active').css({
-    'border-left': '4px solid ' + color,
-    'background': color + '15'
+// 类别搜索：保持“技术通知单”左侧类别搜索的交互方式，输入时即时过滤列表
+function filterEquipmentCategories_#(pageId)(keyword) {
+  var kw = $.trim(keyword || '').toLowerCase();
+  $('#equipSidebarList_#(pageId) .equip-sidebar-item').each(function() {
+    var $item = $(this);
+    var isAll = !$item.attr('data-category');
+    var name = $.trim($item.find('.equip-sidebar-name').text()).toLowerCase();
+    $item.toggle(isAll || !kw || name.indexOf(kw) !== -1);
   });
-  // 清除快筛按钮激活状态
-  currentFilter_#(pageId) = null;
-  $('.filter-pill').removeClass('active');
-  // 移除全部Tab表单中的filter隐藏字段
-  $('#allFilterHidden_#(pageId)').remove();
-  // 快筛按钮只在"全部设备"tab中显示
-  $('#filterPillsRow_#(pageId)').css('visibility', index === 0 ? 'visible' : 'hidden');
-  // 触发 Tab 切换
-  $('#equipmentTabView_#(pageId) .jbolt_tab_link').eq(index).trigger('click');
 }
 
-// 快筛按钮切换
-function toggleFilter_#(pageId)(filterType) {
-  if (currentFilter_#(pageId) === filterType) {
-    // 取消筛选
-    currentFilter_#(pageId) = null;
-    $('.filter-pill').removeClass('active');
-    $('#allFilterHidden_#(pageId)').remove();
-  } else {
-    // 激活筛选
-    currentFilter_#(pageId) = filterType;
-    $('.filter-pill').removeClass('active');
-    $('.filter-pill[data-filter="' + filterType + '"]').addClass('active');
-    // 切到"全部设备"Tab
-    activeTabIndex_#(pageId) = 0;
-    $('.category-card').removeClass('active');
-    $('.category-card[data-index="0"]').addClass('active');
-    // 全部设备卡片颜色固定为灰色
-    $('.category-card.active').css({
-      'border-left': '4px solid #6c757d',
-      'background': '#6c757d15'
-    });
-    $('#equipmentTabView_#(pageId) .jbolt_tab_link').eq(0).trigger('click');
-    // 在全部Tab的 form 中添加/更新隐藏 filter 字段
-    if ($('#allFilterHidden_#(pageId)').length === 0) {
-      $('#allForm_#(pageId)').append('<input type="hidden" id="allFilterHidden_#(pageId)" name="filter" value="' + filterType + '"/>');
-    } else {
-      $('#allFilterHidden_#(pageId)').val(filterType);
-    }
+// 统计卡快筛：status 类卡直接改下拉，filter 类卡写隐藏字段；再点同一卡取消
+function setQuickFilter_#(pageId)(card, filterType, statusVal) {
+  if (activeCard_#(pageId) === card) {
+    activeCard_#(pageId) = null;
+    $('.equip-stat-card').removeClass('active');
+    $('select[name="status"]').val('');
+    $('#equipFilterHidden_#(pageId)').remove();
+    refreshJBoltTableById('equipmentMgrtable_#(pageId)');
+    return;
   }
-  // 刷新全部Tab的表格
-  refreshJBoltTableById('all_mgrtable_#(pageId)');
+  activeCard_#(pageId) = card;
+  $('.equip-stat-card').removeClass('active');
+  $('.equip-stat-card[data-card="' + card + '"]').addClass('active');
+  $('select[name="status"]').val(statusVal || '');
+  if (filterType) {
+    if ($('#equipFilterHidden_#(pageId)').length === 0) {
+      $('#equipmentSearchForm_#(pageId)').append('<input type="hidden" id="equipFilterHidden_#(pageId)" name="filter" value="' + filterType + '"/>');
+    } else {
+      $('#equipFilterHidden_#(pageId)').val(filterType);
+    }
+  } else {
+    $('#equipFilterHidden_#(pageId)').remove();
+  }
+  refreshJBoltTableById('equipmentMgrtable_#(pageId)');
 }
 
-// 加载概览统计数量
+// 总数卡：清空全部筛选（分类/状态/filter），侧栏回到全部设备
+function clearAllFilters_#(pageId)() {
+  activeCard_#(pageId) = null;
+  $('.equip-stat-card').removeClass('active');
+  var $form = $('#equipmentSearchForm_#(pageId)');
+  $form.find('input[name="keywords"]').val('');
+  $form.find('select[name="status"], select[name="inspectionMethod"], select[name="inspectionCycle"]').val('');
+  $('#equipFilterHidden_#(pageId)').remove();
+  $('#equipCategoryHidden_#(pageId)').remove();
+  $('#equipSidebarList_#(pageId) .equip-sidebar-item').removeClass('active');
+  $('#equipSidebarList_#(pageId) .equip-sidebar-item[data-category=""]').addClass('active');
+  jboltTablePageToFirst($('#equipmentMgrtable_#(pageId)'));
+}
+
+// 分类侧栏切换：隐藏 category 字段写入唯一条件表单后刷新同一表格
+function switchCategory_#(pageId)(sn) {
+  if (sn) {
+    if ($('#equipCategoryHidden_#(pageId)').length === 0) {
+      $('#equipmentSearchForm_#(pageId)').append('<input type="hidden" id="equipCategoryHidden_#(pageId)" name="category" value="' + sn + '"/>');
+    } else {
+      $('#equipCategoryHidden_#(pageId)').val(sn);
+    }
+  } else {
+    $('#equipCategoryHidden_#(pageId)').remove();
+  }
+  $('#equipSidebarList_#(pageId) .equip-sidebar-item').removeClass('active');
+  $('#equipSidebarList_#(pageId) .equip-sidebar-item[data-category="' + sn + '"]').addClass('active');
+  jboltTablePageToFirst($('#equipmentMgrtable_#(pageId)'));
+}
+
+// 加载概览统计数量（8 卡 + 侧栏分类角标）
 function loadOverviewCounts_#(pageId)() {
   $.ajax({
     url: 'admin/siargo/equipment/getOverviewCounts',
     type: 'get',
     success: function(res) {
       if (res.state == 'ok') {
-        $('#count-total_#(pageId)').text(res.data.total || 0);
-        // 动态设置各分类计数
-        if (res.data.categories) {
-          var cats = (typeof res.data.categories === 'string') ? JSON.parse(res.data.categories) : res.data.categories;
+        var d = res.data || {};
+        $('#count-total_#(pageId)').text(d.total || 0);
+        $('#count-all_#(pageId)').text(d.total || 0);
+        $('#count-normal_#(pageId)').text(d.normal || 0);
+        $('#count-repairing_#(pageId)').text(d.repairing || 0);
+        $('#count-audit_#(pageId)').text(d.audit || 0);
+        $('#count-expired_#(pageId)').text(d.expired || 0);
+        $('#count-cert_expired_#(pageId)').text(d.cert_expired || 0);
+        $('#count-sealed_#(pageId)').text(d.sealed || 0);
+        $('#count-abnormal_#(pageId)').text(d.abnormal || 0);
+        if (d.categories) {
+          var cats = (typeof d.categories === 'string') ? JSON.parse(d.categories) : d.categories;
           for (var i = 0; i < cats.length; i++) {
             $('#count-cat' + cats[i].sn + '_#(pageId)').text(cats[i].count || 0);
           }
         }
-        // pill 计数
-        $('#count-repairing_#(pageId)').text(res.data.repairing || 0);
-        $('#count-sealed_#(pageId)').text(res.data.sealed || 0);
-        $('#count-expired_#(pageId)').text(res.data.expired || 0);
-        $('#count-cert_expired_#(pageId)').text(res.data.cert_expired || 0);
-        $('#count-audit_#(pageId)').text(res.data.audit || 0);
-        $('#count-abnormal_#(pageId)').text(res.data.abnormal || 0);
       }
     }
   });
 }
 
-// 获取当前激活Tab对应的表格ID
-function getCurrentTableId_#(pageId)() {
-  return tableIds_#(pageId)[activeTabIndex_#(pageId)];
-}
-
-
-// 关闭时间线对话框时，只刷新当前活跃Tab的表格
-function refreshCurrentTab_#(pageId)() {
-  var tableId = getCurrentTableId_#(pageId)();
-  refreshJBoltTableById(tableId);
+// 刷新表格 + 统计（对话框关闭/编辑/删除后统一入口）
+function refreshEquipmentTables_#(pageId)() {
+  refreshJBoltTableById('equipmentMgrtable_#(pageId)');
   loadOverviewCounts_#(pageId)();
 }
 
-// 刷新所有Tab表格数据
-function refreshAllEquipmentTables_#(pageId)() {
-  for (var i = 0; i < tableIds_#(pageId).length; i++) {
-    refreshJBoltTableById(tableIds_#(pageId)[i]);
+// 日期/状态格式化（详情弹窗用）
+function equipFmtDate_#(pageId)(v) {
+  return v ? String(v).substring(0, 10) : '-';
+}
+
+function equipStatusText_#(pageId)(status) {
+  if (status == 1) return '正常';
+  if (status == 2) return '维修中';
+  if (status == 3) return '已封存';
+  if (status == 4) return '报废';
+  if (status == 5) return '异常';
+  return '-';
+}
+
+function equipResultText_#(pageId)(v) {
+  if (v == 1) return '合格';
+  if (v == 2) return '不合格';
+  return '-';
+}
+
+function equipAuditText_#(pageId)(v) {
+  if (v == 2) return '已审核';
+  if (v == 1) return '待审核';
+  return '-';
+}
+
+// 分类编号 -> 分类名称（详情弹窗展示用）
+function equipCategoryName_#(pageId)(sn) {
+  if (!sn) return '-';
+  var cats = categories_#(pageId) || [];
+  for (var i = 0; i < cats.length; i++) {
+    if (String(cats[i].sn) === String(sn)) return cats[i].name;
   }
-  loadOverviewCounts_#(pageId)();
+  return sn;
 }
 
-// 临近过期标红后处理
+// 详情弹窗字段值 HTML 转义
+function equipEscapeHtml_#(pageId)(v) {
+  return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// 只读详情弹窗（纯前端从行数据构建）
+function showEquipmentDetail_#(pageId)(btn) {
+  var tr = $(btn).closest('tr');
+  var d = jboltTableGetRowJsonData('equipmentMgrtable_#(pageId)', tr);
+  if (!d) return;
+  var certHtml = '';
+  if (d.cert_image) {
+    var certImgUrl = equipEscapeHtml_#(pageId)(d.cert_image);
+    certHtml = '<div class="equip-detail-cert">'
+      + '<img src="' + certImgUrl + '" tooltip data-title="点击放大查看证书"'
+      + ' onclick="viewCertPhoto_#(pageId)(\'' + certImgUrl + '\')" style="cursor:zoom-in;"/>'
+      + '</div>';
+  } else {
+    certHtml = '<div class="equip-detail-cert"><span class="text-muted">暂无证书图片</span></div>';
+  }
+  var html = '<div class="equip-detail-body">'
+    + '<div class="equip-detail-section">'
+    +   '<div class="equip-detail-title"><i class="fa fa-info-circle" style="margin-right:6px;"></i>基本信息</div>'
+    +   '<div class="equip-detail-grid">'
+    +     equipDetailItem_#(pageId)('名称', d.name)
+    +     equipDetailItem_#(pageId)('器具编号', d.equipment_no)
+    +     equipDetailItem_#(pageId)('规格型号', d.model)
+    +     equipDetailItem_#(pageId)('出厂编号', d.factory_no)
+    +     equipDetailItem_#(pageId)('设备分类', equipCategoryName_#(pageId)(d.category))
+    +     equipDetailItem_#(pageId)('生产厂家', d.manufacturer)
+    +     equipDetailItem_#(pageId)('购入日期', equipFmtDate_#(pageId)(d.purchase_date))
+    +     equipDetailItem_#(pageId)('使用地点', d.location)
+    +     equipDetailItem_#(pageId)('责任人', d.responsible_person)
+    +     equipDetailItem_#(pageId)('备注', d.remark)
+    +   '</div>'
+    + '</div>'
+    + '<div class="equip-detail-section">'
+    +   '<div class="equip-detail-title"><i class="fa fa-calendar-check-o" style="margin-right:6px;"></i>检校信息</div>'
+    +   '<div class="equip-detail-grid">'
+    +     equipDetailItem_#(pageId)('检定方式', d.inspection_method)
+    +     equipDetailItem_#(pageId)('检校周期', d.inspection_cycle ? (d.inspection_cycle + (d.inspection_cycle_unit || '')) : '-')
+    +     equipDetailItem_#(pageId)('最近检校', equipFmtDate_#(pageId)(d.last_inspection_date))
+    +     equipDetailItem_#(pageId)('下次检校', equipFmtDate_#(pageId)(d.next_inspection_date))
+    +     equipDetailItem_#(pageId)('检校结果', equipResultText_#(pageId)(d.inspection_status))
+    +     equipDetailItem_#(pageId)('设备状态', equipStatusText_#(pageId)(d.status))
+    +   '</div>'
+    + '</div>'
+    + '<div class="equip-detail-section">'
+    +   '<div class="equip-detail-title"><i class="fa fa-user-o" style="margin-right:6px;"></i>编制审核</div>'
+    +   '<div class="equip-detail-grid">'
+    +     equipDetailItem_#(pageId)('编制人', d.creator_name || '-')
+    +     equipDetailItem_#(pageId)('编制时间', equipFmtDate_#(pageId)(d.creator_time))
+    +     equipDetailItem_#(pageId)('审核状态', equipAuditText_#(pageId)(d.audit_status))
+    +     equipDetailItem_#(pageId)('审核人', d.auditor_name || '-')
+    +     equipDetailItem_#(pageId)('审核时间', equipFmtDate_#(pageId)(d.auditor_time))
+    +   '</div>'
+    + '</div>'
+    + '<div class="equip-detail-section">'
+    +   '<div class="equip-detail-title"><i class="fa fa-file-image-o" style="margin-right:6px;"></i>证书</div>'
+    +   certHtml
+    + '</div>'
+    + '</div>';
+  var layerObj = top.layer || layer;
+  layerObj.open({
+    type: 1,
+    title: '设备详情',
+    area: ['760px', '78%'],
+    content: html,
+    btn: ['关闭']
+  });
+}
+
+function equipDetailItem_#(pageId)(label, value) {
+  var v = (value === null || value === undefined || value === '') ? '-' : value;
+  v = equipEscapeHtml_#(pageId)(v);
+  return '<div class="equip-detail-item">'
+    + '<span class="equip-detail-label">' + equipEscapeHtml_#(pageId)(label) + '</span>'
+    + '<span class="equip-detail-value">' + v + '</span>'
+    + '</div>';
+}
+
+// 临近过期标红
 function highlightExpiringDates_#(pageId)() {
   $('.next-date-cell').each(function() {
     var dateStr = $(this).data('date');
@@ -534,7 +498,7 @@ function highlightExpiringDates_#(pageId)() {
   });
 }
 
-// 证书图片全屏预览（支持滚轮缩放、拖拽）
+// 证书图片全屏预览（支持滚轮缩放、拖拽、双击还原）
 function viewCertPhoto_#(pageId)(imgUrl) {
   var layerObj = top.layer || layer;
   var content = '<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000;user-select:none;">'
@@ -548,22 +512,21 @@ function viewCertPhoto_#(pageId)(imgUrl) {
     closeBtn: 1,
     shadeClose: true,
     success: function(layero) {
-      // 关闭按钮样式：无标题模式下白色圆形按钮
       var closeBtn = layero.find('.layui-layer-close');
       if (closeBtn.length) {
-          closeBtn.css({
-              'position': 'absolute',
-              'right': '15px',
-              'top': '15px',
-              'width': '40px',
-              'height': '40px',
-              'line-height': '40px',
-              'background': 'transparent',
-              'text-align': 'center',
-              'cursor': 'pointer',
-              'z-index': '1'
-          });
-          closeBtn.html('<span style="color:#fff;font-size:24px;font-weight:bold;line-height:40px;">×</span>');
+        closeBtn.css({
+          'position': 'absolute',
+          'right': '15px',
+          'top': '15px',
+          'width': '40px',
+          'height': '40px',
+          'line-height': '40px',
+          'background': 'transparent',
+          'text-align': 'center',
+          'cursor': 'pointer',
+          'z-index': '1'
+        });
+        closeBtn.html('<span style="color:#fff;font-size:24px;font-weight:bold;line-height:40px;">×</span>');
       }
       var scale = 1, translateX = 0, translateY = 0;
       var isDragging = false, startX = 0, startY = 0;
@@ -574,14 +537,12 @@ function viewCertPhoto_#(pageId)(imgUrl) {
         if (img) img.style.transform = 'scale(' + scale + ') translate(' + translateX + 'px,' + translateY + 'px)';
       }
       function resetTransform() { scale = 1; translateX = 0; translateY = 0; applyTransform(); }
-      // 滚轮缩放
       layero[0].addEventListener('wheel', function(e) {
         e.preventDefault();
         if (e.deltaY < 0) { scale = Math.min(scale * 1.15, 8); }
         else { scale = Math.max(scale / 1.15, 0.2); }
         applyTransform();
       }, {passive: false});
-      // 拖拽移动
       layero[0].addEventListener('mousedown', function(e) {
         if (e.target.tagName === 'IMG') {
           isDragging = true;
@@ -605,7 +566,6 @@ function viewCertPhoto_#(pageId)(imgUrl) {
           if (img) img.style.cursor = 'grab';
         }
       });
-      // 双击还原
       layero[0].addEventListener('dblclick', function(e) {
         if (e.target.tagName === 'IMG') { resetTransform(); }
       });
@@ -615,16 +575,20 @@ function viewCertPhoto_#(pageId)(imgUrl) {
 
 // 页面初始化
 $(function() {
-  // 延迟200ms加载统计数据，让页面先完成渲染
+  var categorySearchTimer_#(pageId);
+  $('#equipCategorySearch_#(pageId)').on('input', function() {
+    clearTimeout(categorySearchTimer_#(pageId));
+    var keyword = $(this).val();
+    categorySearchTimer_#(pageId) = setTimeout(function() {
+      filterEquipmentCategories_#(pageId)(keyword);
+    }, 200);
+  });
   setTimeout(function(){ loadOverviewCounts_#(pageId)(); }, 200);
-  // 30秒定时刷新统计数量
   setInterval(function(){ loadOverviewCounts_#(pageId)(); }, 30000);
-  // 监听表格数据加载完成后处理临近过期标红
   $(document).ajaxComplete(function(event, xhr, settings) {
     if (settings.url && settings.url.indexOf('equipment/datas') > -1) {
       setTimeout(highlightExpiringDates_#(pageId), 200);
     }
-    // 删除成功后刷新统计
     if (settings.url && settings.url.indexOf('equipment/deleteByIds') > -1) {
       loadOverviewCounts_#(pageId)();
     }

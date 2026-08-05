@@ -230,8 +230,9 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		// 3. 无分类时：仅统计非分类指标
 		if (categories.isEmpty()) {
 			String sql = "SELECT"
-					+ "  COUNT(*) AS total"
-					+ ", SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS repairing"
+				+ "  COUNT(*) AS total"
+				+ ", SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS normal"
+				+ ", SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS repairing"
 					+ ", SUM(CASE WHEN status IN (3, 4) THEN 1 ELSE 0 END) AS sealed"
 					+ ", SUM(CASE WHEN status = 5 THEN 1 ELSE 0 END) AS abnormal"
 					+ ", SUM(CASE WHEN next_inspection_date IS NOT NULL AND next_inspection_date <= DATE_ADD(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS expired"
@@ -263,6 +264,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		// 5. 组装完整 SQL（一条 SQL 统计所有指标）
 		String sql = "SELECT"
 				+ "  COUNT(*) AS total"
+				+ ", SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS normal"
 				+ ", " + catSelect.toString()
 				+ ", SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS repairing"
 				+ ", SUM(CASE WHEN status IN (3, 4) THEN 1 ELSE 0 END) AS sealed"
@@ -277,6 +279,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		// 6. 解析结果
 		if (row != null) {
 			counts.set("total", toLong(row.getLong("total")));
+			counts.set("normal", toLong(row.getLong("normal")));
 			// 动态读取各分类计数（写入副本）
 			for (Record cat : categoriesWithCount) {
 				String sn = cat.getStr("sn");
@@ -292,6 +295,7 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			counts.set("audit", toLong(row.getLong("audit")));
 		} else {
 			counts.set("total", 0L);
+			counts.set("normal", 0L);
 			counts.set("repairing", 0L);
 			counts.set("sealed", 0L);
 			counts.set("abnormal", 0L);
@@ -309,21 +313,23 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	/** 填充非分类统计指标（row为null时设默认值，用于无分类场景） */
 	private void fillNonCategoryCounts(Kv counts, Record row) {
 		if (row != null) {
-			counts.set("total", toLong(row.getLong("total")));
-			counts.set("repairing", toLong(row.getLong("repairing")));
+		counts.set("total", toLong(row.getLong("total")));
+		counts.set("normal", toLong(row.getLong("normal")));
+		counts.set("repairing", toLong(row.getLong("repairing")));
 			counts.set("sealed", toLong(row.getLong("sealed")));
 			counts.set("abnormal", toLong(row.getLong("abnormal")));
 			counts.set("expired", toLong(row.getLong("expired")));
 			counts.set("cert_expired", toLong(row.getLong("cert_expired")));
 			counts.set("audit", toLong(row.getLong("audit")));
 		} else {
-			counts.set("total", 0L);
-			counts.set("repairing", 0L);
-			counts.set("sealed", 0L);
-			counts.set("abnormal", 0L);
-			counts.set("expired", 0L);
-			counts.set("cert_expired", 0L);
-			counts.set("audit", 0L);
+		counts.set("total", 0L);
+		counts.set("normal", 0L);
+		counts.set("repairing", 0L);
+		counts.set("sealed", 0L);
+		counts.set("abnormal", 0L);
+		counts.set("expired", 0L);
+		counts.set("cert_expired", 0L);
+		counts.set("audit", 0L);
 		}
 	}
 
@@ -455,7 +461,41 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 		clearOverviewCountsCache();
 		return ret(true);
 	}
-	
+
+	/**
+	 * 按 ID 批量查询设备（批量操作表单只读预览用）
+	 * @param ids 逗号分隔的设备ID
+	 * @return 设备列表（id/name/equipment_no/status/inspection_cycle/inspection_cycle_unit），无有效ID时返回空列表
+	 */
+	public List<Record> findByIdsForBatch(String ids) {
+		if (notOk(ids)) {
+			return new ArrayList<>();
+		}
+		String[] idStrArr = ids.split(",");
+		List<Long> idList = new ArrayList<>();
+		for (String idStr : idStrArr) {
+			String trimmed = idStr.trim();
+			if (trimmed.isEmpty()) continue;
+			try {
+				idList.add(Long.valueOf(trimmed));
+			} catch (NumberFormatException e) {
+				return new ArrayList<>();
+			}
+		}
+		if (idList.isEmpty()) {
+			return new ArrayList<>();
+		}
+		StringBuilder placeholders = new StringBuilder();
+		for (int i = 0; i < idList.size(); i++) {
+			if (i > 0) placeholders.append(",");
+			placeholders.append("?");
+		}
+		return Db.find(
+			"SELECT CAST(id AS CHAR) AS id, name, equipment_no, status, inspection_cycle, inspection_cycle_unit "
+			+ "FROM siargo_equipment WHERE id IN (" + placeholders + ") ORDER BY equipment_no ASC",
+			idList.toArray());
+	}
+
 	/**
 	 * 批量更改状态
 	 * @param ids 逗号分隔的ID
@@ -653,21 +693,27 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	 * @param pageNumber 页码
 	 * @param pageSize 每页条数
 	 * @param equipmentId 设备ID
+	 * @param comparisonType 对比类型（1-定期 2-临时 3-新表，null 为全部）
 	 * @return 分页数据
 	 */
-	public Page<Record> paginateTimelineDatas(int pageNumber, int pageSize, Long equipmentId) {
+	public Page<Record> paginateTimelineDatas(int pageNumber, int pageSize, Long equipmentId, Integer comparisonType) {
 		String select = "SELECT CAST(c.id AS CHAR) as id, c.comparison_date as event_date, c.description, "
 			+ "c.result as status_value, c.creator_id, c.creator_time, c.audit_status, "
 			+ "c.comparison_type, cu.name as creator_name, "
 			+ "GROUP_CONCAT(DISTINCT cert.image_url) as cert_images, MAX(cert.certificate_date) as cert_date, c.auditor_time, MAX(au.name) as auditor_name ";
-		String sqlExceptSelect = "FROM siargo_equipment_comparison c "
+		StringBuilder sqlExceptSelect = new StringBuilder("FROM siargo_equipment_comparison c "
 			+ "LEFT JOIN jb_user cu ON cu.id = c.creator_id "
 			+ "LEFT JOIN jb_user au ON au.id = c.auditor_id "
 			+ "LEFT JOIN siargo_equipment_certificate cert ON cert.comparison_id = c.id "
-			+ "WHERE c.equipment_id = ? "
-			+ "GROUP BY c.id "
-			+ "ORDER BY c.comparison_date DESC, c.creator_time DESC";
-		Page<Record> page = Db.paginate(pageNumber, pageSize, select, sqlExceptSelect, equipmentId);
+			+ "WHERE c.equipment_id = ? ");
+		List<Object> params = new ArrayList<>();
+		params.add(equipmentId);
+		if (comparisonType != null) {
+			sqlExceptSelect.append("AND c.comparison_type = ? ");
+			params.add(comparisonType);
+		}
+		sqlExceptSelect.append("GROUP BY c.id ORDER BY c.comparison_date DESC, c.creator_time DESC");
+		Page<Record> page = Db.paginate(pageNumber, pageSize, select, sqlExceptSelect.toString(), params.toArray());
 		List<Record> list = page.getList();
 		if (list != null && !list.isEmpty()) {
 			// 收集不合格（status_value == 2）的对比 ID

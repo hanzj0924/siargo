@@ -73,7 +73,15 @@ public class EquipmentAdminController extends JBoltBaseController {
 	* 批量编制表单页
 	*/
 	public void batchInspectionForm() {
-		set("ids", get("ids"));
+		String ids = get("ids");
+		List<Record> equipmentList = service.findByIdsForBatch(ids);
+		if (equipmentList == null || equipmentList.isEmpty()) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		set("ids", ids);
+		set("equipmentList", equipmentList);
+		set("equipmentListJson", JSON.toJSONString(equipmentList));
 		render("batchInspection.html");
 	}
 	
@@ -185,7 +193,15 @@ public class EquipmentAdminController extends JBoltBaseController {
 	* 批量更改状态表单页
 	*/
 	public void batchStatusForm() {
-		set("ids", get("ids"));
+		String ids = get("ids");
+		List<Record> equipmentList = service.findByIdsForBatch(ids);
+		if (equipmentList == null || equipmentList.isEmpty()) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		set("ids", ids);
+		set("equipmentList", equipmentList);
+		set("equipmentListJson", JSON.toJSONString(equipmentList));
 		render("batchStatus.html");
 	}
 	
@@ -224,7 +240,7 @@ public class EquipmentAdminController extends JBoltBaseController {
 			renderFail(JBoltMsg.PARAM_ERROR);
 			return;
 		}
-		renderJsonData(service.paginateTimelineDatas(getPageNumber(), getPageSize(), equipmentId));
+		renderJsonData(service.paginateTimelineDatas(getPageNumber(), getPageSize(), equipmentId, getInt("type")));
 	}
 
 	/**

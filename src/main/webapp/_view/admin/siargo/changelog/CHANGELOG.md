@@ -1,5 +1,14 @@
 ## 更新日志
 
+### v2.8.4 (2026-08-04)
+- feat(equipment): 批量编制/批量更改状态表单页增加设备列表数据回显——EquipmentAdminController 批量表单 action 查询设备列表传入页面，batchInspection.html/batchStatus.html 展示设备信息表格
+- feat(equipment): 设备时间线分页增加类型筛选——paginateTimelineDatas 支持 type 参数过滤，timeline/index.html 增加类型筛选下拉
+- style(dashboard): hero 卡片层次感全面增强——多层渐变背景、分层阴影系统、玻璃拟态状态栏、标题图标芯片感立体样式、统计卡片渐变光条与数字渐变、年份标签渐变边框胶囊
+- style(dashboard): 进度条科技感重构——去除白色卡片容器改为透明融合设计，轨道增加凹陷立体感与刻度线，填充条多段渐变+发光效果，百分比数字纯绿发光
+- style(dashboard): pipeline 托盘细节丰富——四段渐变背景、六层阴影系统、顶部/底部装饰线、左右侧装饰条、刻度线、中央光晕、四角金属铆钉
+- style(dashboard): 环节卡片细节增强——三段渐变背景、顶部五段渐变发光色带、底部色带、背景纹理、图标容器三层渐变+光晕+反射、序号徽章增大发光、大数字渐变+反射线、标签色点发光+底部微光、送检只数渐变分隔线
+- style(dashboard): 动画系统优化——入场动画增加 scale 缩放与更流畅 easing，新增箭头流光 db-flow-glow 与箭头脉冲 db-arrow-pulse 动画，扫描线增加透明度渐变
+
 ### v2.8.3 (2026-08-03)
 - feat(dashboard): 首页看板流程统计改为报告单级本年度口径——QareportService 新增 getDashboardFlowCounts（当年创建报告单下全部有效产品按 insp 分环节，含各环节送检只数），带 30 分钟 DCL+TTL 缓存，clearFlowCountsCache 联动失效；hero 右卡由"在流程报告单"改为"已完成报告单"，与环形图口径一致
 - feat(dashboard): hero 新增"本年度完成进度"进度条（已完成/本年度总量百分比，db-progress 样式 + 动效，prefers-reduced-motion 降级）

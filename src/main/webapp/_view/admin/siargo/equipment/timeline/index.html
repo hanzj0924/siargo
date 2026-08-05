@@ -7,31 +7,23 @@
 #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page jb_vflex" data-key="#(pmkey)">
 
-<!-- 设备概要信息 -->
+<!-- 设备概要条（可折叠） -->
 <div style="padding:0 15px 10px;">
-	<div class="equip-summary-card">
-		<div class="row" style="margin:0;">
-			<div class="col-md-2" style="padding:6px 12px;">
+	<div class="equip-summary-bar" id="equip_summary_bar_#(pageId)" onclick="toggleSummary_#(pageId)()">
+		<div class="equip-summary-main">
+			<div class="equip-summary-item">
 				<span class="equip-summary-label">器具编号</span>
 				<div class="equip-summary-value">#(equipment.equipmentNo ??)</div>
 			</div>
-			<div class="col-md-2" style="padding:6px 12px;">
+			<div class="equip-summary-item">
 				<span class="equip-summary-label">名称</span>
 				<div class="equip-summary-value">#(equipment.name ??)</div>
 			</div>
-			<div class="col-md-2" style="padding:6px 12px;">
+			<div class="equip-summary-item">
 				<span class="equip-summary-label">规格型号</span>
 				<div class="equip-summary-value">#(equipment.model ??)</div>
 			</div>
-			<div class="col-md-2" style="padding:6px 12px;">
-				<span class="equip-summary-label">生产厂家</span>
-				<div class="equip-summary-value">#(equipment.manufacturer ??)</div>
-			</div>
-			<div class="col-md-2" style="padding:6px 12px;">
-				<span class="equip-summary-label">购入日期</span>
-				<div class="equip-summary-value">#if(equipment.purchaseDate)#date(equipment.purchaseDate, "yyyy-MM-dd")#else - #end</div>
-			</div>
-			<div class="col-md-2" style="padding:6px 12px;">
+			<div class="equip-summary-item">
 				<span class="equip-summary-label">状态</span>
 				<div id="equip_status_badge_#(pageId)">
 				#if(equipment.status == 1)
@@ -49,6 +41,29 @@
 				#end
 				</div>
 			</div>
+			<div class="equip-summary-item">
+				<span class="equip-summary-label">下次检校</span>
+				<div class="equip-summary-value">#if(equipment.nextInspectionDate)#date(equipment.nextInspectionDate, "yyyy-MM-dd")#else - #end</div>
+			</div>
+			<i class="fa fa-chevron-down equip-summary-toggle"></i>
+		</div>
+		<div class="equip-summary-extra">
+			<div class="equip-summary-item">
+				<span class="equip-summary-label">生产厂家</span>
+				<div class="equip-summary-value">#(equipment.manufacturer ??)</div>
+			</div>
+			<div class="equip-summary-item">
+				<span class="equip-summary-label">购入日期</span>
+				<div class="equip-summary-value">#if(equipment.purchaseDate)#date(equipment.purchaseDate, "yyyy-MM-dd")#else - #end</div>
+			</div>
+			<div class="equip-summary-item">
+				<span class="equip-summary-label">责任人</span>
+				<div class="equip-summary-value">#(equipment.responsiblePerson ??)</div>
+			</div>
+			<div class="equip-summary-item">
+				<span class="equip-summary-label">使用地点</span>
+				<div class="equip-summary-value">#(equipment.location ??)</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -60,6 +75,12 @@
 		<i class="fa fa-balance-scale"></i> 新增对比
 	</button>
 	#end
+	<div class="timeline-filter-row" id="timeline_filter_row_#(pageId)">
+		<button type="button" class="timeline-filter-btn active" data-type="0" onclick="filterTimeline_#(pageId)(0)">全部</button>
+		<button type="button" class="timeline-filter-btn" data-type="1" onclick="filterTimeline_#(pageId)(1)">定期</button>
+		<button type="button" class="timeline-filter-btn" data-type="2" onclick="filterTimeline_#(pageId)(2)">临时</button>
+		<button type="button" class="timeline-filter-btn" data-type="3" onclick="filterTimeline_#(pageId)(3)">新表</button>
+	</div>
 	<button class="btn btn-outline-secondary btn-sm" onclick="refreshTimeline_#(pageId)()">
 		<i class="fa fa-refresh"></i> 刷新
 	</button>
@@ -87,12 +108,32 @@
 var currentPage_#(pageId) = 1;
 var totalPages_#(pageId) = 1;
 var equipmentId_#(pageId) = "#(equipment.id)";
+var currentType_#(pageId) = 0;
+
+// 类型筛选：重置到第 1 页并发起带 type 参数的请求（0=全部不传参）
+function filterTimeline_#(pageId)(type) {
+	if (currentType_#(pageId) === type) return;
+	currentType_#(pageId) = type;
+	$('#timeline_filter_row_#(pageId) .timeline-filter-btn').removeClass('active');
+	$('#timeline_filter_row_#(pageId) .timeline-filter-btn[data-type="' + type + '"]').addClass('active');
+	currentPage_#(pageId) = 1;
+	loadTimeline_#(pageId)(1, false);
+}
+
+// 概要条展开/收起
+function toggleSummary_#(pageId)() {
+	$('#equip_summary_bar_#(pageId)').toggleClass('expanded');
+}
 
 // 加载时间线数据
 function loadTimeline_#(pageId)(page, append) {
+	var reqData = { equipmentId: equipmentId_#(pageId), pageNumber: page, pageSize: 10 };
+	if (currentType_#(pageId) > 0) {
+		reqData.type = currentType_#(pageId);
+	}
 	$.ajax({
 		url: 'admin/siargo/equipment/timelineDatas',
-		data: { equipmentId: equipmentId_#(pageId), pageNumber: page, pageSize: 10 },
+		data: reqData,
 		success: function(res) {
 			if (res.state === 'ok') {
 				var data = res.data;
@@ -109,33 +150,34 @@ function loadTimeline_#(pageId)(page, append) {
 	});
 }
 
-// 渲染时间线
+// 渲染时间线（单侧布局）
 function renderTimeline_#(pageId)(list, append) {
 	var container = $('#timeline_container_#(pageId)');
 	if (!append) container.empty();
 	if (!list || list.length === 0) {
 		if (!append) {
-			container.append('<div class="timeline-empty"><i class="fa fa-clock-o" style="font-size:32px;margin-bottom:8px;display:block;"></i>暂无时间线记录</div>');
+			container.append('<div class="timeline-empty"><i class="fa fa-clock-o"></i>暂无时间线记录<div class="timeline-empty-tip">点击右上角"新增对比"开始记录设备的检校/维修历程</div></div>');
 		}
 		return;
 	}
 	for (var i = 0; i < list.length; i++) {
-		var item = list[i];
-		var side = (i % 2 === 0) ? 'left' : 'right';
-		var html = buildTimelineCard_#(pageId)(item, side);
-		container.append(html);
+		container.append(buildTimelineCard_#(pageId)(list[i]));
 	}
 }
 
 // 构建卡片HTML
-function buildTimelineCard_#(pageId)(item, side) {
+function buildTimelineCard_#(pageId)(item) {
+	var typeClass = '';
 	var typeBadge = '';
 	if (item.comparison_type == 1) {
-		typeBadge = '<span class="badge" style="background:#5b7e8a;color:#fff;"><i class="fa fa-calendar-check-o"></i> 定期对比</span>';
+		typeClass = 'timeline-type-1';
+		typeBadge = '<span class="timeline-type-badge timeline-type-1"><i class="fa fa-calendar-check-o"></i> 定期对比</span>';
 	} else if (item.comparison_type == 2) {
-		typeBadge = '<span class="badge" style="background:#8a5b6e;color:#fff;"><i class="fa fa-bolt"></i> 临时对比</span>';
+		typeClass = 'timeline-type-2';
+		typeBadge = '<span class="timeline-type-badge timeline-type-2"><i class="fa fa-bolt"></i> 临时对比</span>';
 	} else if (item.comparison_type == 3) {
-		typeBadge = '<span class="badge" style="background:#7a7a6a;color:#fff;"><i class="fa fa-file-text-o"></i> 新表对比</span>';
+		typeClass = 'timeline-type-3';
+		typeBadge = '<span class="timeline-type-badge timeline-type-3"><i class="fa fa-file-text-o"></i> 新表对比</span>';
 	}
 
 	var dateStr = item.event_date ? item.event_date.substring(0, 10) : '-';
@@ -153,7 +195,7 @@ function buildTimelineCard_#(pageId)(item, side) {
 		auditBadge = '<span class="badge badge-success">已审核</span>';
 		if (item.auditor_name) {
 			var auditTime = item.auditor_time ? item.auditor_time.substring(0,10) : '';
-			auditBadge += ' <span style="font-size:11px;color:#888;">' + item.auditor_name + (auditTime ? ' ' + auditTime : '') + '</span>';
+			auditBadge += ' <span class="text-muted" style="font-size:11px;">' + item.auditor_name + (auditTime ? ' ' + auditTime : '') + '</span>';
 		}
 	} else if (item.audit_status == 1) {
 		auditBadge = '<span class="badge badge-danger">待审核</span>';
@@ -161,17 +203,22 @@ function buildTimelineCard_#(pageId)(item, side) {
 
 	var creator = item.creator_name || '-';
 
-	// 证书按钮
-	var certBtn = '';
+	// 证书：首图缩略图 + 数量角标
+	var certHtml = '';
 	if (item.cert_images) {
 		var certPhotos = item.cert_images.split(',').map(function(url) {
 			return {src: url.trim()};
 		});
-		var certDateStr = item.cert_date ? ' <small style="opacity:0.8;">' + item.cert_date.substring(0, 10) + '</small>' : '';
-		certBtn = ' <a href="javascript:;" class="btn btn-outline-primary btn-xs" title="查看证书" onclick="viewCertificateImages_#(pageId)(' + JSON.stringify(certPhotos).replace(/"/g, '&quot;') + ')"><i class="jbicon jb-21ok"></i>查看证书' + certDateStr + '</a>';
+		var firstCert = certPhotos[0] ? certPhotos[0].src : '';
+		var certCount = certPhotos.length > 1 ? '<span class="cert-thumbnail-count">+' + (certPhotos.length - 1) + '</span>' : '';
+		certHtml = '<span class="cert-thumbnail-wrap" tooltip data-title="查看证书（' + certPhotos.length + '张）"'
+			+ ' onclick="viewCertificateImages_#(pageId)(' + JSON.stringify(certPhotos).replace(/"/g, '&quot;') + ')">'
+			+ '<img class="cert-thumbnail" src="' + firstCert + '" alt="证书"/>'
+			+ certCount
+			+ '</span>';
 	}
 
-	var html = '<div class="timeline-item ' + side + '">'
+	var html = '<div class="timeline-item ' + typeClass + '">'
 		+ '<div class="timeline-dot"></div>'
 		+ '<div class="timeline-item-header">'
 		+   typeBadge
@@ -179,7 +226,7 @@ function buildTimelineCard_#(pageId)(item, side) {
 		+ '</div>'
 		+ '<div class="timeline-item-body">' + desc + '</div>'
 		+ '<div class="timeline-item-footer">'
-		+   '<div>' + resultBadge + ' ' + auditBadge + certBtn + '</div>'
+		+   '<div>' + certHtml + ' ' + resultBadge + ' ' + auditBadge + '</div>'
 		+   '<div style="display:flex;align-items:center;gap:8px;">'
 		+     '<span class="text-muted"><i class="fa fa-user"></i> ' + creator + '</span>'
 		+     '<div class="btn-group btn-group-sm">'
@@ -189,21 +236,19 @@ function buildTimelineCard_#(pageId)(item, side) {
 		+   '</div>'
 		+ '</div>';
 
-	// 不合格时显示维修子卡片列表（可折叠）
+	// 不合格时显示维修子卡片列表（默认展开，可折叠）
 	if (item.status_value == 2) {
 		var repairs = [];
 		if (item.repairs_json) {
 			try { repairs = JSON.parse(item.repairs_json); } catch(e) {}
 		}
 		if (repairs.length > 0) {
-			// 折叠头：维修记录数量 + 展开/收起图标
 			var collapseId = 'rp_' + item.id;
 			html += '<div class="repair-collapse-header" onclick="toggleRepairs_#(pageId)(\'' + collapseId + '\')">'
 				+ '<span><i class="fa fa-wrench"></i> 维修记录 (' + repairs.length + ')</span>'
-				+ '<i class="fa fa-chevron-down repair-collapse-icon collapsed" id="icon_' + collapseId + '"></i>'
+				+ '<i class="fa fa-chevron-down repair-collapse-icon" id="icon_' + collapseId + '"></i>'
 				+ '</div>';
-			// 可折叠容器（默认折叠）
-			html += '<div class="repair-collapse-body collapsed" id="' + collapseId + '" style="max-height:0">';
+			html += '<div class="repair-collapse-body" id="' + collapseId + '">';
 			for (var ri = 0; ri < repairs.length; ri++) {
 				var rep = repairs[ri];
 				var repairStartDate = rep.repair_date ? rep.repair_date.substring(0,10) : '';
@@ -252,7 +297,7 @@ function buildTimelineCard_#(pageId)(item, side) {
 		}
 		// 始终显示新增维修按钮
 		html += '<div style="margin-top:10px;text-align:center;">'
-			+ '<button class="btn btn-outline-warning btn-xs" onclick="addRepairForComparison_#(pageId)(\'' + item.id + '\')">' 
+			+ '<button class="btn btn-outline-warning btn-xs" onclick="addRepairForComparison_#(pageId)(\'' + item.id + '\')">'
 			+ '<i class="fa fa-wrench"></i> 新增维修</button></div>';
 	}
 
@@ -382,7 +427,7 @@ function updateRepairProgress_#(pageId)(repairId, currentResult) {
 		yes: function(index, layero) {
 			var result = layero.find('#repairResultSelect').val();
 			var completionDate = layero.find('#completionDateInput').val();
-			
+
 			var postData = {
 				'equipmentRepair.id': repairId,
 				'equipmentRepair.repairResult': result
@@ -390,7 +435,7 @@ function updateRepairProgress_#(pageId)(repairId, currentResult) {
 			if (result != '1' && completionDate) {
 				postData['equipmentRepair.completionDate'] = completionDate;
 			}
-			
+
 			layer.close(index);
 			Ajax.post('admin/siargo/equipment/repair/update', postData, function(data) {
 				LayerMsgBox.success(data.msg || '更新成功', 800, function() {
@@ -485,7 +530,6 @@ function viewCertificateImages_#(pageId)(photos) {
 		closeBtn: 1,
 		shadeClose: true,
 		success: function(layero) {
-			// 关闭按钮样式：无标题模式下白色圆形按钮
 			var closeBtn = layero.find('.layui-layer-close');
 			if (closeBtn.length) {
 				closeBtn.css({
@@ -513,7 +557,6 @@ function viewCertificateImages_#(pageId)(photos) {
 			}
 			function resetTransform() { scale = 1; translateX = 0; translateY = 0; applyTransform(); }
 
-			// 滚轮缩放
 			layero[0].addEventListener('wheel', function(e) {
 				e.preventDefault();
 				if (e.deltaY < 0) { scale = Math.min(scale * 1.15, 8); }
@@ -521,7 +564,6 @@ function viewCertificateImages_#(pageId)(photos) {
 				applyTransform();
 			}, {passive: false});
 
-			// 拖拽移动
 			layero[0].addEventListener('mousedown', function(e) {
 				if (e.target.tagName === 'IMG') {
 					isDragging = true;
@@ -546,7 +588,6 @@ function viewCertificateImages_#(pageId)(photos) {
 				}
 			});
 
-			// 多图切换
 			if (total > 1) {
 				layero.find('#certNavLeft').on('click', function() {
 					currentIndex = (currentIndex - 1 + total) % total;
@@ -558,7 +599,6 @@ function viewCertificateImages_#(pageId)(photos) {
 				});
 			}
 
-			// 双击还原
 			layero[0].addEventListener('dblclick', function(e) {
 				if (e.target.tagName === 'IMG') { resetTransform(); }
 			});
@@ -567,7 +607,6 @@ function viewCertificateImages_#(pageId)(photos) {
 				var container = layero.find('.layui-layer-content');
 				container.html(buildContent(currentIndex));
 				resetTransform();
-				// 重新绑定切换事件
 				if (total > 1) {
 					layero.find('#certNavLeft').on('click', function() {
 						currentIndex = (currentIndex - 1 + total) % total;

@@ -168,6 +168,30 @@
 	</div>
 </div>
 
+<!-- 证书信息 -->
+<div class="equip-section-header" style="margin-top:0.5rem;">
+	<i class="fa fa-certificate"></i>
+	<span>证书信息</span>
+</div>
+<div class="row">
+	<div class="col">
+		<div class="form-group row equip-form-group">
+			<label class="col-sm-3 col-form-label">证书图片</label>
+			<div class="col">
+				<input type="hidden" id="certificateImageUrls" name="certificateImageUrls" value="#(certificateImageUrls??)" />
+				<div class="j_img_uploder"
+					data-handler="uploadFile"
+					data-url="/admin/siargo/equipment/certificate/uploadImages?save=true"
+					data-hiddeninput="certificateImageUrls"
+					data-value="#(certificateImageUrls??)"
+					data-area="120,120"
+					data-maxsize="102400"
+					style="width:120px;height:120px;">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 </form>
 #define js()

@@ -1,13 +1,40 @@
 #@jboltLayout()
 #define main()
+#set(pageId=RandomUtil.random(6))
 <div class="jbolt_page">
 <div class="jbolt_page_content p-3">
+	<!-- 选中设备只读预览 -->
+	<div class="batch-preview-box">
+		<div class="batch-preview-total">共选中 <b>#(equipmentList.size())</b> 台设备</div>
+		<div class="batch-preview-list">
+			#for(item : equipmentList)
+			#if(for.index < 20)
+			<div class="batch-preview-item">
+				<span class="batch-preview-no">#(item.equipment_no ??)</span>
+				<span class="batch-preview-name" title="#(item.name ??)">#(item.name ??)</span>
+				<span class="batch-preview-status">
+					#if(item.status == 1)<span class="badge badge-success">正常</span>
+					#elseif(item.status == 2)<span class="badge badge-primary">维修中</span>
+					#elseif(item.status == 3)<span class="badge badge-secondary">已封存</span>
+					#elseif(item.status == 4)<span class="badge badge-secondary">报废</span>
+					#elseif(item.status == 5)<span class="badge badge-danger">异常</span>
+					#else<span class="text-muted">未知</span>#end
+				</span>
+				<span class="batch-preview-cycle">#(item.inspection_cycle ??) #(item.inspection_cycle_unit ??)</span>
+			</div>
+			#end
+			#end
+			#if(equipmentList.size() > 20)
+			<div class="batch-preview-more">等 #(equipmentList.size() - 20) 台设备…</div>
+			#end
+		</div>
+	</div>
 	<form onsubmit="return false;" id="batchInspectionForm" action="admin/siargo/equipment/batchInspection" method="post">
 		<input type="hidden" name="ids" value="#(ids ??)" />
 		<div class="form-group row">
 			<label class="col-sm-4 col-form-label">最近检校日期</label>
 			<div class="col-sm-8">
-				<input type="text" data-rule="required" data-date data-type="date" data-fmt="yyyy-MM-dd" readonly="readonly" autocomplete="off" class="form-control" placeholder="请选择上次检校日期" data-tips="请选择上次检校日期" maxlength="10" name="lastInspectionDate" value="" />
+				<input type="text" data-rule="required" data-date data-type="date" data-fmt="yyyy-MM-dd" readonly="readonly" autocomplete="off" class="form-control" placeholder="请选择上次检校日期" data-tips="请选择上次检校日期" maxlength="10" name="lastInspectionDate" value="" data-change-handler="calcNextInspectionDate_#(pageId)" />
 			</div>
 		</div>
 		<div class="form-group row">
@@ -31,6 +58,56 @@
 #end
 #define js()
 <script>
+// 服务端注入的选中设备列表（含检校周期）
+var batchEquipments_#(pageId) = #(equipmentListJson);
+
+// 周期一致时按最近检校日期自动推算下次日期；不一致时提示手动填写
+function calcNextInspectionDate_#(pageId)(dateEle, value) {
+	var nextInput = $('input[name="nextInspectionDate"]');
+	if (!value) {
+		nextInput.val('');
+		return;
+	}
+	var cycles = [];
+	for (var i = 0; i < batchEquipments_#(pageId).length; i++) {
+		var e = batchEquipments_#(pageId)[i];
+		if (e.inspection_cycle && e.inspection_cycle_unit) {
+			cycles.push({cycle: parseInt(e.inspection_cycle, 10), unit: e.inspection_cycle_unit});
+		}
+	}
+	if (cycles.length === 0) {
+		nextInput.val('');
+		return;
+	}
+	var first = cycles[0];
+	var same = true;
+	for (var j = 1; j < cycles.length; j++) {
+		if (cycles[j].cycle !== first.cycle || cycles[j].unit !== first.unit) {
+			same = false;
+			break;
+		}
+	}
+	if (!same) {
+		nextInput.val('');
+		layer.msg('所选设备检校周期不一致，请手动填写下次检校日期', {icon: 0});
+		return;
+	}
+	var parts = value.split('-');
+	var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+	if (first.unit === '年') {
+		d.setFullYear(d.getFullYear() + first.cycle);
+	} else if (first.unit === '月') {
+		var targetMonth = d.getMonth() + first.cycle;
+		var targetYear = d.getFullYear() + Math.floor(targetMonth / 12);
+		targetMonth = targetMonth % 12;
+		var lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
+		d = new Date(targetYear, targetMonth, Math.min(d.getDate(), lastDay));
+	}
+	var y = d.getFullYear();
+	var m = ('0' + (d.getMonth() + 1)).slice(-2);
+	var day = ('0' + d.getDate()).slice(-2);
+	nextInput.val(y + '-' + m + '-' + day);
+}
 </script>
 #include("/_view/_admin/common/_formjs.html",formId="batchInspectionForm")
 #end
