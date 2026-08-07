@@ -19,6 +19,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.kit.Ret;
+import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Db;
+import cn.jbolt.admin.siargo.equipment.EquipmentService;
 /**
  * 设备管理证书记录 Controller
  * @ClassName: EquipmentCertificateAdminController
@@ -33,6 +37,8 @@ public class EquipmentCertificateAdminController extends JBoltBaseController {
 
 	@Inject
 	private EquipmentCertificateService service;
+	@Inject
+	private EquipmentService equipmentService;
 
 	/**
 	 * 上传证书图片到临时目录（由记录表单调用）
@@ -124,10 +130,32 @@ public class EquipmentCertificateAdminController extends JBoltBaseController {
 
 	/**
 	 * 批量删除
+	 * <p>Db.tx() 手动事务 + afterCommit：物理文件删除不可回滚，
+	 * 先在事务外收集路径，事务内仅删 DB，提交后统一删除文件并清缓存</p>
 	 */
-	@Before(Tx.class)
 	public void deleteByIds() {
-		renderJson(service.deleteByBatchIds(get("ids")));
+		String idsJson = get("ids");
+		if (StrKit.isBlank(idsJson)) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		Long[] ids = getIdsToLongArray();
+		// 1. 事务外收集待删证书的物理文件路径（文件删除不可回滚）
+		List<String> filePaths = service.queryFilePathsByIds(ids != null ? Arrays.asList(ids) : new ArrayList<>());
+		// 2. 事务内仅删 DB 记录
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.deleteByBatchIds(idsJson);
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+			return;
+		}
+		// 3. afterCommit: 删除物理文件 + 清概览缓存
+		service.deletePhysicalFiles(filePaths);
+		equipmentService.clearOverviewCountsCache();
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
 	}
 
 	/**

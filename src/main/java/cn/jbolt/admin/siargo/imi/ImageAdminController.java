@@ -8,6 +8,8 @@ import cn.jbolt.common.config.JBoltUploadFolder;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
 import com.jfinal.kit.Ret;
+import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Db;
 
 import java.io.File;
 import java.io.IOException;
@@ -195,22 +197,40 @@ public class ImageAdminController extends JBoltBaseController {
 	 * @param ids 逗号分隔的图片ID列表
 	 * @return JSON 操作结果
 	 */
-	@Before(Tx.class)
 	public void deleteByIds() {
 		String idsJson = getPara("ids");
+		if (StrKit.isBlank(idsJson)) {
+			renderFail("参数错误");
+			return;
+		}
 		List<Long> ids = Arrays.stream(idsJson.split(","))
 				.map(String::trim)
 				.filter(s -> !s.isEmpty())
 				.map(Long::parseLong)
 				.collect(Collectors.toList());
-
-		for (Long id : ids) {
-			Ret ret = service.delete(id);
-			if (ret.isFail()) {
-				renderJson(ret);
-				return;
-			}
+		if (ids.isEmpty()) {
+			renderFail("参数错误");
+			return;
 		}
+		// 1. 事务外收集待删物理文件路径（文件删除不可回滚）
+		List<String> filePaths = service.queryFilePathsByIds(ids);
+		// 2. 事务内仅软删 DB 记录
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			for (Long id : ids) {
+				retHolder[0] = service.delete(id);
+				if (retHolder[0].isFail()) {
+					return false;
+				}
+			}
+			return true;
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+			return;
+		}
+		// 3. afterCommit: 删除物理文件
+		service.deletePhysicalFiles(filePaths);
 		renderJsonSuccess();
 	}
 

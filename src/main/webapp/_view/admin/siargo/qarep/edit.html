@@ -76,7 +76,7 @@
 									<div class="col input-group">
 										<select class="form-control" data-autoload name="product.insp"
 											data-rule="select" data-tips="请选择检验进度" 
-											data-value="" data-options="精度待检:1,外观待检:2,包装待检:3,待批准:4,已完成:5"
+											data-value="" data-options="精度待检:1,成品检漏待检:6,外观待检:2,包装待检:3,待批准:4,已完成:5"
 											data-select="#(qapro.insp ??)">
 										</select>
 									</div>
@@ -95,6 +95,14 @@
 											data-rule="select" data-tips="请选择产品类型" data-text="=请选择="
 											data-value="" data-value-attr="sn"  
 											data-select="#(qapro.sp_type??)">
+										</select>
+									</div>
+									<label class="col-auto col-form-label">成品检漏</label>
+									<div class="col input-group">
+										<select class="form-control" data-autoload name="product.lt_status"
+											data-rule="select" data-tips="请选择是否有成品检漏" data-text="=请选择="
+											data-value="" data-options="已检验:1,无:2"
+											data-select="#(qapro.lt_status ?? 2)">
 										</select>
 									</div>
 								</div>

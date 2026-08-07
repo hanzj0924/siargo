@@ -18,9 +18,13 @@
 			<div class="rjh-dot"></div>
 			<div class="rjh-card">
 				<div class="rjh-hd">
-					#-- 发起驳回环节 → 退回重检环节，各环节背景色与流程图主题色一致（2=外观驳回退精度 3=包装驳回退外观 4=批准驳回退包装） --#
+					#-- 发起驳回环节 → 退回重检环节，各环节背景色与流程图主题色一致（2=外观驳回按lt_status退精度/成品检漏 6=成品检漏驳回退精度 3=包装驳回退外观 4=批准驳回退包装） --#
 					<span class="rjh-flow">
-						#if(log.reject_insp == 2)
+						#if(log.reject_insp == 6)
+						<span class="insp-step-badge insp-badge-lt">成品检漏检验</span><span class="rjh-flow-arrow">&#8594;</span><span class="insp-step-badge insp-badge-accq">精度检验</span>
+						#else if(log.reject_insp == 2 && log.lt_status == 1)
+						<span class="insp-step-badge insp-badge-funq">外观检验</span><span class="rjh-flow-arrow">&#8594;</span><span class="insp-step-badge insp-badge-lt">成品检漏检验</span>
+						#else if(log.reject_insp == 2)
 						<span class="insp-step-badge insp-badge-funq">外观检验</span><span class="rjh-flow-arrow">&#8594;</span><span class="insp-step-badge insp-badge-accq">精度检验</span>
 						#else if(log.reject_insp == 3)
 						<span class="insp-step-badge insp-badge-appq">包装检验</span><span class="rjh-flow-arrow">&#8594;</span><span class="insp-step-badge insp-badge-funq">外观检验</span>

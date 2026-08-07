@@ -57,17 +57,19 @@ public class ProductService extends JBoltBaseService<Product> {
 			+ "d_insp.NAME AS insp_name, "
 			+ "accq_user.NAME AS accq_name, "
 			+ "funq_user.NAME AS funq_name, "
+			+ "lt_user.NAME AS lt_name, "
 			+ "appq_user.NAME AS appq_name, "
 			+ "allq_user.NAME AS allq_name, "
 			// 各环节驳回历史计数（用于角标显示）
 			+ "(SELECT COUNT(*) FROM siargo_product_reject_log r2 WHERE r2.product_id = sp.id AND r2.reject_insp = 2) AS reject_count_2, "
 			+ "(SELECT COUNT(*) FROM siargo_product_reject_log r3 WHERE r3.product_id = sp.id AND r3.reject_insp = 3) AS reject_count_3, "
 			+ "(SELECT COUNT(*) FROM siargo_product_reject_log r4 WHERE r4.product_id = sp.id AND r4.reject_insp = 4) AS reject_count_4, "
+			+ "(SELECT COUNT(*) FROM siargo_product_reject_log r6 WHERE r6.product_id = sp.id AND r6.reject_insp = 6) AS reject_count_6, "
 			// 最新一条驳回记录（用于当前驳回状态节点详情）
 			+ "rl.reject_insp, rl.reject_des, "
 			+ "DATE_FORMAT(rl.reject_time, '%Y-%m-%d %H:%i') AS reject_time, "
 			+ "reject_user.NAME AS reject_name, "
-			+ "CASE rl.reject_insp WHEN 2 THEN '外观检验' WHEN 3 THEN '包装检验' WHEN 4 THEN '批准' ELSE '未知环节' END AS reject_insp_name "
+			+ "CASE rl.reject_insp WHEN 2 THEN '外观检验' WHEN 3 THEN '包装检验' WHEN 4 THEN '批准' WHEN 6 THEN '成品检漏检验' ELSE '未知环节' END AS reject_insp_name "
 			+ "FROM siargo_product sp "
 			+ "LEFT JOIN jb_dictionary AS d_type ON d_type.type_key = 'siargo_prod_type' "
 			+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
@@ -77,6 +79,7 @@ public class ProductService extends JBoltBaseService<Product> {
 			+ "AND d_insp.enable = '1' "
 			+ "LEFT JOIN jb_user AS accq_user ON accq_user.id = sp.accq_uid "
 			+ "LEFT JOIN jb_user AS funq_user ON funq_user.id = sp.funq_uid "
+			+ "LEFT JOIN jb_user AS lt_user ON lt_user.id = sp.lt_uid "
 			+ "LEFT JOIN jb_user AS appq_user ON appq_user.id = sp.appq_uid "
 			+ "LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid "
 			// 关联最新一条驳回日志（按 id DESC 取第一条）

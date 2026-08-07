@@ -218,10 +218,50 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 			return fail("删除版号 [" + pdfver + "] 记录失败");
 		}
 		clearCache();
-		// 3. DB删除成功后，再删除物理目录（模板目录 + 输出目录）
-		deletePhysicalDir(folder.getTemplatePath());
-		deletePhysicalDir(folder.getExportPath());
+		// 3. 物理目录删除由 Controller 在事务提交后统一执行（afterCommit，deletePhysicalDirs）
 		return Ret.ok();
+	}
+
+	/**
+	 * 收集版号对应待删物理目录（模板目录 + 输出目录），供 Controller afterCommit 删除
+	 * @param pdfver 版号
+	 * @return 物理目录绝对路径列表
+	 */
+	public List<String> collectFolderDirs(String pdfver) {
+		List<String> dirs = new ArrayList<>();
+		PdfFolder folder = dao.findFirst(
+				"SELECT * FROM siargo_pdf_folder WHERE pdfver = ?", pdfver);
+		if (folder == null) {
+			return dirs;
+		}
+		String templatePath = folder.getTemplatePath();
+		String exportPath = folder.getExportPath();
+		if (templatePath != null && !templatePath.isEmpty()) {
+			dirs.add(PathKit.getWebRootPath() + templatePath);
+		}
+		if (exportPath != null && !exportPath.isEmpty()) {
+			dirs.add(PathKit.getWebRootPath() + exportPath);
+		}
+		return dirs;
+	}
+
+	/**
+	 * 批量删除物理目录（供 Controller 在事务提交后调用）
+	 * @param dirs 物理目录绝对路径列表
+	 */
+	public void deletePhysicalDirs(List<String> dirs) {
+		if (dirs == null) {
+			return;
+		}
+		for (String fullPath : dirs) {
+			if (fullPath == null || fullPath.isEmpty()) {
+				continue;
+			}
+			File dir = new File(fullPath);
+			if (dir.exists() && dir.isDirectory()) {
+				deleteDirRecursively(dir);
+			}
+		}
 	}
 
 	/**

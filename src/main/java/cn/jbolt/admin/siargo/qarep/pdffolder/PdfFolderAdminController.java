@@ -8,6 +8,10 @@ import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.kit.Ret;
+import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Db;
+import java.util.List;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.PdfFolder;
 import cn.jbolt.siargo.model.PdfTemplate;
@@ -105,10 +109,28 @@ public class PdfFolderAdminController extends JBoltBaseController {
 		renderJson(service.createVersionFolder(getLong("dictId")));
 	}
 
-	/** 删除版号文件夹 */
-	@Before(Tx.class)
+	/** 删除版号文件夹（Db.tx + afterCommit：物理目录删除不可回滚，事务内仅删 DB） */
 	public void deleteFolder() {
-		renderJson(service.deleteVersionFolder(get("pdfver")));
+		String pdfver = get("pdfver");
+		if (StrKit.isBlank(pdfver)) {
+			renderFail(JBoltMsg.PARAM_ERROR);
+			return;
+		}
+		// 1. 事务外收集待删物理目录
+		List<String> dirs = service.collectFolderDirs(pdfver);
+		// 2. 事务内仅删 DB（模板规则 + folder 记录）
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.deleteVersionFolder(pdfver);
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+			return;
+		}
+		// 3. afterCommit: 删除物理目录
+		service.deletePhysicalDirs(dirs);
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
 	}
 
 	// ======================== 模板文件管理 ========================

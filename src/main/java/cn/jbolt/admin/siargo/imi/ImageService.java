@@ -449,21 +449,12 @@ public class ImageService extends JBoltBaseService<Image> {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
 		}
 
-		// 先更新数据库状态
+		// 软删除：仅更新数据库状态；物理文件删除由 Controller 在事务提交后统一执行（afterCommit）
 		dbImage.set("deleted_time", DateUtil.getDateString(DateUtil.YMDHMS));
 		dbImage.set("status", STATUS_DELETED);
 		boolean success = dbImage.update();
 		if (!success) {
 			return fail("删除失败");
-		}
-
-		// 再删除文件（失败时记录日志，不影响业务返回）
-		File oldFile = new File(webRootPath + dbImage.getFilePath());
-		if (oldFile.exists()) {
-			boolean deleted = oldFile.delete();
-			if (!deleted) {
-				LOG.warn("[ImageService] 文件删除失败，需人工清理: " + dbImage.getFilePath());
-			}
 		}
 
 		return ret(true);
@@ -474,6 +465,56 @@ public class ImageService extends JBoltBaseService<Image> {
 	 */
 	public Ret deleteByBatchIds(String ids) {
 		return deleteByIds(ids, true);
+	}
+
+	/**
+	 * 查询多条图片记录的物理文件路径（供 Controller 在事务提交后统一删除）
+	 * @param ids 图片ID列表
+	 * @return 物理文件绝对路径列表（剔除空值/含 .. 的非法路径）
+	 */
+	public List<String> queryFilePathsByIds(List<Long> ids) {
+		List<String> paths = new ArrayList<>();
+		if (ids == null || ids.isEmpty()) {
+			return paths;
+		}
+		StringBuilder placeholders = new StringBuilder();
+		for (int i = 0; i < ids.size(); i++) {
+			if (i > 0) placeholders.append(",");
+			placeholders.append("?");
+		}
+		List<Record> rows = Db.find("SELECT file_path FROM siargo_image WHERE id IN (" + placeholders + ")", ids.toArray());
+		if (rows != null) {
+			for (Record row : rows) {
+				String fp = row.getStr("file_path");
+				if (fp != null && !fp.isEmpty() && !fp.contains("..")) {
+					paths.add(webRootPath + fp);
+				}
+			}
+		}
+		return paths;
+	}
+
+	/**
+	 * 批量删除物理文件（供 Controller 在事务提交后调用）
+	 * @param paths 物理文件绝对路径列表
+	 */
+	public void deletePhysicalFiles(List<String> paths) {
+		if (paths == null) {
+			return;
+		}
+		for (String path : paths) {
+			if (path == null || path.contains("..")) {
+				continue;
+			}
+			try {
+				File file = new File(path);
+				if (file.exists() && file.isFile()) {
+					file.delete();
+				}
+			} catch (Exception e) {
+				LOG.error("[ImageService] 删除物理文件异常: " + path, e);
+			}
+		}
 	}
 
 	// -------------------------------------------------------------------------

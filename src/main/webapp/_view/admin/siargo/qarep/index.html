@@ -27,7 +27,7 @@
 #define sharedReportCols()
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="详情" data-dialogbtn data-area="675,860" data-btn="close"
+	<a tooltip data-title="详情" data-dialogbtn data-area="790,860" data-btn="close"
 		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
 	</a>
 </td>
@@ -52,8 +52,8 @@
 <td>${data.scName}</td>
 #end
 
-#-- ===== Enjoy 宏：6 个 Tab 的 JBoltTable 公共属性收敛。差异项经参数传入：
-     prefix    = id/搜索表单/行模板/分页/工具条的统一前缀（allreport/noq/accq/funq/appq/allq）
+#-- ===== Enjoy 宏：7 个 Tab 的 JBoltTable 公共属性收敛。差异项经参数传入：
+     prefix    = id/搜索表单/行模板/分页/工具条的统一前缀（allreport/noq/ltq/accq/funq/appq/allq）
      insp      = 检验进度过滤参数（0 = 不带 insp 参数，即"全部"Tab）
      autoload  = 是否进入页面即自动加载（仅"全部"Tab 为 true，其余懒加载）
      fixedRight= 是否固定最后一列（仅"已完成"Tab 的查看PDF列） ===== --#
@@ -98,6 +98,8 @@
 		<span class="badge badge-danger">${data.inspName}</span>
 	{@else if data.insp==5}
 		<span class="badge badge-success">${data.inspName}</span>
+	{@else if data.insp==6}
+		<span class="badge badge-leak">${data.inspName}</span>
 	{@else}
 		<span class="badge badge-secondary">${data.inspName}</span>
 	{@/if}
@@ -117,6 +119,19 @@
 {@/each}
 </script>
 
+<!-- 成品检漏待检 表单数据 -->
+<script type="text/template" id="ltqRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.spid}">
+#@sharedReportCols()
+<td>
+	<span class="badge badge-info">${data.accqName}</span>
+	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
+</tr>
+{@/each}
+</script>
+
 <!-- 精度合格 表单数据 -->
 <script type="text/template" id="accqRowtpl_#(pageId)">
 {@each datas as data,index}
@@ -125,6 +140,14 @@
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
+<td>
+	{@if data.ltStatus==1 && data.ltName!=null}
+		<span class="badge badge-leak">${data.ltName}</span>
+		<small class="text-muted d-block">${data.ltTime}</small>
+	{@else}
+		<span class="text-muted">-</span>
+	{@/if}
 </td>
 </tr>
 {@/each}
@@ -138,6 +161,14 @@
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
+<td>
+	{@if data.ltStatus==1 && data.ltName!=null}
+		<span class="badge badge-leak">${data.ltName}</span>
+		<small class="text-muted d-block">${data.ltTime}</small>
+	{@else}
+		<span class="text-muted">-</span>
+	{@/if}
 </td>
 <td>
 	{@if data.funqName==null}
@@ -160,6 +191,14 @@
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
+<td>
+	{@if data.ltStatus==1 && data.ltName!=null}
+		<span class="badge badge-leak">${data.ltName}</span>
+		<small class="text-muted d-block">${data.ltTime}</small>
+	{@else}
+		<span class="text-muted">-</span>
+	{@/if}
 </td>
 <td>
 	{@if data.funqName==null}
@@ -189,6 +228,14 @@
 <td>
 	<span class="badge badge-info">${data.accqName}</span>
 	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
+<td>
+	{@if data.ltStatus==1 && data.ltName!=null}
+		<span class="badge badge-leak">${data.ltName}</span>
+		<small class="text-muted d-block">${data.ltTime}</small>
+	{@else}
+		<span class="text-muted">-</span>
+	{@/if}
 </td>
 <td>
 	{@if data.funqName==null}
@@ -223,12 +270,14 @@
 	<div class="jbolt_tab_links jb_vheader">
 		<a class="jbolt_tab_link"  href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
 		<a class="jbolt_tab_link"  href="#noq_tabcontent"><i class="jbicon2 jbi-linechart"></i> 精度待检</a>
+		<a class="jbolt_tab_link"  href="#ltq_tabcontent"><i class="fa fa-tachometer"></i> 成品检漏待检</a>
 		<a class="jbolt_tab_link"  href="#accq_tabcontent"><i class="fa fa-eye"></i> 外观待检</a>
 		<a class="jbolt_tab_link"  href="#funq_tabcontent"><i class="jbicon2 jbi-gift"></i> 包装待检</a>
 		<a class="jbolt_tab_link"  href="#appq_tabcontent"><i class="jbicon2 jbi-edit-fill"></i> 待批准</a>
 		<a class="jbolt_tab_link"  href="#allq_tabcontent"><i class="jbicon jb-xiangmushouxubeian"></i> 已完成</a>
 	</div>
-	<!-- 流程状态导航 - 步骤条样式 -->	<div class="flow-stepper-nav">
+	<!-- 流程状态导航 - 步骤条样式 -->	
+	 <div class="flow-stepper-nav">
 		<!-- 左侧汇总徽章 -->
 		<div class="flow-summary-badge active" onclick="switchTabByIndex_#(pageId)(0)">
 			<i class="jbicon jb-liebiao3"></i>
@@ -242,25 +291,31 @@
 				<div class="flow-node-count" id="count-noq">-</div>
 			</div>
 			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="vis" onclick="switchTabByIndex_#(pageId)(2)">
+			<div class="flow-stepper-item" data-color="leak" onclick="switchTabByIndex_#(pageId)(2)">
+				<div class="flow-node"><i class="fa fa-tachometer"></i></div>
+				<div class="flow-node-label">成品检漏待检</div>
+				<div class="flow-node-count" id="count-ltq">-</div>
+			</div>
+			<div class="flow-connector"></div>
+			<div class="flow-stepper-item" data-color="vis" onclick="switchTabByIndex_#(pageId)(3)">
 				<div class="flow-node"><i class="fa fa-eye"></i></div>
 				<div class="flow-node-label">外观待检</div>
 				<div class="flow-node-count" id="count-accq">-</div>
 			</div>
 			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="pack" onclick="switchTabByIndex_#(pageId)(3)">
+			<div class="flow-stepper-item" data-color="pack" onclick="switchTabByIndex_#(pageId)(4)">
 				<div class="flow-node"><i class="jbicon2 jbi-gift"></i></div>
 				<div class="flow-node-label">包装待检</div>
 				<div class="flow-node-count" id="count-funq">-</div>
 			</div>
 			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="appr" onclick="switchTabByIndex_#(pageId)(4)">
+			<div class="flow-stepper-item" data-color="appr" onclick="switchTabByIndex_#(pageId)(5)">
 				<div class="flow-node"><i class="jbicon2 jbi-edit-fill"></i></div>
 				<div class="flow-node-label">待批准</div>
 				<div class="flow-node-count" id="count-appq">-</div>
 			</div>
 			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="done" onclick="switchTabByIndex_#(pageId)(5)">
+			<div class="flow-stepper-item" data-color="done" onclick="switchTabByIndex_#(pageId)(6)">
 				<div class="flow-node"><i class="jbicon jb-xiangmushouxubeian"></i></div>
 				<div class="flow-node-label">已完成</div>
 				<div class="flow-node-count" id="count-allq">-</div>
@@ -275,7 +330,7 @@
 					<div class="col-sm-4 text-left">
 						<div class="btn-group " role="group" aria-label="btn-group">
 							<button data-openpage="dialog" data-area="1060,870"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单 <span style='color:#f0ad4e;font-size:12px;margin-left:20px;'><i class='fa fa-exclamation-circle'></i> 注意编号！请按实际情况填写产品编号</span>"
 								data-url="admin/siargo/qarep/add"
 								class="btn btn-outline-primary ">
 								<i class="fa fa-plus"></i> 新增
@@ -336,7 +391,7 @@
 					<div class="col-sm-4 text-left">
 						<div class="btn-group " role="group" aria-label="btn-group">
 							<button data-openpage="dialog" data-area="1060,870"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单 <span style='color:#f0ad4e;font-size:12px;margin-left:20px;'><i class='fa fa-exclamation-circle'></i> 注意编号！请按实际情况填写产品编号</span>"
 								data-url="admin/siargo/qarep/add"
 								class="btn btn-outline-primary ">
 								<i class="fa fa-plus"></i> 新增
@@ -392,6 +447,58 @@
 			</table>
 		</div>
 		
+		<div class="jbolt_tab_content"  id="ltq_tabcontent">
+			<!-- 成品检漏待检 工具条 toolbar -->
+			<div class="jbolt_table_toolbar" id="ltq_toolbar_#(pageId)">
+				<div class="row">
+					<div class="col-sm-4 text-left">
+						<div class="btn-group " role="group" aria-label="btn-group">
+							<button data-openpage="dialog" data-area="570,350"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
+								data-check-handler="jboltTableGetCheckedId"
+								data-url="admin/siargo/qarep/editDes/"
+								class="btn btn-outline-info ">
+								<i class="fa fa-edit"></i> 修改产品备注
+							</button>
+							<button onclick="jboltTableRefresh(this)"
+								class="btn btn-outline-secondary ">
+								<i class="fa fa-refresh"></i> 刷新
+							</button>
+						</div>
+					</div>
+					#@qarepSearchForm("ltq")
+					<div class="col-sm-4 text-right">
+						#if(leaktest)
+						<button type="button" onclick="openApprovalDrawer_#(pageId)(event, 'ltq_mgrtable_#(pageId)', 6)"
+								class="btn flow-action-btn flow-action-ltq"><i class="fa fa-check-circle"></i> 成品检漏审批 <i class="fa fa-chevron-right"></i>
+						</button>
+						#end
+					</div>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<table #@qarepTableAttrs("ltq", 6, false, false)>
+				<thead class="fw-normal">
+					<tr>
+						<th data-width="60">序号</th>
+						<th data-width="100" data-column="formnum">报告单编号</th>
+						<th data-width="80" data-column="order_id">订单号</th>
+						<th data-width="100" data-column="rep_type">报告单类型</th>
+						<th data-width="80" data-column="prod_type">产品类型</th>
+						<th data-width="130" data-column="sp_des">备注</th>
+						<th data-width="80" data-column="sp_qsi">送检数量</th>
+						<th data-width="80" data-column="sp_qi">检验数量</th>
+						<th data-min-width="220" data-column="sp_model">产品型号</th>
+						<th data-width="210" data-column="sp_number">产品编号</th>
+						<th data-width="150" data-column="sc_name">客户名称</th>
+						<th data-width="130" data-column="accq_uid">精度检验</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		
 		<div class="jbolt_tab_content"  id="accq_tabcontent">
 			<!-- 精度合格 工具条 toolbar -->
 			<div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
@@ -437,6 +544,7 @@
 						<th data-width="210" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="130" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="lt_uid">成品检漏</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -489,6 +597,7 @@
 						<th data-width="210" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="130" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="lt_uid">成品检漏</th>
 						<th data-width="130" data-column="funq_uid">外观检验</th>
 					</tr>
 				</thead>
@@ -542,6 +651,7 @@
 						<th data-width="200" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="130" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="lt_uid">成品检漏</th>
 						<th data-width="130" data-column="funq_uid">外观检验</th>
 						<th data-width="130" data-column="appq_uid">包装检验</th>
 					</tr>
@@ -619,6 +729,7 @@
 						<th data-width="190" data-column="sp_number">产品编号</th>
 						<th data-width="150" data-column="sc_name">客户名称</th>
 						<th data-width="130" data-column="accq_uid">精度检验</th>
+						<th data-width="130" data-column="lt_uid">成品检漏</th>
 						<th data-width="130" data-column="funq_uid">外观检验</th>
 						<th data-width="130" data-column="appq_uid">包装检验</th>
 						<th data-width="130" data-column="allq_uid">批准</th>
@@ -760,7 +871,7 @@ function mergeFixedLeftRows($tbody, colIndexes, formnumColIdx, currentPage, page
 // ===== Tab懒加载与脏标记 =====
 var loadedTabs_#(pageId) = {};
 var dirtyTabs_#(pageId) = {};
-var tableIds_#(pageId) = ['allreport', 'noq', 'accq', 'funq', 'appq', 'allq'];
+var tableIds_#(pageId) = ['allreport', 'noq', 'ltq', 'accq', 'funq', 'appq', 'allq'];
 
 // 获取当前激活的Tab索引
 function getCurrentTabIndex_#(pageId)() {
@@ -807,6 +918,7 @@ function loadFlowCounts() {
 		// 规范 98：使用平台 Ajax 对象族（自动处理登录失效/系统锁定/终端离线等全局状态）
 		Ajax.get('admin/siargo/qarep/getFlowCounts', function(res) {
 			$('#count-noq').text(res.data.noq || 0);
+			$('#count-ltq').text(res.data.ltq || 0);
 			$('#count-accq').text(res.data.accq || 0);
 			$('#count-funq').text(res.data.funq || 0);
 			$('#count-appq').text(res.data.appq || 0);

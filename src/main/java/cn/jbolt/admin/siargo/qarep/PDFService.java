@@ -294,6 +294,10 @@ public class PDFService {
 		map.put("funq_name", safeStr(report.getStr("funq_name"), "funq_name"));
 		map.put("funq_time", safeStr(report.getStr("funq_time"), "funq_time"));
 		map.put("funq_email", optionalStr(report.getStr("funq_email")));
+		// 成品检漏检验人员（可选取值：无成品检漏产品不输出，避免 PDF 生成失败）
+		map.put("lt_name", optionalStr(report.getStr("lt_name")));
+		map.put("lt_time", optionalStr(report.getStr("lt_time")));
+		map.put("lt_email", optionalStr(report.getStr("lt_email")));
 		// 包装检验人员
 		map.put("appq_name", safeStr(report.getStr("appq_name"), "appq_name"));
 		map.put("appq_time", safeStr(report.getStr("appq_time"), "appq_time"));
@@ -426,12 +430,13 @@ public class PDFService {
 	 * <p>校验规则：</p>
 	 * <ol>
 	 *   <li>拒绝包含 ".." 的路径穿越</li>
-	 *   <li>拒绝绝对路径（/ 或 \ 开头、盘符开头）</li>
+	 *   <li>拒绝真正的绝对路径（\ 开头即UNC路径、盘符开头）</li>
+	 *   <li>以 / 开头视为相对webRoot的路径（模板管理写入格式），统一去掉前导斜杠，避免拼接出双斜杠</li>
 	 *   <li>统一去尾部斜杠，避免拼接出双斜杠</li>
 	 * </ol>
 	 * @param path 原始相对路径
 	 * @param desc 配置项描述（用于告警日志）
-	 * @return 规范化后的相对路径（无尾部斜杠），非法时返回 null
+	 * @return 规范化后的相对路径（无头尾斜杠），非法时返回 null
 	 */
 	private String safeRelativePath(String path, String desc) {
 		if (path == null || path.isEmpty()) {
@@ -443,12 +448,16 @@ public class PDFService {
 			LOG.warn("检测到非法" + desc + "（含..）: " + path);
 			return null;
 		}
-		// 第二层：拒绝绝对路径（/ 或 \ 开头、盘符开头）
-		if (dir.startsWith("/") || dir.startsWith("\\") || dir.matches("^[a-zA-Z]:.*")) {
+		// 第二层：拒绝真正的绝对路径（\ 开头即UNC路径、盘符开头）
+		if (dir.startsWith("\\") || dir.matches("^[a-zA-Z]:.*")) {
 			LOG.warn("检测到非法" + desc + "（绝对路径）: " + path);
 			return null;
 		}
-		// 第三层：统一去尾部斜杠，避免拼接出双斜杠
+		// 第三层：去掉前导 /（DB中模板管理写入的路径以 / 开头，表示相对webRoot的路径）
+		while (dir.startsWith("/")) {
+			dir = dir.substring(1);
+		}
+		// 第四层：统一去尾部斜杠，避免拼接出双斜杠
 		while (dir.endsWith("/") || dir.endsWith("\\")) {
 			dir = dir.substring(0, dir.length() - 1);
 		}

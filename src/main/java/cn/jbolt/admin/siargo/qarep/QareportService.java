@@ -98,7 +98,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	/**
 	 * 获取各流程阶段的数量统计（带30分钟缓存）
 	 * <p>返回不可变Map，防止调用方误改缓存内容</p>
-	 * @return Map包含各阶段数量：all(全部), noq(精度待检), accq(外观待检), funq(包装待检), appq(待批准), allq(已完成)
+	 * @return Map包含各阶段数量：all(全部), noq(精度待检), ltq(成品检漏待检), accq(外观待检), funq(包装待检), appq(待批准), allq(已完成)
 	 */
 	public java.util.Map<String, Long> getFlowCounts() {
 		// 先检查缓存是否有效（无锁快速路径）
@@ -126,7 +126,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * 获取首页看板报告单级流程统计（本年度，带30分钟缓存）
 	 * <p>产品级、本年度口径：查询当年创建报告单下的全部有效产品（vd=1），按 insp 分环节，
 	 * 不去重；allq 即当年 insp=5 的产品数，与环形图“本年度报告单来源”总数一致。</p>
-	 * @return Map包含各阶段数量：all(本年度产品总数), noq/accq/funq/appq/allq(按 insp 分环节),
+	 * @return Map包含各阶段数量：all(本年度产品总数), noq/ltq/accq/funq/appq/allq(按 insp 分环节),
 	 *         noq_qsi~allq_qsi(各环节产品送检只数)
 	 */
 	public java.util.Map<String, Long> getDashboardFlowCounts() {
@@ -241,7 +241,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * @return 操作结果；部分成功时 Ret.ok 且携带 msg 说明
 	 */
 	public Ret batchUpdateInspStatus(List<Long> ids, Integer insp) {
-		// 入口校验：insp必须在[2,5]范围内
+		// 入口校验：insp必须在[2,6]范围内（2=精度审批 6=成品检漏审批 3=外观审批 4=包装审批 5=批准）
 		if (ids == null || ids.isEmpty() || insp == null
 				|| insp < QarepConst.INSP_APPROVE_MIN || insp > QarepConst.INSP_APPROVE_MAX) {
 			return fail(JBoltMsg.PARAM_ERROR);
@@ -252,6 +252,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			return fail("您没有该检验环节的批准权限，无法执行此操作");
 		}
 		String stageCol = QarepConst.approveStageColumn(insp);
+		if (stageCol == null) {
+			return fail(JBoltMsg.PARAM_ERROR);
+		}
 		String now = DateUtil.getDateString(DateUtil.YMDHMS);
 		List<String> failedItems = new ArrayList<>();
 		int successCount = 0;
@@ -259,11 +262,49 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			if (id == null) {
 				continue;
 			}
-			// 条件更新：仅当前状态为目标状态-1且有效时才更新，避免并发重复处理/状态跳跃
+			// 读取产品当前状态与成品检漏标记，逐产品计算目标状态
+			Record cur = Db.findFirst(
+					"SELECT insp, lt_status FROM siargo_product WHERE id = ? AND vd = " + QarepConst.VD_VALID, id);
+			if (cur == null) {
+				failedItems.add("ID:" + id + "（数据不存在）");
+				continue;
+			}
+			int ltStatus = cur.getInt("lt_status") == null ? QarepConst.LT_STATUS_NO : cur.getInt("lt_status");
+			// 各审批操作的前置状态与目标状态：精度审批按 lt_status 分流到 6 或 2
+			int prevInsp;
+			int newInsp;
+			switch (insp) {
+				case QarepConst.INSP_PENDING_APPEARANCE: // 2：精度审批
+					prevInsp = QarepConst.INSP_PENDING_ACCURACY;
+					newInsp = ltStatus == QarepConst.LT_STATUS_YES
+							? QarepConst.INSP_PENDING_LEAK_TEST
+							: QarepConst.INSP_PENDING_APPEARANCE;
+					break;
+				case QarepConst.INSP_PENDING_LEAK_TEST: // 6：成品检漏审批
+					prevInsp = QarepConst.INSP_PENDING_LEAK_TEST;
+					newInsp = QarepConst.INSP_PENDING_APPEARANCE;
+					break;
+				case QarepConst.INSP_PENDING_PACKAGING: // 3：外观审批
+					prevInsp = QarepConst.INSP_PENDING_APPEARANCE;
+					newInsp = QarepConst.INSP_PENDING_PACKAGING;
+					break;
+				case QarepConst.INSP_PENDING_APPROVAL: // 4：包装审批
+					prevInsp = QarepConst.INSP_PENDING_PACKAGING;
+					newInsp = QarepConst.INSP_PENDING_APPROVAL;
+					break;
+				case QarepConst.INSP_COMPLETED: // 5：批准
+					prevInsp = QarepConst.INSP_PENDING_APPROVAL;
+					newInsp = QarepConst.INSP_COMPLETED;
+					break;
+				default:
+					failedItems.add(describeProduct(id) + "（非法审批目标）");
+					continue;
+			}
+			// 条件更新：仅当前状态匹配且有效时才更新，避免并发重复处理/状态跳跃
 			int rows = Db.update(
 					"UPDATE siargo_product SET insp = ?, " + stageCol + "_uid = ?, " + stageCol + "_time = ? "
 					+ "WHERE id = ? AND insp = ? AND vd = " + QarepConst.VD_VALID,
-					insp, userId, now, id, insp - 1);
+					newInsp, userId, now, id, prevInsp);
 			if (rows > 0) {
 				successCount++;
 			} else {
@@ -283,12 +324,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 批量驳回产品检验状态至上一阶段
-	 * <p>状态回退映射：</p>
-	 * <ul>
-	 *   <li>insp=2（外观待检）→ insp=1（精度待检），清空精度检验完成记录（accq_uid/accq_time）</li>
-	 *   <li>insp=3（包装待检）→ insp=2（外观待检），清空外观检验完成记录（funq_uid/funq_time）</li>
-	 *   <li>insp=4（待批准）→ insp=3（包装待检），清空包装检验完成记录（appq_uid/appq_time）</li>
-	 *   <li>insp=5（已完成）与 insp=1（精度待检）不可驳回</li>
+ * <p>状态回退映射：</p>
+ * <ul>
+ *   <li>insp=2（外观待检）→ lt_status=1 回退到 6（成品检漏待检）并清空 lt_uid/lt_time；否则回退到 1（精度待检）并清空 accq_uid/accq_time</li>
+ *   <li>insp=6（成品检漏待检）→ insp=1（精度待检），清空精度检验完成记录（accq_uid/accq_time）</li>
+ *   <li>insp=3（包装待检）→ insp=2（外观待检），清空外观检验完成记录（funq_uid/funq_time）</li>
+ *   <li>insp=4（待批准）→ insp=3（包装待检），清空包装检验完成记录（appq_uid/appq_time）</li>
+ *   <li>insp=5（已完成）与 insp=1（精度待检）不可驳回</li>
 	 * </ul>
 	 * <p>安全与并发控制：逐产品做服务端角色校验（当前环节负责角色或超管）+ 条件更新（WHERE insp=当前值）</p>
 	 * <p>每次驳回向历史表 siargo_product_reject_log 追加一条记录（环节/原因/驳回人/时间），支持一个产品多次驳回</p>
@@ -312,26 +354,55 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				failedItems.add("ID:" + id + "（数据不存在）");
 				continue;
 			}
-			// 当前检验阶段：仅2~4可驳回（已完成insp=5与精度待检insp=1不可驳回）
+			// 当前检验阶段：仅2、3、4、6可驳回（已完成insp=5与精度待检insp=1不可驳回）
 			Integer cur = product.getInt("insp");
-			if (cur == null || cur < QarepConst.INSP_REJECT_MIN || cur > QarepConst.INSP_REJECT_MAX) {
+			if (cur == null || !QarepConst.isRejectableInsp(cur)) {
 				failedItems.add(describeProduct(id) + "（当前状态不可驳回）");
 				continue;
 			}
-			// 服务端角色校验：当前环节负责角色（212~214）或超管才可驳回
+			// 服务端角色校验：当前环节负责角色（212~215）或超管才可驳回
 			if (!canRejectStage(userId, cur)) {
 				failedItems.add(describeProduct(id) + "（无该环节驳回权限）");
 				continue;
 			}
+			int ltStatus = product.getInt("lt_status") == null ? QarepConst.LT_STATUS_NO : product.getInt("lt_status");
+			// 回退目标与清空列：外观环节按 lt_status 分流（1→成品检漏待检清lt，2→精度待检清accq）
+			int newInsp;
+			String clearCol;
+			switch (cur) {
+				case QarepConst.INSP_PENDING_LEAK_TEST: // 6：成品检漏驳回 → 精度待检，清空 accq
+					newInsp = QarepConst.INSP_PENDING_ACCURACY;
+					clearCol = "accq";
+					break;
+				case QarepConst.INSP_PENDING_APPEARANCE: // 2：外观驳回
+					if (ltStatus == QarepConst.LT_STATUS_YES) {
+						newInsp = QarepConst.INSP_PENDING_LEAK_TEST;
+						clearCol = "lt";
+					} else {
+						newInsp = QarepConst.INSP_PENDING_ACCURACY;
+						clearCol = "accq";
+					}
+					break;
+				case QarepConst.INSP_PENDING_PACKAGING: // 3：包装驳回 → 外观待检，清空 funq
+					newInsp = QarepConst.INSP_PENDING_APPEARANCE;
+					clearCol = "funq";
+					break;
+				case QarepConst.INSP_PENDING_APPROVAL: // 4：批准驳回 → 包装待检，清空 appq
+					newInsp = QarepConst.INSP_PENDING_PACKAGING;
+					clearCol = "appq";
+					break;
+				default:
+					failedItems.add(describeProduct(id) + "（当前状态不可驳回）");
+					continue;
+			}
 			// 条件更新：清空被驳回阶段的完成记录并回退，仅当状态未被他人变更时生效
-			String stageCol = QarepConst.rejectClearStageColumn(cur);
 			int rows = Db.update(
-					"UPDATE siargo_product SET insp = ?, " + stageCol + "_uid = NULL, " + stageCol + "_time = NULL "
+					"UPDATE siargo_product SET insp = ?, " + clearCol + "_uid = NULL, " + clearCol + "_time = NULL "
 					+ "WHERE id = ? AND insp = ? AND vd = " + QarepConst.VD_VALID,
-					cur - 1, id, cur);
+					newInsp, id, cur);
 			if (rows > 0) {
 				successCount++;
-				// 追加驳回历史记录：环节（2=外观检验 3=包装检验 4=批准）、原因、驳回人、时间
+				// 追加驳回历史记录：环节（2=外观检验 3=包装检验 4=批准 6=成品检漏）、原因、驳回人、时间
 				productRejectLogService.saveLog(id, cur, rejectDes, userId);
 			} else {
 				failedItems.add(describeProduct(id) + "（状态已变化或已被他人处理）");
@@ -541,11 +612,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ ", SUM(CASE WHEN insp = 3 THEN 1 ELSE 0 END) AS insp_3"
 				+ ", SUM(CASE WHEN insp = 4 THEN 1 ELSE 0 END) AS insp_4"
 				+ ", SUM(CASE WHEN insp = 5 THEN 1 ELSE 0 END) AS insp_5"
+				+ ", SUM(CASE WHEN insp = 6 THEN 1 ELSE 0 END) AS insp_6"
 				+ ", SUM(CASE WHEN insp = 1 THEN sp.qsi ELSE 0 END) AS qsi_1"
 				+ ", SUM(CASE WHEN insp = 2 THEN sp.qsi ELSE 0 END) AS qsi_2"
 				+ ", SUM(CASE WHEN insp = 3 THEN sp.qsi ELSE 0 END) AS qsi_3"
 				+ ", SUM(CASE WHEN insp = 4 THEN sp.qsi ELSE 0 END) AS qsi_4"
 				+ ", SUM(CASE WHEN insp = 5 THEN sp.qsi ELSE 0 END) AS qsi_5"
+				+ ", SUM(CASE WHEN insp = 6 THEN sp.qsi ELSE 0 END) AS qsi_6"
 				+ " FROM siargo_product sp WHERE sp.vd = 1";
 		Record row = Db.findFirst(sql);
 		if (row != null) {
@@ -555,11 +628,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			counts.put("funq", row.getLong("insp_3") != null ? row.getLong("insp_3") : 0L);
 			counts.put("appq", row.getLong("insp_4") != null ? row.getLong("insp_4") : 0L);
 			counts.put("allq", row.getLong("insp_5") != null ? row.getLong("insp_5") : 0L);
+			counts.put("ltq", row.getLong("insp_6") != null ? row.getLong("insp_6") : 0L);
 			counts.put("noq_qsi", row.getLong("qsi_1") != null ? row.getLong("qsi_1") : 0L);
 			counts.put("accq_qsi", row.getLong("qsi_2") != null ? row.getLong("qsi_2") : 0L);
 			counts.put("funq_qsi", row.getLong("qsi_3") != null ? row.getLong("qsi_3") : 0L);
 			counts.put("appq_qsi", row.getLong("qsi_4") != null ? row.getLong("qsi_4") : 0L);
 			counts.put("allq_qsi", row.getLong("qsi_5") != null ? row.getLong("qsi_5") : 0L);
+			counts.put("ltq_qsi", row.getLong("qsi_6") != null ? row.getLong("qsi_6") : 0L);
 		} else {
 			counts.put("all", 0L);
 			counts.put("noq", 0L);
@@ -567,11 +642,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			counts.put("funq", 0L);
 			counts.put("appq", 0L);
 			counts.put("allq", 0L);
+			counts.put("ltq", 0L);
 			counts.put("noq_qsi", 0L);
 			counts.put("accq_qsi", 0L);
 			counts.put("funq_qsi", 0L);
 			counts.put("appq_qsi", 0L);
 			counts.put("allq_qsi", 0L);
+			counts.put("ltq_qsi", 0L);
 		}
 		return counts;
 	}
@@ -590,11 +667,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ ", SUM(CASE WHEN insp = 3 THEN 1 ELSE 0 END) AS insp_3"
 				+ ", SUM(CASE WHEN insp = 4 THEN 1 ELSE 0 END) AS insp_4"
 				+ ", SUM(CASE WHEN insp = 5 THEN 1 ELSE 0 END) AS insp_5"
+				+ ", SUM(CASE WHEN insp = 6 THEN 1 ELSE 0 END) AS insp_6"
 				+ ", SUM(CASE WHEN insp = 1 THEN sp.qsi ELSE 0 END) AS qsi_1"
 				+ ", SUM(CASE WHEN insp = 2 THEN sp.qsi ELSE 0 END) AS qsi_2"
 				+ ", SUM(CASE WHEN insp = 3 THEN sp.qsi ELSE 0 END) AS qsi_3"
 				+ ", SUM(CASE WHEN insp = 4 THEN sp.qsi ELSE 0 END) AS qsi_4"
 				+ ", SUM(CASE WHEN insp = 5 THEN sp.qsi ELSE 0 END) AS qsi_5"
+				+ ", SUM(CASE WHEN insp = 6 THEN sp.qsi ELSE 0 END) AS qsi_6"
 				+ " FROM siargo_product sp"
 				+ " INNER JOIN siargo_qareport sq ON sq.id = sp.report_id"
 				+ " WHERE YEAR(sq.create_time) = YEAR(CURDATE()) AND sp.vd = 1";
@@ -606,11 +685,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			counts.put("funq", row.getLong("insp_3") != null ? row.getLong("insp_3") : 0L);
 			counts.put("appq", row.getLong("insp_4") != null ? row.getLong("insp_4") : 0L);
 			counts.put("allq", row.getLong("insp_5") != null ? row.getLong("insp_5") : 0L);
+			counts.put("ltq", row.getLong("insp_6") != null ? row.getLong("insp_6") : 0L);
 			counts.put("noq_qsi", row.getLong("qsi_1") != null ? row.getLong("qsi_1") : 0L);
 			counts.put("accq_qsi", row.getLong("qsi_2") != null ? row.getLong("qsi_2") : 0L);
 			counts.put("funq_qsi", row.getLong("qsi_3") != null ? row.getLong("qsi_3") : 0L);
 			counts.put("appq_qsi", row.getLong("qsi_4") != null ? row.getLong("qsi_4") : 0L);
 			counts.put("allq_qsi", row.getLong("qsi_5") != null ? row.getLong("qsi_5") : 0L);
+			counts.put("ltq_qsi", row.getLong("qsi_6") != null ? row.getLong("qsi_6") : 0L);
 		} else {
 			counts.put("all", 0L);
 			counts.put("noq", 0L);
@@ -618,11 +699,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			counts.put("funq", 0L);
 			counts.put("appq", 0L);
 			counts.put("allq", 0L);
+			counts.put("ltq", 0L);
 			counts.put("noq_qsi", 0L);
 			counts.put("accq_qsi", 0L);
 			counts.put("funq_qsi", 0L);
 			counts.put("appq_qsi", 0L);
 			counts.put("allq_qsi", 0L);
+			counts.put("ltq_qsi", 0L);
 		}
 		return counts;
 	}
@@ -699,10 +782,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				// 选择字段：报告单基础信息（id/spid转CHAR防止前端雪花ID精度丢失）
 				.select("CAST(sq.id AS CHAR) AS id", "sq.order_id", "sc.name AS sc_name", "sq.formnum","sp.insp",
 						// 检验时间信息
-						"sp.accq_time", "sp.funq_time", "sp.appq_time", "sp.allq_time",
+						"sp.accq_time", "sp.funq_time", "sp.appq_time", "sp.allq_time", "sp.lt_status", "sp.lt_time",
 						// 检验人员姓名
 						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
-						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
+						"lt_user.name AS lt_name", "allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						// 产品信息字段
 						"CAST(sp.id AS CHAR) as spid", "sp.model as sp_model", "sp.number as sp_number", "sp.type as sp_type",
 						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.flow_range as sp_flow_range", "sp.des as sp_des", 
@@ -743,6 +826,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				// ========== 关联用户表获取各阶段检验人员信息 ==========
 				.leftJoin("jb_user", "accq_user", "accq_user.id = sp.accq_uid")
 				.leftJoin("jb_user", "funq_user", "funq_user.id = sp.funq_uid")
+				.leftJoin("jb_user", "lt_user", "lt_user.id = sp.lt_uid")
 				.leftJoin("jb_user", "appq_user", "appq_user.id = sp.appq_uid")
 				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid").eq("sp.vd", QarepConst.VD_VALID);
 	
@@ -770,6 +854,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 	         case QarepConst.INSP_PENDING_APPEARANCE:
+	        	 sql.orderBy("sp.accq_time", true);  // 主排序：上一个进度(精度检验)完成时间
+	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.formnum", true);
+	        	 break;
+	         case QarepConst.INSP_PENDING_LEAK_TEST:
 	        	 sql.orderBy("sp.accq_time", true);  // 主排序：上一个进度(精度检验)完成时间
 	        	 sql.orderBy("sq.create_time", true);
 	        	 sql.orderBy("sq.formnum", true);
@@ -848,6 +937,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			return fail("送检数量小于检验数量，重新输入！");
 		}
 
+		// 成品检漏标记：缺失默认“无成品检漏”（兼容 Excel 导入等旧入口）
+		int ltStatus = product.getLtStatus() == null ? QarepConst.LT_STATUS_NO : product.getLtStatus();
+		if (ltStatus != QarepConst.LT_STATUS_YES && ltStatus != QarepConst.LT_STATUS_NO) {
+			return fail("成品检漏参数非法！");
+		}
+
 		// ========== 保存报告单（如果不存在）==========
 		if (notOk(qareport.getId())) {
 
@@ -894,9 +989,15 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				pro.set("accq_uid", JBoltUserKit.getUserId());
 				pro.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 			}
+
+			// 有成品检漏且精度已检：直接进入成品检漏待检（insp=6）
+			Integer inspValue = product.getInsp();
+			if (inspValue == QarepConst.INSP_PENDING_APPEARANCE && ltStatus == QarepConst.LT_STATUS_YES) {
+				inspValue = QarepConst.INSP_PENDING_LEAK_TEST;
+			}
 			
 			// 复制产品属性
-			pro.set("insp", product.getInsp());
+			pro.set("insp", inspValue);
 			pro.set("type", product.getType());
 			pro.set("model", product.getModel());
 			pro.set("qsi", product.getQsi());
@@ -905,6 +1006,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			pro.set("flow_range", product.getFlowRange());
 			pro.set("des", product.getDes());
 			pro.set("pdfver", product.getPdfver());
+			pro.set("lt_status", ltStatus);
 			// 关联报告单
 			pro.set("report_id", qareport.getId());
 			// 电气参数
@@ -927,9 +1029,14 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				product.set("accq_uid", JBoltUserKit.getUserId());
 				product.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
 			}
+			// 有成品检漏且精度已检：进入成品检漏待检（insp=6）
+			if (product.getInsp() == QarepConst.INSP_PENDING_APPEARANCE && ltStatus == QarepConst.LT_STATUS_YES) {
+				product.set("insp", QarepConst.INSP_PENDING_LEAK_TEST);
+			}
 
 			product.set("report_id", qareport.getId());
 			product.set("vd", QarepConst.VD_VALID);
+			product.set("lt_status", ltStatus);
 			prodsuccess = product.save();
 		}
 
@@ -953,10 +1060,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  DATE_FORMAT(sp.funq_time, '%Y-%m-%d %H:%i') AS funq_time,\n"
 				+ "  DATE_FORMAT(sp.appq_time, '%Y-%m-%d %H:%i') AS appq_time,\n"
 				+ "  DATE_FORMAT(sp.allq_time, '%Y-%m-%d %H:%i') AS allq_time,\n" 
+				+ "  sp.lt_status,\n" + "  DATE_FORMAT(sp.lt_time, '%Y-%m-%d %H:%i') AS lt_time,\n"
 				+ "  accq_user.NAME AS accq_name,\n funq_user.NAME AS funq_name,\n" 
-				+ "  appq_user.NAME AS appq_name,\n allq_user.NAME AS allq_name,\n"
+				+ "  lt_user.NAME AS lt_name,\n appq_user.NAME AS appq_name,\n allq_user.NAME AS allq_name,\n"
 				+ "  accq_user.email AS accq_email,\n funq_user.email AS funq_email,\n" 
-				+ "  appq_user.email AS appq_email,\n allq_user.email AS allq_email,\n"
+				+ "  lt_user.email AS lt_email,\n appq_user.email AS appq_email,\n allq_user.email AS allq_email,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') AS create_time,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y.%m.%d') AS c_time,\n" + "  sp.id AS spid,\n"
 				+ "  sp.model AS sp_model,\n" + "  sp.number AS sp_number,\n" + "  sp.type AS sp_type,\n"
@@ -987,6 +1095,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  AND d_flow.ENABLE = '1'"
 				+ "  LEFT JOIN jb_user AS accq_user ON accq_user.id = sp.accq_uid\n"
 				+ "  LEFT JOIN jb_user AS funq_user ON funq_user.id = sp.funq_uid\n"
+				+ "  LEFT JOIN jb_user AS lt_user ON lt_user.id = sp.lt_uid\n"
 				+ "  LEFT JOIN jb_user AS appq_user ON appq_user.id = sp.appq_uid\n"
 				+ "  LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid\n" + "WHERE\n" 
 				+ "  sp.id = ? ";
@@ -1023,7 +1132,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			}
 			placeholders.append("?");
 		}
-		String sql = "SELECT CAST(sp.id AS CHAR) AS id, sp.model, sp.number, sp.qsi, sp.qi, sp.des, sp.insp, "
+		String sql = "SELECT CAST(sp.id AS CHAR) AS id, sp.model, sp.number, sp.qsi, sp.qi, sp.des, sp.insp, sp.lt_status, "
 			// 驳回历史条数（>0 时显示「驳」角标，点击查看历史）
 			+ "sp.reject_count, "
 			+ "sq.formnum, sq.order_id, "
@@ -1048,7 +1157,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * 更新报告单和产品数据
 	 * <p>安全说明（编辑白名单）：不信任前端提交的各环节 uid/time 签名字段；
 	 * 以库内记录为基准，仅拷贝允许编辑的业务字段（型号/编号/qi/qsi/描述/电气参数等）；
-	 * insp 支持服务端更新：服务端校验合法范围（1~5）后，按状态机语义联动维护各环节签名
+	 * insp 支持服务端更新：服务端校验合法范围（1~6）后，按状态机语义联动维护各环节签名
 	 * （前进补签缺失环节/回退清空超出环节），签名列一律以服务端生成为准</p>
 	 * <p>所有业务校验在任何写库操作之前完成；产品更新失败抛RuntimeException触发事务回滚</p>
 	 * @param qareport 报告单对象（前端提交）
@@ -1067,6 +1176,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		if (product.getQsi() < product.getQi()) {
 			return fail("送检数量小于检验数量，重新输入！");
 		}
+		// 成品检漏标记：缺失默认“无成品检漏”（兼容旧数据/旧入口）
+		int ltStatus = product.getLtStatus() == null ? QarepConst.LT_STATUS_NO : product.getLtStatus();
+		if (ltStatus != QarepConst.LT_STATUS_YES && ltStatus != QarepConst.LT_STATUS_NO) {
+			return fail("成品检漏参数非法！");
+		}
 
 		// 更新时需要判断数据存在
 		Qareport dbQareport = dao.findById(qareport.getId());
@@ -1084,16 +1198,35 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		dbQareport.set("rep_type", qareport.getRepType());
 
 		// ========== 检验进度更新（服务端支持，保持状态机一致） ==========
-		// 前端 select 可绕过，服务端兜底校验合法范围（1~5）
+		// 前端 select 可绕过，服务端兜底校验合法范围（1~6）
 		Integer insp = product.getInsp();
-		if (insp == null || insp < QarepConst.INSP_PENDING_ACCURACY || insp > QarepConst.INSP_COMPLETED) {
+		if (insp == null || insp < QarepConst.INSP_PENDING_ACCURACY || insp > QarepConst.INSP_PENDING_LEAK_TEST) {
 			return fail("检验进度参数非法！");
 		}
+		// 成品检漏待检（insp=6）仅对有成品检漏的产品合法
+		if (insp == QarepConst.INSP_PENDING_LEAK_TEST && ltStatus != QarepConst.LT_STATUS_YES) {
+			return fail("成品检漏待检仅适用于有成品检漏的产品！");
+		}
 		Integer dbInsp = dbProduct.getInt("insp");
-		if (dbInsp != null && !insp.equals(dbInsp)) {
+		Integer dbLtStatus = dbProduct.getInt("lt_status");
+		boolean ltChanged = dbLtStatus == null || dbLtStatus != ltStatus;
+		Integer targetInsp = insp;
+		if (ltChanged) {
+			// 编辑页调整成品检漏标记时的状态归一化：
+			// 无→有 且当前在外观待检（检漏未做）时退回成品检漏待检；有→无 且当前在成品检漏待检时直接进入外观待检
+			if (ltStatus == QarepConst.LT_STATUS_YES
+					&& dbInsp != null && dbInsp == QarepConst.INSP_PENDING_APPEARANCE
+					&& insp != QarepConst.INSP_PENDING_LEAK_TEST) {
+				targetInsp = QarepConst.INSP_PENDING_LEAK_TEST;
+			} else if (ltStatus == QarepConst.LT_STATUS_NO
+					&& dbInsp != null && dbInsp == QarepConst.INSP_PENDING_LEAK_TEST) {
+				targetInsp = QarepConst.INSP_PENDING_APPEARANCE;
+			}
+		}
+		if (dbInsp != null && (!targetInsp.equals(dbInsp) || ltChanged)) {
 			// 进度变更：联动维护各环节签名（前进补签缺失环节/回退清空超出环节），
 			// 条件更新（WHERE insp=库内旧值）防并发覆盖他人已推进的状态
-			if (!syncInspWithSignatures(product.getId(), dbInsp, insp)) {
+			if (!syncInspWithSignatures(product.getId(), dbInsp, targetInsp, ltStatus)) {
 				return fail("检验进度更新失败（状态已变化），请刷新后重试！");
 			}
 		}
@@ -1116,6 +1249,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		dbProduct.set("fl", product.getFl());
 		dbProduct.set("bv", product.getBv());
 		dbProduct.set("la", product.getLa());
+		dbProduct.set("lt_status", ltStatus);
 
 		boolean qasuccess = dbQareport.update();
 		if (!qasuccess) {
@@ -1131,48 +1265,63 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 检验进度变更时的签名一致性维护（编辑页服务端支持）
-	 * <p>状态机语义（与批准/驳回流程一致）：insp=N 时，环节 2~N 的签名必须完整，
-	 * 否则详情页/PDF 生成（safeStr 强校验）会因缺签名异常</p>
-	 * <ul>
-	 *   <li>前进（newInsp > oldInsp）：为 [oldInsp+1, newInsp] 各环节补齐签名（COALESCE 仅补缺失，不覆盖已有签名）</li>
-	 *   <li>回退（newInsp < oldInsp）：清空 [newInsp+1, 5] 各环节签名</li>
-	 * </ul>
+	 * <p>状态机语义（与批准/驳回流程一致）：按逻辑顺序 1→(6)→2→3→4→5，
+	 * 目标状态要求的签名集合（accq；lt 仅 lt_status=1 且越过成品检漏环节后；funq/appq/allq）必须完整，
+	 * 不要求的签名一律清空，避免详情页/PDF 生成（safeStr 强校验）因缺签名异常</p>
+	 * <p>签名采用 COALESCE 补签，仅补缺失、不覆盖已有签名</p>
 	 * <p>条件更新（WHERE insp=库内旧值）保证并发下不会覆盖他人已推进的状态</p>
 	 * @param productId 产品ID
 	 * @param oldInsp 库内当前进度
 	 * @param newInsp 目标进度
+	 * @param ltStatus 成品检漏标记（1=有 2=无）
 	 * @return 是否更新成功（false=状态已被他人变更）
 	 */
-	private boolean syncInspWithSignatures(Long productId, Integer oldInsp, Integer newInsp) {
+	private boolean syncInspWithSignatures(Long productId, Integer oldInsp, Integer newInsp, int ltStatus) {
 		Long userId = JBoltUserKit.getUserId();
 		String now = DateUtil.getDateString(DateUtil.YMDHMS);
 		StringBuilder sql = new StringBuilder("UPDATE siargo_product SET insp = ?");
 		List<Object> params = new ArrayList<>();
 		params.add(newInsp);
-		if (newInsp > oldInsp) {
-			// 前进：补齐缺失环节签名（COALESCE 仅补空，不覆盖已有签名）
-			for (int stage = oldInsp + 1; stage <= newInsp; stage++) {
-				String col = QarepConst.approveStageColumn(stage);
-				if (col != null) {
-					sql.append(", ").append(col).append("_uid = COALESCE(").append(col).append("_uid, ?)")
-						.append(", ").append(col).append("_time = COALESCE(").append(col).append("_time, ?)");
-					params.add(userId);
-					params.add(now);
-				}
-			}
-		} else {
-			// 回退：清空超出目标进度的环节签名
-			for (int stage = newInsp + 1; stage <= QarepConst.INSP_COMPLETED; stage++) {
-				String col = QarepConst.approveStageColumn(stage);
-				if (col != null) {
-					sql.append(", ").append(col).append("_uid = NULL, ").append(col).append("_time = NULL");
-				}
-			}
-		}
+		boolean needAccq = newInsp != QarepConst.INSP_PENDING_ACCURACY;
+		boolean needLt = ltStatus == QarepConst.LT_STATUS_YES
+				&& newInsp != QarepConst.INSP_PENDING_ACCURACY
+				&& newInsp != QarepConst.INSP_PENDING_LEAK_TEST;
+		boolean needFunq = newInsp == QarepConst.INSP_PENDING_PACKAGING
+				|| newInsp == QarepConst.INSP_PENDING_APPROVAL
+				|| newInsp == QarepConst.INSP_COMPLETED;
+		boolean needAppq = newInsp == QarepConst.INSP_PENDING_APPROVAL
+				|| newInsp == QarepConst.INSP_COMPLETED;
+		boolean needAllq = newInsp == QarepConst.INSP_COMPLETED;
+		appendSignatureColumn(sql, params, "accq", needAccq, userId, now);
+		appendSignatureColumn(sql, params, "lt", needLt, userId, now);
+		appendSignatureColumn(sql, params, "funq", needFunq, userId, now);
+		appendSignatureColumn(sql, params, "appq", needAppq, userId, now);
+		appendSignatureColumn(sql, params, "allq", needAllq, userId, now);
 		sql.append(" WHERE id = ? AND insp = ? AND vd = ").append(QarepConst.VD_VALID);
 		params.add(productId);
 		params.add(oldInsp);
 		return Db.update(sql.toString(), params.toArray()) > 0;
+	}
+
+	/**
+	 * 追加单个签名列到 UPDATE 语句：需要时 COALESCE 补签，不需要时清空
+	 * @param sql UPDATE 语句构建器
+	 * @param params 参数列表
+	 * @param col 列前缀（accq/lt/funq/appq/allq）
+	 * @param need 目标状态是否需要该签名
+	 * @param userId 当前用户ID
+	 * @param now 当前时间字符串
+	 */
+	private void appendSignatureColumn(StringBuilder sql, List<Object> params, String col,
+			boolean need, Long userId, String now) {
+		if (need) {
+			sql.append(", ").append(col).append("_uid = COALESCE(").append(col).append("_uid, ?)")
+				.append(", ").append(col).append("_time = COALESCE(").append(col).append("_time, ?)");
+			params.add(userId);
+			params.add(now);
+		} else {
+			sql.append(", ").append(col).append("_uid = NULL, ").append(col).append("_time = NULL");
+		}
 	}
 
 	/**
@@ -1577,20 +1726,24 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "sp.model, "
 				+ "sp.number, "
 				+ "sp.insp, "
+				+ "sp.lt_status, "
 				+ "sp.accq_time, "
 				+ "sp.funq_time, "
 				+ "sp.appq_time, "
 				+ "sp.allq_time, "
+				+ "sp.lt_time, "
 				+ "u1.name AS accq_name, "
 				+ "u2.name AS funq_name, "
 				+ "u3.name AS appq_name, "
-				+ "u4.name AS allq_name "
+				+ "u4.name AS allq_name, "
+				+ "u5.name AS lt_name "
 				+ "FROM siargo_product sp "
 				+ "LEFT JOIN siargo_qareport sq ON sp.report_id = sq.id "
 				+ "LEFT JOIN jb_user u1 ON sp.accq_uid = u1.id "
 				+ "LEFT JOIN jb_user u2 ON sp.funq_uid = u2.id "
 				+ "LEFT JOIN jb_user u3 ON sp.appq_uid = u3.id "
 				+ "LEFT JOIN jb_user u4 ON sp.allq_uid = u4.id "
+				+ "LEFT JOIN jb_user u5 ON sp.lt_uid = u5.id "
 				+ "WHERE sq.order_id = ? AND sp.vd = 1 "
 				+ "ORDER BY sp.id ASC";
 
@@ -1611,16 +1764,17 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 		// 构建 IN 子句的 ? 占位符
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT sq.order_id, sp.model, sp.number, sp.insp, ")
-			.append("sp.accq_time, sp.funq_time, sp.appq_time, sp.allq_time, ")
+		sql.append("SELECT sq.order_id, sp.model, sp.number, sp.insp, sp.lt_status, ")
+			.append("sp.accq_time, sp.funq_time, sp.appq_time, sp.allq_time, sp.lt_time, ")
 			.append("u1.name AS accq_name, u2.name AS funq_name, ")
-			.append("u3.name AS appq_name, u4.name AS allq_name ")
+			.append("u3.name AS appq_name, u4.name AS allq_name, u5.name AS lt_name ")
 			.append("FROM siargo_product sp ")
 			.append("LEFT JOIN siargo_qareport sq ON sp.report_id = sq.id ")
 			.append("LEFT JOIN jb_user u1 ON sp.accq_uid = u1.id ")
 			.append("LEFT JOIN jb_user u2 ON sp.funq_uid = u2.id ")
 			.append("LEFT JOIN jb_user u3 ON sp.appq_uid = u3.id ")
 			.append("LEFT JOIN jb_user u4 ON sp.allq_uid = u4.id ")
+			.append("LEFT JOIN jb_user u5 ON sp.lt_uid = u5.id ")
 			.append("WHERE sq.order_id IN (");
 
 		for (int i = 0; i < orderIds.size(); i++) {

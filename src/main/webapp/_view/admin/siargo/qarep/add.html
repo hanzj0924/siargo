@@ -10,9 +10,6 @@
 			action="admin/siargo/qarep/save" method="post">
 			<input type="hidden" name="qareport.id" value="#(qareport.id??)" />
 			<div class="fm-wrap">
-				<!-- 编号填写提示（页面内提示条，替代原跨窗口 DOM 注入） -->
-				<div class="fm-notice"><i class="fa fa-exclamation-circle"></i> 注意编号！请按实际情况填写产品编号</div>
-
 				<!-- 上半部分：左右两栏 -->
 				<div class="row">
 					<!-- 左栏：报告单信息 + 产品信息 -->
@@ -110,6 +107,14 @@
 											data-value="" data-value-attr="sn"
 											data-select="#(qareport.prodType ??)"
 											data-beforechange="prodTypeChange">
+										</select>
+									</div>
+									<label class="col-auto col-form-label">成品检漏环节</label>
+									<div class="col input-group">
+										<select class="form-control" data-autoload name="product.lt_status"
+											data-rule="select" data-tips="请选择是否有成品检漏" data-text="=请选择="
+											data-value="" data-options="已检验:1,无:2"
+											data-select="#(qareport.lt_status ??)">
 										</select>
 									</div>
 								</div>
@@ -294,9 +299,7 @@
 		#define js()
 		<script>
 			$(function() {
-				// 编号提示已由页面内 .fm-notice 提示条承载（见 .fm-wrap 顶部），
-				// 原跨窗口 DOM 注入（parent.document 操作 layui 按钮栏）已废弃——依赖 layui
-				// 内部类名与渲染时机，升级即失效，且违反"页面自包含"原则。
+				// 页面初始化
 			});
 
 			function refreshCustSelect() {

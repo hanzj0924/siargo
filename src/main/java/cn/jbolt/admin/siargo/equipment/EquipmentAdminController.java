@@ -11,9 +11,11 @@ import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.kit.Ret;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.Equipment;
 import cn.jbolt.siargo.model.EquipmentCertificate;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.alibaba.fastjson.JSON;
 import java.util.List;
@@ -87,18 +89,41 @@ public class EquipmentAdminController extends JBoltBaseController {
 	
 	/**
 	* 批量定期对比
+	* <p>Db.tx() 手动事务：多步写（先更新全部设备检校日期→逐台校验状态→建对比记录），
+	* 中途 Ret.fail 时 @Before(Tx.class) 不会回滚（只认异常），故必须 Db.tx() 保证原子性</p>
 	*/
-	@Before(Tx.class)
 	public void batchInspection() {
-		renderJson(service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status")));
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status"));
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "批量定期对比失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
+		service.clearOverviewCountsCache();
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("批量定期对比失败"));
 	}
-	
+
 	/**
 	* 批量审核
+	* <p>Db.tx() 手动事务：逐台审核，中途 Ret.fail 时需整体回滚</p>
 	*/
-	@Before(Tx.class)
 	public void batchAudit() {
-		renderJson(service.batchAudit(get("ids")));
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.batchAudit(get("ids"));
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "批量审核失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
+		service.clearOverviewCountsCache();
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("批量审核失败"));
 	}
 	
 	/**
@@ -168,9 +193,19 @@ public class EquipmentAdminController extends JBoltBaseController {
   /**
 	* 保存
 	*/
-    @Before(Tx.class)
 	public void save() {
-		renderJson(service.save(getModel(Equipment.class, "equipment"), get("certificateImageUrls")));
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.save(getModel(Equipment.class, "equipment"), get("certificateImageUrls"));
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "保存失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
+		service.clearOverviewCountsCache();
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("保存失败"));
 	}
 	
    /**
@@ -183,10 +218,21 @@ public class EquipmentAdminController extends JBoltBaseController {
 	
    /**
 	* 批量删除
+	* <p>Db.tx() 手动事务：循环删除，中途 checkInUse 阻止需整体回滚（@Before(Tx.class) 不认 Ret.fail）</p>
 	*/
-    @Before(Tx.class)
 	public void deleteByIds() {
-		renderJson(service.deleteByBatchIds(get("ids")));
+		final Ret[] retHolder = {null};
+		boolean txOk = Db.tx(() -> {
+			retHolder[0] = service.deleteByBatchIds(get("ids"));
+			return retHolder[0] != null && retHolder[0].isOk();
+		});
+		if (!txOk) {
+			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+			return;
+		}
+		// === afterCommit: 缓存清理 ===
+		service.clearOverviewCountsCache();
+		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
 	}
 	
 	/**

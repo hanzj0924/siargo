@@ -62,6 +62,14 @@ public class EquipmentRepairService extends JBoltBaseService<EquipmentRepair> {
 		EquipmentRepair dbEquipmentRepair=findById(equipmentRepair.getId());
 		if(dbEquipmentRepair==null) {return fail(JBoltMsg.DATA_NOT_EXIST);}
 		//if(existsName(equipmentRepair.getName(), equipmentRepair.getId())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+		// 审核门控：关联对比记录已审核（audit_status=2）时禁止修改维修记录
+		Long comparisonId = dbEquipmentRepair.getComparisonId();
+		if (comparisonId != null) {
+			Integer auditStatus = Db.queryInt("SELECT audit_status FROM siargo_equipment_comparison WHERE id = ?", comparisonId);
+			if (auditStatus != null && auditStatus == 2) {
+				return fail("该维修记录关联的对比已审核，不可修改");
+			}
+		}
 		boolean success=equipmentRepair.update();
 		if(success) {
 			//添加日志

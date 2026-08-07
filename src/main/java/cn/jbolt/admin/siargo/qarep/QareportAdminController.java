@@ -94,6 +94,7 @@ public class QareportAdminController extends JBoltBaseController {
 		
 		// 报告单子权限：管理员/报告单 角色可覆盖，或直接拥有该子角色
 		set("accuracy",  roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_ACCURACY));
+		set("leaktest",   roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_LEAK_TEST));
 		set("appearance", roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_APPEARANCE));
 		set("packaging",  roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_PACKAGING));
 		set("approval",   roleService.hasRoleOrAbove(userId, QarepConst.ROLE_SN_APPROVAL));
@@ -376,11 +377,12 @@ public class QareportAdminController extends JBoltBaseController {
 	 * <p>根据检验进度更新不同级别的批准信息：</p>
 	 * <ul>
 	 *   <li>insp=2：精度检验批准</li>
-	 *   <li>insp=3：功能检验批准</li>
-	 *   <li>insp=4：批准检验</li>
-	 *   <li>insp=5：最终放行</li>
+	 *   <li>insp=6：成品检漏检验批准</li>
+	 *   <li>insp=3：外观检验批准</li>
+	 *   <li>insp=4：包装检验批准</li>
+	 *   <li>insp=5：批准放行</li>
 	 * </ul>
-	 * <p>服务端会按目标环节校验当前用户角色（211~214，超管豁免），并使用条件更新防并发</p>
+	 * <p>服务端会按目标环节校验当前用户角色（211~215，超管豁免），并使用条件更新防并发</p>
 	 */
 	public void batchInspection() {
         Integer insp = getParaToInt("insp");
@@ -424,9 +426,10 @@ public class QareportAdminController extends JBoltBaseController {
 	 * <p>根据目标检验阶段和选中产品ID列表加载待审批产品数据：</p>
 	 * <ul>
 	 *   <li>insp=2：精度检验批准</li>
-	 *   <li>insp=3：功能检验批准</li>
-	 *   <li>insp=4：批准检验</li>
-	 *   <li>insp=5：最终放行</li>
+	 *   <li>insp=6：成品检漏检验批准</li>
+	 *   <li>insp=3：外观检验批准</li>
+	 *   <li>insp=4：包装检验批准</li>
+	 *   <li>insp=5：批准放行</li>
 	 * </ul>
 	 */
 	public void approval() {
@@ -446,8 +449,25 @@ public class QareportAdminController extends JBoltBaseController {
 			return;
 		}
 
+		List<Record> products = service.findApprovalProducts(ids);
+		// 精度审批（insp=2）时，下一环节名称按选中产品的成品检漏标记动态展示：
+		// 全有→成品检漏待检，全无→外观待检，混合→“成品检漏/外观待检”
+		if (insp == QarepConst.INSP_PENDING_APPEARANCE) {
+			boolean anyLt = false;
+			boolean allLt = true;
+			for (Record p : products) {
+				Integer ltStatus = p.getInt("lt_status");
+				boolean hasLt = ltStatus != null && ltStatus == QarepConst.LT_STATUS_YES;
+				if (hasLt) {
+					anyLt = true;
+				} else {
+					allLt = false;
+				}
+			}
+			set("nextStageName", allLt ? "成品检漏待检" : (anyLt ? "成品检漏/外观待检" : "外观待检"));
+		}
 		set("insp", insp);
-		set("products", service.findApprovalProducts(ids));
+		set("products", products);
 		render("approval.html");
 	}
 
@@ -455,7 +475,7 @@ public class QareportAdminController extends JBoltBaseController {
 	 * 批量驳回至上一阶段
 	 * URL: /admin/siargo/qarep/batchReject
 	 * <p>将选中产品的检验进度回退到上一阶段，同时记录驳回原因、驳回人和驳回时间</p>
-	 * <p>服务端会按当前环节校验当前用户角色（212~214，超管豁免），并使用条件更新防并发</p>
+	 * <p>服务端会按当前环节校验当前用户角色（212~215，超管豁免），并使用条件更新防并发</p>
 	 */
 	public void batchReject() {
 		String idsJson = getPara("ids");

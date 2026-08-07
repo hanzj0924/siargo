@@ -65,6 +65,11 @@
       <div class="dt-row">
         <div class="dt-lbl">产品型号</div>
         <div class="dt-val">#(p.model??)</div>
+        <div class="dt-lbl-m">成品检漏环节</div>
+        <div class="dt-val">
+          <label class="dt-radio"><input type="radio" disabled #if(p.lt_status == 1)checked#end /> 已检验</label>
+          <label class="dt-radio"><input type="radio" disabled #if(p.lt_status == null || p.lt_status != 1)checked#end /> 无</label>
+        </div>
       </div>
       <div class="dt-row">
         <div class="dt-lbl">编号</div>
@@ -78,8 +83,8 @@
         <div class="dt-lbl">检验进度</div>
         <div class="dt-val">
           #if(p.insp == 1)
-          #if(p.reject_insp == 2 && p.reject_des != null)
-          #-- 精度检验被驳回重检中（最新驳回来自外观环节）：灰色重检节点 + 红色已驳回节点 --#
+          #if((p.reject_insp == 2 || p.reject_insp == 6) && p.reject_des != null)
+          #-- 精度检验被驳回重检中（最新驳回来自外观环节或成品检漏环节）：灰色重检节点 + 红色已驳回节点 --#
           <div class="insp-flow">
             <div class="insp-step">
               <span class="insp-step-name">精度检验</span>
@@ -93,13 +98,30 @@
           #end
           #else if(p.insp >= 2)
           <div class="insp-flow">
-            <!-- 精度检验（reject_insp=2 表示精度曾被外观环节驳回重做） -->
+            <!-- 精度检验（reject_insp=2/6 表示精度曾被外观/成品检漏环节驳回重做） -->
             <div class="insp-step">
-              <span class="insp-step-name">精度检验#if(p.reject_count_2 > 0) #@rejectMark(p)#end</span>
+              <span class="insp-step-name">精度检验#if((p.lt_status == 1 && p.reject_count_6 > 0) || (p.lt_status != 1 && p.reject_count_2 > 0)) #@rejectMark(p)#end</span>
               <span class="insp-step-badge insp-badge-accq">#(p.accq_name ??)</span>
               <span class="insp-step-time">#if(p.accq_time)#date(p.accq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
-            #if(p.insp >= 3)
+            #if(p.lt_status == 1 && (p.insp == 2 || p.insp == 3 || p.insp == 4 || p.insp == 5 || (p.insp == 6 && p.reject_insp == 2 && p.reject_des != null)))
+            <span class="insp-arrow">&#8594;</span>
+            <!-- 成品检漏检验：仅已检验或有驳回重检时显示；待检/未检验不显示（与其他环节一致） -->
+            <div class="insp-step">
+              <span class="insp-step-name">成品检漏#if(p.reject_count_2 > 0) #@rejectMark(p)#end</span>
+              #if(p.insp == 6)
+                <span class="insp-step-badge insp-badge-redo">重检中</span>
+              #else
+                <span class="insp-step-badge insp-badge-lt">#(p.lt_name ??)</span>
+              #end
+              <span class="insp-step-time">#if(p.lt_time)#date(p.lt_time, "yyyy-MM-dd HH:mm:ss")#end</span>
+            </div>
+            #if(p.insp == 6 && p.reject_insp == 2 && p.reject_des != null)
+            #@rejectStepNode(p)
+            #end
+            #end
+            #-- insp=6（成品检漏待检）数值大于 5 但流程上位于精度与外观之间，以下环节判断必须排除 6，否则会渲染出未进行的外观/包装/批准空节点 --#
+            #if(p.insp >= 3 && p.insp != 6)
             <span class="insp-arrow">&#8594;</span>
             <!-- 外观检验（reject_insp=3 表示外观曾被包装环节驳回重做） -->
             <div class="insp-step">
@@ -108,7 +130,7 @@
               <span class="insp-step-time">#if(p.funq_time)#date(p.funq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
-            #if(p.insp >= 4)
+            #if(p.insp >= 4 && p.insp != 6)
             <span class="insp-arrow">&#8594;</span>
             <!-- 包装检验（reject_insp=4 表示包装曾被批准环节驳回重做） -->
             <div class="insp-step">
@@ -117,12 +139,12 @@
               <span class="insp-step-time">#if(p.appq_time)#date(p.appq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end
-            #if(p.insp >= 5)
+            #if(p.insp >= 5 && p.insp != 6)
             <span class="insp-arrow">&#8594;</span>
             <!-- 批准 -->
             <div class="insp-step">
               <span class="insp-step-name">批准</span>
-              <span class="insp-step-badge insp-badge-allq">&#10003; #(p.allq_name ??)</span>
+              <span class="insp-step-badge insp-badge-allq">#(p.allq_name ??)</span>
               <span class="insp-step-time">#if(p.allq_time)#date(p.allq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
             </div>
             #end

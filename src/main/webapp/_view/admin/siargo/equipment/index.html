@@ -281,6 +281,7 @@ function setQuickFilter_#(pageId)(card, filterType, statusVal) {
     $('.equip-stat-card').removeClass('active');
     $('select[name="status"]').val('');
     $('#equipFilterHidden_#(pageId)').remove();
+    jboltTablePageToFirst($('#equipmentMgrtable_#(pageId)'));
     refreshJBoltTableById('equipmentMgrtable_#(pageId)');
     return;
   }
@@ -297,6 +298,7 @@ function setQuickFilter_#(pageId)(card, filterType, statusVal) {
   } else {
     $('#equipFilterHidden_#(pageId)').remove();
   }
+  jboltTablePageToFirst($('#equipmentMgrtable_#(pageId)'));
   refreshJBoltTableById('equipmentMgrtable_#(pageId)');
 }
 

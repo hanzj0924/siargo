@@ -9,6 +9,7 @@ import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
 import cn.jbolt.common.config.JBoltUploadFolder;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.EquipmentCertificate;
@@ -118,11 +119,8 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 */
 	@Override
 	protected String afterDelete(EquipmentCertificate equipmentCertificate, Kv kv) {
-		// 删除磁盘上的证书图片文件
-		String imageUrl = equipmentCertificate.getStr("image_url");
-		deleteCertificateFile(imageUrl);
-		// 记录删除日志
-		addDeleteSystemLog(equipmentCertificate.getId(), JBoltUserKit.getUserId(), imageUrl);
+		// 物理文件删除由 Controller 在事务提交后统一执行（afterCommit），此处仅记录日志
+		addDeleteSystemLog(equipmentCertificate.getId(), JBoltUserKit.getUserId(), equipmentCertificate.getStr("image_url"));
 		return null;
 	}
 	
@@ -297,6 +295,98 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 			for (EquipmentCertificate cert : certs) {
 				deleteCertificateFile(cert.getStr("image_url"));
 			}
+		}
+		Db.delete("DELETE FROM siargo_equipment_certificate WHERE comparison_id = ?", comparisonId);
+	}
+
+	// -------------------------------------------------------------------------
+	// 物理文件删除辅助（afterCommit 使用）
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 查询多条证书记录的物理文件路径（供 Controller 在事务提交后统一删除）
+	 * @param ids 证书记录ID列表
+	 * @return 物理文件绝对路径列表（剔除空值/含 .. 的非法路径）
+	 */
+	public List<String> queryFilePathsByIds(List<Long> ids) {
+		List<String> paths = new ArrayList<>();
+		if (ids == null || ids.isEmpty()) {
+			return paths;
+		}
+		StringBuilder placeholders = new StringBuilder();
+		for (int i = 0; i < ids.size(); i++) {
+			if (i > 0) placeholders.append(",");
+			placeholders.append("?");
+		}
+		List<Record> rows = Db.find("SELECT image_url FROM siargo_equipment_certificate WHERE id IN (" + placeholders + ")", ids.toArray());
+		if (rows != null) {
+			for (Record row : rows) {
+				String url = row.getStr("image_url");
+				if (url != null && !url.isEmpty() && !url.contains("..")) {
+					paths.add(webRootPath + url);
+				}
+			}
+		}
+		return paths;
+	}
+
+	/**
+	 * 查询多个对比记录关联的证书物理文件路径（供删除对比记录时 afterCommit 统一删除）
+	 * @param comparisonIds 对比记录ID列表
+	 * @return 物理文件绝对路径列表
+	 */
+	public List<String> queryFilePathsByComparisonIds(List<Long> comparisonIds) {
+		List<String> paths = new ArrayList<>();
+		if (comparisonIds == null || comparisonIds.isEmpty()) {
+			return paths;
+		}
+		StringBuilder placeholders = new StringBuilder();
+		for (int i = 0; i < comparisonIds.size(); i++) {
+			if (i > 0) placeholders.append(",");
+			placeholders.append("?");
+		}
+		List<Record> rows = Db.find("SELECT image_url FROM siargo_equipment_certificate WHERE comparison_id IN (" + placeholders + ")", comparisonIds.toArray());
+		if (rows != null) {
+			for (Record row : rows) {
+				String url = row.getStr("image_url");
+				if (url != null && !url.isEmpty() && !url.contains("..")) {
+					paths.add(webRootPath + url);
+				}
+			}
+		}
+		return paths;
+	}
+
+	/**
+	 * 批量删除物理文件（供 Controller 在事务提交后调用；带路径穿越二次过滤）
+	 * @param paths 待删除的物理文件绝对路径列表
+	 */
+	public void deletePhysicalFiles(List<String> paths) {
+		if (paths == null) {
+			return;
+		}
+		for (String path : paths) {
+			if (path == null || path.contains("..")) {
+				continue;
+			}
+			try {
+				File file = new File(path);
+				if (file.exists() && file.isFile()) {
+					file.delete();
+				}
+			} catch (Exception e) {
+				LOG.error("删除证书图片文件异常: " + path, e);
+			}
+		}
+	}
+
+	/**
+	 * 仅删除某对比记录关联的证书记录（不删物理文件，供删除对比记录 afterCommit 流程使用）
+	 * @param comparisonId 对比记录ID
+	 */
+	public void deleteRecordsByComparisonId(Long comparisonId) {
+		if (notOk(comparisonId)) {
+			return;
 		}
 		Db.delete("DELETE FROM siargo_equipment_certificate WHERE comparison_id = ?", comparisonId);
 	}

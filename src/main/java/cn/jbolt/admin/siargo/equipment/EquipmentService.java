@@ -612,6 +612,9 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 			if(isOk(certificateImageUrls)) {
 				try {
 					equipmentCertificateService.saveCertificateImages(equipment.getId(), certificateImageUrls);
+				} catch (com.jfinal.plugin.activerecord.NestedTransactionHelpException e) {
+					// 证书保存失败：通知外层 Db.tx() 回滚整体，避免部分证书记录入库但文件已清理
+					throw e;
 				} catch (Exception e) {
 					LOG.error("设备保存成功但证书图片保存失败，equipmentId=" + equipment.getId() + "，原因：" + e.getMessage(), e);
 				}

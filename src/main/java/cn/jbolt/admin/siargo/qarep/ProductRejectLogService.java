@@ -62,11 +62,12 @@ public class ProductRejectLogService extends JBoltBaseService<ProductRejectLog> 
 	 * @return 驳回历史记录列表
 	 */
 	public List<Record> findLogsByProductId(Long productId) {
-		String sql = "SELECT rl.id, rl.reject_insp, rl.reject_des, "
-			+ "CASE rl.reject_insp WHEN 2 THEN '外观检验' WHEN 3 THEN '包装检验' WHEN 4 THEN '批准' END AS reject_insp_name, "
+		String sql = "SELECT rl.id, rl.reject_insp, rl.reject_des, p.lt_status, "
+			+ "CASE rl.reject_insp WHEN 2 THEN '外观检验' WHEN 3 THEN '包装检验' WHEN 4 THEN '批准' WHEN 6 THEN '成品检漏检验' END AS reject_insp_name, "
 			+ "DATE_FORMAT(rl.reject_time, '%Y-%m-%d %H:%i') AS reject_time, "
 			+ "u.name AS reject_name "
 			+ "FROM siargo_product_reject_log rl "
+			+ "LEFT JOIN siargo_product p ON p.id = rl.product_id "
 			+ "LEFT JOIN jb_user u ON u.id = rl.reject_uid "
 			+ "WHERE rl.product_id = ? "
 			+ "ORDER BY rl.id ASC";

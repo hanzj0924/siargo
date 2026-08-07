@@ -165,6 +165,12 @@ function renderTimeline_#(pageId)(list, append) {
 	}
 }
 
+// HTML 转义（防 XSS）
+function escapeHtml_#(pageId)(str) {
+	if (str === null || str === undefined) return '';
+	return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // 构建卡片HTML
 function buildTimelineCard_#(pageId)(item) {
 	var typeClass = '';
@@ -182,7 +188,7 @@ function buildTimelineCard_#(pageId)(item) {
 
 	var dateStr = item.event_date ? item.event_date.substring(0, 10) : '-';
 
-	var desc = item.description || '';
+	var desc = escapeHtml_#(pageId)(item.description || '');
 	if (desc.length > 30) desc = desc.substring(0, 30) + '...';
 	if (!desc) desc = '<span class="text-muted">---</span>';
 
@@ -195,13 +201,13 @@ function buildTimelineCard_#(pageId)(item) {
 		auditBadge = '<span class="badge badge-success">已审核</span>';
 		if (item.auditor_name) {
 			var auditTime = item.auditor_time ? item.auditor_time.substring(0,10) : '';
-			auditBadge += ' <span class="text-muted" style="font-size:11px;">' + item.auditor_name + (auditTime ? ' ' + auditTime : '') + '</span>';
+			auditBadge += ' <span class="text-muted" style="font-size:11px;">' + escapeHtml_#(pageId)(item.auditor_name || '') + (auditTime ? ' ' + auditTime : '') + '</span>';
 		}
 	} else if (item.audit_status == 1) {
 		auditBadge = '<span class="badge badge-danger">待审核</span>';
 	}
 
-	var creator = item.creator_name || '-';
+	var creator = escapeHtml_#(pageId)(item.creator_name || '-');
 
 	// 证书：首图缩略图 + 数量角标
 	var certHtml = '';
@@ -274,9 +280,9 @@ function buildTimelineCard_#(pageId)(item) {
 					+   '</div>'
 					+ '</div>'
 					+ '<div class="repair-subcard-body">'
-					+   '<div><b>故障：</b>' + (rep.fault_description || '-') + '</div>'
-					+   '<div><b>措施：</b>' + (rep.repair_action || '-') + '</div>'
-					+   '<div><b>维修人：</b>' + (rep.repairer || '-') + '</div>'
+					+   '<div><b>故障：</b>' + escapeHtml_#(pageId)(rep.fault_description || '-') + '</div>'
+					+   '<div><b>措施：</b>' + escapeHtml_#(pageId)(rep.repair_action || '-') + '</div>'
+					+   '<div><b>维修人：</b>' + escapeHtml_#(pageId)(rep.repairer || '-') + '</div>'
 					+ '</div>'
 					+ '<div class="repair-subcard-footer">'
 					+ '<div class="repair-progress">'
@@ -286,7 +292,10 @@ function buildTimelineCard_#(pageId)(item) {
 					+   '</div>'
 					+   '<div class="repair-progress-line ' + lineClass + '"></div>'
 					+   '<div class="repair-progress-node">'
-					+     '<div class="repair-progress-dot ' + endDotClass + '" title="点击修改维修进度" onclick="updateRepairProgress_#(pageId)(\'' + rep.id + '\',' + rep.repair_result + ')"></div>'
+					+     (item.audit_status == 2
+						? '<div class="repair-progress-dot ' + endDotClass + '" title="已审核，不可修改维修进度"></div>'
+						: '<div class="repair-progress-dot ' + endDotClass + '" title="点击修改维修进度" onclick="updateRepairProgress_#(pageId)('' + rep.id + '',' + rep.repair_result + ')"></div>')
+					
 					+     '<span class="repair-progress-label">' + endLabel + '</span>'
 					+   '</div>'
 					+ '</div>'

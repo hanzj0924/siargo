@@ -1,4 +1,4 @@
-# Siargo 订单检验状态查询 API V2.0使用说明
+# Siargo 订单检验状态查询 API V2.1使用说明
 
 ## 一、认证方式
 
@@ -220,10 +220,12 @@ print(resp.json())
                 "serialNo": "G7HSH96001",
                 "status": {
                     "insp": 2,
-                    "label": "精度检验已完成"
+                    "label": "精度检验已完成",
+                    "hasLeakTest": false
                 },
                 "timeline": {
                     "accuracy":   { "time": "2026-04-03 14:27:05", "operator": "韩子衿" },
+                    "leakTest":   { "time": "", "operator": "" },
                     "appearance": { "time": "", "operator": "" },
                     "packaging":  { "time": "", "operator": "" },
                     "approval":   { "time": "", "operator": "" }
@@ -234,10 +236,12 @@ print(resp.json())
                 "serialNo": "G7HSH96099",
                 "status": {
                     "insp": 2,
-                    "label": "精度检验已完成"
+                    "label": "精度检验已完成",
+                    "hasLeakTest": false
                 },
                 "timeline": {
                     "accuracy":   { "time": "2026-04-03 14:28:07", "operator": "韩子衿" },
+                    "leakTest":   { "time": "", "operator": "" },
                     "appearance": { "time": "", "operator": "" },
                     "packaging":  { "time": "", "operator": "" },
                     "approval":   { "time": "", "operator": "" }
@@ -284,9 +288,10 @@ print(resp.json())
                     {
                         "model": "MF5212-Q-300-A",
                         "serialNo": "G7HSH96001",
-                        "status": { "insp": 5, "label": "已完成检验" },
+                        "status": { "insp": 5, "label": "已完成检验", "hasLeakTest": true },
                         "timeline": {
                             "accuracy":   { "time": "2026-03-01 10:30:00", "operator": "张三" },
+                            "leakTest":   { "time": "2026-03-01 15:00:00", "operator": "孙七" },
                             "appearance": { "time": "2026-03-02 14:20:00", "operator": "李四" },
                             "packaging":  { "time": "2026-03-03 09:00:00", "operator": "王五" },
                             "approval":   { "time": "2026-03-04 16:00:00", "operator": "赵六" }
@@ -361,19 +366,20 @@ print(resp.json())
 |------------|--------|---------------------------------------|
 | model      | String | 产品型号                              |
 | serialNo   | String | 产品编号/序列号                       |
-| status     | Object | 当前检验状态 `{insp, label}`          |
-| timeline   | Object | 四个检验阶段的时间线                  |
+| status     | Object | 当前检验状态 `{insp, label, hasLeakTest}` |
+| timeline   | Object | 五个检验阶段的时间线                  |
 
 ### 6.4 status 对象
 
 | 字段名 | 类型   | 说明                           |
 |--------|--------|--------------------------------|
-| insp   | int    | 检验进度码（1~5，见下方枚举）  |
-| label  | String | 检验进度中文描述               |
+| insp        | int     | 检验进度码（1~6，见下方枚举）        |
+| label       | String  | 检验进度中文描述                      |
+| hasLeakTest | boolean | 该产品是否有成品检漏环节（lt_status=1 为 true） |
 
 ### 6.5 timeline 对象
 
-四个检验阶段，每个阶段包含：
+五个检验阶段，每个阶段包含：
 
 | 字段名   | 类型   | 说明                 |
 |----------|--------|----------------------|
@@ -385,6 +391,7 @@ print(resp.json())
 | timeline 字段 | 对应检验阶段 | 对应数据库字段     |
 |---------------|-------------|-------------------|
 | accuracy      | 精度检验    | accq_time/accq_name |
+| leakTest      | 成品检漏检验 | lt_time/lt_name   |
 | appearance    | 外观检验    | funq_time/funq_name |
 | packaging     | 包装检验    | appq_time/appq_name |
 | approval      | 批准放行    | allq_time/allq_name |
@@ -407,6 +414,7 @@ print(resp.json())
 | 3  | 外观检验已完成 | 正在执行包装检验（含已完成外观等待后续） |
 | 4  | 包装检验已完成 | 正在执行批准程序（含已完成包装等待批准） |
 | 5  | 已完成检验   | 检验流程全部完成，已批准放行       |
+| 6  | 成品检漏检验待检 | 精度检验已完成，待成品检漏检验（仅 lt_status=1 的产品） |
 
 ---
 
@@ -478,8 +486,50 @@ GET /api/siargo/order/batchStatus?jboltappid=jbzvdqh9pxxmolt&orderIds=103697,103
 
 | 版本   | 日期       | 变更内容 |
 |--------|------------|---------|
+| v2.1   | 2026-08-06 | 新增成品检漏环节：`status.hasLeakTest` 标识产品是否启用成品检漏；`timeline.leakTest` 返回成品检漏完成时间与检验人；`insp` 枚举新增 `6=成品检漏检验待检`。响应字段为增量兼容，旧调用方无需改动 |
 | v2.0   | 2026-07-06 | 重构响应格式：统一 `{status, code, msg, data}` 结构；字段语义化（`number` → `serialNo`，引入 `status`/`timeline` 嵌套对象）；新增 `traceId` 追踪机制；新增 `ApiErrorCode` 常量管理；批量查询改为 IN 查询消除 N+1 问题 |
 | v1.0   | 2026-04-13 | 初始版本，单个/批量订单状态查询 |
+
+### v2.1 更新说明（2026-08-06）
+
+本次升级新增**成品检漏环节**，接口地址、参数、Token 算法均不变，仅响应内容增加字段：
+
+1. `status.hasLeakTest`（boolean）：`true` = 该产品启用成品检漏环节（`lt_status=1`）；`false` = 不启用（`lt_status=2` 或历史数据为空）。
+2. `timeline.leakTest`（`{time, operator}`）：成品检漏检验完成时间与检验人；未完成或该产品无成品检漏环节时，`time`/`operator` 均为空字符串 `""`。
+3. `insp` 枚举新增 `6 = 成品检漏检验待检`：表示精度检验已完成、等待成品检漏检验，仅 `hasLeakTest=true` 的产品会出现。
+4. 检验阶段顺序固定为 `accuracy → leakTest → appearance → packaging → approval`；无成品检漏的产品 `leakTest` 节点仍然返回（空值），调用方解析逻辑无需按版本切换。
+
+**最新调用方式（与 v2.0 相同）：**
+
+```
+单个查询：
+GET /api/siargo/order/status?jboltappid=jbzvdqh9pxxmolt&orderId=103697&token=<SHA256(AppSecret + orderId + yyyyMMdd)>
+
+批量查询：
+GET /api/siargo/order/batchStatus?jboltappid=jbzvdqh9pxxmolt&orderIds=103697,103741,103773&token=<SHA256(AppSecret + 排序后订单号逗号拼接 + yyyyMMdd)>
+```
+
+成功响应中每条产品示例（含成品检漏）：
+
+```json
+{
+  "model": "MF5212-Q-300-A",
+  "serialNo": "G7HSH96001",
+  "status": {
+    "insp": 2,
+    "label": "精度检验已完成",
+    "hasLeakTest": true
+  },
+  "timeline": {
+    "accuracy":   { "time": "2026-08-06 09:00:00", "operator": "韩子衿" },
+    "leakTest":   { "time": "2026-08-06 10:30:00", "operator": "孙七" },
+    "appearance": { "time": "", "operator": "" },
+    "packaging":  { "time": "", "operator": "" },
+    "approval":   { "time": "", "operator": "" }
+  }
+}
+```
+
 # Siargo 订单检验状态查询 API V1.0使用说明
 
 ## 一、认证方式

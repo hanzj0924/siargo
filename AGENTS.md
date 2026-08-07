@@ -14,7 +14,7 @@
 | customer / supplier | 简单 CRUD | 新模块的第一参考 |
 | dms | 中 | 主子表、文件上传、关键字搜索、软删除 |
 | equipment | 高 | 设备全生命周期、主子表、编制→审核、时间线、证书 |
-| qarep | 最高 | 多阶段审批（insp=1 待检→2 精度→3 外观→4 包装→5 批准）、Excel 导入、PDF 生成、回收站、流程统计缓存 |
+| qarep | 最高 | 多阶段审批（insp=1 精度待检→2 外观待检→3 包装待检→4 待批准→5 完成，各环节签 accq/funq/appq/allq）、Excel 导入、PDF 生成、回收站、流程统计缓存 |
 | api / apicalllog | 中 | 对外 API + Token 签名 + 调用日志 |
 | imi / cme / changelog | 低 | 简单模块 |
 
@@ -22,8 +22,11 @@
 
 1. **Controller 禁止直接操作数据库**（禁止 `Db.find()`、`Db.queryLong()` 等），必须通过 Service 层。
 2. 后台 Controller 必须加 `@CheckPermission(PermissionKey.SIARGO)` + `@UnCheckIfSystemAdmin`。
-3. 写操作禁止 `@Before(Tx.class)` 声明式事务，必须手动 `Db.tx(() -> {...})`。
-4. **缓存清理/异步通知必须 afterCommit**：`clear*Cache()`、`EventKit.post`、WebSocket 推送都在 `Db.tx()` 返回 `true` 之后执行；Service 写方法不负责清缓存，由 Controller 在事务提交后统一清理。
+3. **事务写法分场景**（`@Before(Tx.class)` 是 JBolt 生成器/平台标准，尊重原生写法）：
+   - 单条简单写（先校验后单条 DB、无文件/事件/多步）→ 用 `@Before(Tx.class)` 声明式事务。
+   - **多步批量写、物理文件操作、事件/WebSocket 推送 → 必须手动 `Db.tx(() -> {...})`**。原因：JFinal `@Before(Tx.class)` 只认"抛异常/返回 boolean false"为回滚信号，siargo 的 `Ret.fail`（软失败不抛异常）不会触发回滚，多步写中途失败会**部分提交**。
+   - Service 内禁止在 `@Before(Tx.class)` 事务内做文件删除/移动或嵌套 `Db.tx()`；物理文件路径在事务内收集、事务提交后删除。
+4. **缓存清理/异步通知必须 afterCommit**：`EventKit.post`、WebSocket 推送、物理文件删除必须在事务提交后执行（多步写场景由 Controller 在 `Db.tx()` 返回 `true` 之后统一处理）；Service 写方法不负责清缓存/发事件/删文件。
 5. 禁止手动修改 `siargo/model/base/Base*Model.java`（代码生成器自动维护）。
 6. Model 字段读写用动态方法 `set("field", value)` / `getLong("field")`，不用传统 JavaBean getter/setter。
 7. 主键统一雪花算法 `bigint`，JSON 序列化必须 `@JSONField(serializeUsing = ToStringSerializer.class)`，防前端精度丢失。
@@ -51,6 +54,8 @@ Controller 继承 `JBoltBaseController`（后台）或 `JBoltApiBaseController`�
 **路由关键**：`ProjectConfig.configRoute()` 按子包显式 `this.scan("cn.jbolt.admin.siargo.xxx")`。新增业务子包必须补一行 scan，否则 404；`api` 子包单独注册（无登录拦截）。
 
 ## Controller 规范（事务模板）
+
+**单条简单写**可用 `@Before(Tx.class) + renderJson(service.xxx())`（与生成器产物一致）；**多步批量写 / 物理文件 / 事件通知**用以下 `Db.tx()` 模板——`Ret.fail` → lambda 返回 false → 回滚，事务提交后做 afterCommit：
 
 ```java
 @CheckPermission(PermissionKey.SIARGO)

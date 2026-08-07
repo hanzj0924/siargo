@@ -11,7 +11,6 @@
 
         <!-- ===== 流程环节看板（hero） ===== -->
         <div class="db-hero db-anim db-d1">
-            <div class="db-hero-ruler"></div>
             <div class="db-hero-top">
                 <span class="db-hero-top-item"><i class="fa fa-sitemap"></i> PIPELINE <b>5</b> STAGES</span>
                 <span class="db-hero-top-item"><i class="fa fa-shield"></i> STATUS <b>NORMAL</b></span>
@@ -27,15 +26,11 @@
                     <div class="db-hero-divider"></div>
                     <p class="db-hero-sub"><i class="fa fa-cube"></i> 本年度累计送检 <b>#(totalQsi ?? '0')</b> 只 · 检验 <b>#(totalQi ?? '0')</b> 只</p>
                 </div>
-                <div class="db-hero-stats">
-                    <div class="db-hero-stat is-done">
-                        <span class="db-hero-stat-num">#(flowCounts.allq ?? 0)</span>
-                        <span class="db-hero-stat-label">已完成报告单</span>
-                    </div>
-                    <div class="db-hero-stat is-pend">
-                        <span class="db-hero-stat-num" id="dbPend_#(pageId)">0</span>
-                        <span class="db-hero-stat-label">待处理报告单</span>
-                    </div>
+                <div class="db-hero-stat-pend">
+                    <span class="db-hero-stat-pend-num" id="dbPend_#(pageId)">0</span>
+                    <span class="db-hero-stat-pend-unit">单</span>
+                    <span class="db-hero-stat-pend-sep"></span>
+                    <span class="db-hero-stat-pend-label"><i class="fa fa-hourglass-half"></i> 待处理报告单</span>
                 </div>
             </div>
 
@@ -50,21 +45,13 @@
                 </div>
             </div>
 
-            <!-- pipeline：5 环节，语义色 data-color 驱动（siargo.css --flow-*） -->
+            <!-- pipeline：6 环节，语义色 data-color 驱动（siargo.css --flow-*） -->
             <div class="db-flow-title"><i class="fa fa-random"></i> PIPELINE // 环节流转</div>
             <div class="db-flow">
-                <!-- 托盘装饰层 -->
+                <!-- 托盘装饰层：顶部高光线、虚线输送线（穿过卡片间隙）、夹具角标（TL/BR 用 db-flow 伪元素，TR/BL 用此 div 伪元素） -->
                 <div class="db-flow-top-line"></div>
-                <div class="db-flow-bottom-line"></div>
-                <div class="db-flow-left-bar"></div>
-                <div class="db-flow-right-bar"></div>
-                <div class="db-flow-ticks-top"></div>
-                <div class="db-flow-ticks-bottom"></div>
-                <div class="db-flow-center-glow"></div>
-                <div class="db-flow-rivet db-flow-rivet-tl"></div>
-                <div class="db-flow-rivet db-flow-rivet-tr"></div>
-                <div class="db-flow-rivet db-flow-rivet-bl"></div>
-                <div class="db-flow-rivet db-flow-rivet-br"></div>
+                <div class="db-flow-baseline"></div>
+                <div class="db-flow-corners"></div>
                 <div class="db-stage db-anim db-d1" data-color="acc">
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-linechart"></i></span>
@@ -74,41 +61,51 @@
                     <div class="db-stage-label">精度待检</div>
                     <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</div>
                 </div>
-                <div class="db-flow-arrow" data-from="acc" data-to="vis"></div>
-                <div class="db-stage db-anim db-d2" data-color="vis">
+                <div class="db-flow-arrow" data-from="acc" data-to="leak"></div>
+                <div class="db-stage db-anim db-d2" data-color="leak">
+                    <div class="db-stage-head">
+                        <span class="db-stage-icon"><i class="fa fa-tachometer"></i></span>
+                        <i class="db-stage-step">02</i>
+                    </div>
+                    <div class="db-stage-num" data-count="#(flowCounts.ltq ?? 0)">0<small>单</small></div>
+                    <div class="db-stage-label">成品检漏待检</div>
+                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.ltq_qsi ?? 0)">0</b> 只</div>
+                </div>
+                <div class="db-flow-arrow" data-from="leak" data-to="vis"></div>
+                <div class="db-stage db-anim db-d3" data-color="vis">
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="fa fa-eye"></i></span>
-                        <i class="db-stage-step">02</i>
+                        <i class="db-stage-step">03</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.accq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">外观待检</div>
                     <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</div>
                 </div>
                 <div class="db-flow-arrow" data-from="vis" data-to="pack"></div>
-                <div class="db-stage db-anim db-d3" data-color="pack">
+                <div class="db-stage db-anim db-d4" data-color="pack">
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-gift"></i></span>
-                        <i class="db-stage-step">03</i>
+                        <i class="db-stage-step">04</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.funq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">包装待检</div>
                     <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</div>
                 </div>
                 <div class="db-flow-arrow" data-from="pack" data-to="appr"></div>
-                <div class="db-stage db-anim db-d4" data-color="appr">
+                <div class="db-stage db-anim db-d5" data-color="appr">
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon2 jbi-edit-fill"></i></span>
-                        <i class="db-stage-step">04</i>
+                        <i class="db-stage-step">05</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.appq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">待批准</div>
                     <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</div>
                 </div>
                 <div class="db-flow-arrow" data-from="appr" data-to="done"></div>
-                <div class="db-stage db-anim db-d5" data-color="done">
+                <div class="db-stage db-anim db-d6" data-color="done">
                     <div class="db-stage-head">
                         <span class="db-stage-icon"><i class="jbicon jb-xiangmushouxubeian"></i></span>
-                        <i class="db-stage-step">05</i>
+                        <i class="db-stage-step">06</i>
                     </div>
                     <div class="db-stage-num" data-count="#(flowCounts.allq ?? 0)">0<small>单</small></div>
                     <div class="db-stage-label">已完成</div>
@@ -226,8 +223,8 @@ var DashBoard_#(pageId) = {
 			var $qsi = $stage.find('[data-qsi]');
 			$qsi.text((Number($qsi.attr('data-qsi')) || 0).toLocaleString());
 		});
-		// 待处理总数 = 精度 + 外观 + 包装 + 待批准
-		var pending = (Number(flow.noq) || 0) + (Number(flow.accq) || 0) + (Number(flow.funq) || 0) + (Number(flow.appq) || 0);
+		// 待处理总数 = 精度 + 成品检漏 + 外观 + 包装 + 待批准
+		var pending = (Number(flow.noq) || 0) + (Number(flow.ltq) || 0) + (Number(flow.accq) || 0) + (Number(flow.funq) || 0) + (Number(flow.appq) || 0);
 		$('#dbPend_#(pageId)').text(pending.toLocaleString());
 		// 完成进度条：已完成 / 本年度总量
 		var allCnt = Number(flow.all) || 0;

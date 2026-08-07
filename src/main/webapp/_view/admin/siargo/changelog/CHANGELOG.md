@@ -1,5 +1,23 @@
 ## 更新日志
 
+### v2.9.0 (2026-08-06)
+- feat(qarep): 新增成品检漏检验环节——创建报告单选择"有/无成品检漏"（product.lt_status：1有/2无）；有检漏产品流程为 精度→成品检漏→外观→包装→批准→已完成（insp=6 成品检漏待检），无检漏产品保持原流程；新增角色 SN=215 成品检漏检验员
+- feat(qarep): 报告单列表新增"成品检漏待检"Tab 与步骤条节点（入口 admin/siargo/qarep），成品检漏审批按钮按 215 角色显示；外观/包装/待批准/已完成列表增加成品检漏列，全部 Tab 检验进度徽章支持 insp=6
+- feat(qarep): 审批工作台支持 insp=6（成品检漏待检→外观待检），精度审批的下一环节按选中产品 lt_status 动态显示（全有/全无/混合）
+- feat(qarep): 驳回按 lt_status 分支——外观驳回退回成品检漏（清空 lt 签名）或退回精度（清空 accq）；成品检漏驳回退回精度；编辑页切换 lt_status 自动归一化状态并补/清签名
+- feat(qarep): 详情页产品型号右侧新增"检漏环节"只读单选；检验进度流程仅在成品检漏已完成或驳回重检时显示对应节点，待检不显示
+- feat(api): 订单状态 API 增加成品检漏——status.hasLeakTest、timeline.leakTest（lt_time/lt_name）、insp=6 枚举；接口文档升级 V2.1（/api/siargo/order/status、/batchStatus）
+- style(qarep): 成品检漏环节使用紫色主题色与压力表图标（贴合水压/气压检漏业务），徽章白字，siargo.css/.min.css 同步
+- feat(dashboard): 首页看板流程总览新增"成品检漏待检"环节卡片，待处理总数计入 ltq/ltq_qsi
+- chore(model): BaseProduct 重新生成新增 lt_status/lt_uid/lt_time 字段，ModelGenerator 聚焦生成 siargo_product
+- feat(equipment): 设备列表页仪表盘重构——状态统计卡与表格操作列（查看证书/详情/对比维修记录）
+- feat(equipment): 设备时间线页新增可折叠设备概要条（含下次检校等汇总信息）
+- refactor(equipment): 证书删除与对比记录级联删除改为 Db.tx + afterCommit 物理文件统一删除（事务内仅删 DB，提交后删物理文件）
+- fix(equipment): 维修记录关联的对比记录已审核（audit_status=2）时禁止修改
+- refactor(imi): 图片删除改为 Db.tx + afterCommit 物理文件统一删除（queryFilePathsByIds 事务外收集路径）
+- refactor(pdffolder): 版号文件夹删除改为事务外收集目录 + 事务内删 DB + 提交后统一删除物理目录
+- feat(qarep): PDF 数据映射新增成品检漏字段 lt_name/lt_time/lt_email（可选取值，模板可绑定）
+
 ### v2.8.4 (2026-08-04)
 - feat(equipment): 批量编制/批量更改状态表单页增加设备列表数据回显——EquipmentAdminController 批量表单 action 查询设备列表传入页面，batchInspection.html/batchStatus.html 展示设备信息表格
 - feat(equipment): 设备时间线分页增加类型筛选——paginateTimelineDatas 支持 type 参数过滤，timeline/index.html 增加类型筛选下拉

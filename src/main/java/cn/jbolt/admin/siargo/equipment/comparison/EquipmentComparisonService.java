@@ -236,8 +236,8 @@ public class EquipmentComparisonService extends JBoltBaseService<EquipmentCompar
 	@Override
 	protected String afterDelete(EquipmentComparison equipmentComparison, Kv kv) {
 		addDeleteSystemLog(equipmentComparison.getId(), JBoltUserKit.getUserId(), equipmentComparison.getDescription());
-		// 级联删除关联的证书记录（同时清理磁盘图片文件）
-		equipmentCertificateService.deleteByComparisonId(equipmentComparison.getId());
+		// 级联删除关联的证书记录（只删 DB；物理文件由 Controller 在事务提交后统一删除）
+		equipmentCertificateService.deleteRecordsByComparisonId(equipmentComparison.getId());
 		return null;
 	}
 	

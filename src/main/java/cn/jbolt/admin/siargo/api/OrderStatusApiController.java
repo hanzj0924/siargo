@@ -13,6 +13,7 @@ import com.jfinal.plugin.activerecord.Record;
 
 import cn.jbolt.admin.siargo.apicalllog.ApiCallLogService;
 import cn.jbolt.admin.siargo.qarep.QareportService;
+import cn.jbolt.admin.siargo.qarep.QarepConst;
 import cn.jbolt.core.util.JBoltIpUtil;
 import cn.jbolt.core.api.JBoltApiBaseController;
 import cn.jbolt.core.api.OpenAPI;
@@ -151,22 +152,26 @@ public class OrderStatusApiController extends JBoltApiBaseController {
 	 * {
 	 *   "model": "SFM-3013",
 	 *   "serialNo": "SN001",
-	 *   "status": { "insp": 2, "label": "精度检验已完成" },
+	 *   "status": { "insp": 2, "label": "精度检验已完成", "hasLeakTest": true },
 	 *   "timeline": {
-	 *     "accuracy":   { "time": "2026-01-01 10:00", "operator": "张三" },
-	 *     "appearance": { "time": "", "operator": "" },
-	 *     "packaging":  { "time": "", "operator": "" },
-	 *     "approval":   { "time": "", "operator": "" }
+	 *     "accuracy":  { "time": "2026-01-01 10:00", "operator": "张三" },
+	 *     "leakTest":  { "time": "2026-01-01 11:00", "operator": "李四" },
+	 *     "appearance":{ "time": "", "operator": "" },
+	 *     "packaging": { "time": "", "operator": "" },
+	 *     "approval":  { "time": "", "operator": "" }
 	 *   }
 	 * }
 	 * </pre>
 	 */
 	private Kv mapToOrderStatusItem(Record record) {
 		int insp = record.getInt("insp") != null ? record.getInt("insp") : 0;
+		Integer ltStatus = record.getInt("lt_status");
+		boolean hasLeakTest = ltStatus != null && ltStatus == QarepConst.LT_STATUS_YES;
 		return Kv.by("model", record.getStr("model"))
 			.set("serialNo", record.getStr("number"))
-			.set("status", Kv.by("insp", insp).set("label", inspLabel(insp)))
+			.set("status", Kv.by("insp", insp).set("label", inspLabel(insp)).set("hasLeakTest", hasLeakTest))
 			.set("timeline", Kv.by("accuracy", timelineNode(record, "accq_time", "accq_name"))
+				.set("leakTest", timelineNode(record, "lt_time", "lt_name"))
 				.set("appearance", timelineNode(record, "funq_time", "funq_name"))
 				.set("packaging", timelineNode(record, "appq_time", "appq_name"))
 				.set("approval", timelineNode(record, "allq_time", "allq_name")));
@@ -179,6 +184,7 @@ public class OrderStatusApiController extends JBoltApiBaseController {
 		switch (insp) {
 			case 1: return "待检验";
 			case 2: return "精度检验已完成";
+			case 6: return "成品检漏检验待检";
 			case 3: return "外观检验已完成";
 			case 4: return "包装检验已完成";
 			case 5: return "已完成检验";
