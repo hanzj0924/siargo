@@ -11,105 +11,77 @@
 
         <!-- ===== 流程环节看板（hero） ===== -->
         <div class="db-hero db-anim db-d1">
-            <div class="db-hero-top">
-                <span class="db-hero-top-item"><i class="fa fa-sitemap"></i> PIPELINE <b>5</b> STAGES</span>
-                <span class="db-hero-top-item"><i class="fa fa-shield"></i> STATUS <b>NORMAL</b></span>
-                <span class="db-hero-top-item"><i class="fa fa-clock-o"></i> UPDATE <b id="dbMetaTime_#(pageId)">--:--:--</b></span>
-            </div>
+            <!-- 标题行：左侧标题 + 年度累计，右侧状态芯片 -->
             <div class="db-hero-head">
                 <div class="db-hero-title-group">
-                    <h4 class="db-hero-title">
-                        <span class="db-hero-title-icon"><i class="fa fa-tasks"></i></span>
-                        报告单流程总览
-                        <span class="db-hero-year" id="dbYear_#(pageId)"></span>
-                    </h4>
-                    <div class="db-hero-divider"></div>
-                    <p class="db-hero-sub"><i class="fa fa-cube"></i> 本年度累计送检 <b>#(totalQsi ?? '0')</b> 只 · 检验 <b>#(totalQi ?? '0')</b> 只</p>
+                    <span class="db-hero-title-icon"><i class="fa fa-tasks"></i></span>
+                    <div class="db-hero-title-txt">
+                        <h4 class="db-hero-title">报告单流程总览 <span class="db-hero-year" id="dbYear_#(pageId)"></span></h4>
+                        <p class="db-hero-sub">
+                            <span class="db-sub-item"><i class="jbicon2 jbi-send"></i>本年度送检 <b>#(totalQsi ?? '0')</b> 只</span>
+                            <span class="db-sub-sep"></span>
+                            <span class="db-sub-item"><i class="jbicon2 jbi-experiment"></i>本年度检验 <b>#(totalQi ?? '0')</b> 只</span>
+                        </p>
+                    </div>
                 </div>
-                <div class="db-hero-stat-pend">
-                    <span class="db-hero-stat-pend-num" id="dbPend_#(pageId)">0</span>
-                    <span class="db-hero-stat-pend-unit">单</span>
-                    <span class="db-hero-stat-pend-sep"></span>
-                    <span class="db-hero-stat-pend-label"><i class="fa fa-hourglass-half"></i> 待处理报告单</span>
+                <div class="db-hero-meta">
+                    <span class="db-meta-chip db-meta-live"><i class="fa fa-circle"></i> 运行正常</span>
+                    <span class="db-meta-chip"><i class="fa fa-clock-o"></i> 更新 <b id="dbMetaTime_#(pageId)">--:--:--</b></span>
                 </div>
             </div>
 
-            <!-- 本年度完成进度 -->
-            <div class="db-progress">
-                <div class="db-progress-head">
-                    <span><i class="fa fa-line-chart"></i> 本年度完成进度</span>
-                    <b id="dbDonePct_#(pageId)">0%</b>
+            <!-- 统计模块：待处理 vs 已完成（各模块下方短色条分割，2 段） -->
+            <div class="db-hero-stats">
+                <div class="db-stat db-stat-pend">
+                    <div class="db-stat-head"><span class="db-stat-ico db-stat-ico-pend"><i class="fa fa-hourglass-half"></i></span>待处理 · 报告单</div>
+                    <b class="db-stat-num db-stat-num-pend" id="dbPend_#(pageId)">0</b>
+                    <span class="db-stat-sub">各环节在检 · 单位(单)</span>
+                    <span class="db-stat-bar db-stat-bar-pend"></span>
                 </div>
-                <div class="db-progress-track">
-                    <div class="db-progress-fill" id="dbDoneBar_#(pageId)"></div>
+                <div class="db-stat-divider"></div>
+                <div class="db-stat db-stat-done">
+                    <div class="db-stat-head"><span class="db-stat-ico db-stat-ico-done"><i class="fa fa-check-circle-o"></i></span>已完成 · 放行</div>
+                    <b class="db-stat-num db-stat-num-done" data-count="#(flowCounts.allq ?? 0)">0</b>
+                    <span class="db-stat-sub">本年度累计 · 单位(单)</span>
+                    <span class="db-stat-bar db-stat-bar-done"></span>
                 </div>
             </div>
 
-            <!-- pipeline：6 环节，语义色 data-color 驱动（siargo.css --flow-*） -->
-            <div class="db-flow-title"><i class="fa fa-random"></i> PIPELINE // 环节流转</div>
-            <div class="db-flow">
-                <!-- 托盘装饰层：顶部高光线、虚线输送线（穿过卡片间隙）、夹具角标（TL/BR 用 db-flow 伪元素，TR/BL 用此 div 伪元素） -->
-                <div class="db-flow-top-line"></div>
-                <div class="db-flow-baseline"></div>
-                <div class="db-flow-corners"></div>
-                <div class="db-stage db-anim db-d1" data-color="acc">
-                    <div class="db-stage-head">
-                        <span class="db-stage-icon"><i class="jbicon2 jbi-linechart"></i></span>
-                        <i class="db-stage-step">01</i>
-                    </div>
-                    <div class="db-stage-num" data-count="#(flowCounts.noq ?? 0)">0<small>单</small></div>
-                    <div class="db-stage-label">精度待检</div>
-                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</div>
+            <!-- 环节堆叠占比：一条 100% 宽堆叠条按 5 个在检环节单数占比分段（已完成已在统计模块展示） -->
+            <div class="db-stack">
+                <div class="db-stack-bar">
+                    <div class="db-stack-seg" data-color="acc" data-count="#(flowCounts.noq ?? 0)"></div>
+                    <div class="db-stack-seg" data-color="leak" data-count="#(flowCounts.ltq ?? 0)"></div>
+                    <div class="db-stack-seg" data-color="vis" data-count="#(flowCounts.accq ?? 0)"></div>
+                    <div class="db-stack-seg" data-color="pack" data-count="#(flowCounts.funq ?? 0)"></div>
+                    <div class="db-stack-seg" data-color="appr" data-count="#(flowCounts.appq ?? 0)"></div>
                 </div>
-                <div class="db-flow-arrow" data-from="acc" data-to="leak"></div>
-                <div class="db-stage db-anim db-d2" data-color="leak">
-                    <div class="db-stage-head">
-                        <span class="db-stage-icon"><i class="fa fa-tachometer"></i></span>
-                        <i class="db-stage-step">02</i>
+                <div class="db-stack-cols">
+                    <div class="db-stack-col" data-color="acc">
+                        <span class="db-stack-name"><i class="db-stack-dot"></i>精度待检</span>
+                        <b class="db-stack-num" data-count="#(flowCounts.noq ?? 0)">0</b>
+                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</span>
                     </div>
-                    <div class="db-stage-num" data-count="#(flowCounts.ltq ?? 0)">0<small>单</small></div>
-                    <div class="db-stage-label">成品检漏待检</div>
-                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.ltq_qsi ?? 0)">0</b> 只</div>
-                </div>
-                <div class="db-flow-arrow" data-from="leak" data-to="vis"></div>
-                <div class="db-stage db-anim db-d3" data-color="vis">
-                    <div class="db-stage-head">
-                        <span class="db-stage-icon"><i class="fa fa-eye"></i></span>
-                        <i class="db-stage-step">03</i>
+                    <div class="db-stack-col" data-color="leak">
+                        <span class="db-stack-name"><i class="db-stack-dot"></i>成品检漏</span>
+                        <b class="db-stack-num" data-count="#(flowCounts.ltq ?? 0)">0</b>
+                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.ltq_qsi ?? 0)">0</b> 只</span>
                     </div>
-                    <div class="db-stage-num" data-count="#(flowCounts.accq ?? 0)">0<small>单</small></div>
-                    <div class="db-stage-label">外观待检</div>
-                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</div>
-                </div>
-                <div class="db-flow-arrow" data-from="vis" data-to="pack"></div>
-                <div class="db-stage db-anim db-d4" data-color="pack">
-                    <div class="db-stage-head">
-                        <span class="db-stage-icon"><i class="jbicon2 jbi-gift"></i></span>
-                        <i class="db-stage-step">04</i>
+                    <div class="db-stack-col" data-color="vis">
+                        <span class="db-stack-name"><i class="db-stack-dot"></i>外观待检</span>
+                        <b class="db-stack-num" data-count="#(flowCounts.accq ?? 0)">0</b>
+                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</span>
                     </div>
-                    <div class="db-stage-num" data-count="#(flowCounts.funq ?? 0)">0<small>单</small></div>
-                    <div class="db-stage-label">包装待检</div>
-                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</div>
-                </div>
-                <div class="db-flow-arrow" data-from="pack" data-to="appr"></div>
-                <div class="db-stage db-anim db-d5" data-color="appr">
-                    <div class="db-stage-head">
-                        <span class="db-stage-icon"><i class="jbicon2 jbi-edit-fill"></i></span>
-                        <i class="db-stage-step">05</i>
+                    <div class="db-stack-col" data-color="pack">
+                        <span class="db-stack-name"><i class="db-stack-dot"></i>包装待检</span>
+                        <b class="db-stack-num" data-count="#(flowCounts.funq ?? 0)">0</b>
+                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</span>
                     </div>
-                    <div class="db-stage-num" data-count="#(flowCounts.appq ?? 0)">0<small>单</small></div>
-                    <div class="db-stage-label">待批准</div>
-                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</div>
-                </div>
-                <div class="db-flow-arrow" data-from="appr" data-to="done"></div>
-                <div class="db-stage db-anim db-d6" data-color="done">
-                    <div class="db-stage-head">
-                        <span class="db-stage-icon"><i class="jbicon jb-xiangmushouxubeian"></i></span>
-                        <i class="db-stage-step">06</i>
+                    <div class="db-stack-col" data-color="appr">
+                        <span class="db-stack-name"><i class="db-stack-dot"></i>待批准</span>
+                        <b class="db-stack-num" data-count="#(flowCounts.appq ?? 0)">0</b>
+                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</span>
                     </div>
-                    <div class="db-stage-num" data-count="#(flowCounts.allq ?? 0)">0<small>单</small></div>
-                    <div class="db-stage-label">已完成</div>
-                    <div class="db-stage-qsi"><i class="fa fa-cube"></i> 送检 <b data-qsi="#(flowCounts.allq_qsi ?? 0)">0</b> 只</div>
                 </div>
             </div>
         </div>
@@ -194,7 +166,8 @@ var DashBoard_#(pageId) = {
 
 	init: function () {
 		$('#dbYear_#(pageId)').text(new Date().getFullYear() + ' 年度');
-		this.initStages();
+		this.initMetaTime();
+		this.initStack();
 		this.initBarChart();
 		this.initQuarterChart();
 		this.initLineChart();
@@ -202,40 +175,60 @@ var DashBoard_#(pageId) = {
 		this.observeResize();
 	},
 
-	// ---- 流程看板：数字滚动 + 各环节送检只数 + 待处理总数 ----
-	initStages: function () {
+	// ---- 刷新时间 ----
+	initMetaTime: function () {
+		var _d = new Date(), _p = function (n) { return n < 10 ? '0' + n : '' + n; };
+		var _t = _p(_d.getHours()) + ':' + _p(_d.getMinutes()) + ':' + _p(_d.getSeconds());
+		$('#dbMetaTime_#(pageId)').text(_t);
+	},
+
+	// ---- 统计模块 + 环节堆叠占比：待处理/已完成大数字、5 环节堆叠段 + 数字滚动 + hover 联动 ----
+	initStack: function () {
 		var flow = this.flow || {};
-		$('.db-stage').each(function () {
-			var $stage = $(this);
-			var count = Number($stage.find('.db-stage-num').attr('data-count')) || 0;
-			// 数字滚动入场（600ms ease-out）
-			var $num = $stage.find('.db-stage-num');
+		var pending = (Number(flow.noq) || 0) + (Number(flow.ltq) || 0) + (Number(flow.accq) || 0) + (Number(flow.funq) || 0) + (Number(flow.appq) || 0);
+		var doneCnt = Number(flow.allq) || 0;
+		// 统计模块大数字（待处理直接显示，已完成千分位）
+		$('#dbPend_#(pageId)').text(pending.toLocaleString());
+		var $doneNum = $('.db-stat-num-done');
+		$doneNum.text(doneCnt.toLocaleString());
+		// 堆叠段宽 = 在检单数占 5 环节总量比例
+		var $segs = $('.db-stack-seg');
+		var total = 0;
+		$segs.each(function () { total += (Number($(this).attr('data-count')) || 0); });
+		$segs.each(function () {
+			var count = Number($(this).attr('data-count')) || 0;
+			var pct = total > 0 ? (count * 100 / total) : 0;
+			$(this).css('flex-grow', pct.toFixed(3));
+			$(this).css('flex-basis', '0%');
+			$(this).css('min-width', count > 0 ? '6px' : '0');
+		});
+		// 数字滚动（600ms ease-out）+ 送检千分位
+		$('.db-stack-col').each(function () {
+			var $col = $(this);
+			var count = Number($col.find('.db-stack-num').attr('data-count')) || 0;
+			var $num = $col.find('.db-stack-num');
 			var start = null;
 			function step(ts) {
 				if (!start) start = ts;
 				var p = Math.min((ts - start) / 600, 1);
 				var eased = 1 - Math.pow(1 - p, 3);
-				$num.html(Math.round(count * eased).toLocaleString() + '<small>单</small>');
+				$num.text(Math.round(count * eased).toLocaleString());
 				if (p < 1) requestAnimationFrame(step);
 			}
 			requestAnimationFrame(step);
-			// 该环节送检只数（千分位格式化）
-			var $qsi = $stage.find('[data-qsi]');
+			var $qsi = $col.find('[data-qsi]');
 			$qsi.text((Number($qsi.attr('data-qsi')) || 0).toLocaleString());
 		});
-		// 待处理总数 = 精度 + 成品检漏 + 外观 + 包装 + 待批准
-		var pending = (Number(flow.noq) || 0) + (Number(flow.ltq) || 0) + (Number(flow.accq) || 0) + (Number(flow.funq) || 0) + (Number(flow.appq) || 0);
-		$('#dbPend_#(pageId)').text(pending.toLocaleString());
-		// 完成进度条：已完成 / 本年度总量
-		var allCnt = Number(flow.all) || 0;
-		var doneCnt = Number(flow.allq) || 0;
-		var donePct = allCnt > 0 ? Math.round(doneCnt * 10000 / allCnt) / 100 : 0;
-		$('#dbDonePct_#(pageId)').text(donePct.toLocaleString() + '%');
-		$('#dbDoneBar_#(pageId)').css('width', donePct + '%');
-		// 刷新时间
-		var _d = new Date(), _p = function (n) { return n < 10 ? '0' + n : '' + n; };
-		var _t = _p(_d.getHours()) + ':' + _p(_d.getMinutes()) + ':' + _p(_d.getSeconds());
-		$('#dbMetaTime_#(pageId)').text(_t);
+		// 段 ↔ 列 hover 联动（按索引对应）
+		var self = this;
+		$segs.each(function (i) {
+			$(this).on('mouseenter', function () { $('.db-stack-col').eq(i).addClass('db-stack-col-hot'); });
+			$(this).on('mouseleave', function () { $('.db-stack-col').eq(i).removeClass('db-stack-col-hot'); });
+		});
+		$('.db-stack-col').each(function (i) {
+			$(this).on('mouseenter', function () { $segs.eq(i).addClass('db-stack-seg-hot'); });
+			$(this).on('mouseleave', function () { $segs.eq(i).removeClass('db-stack-seg-hot'); });
+		});
 	},
 
 	// ---- 通用：初始化/重建 ECharts 实例 ----
@@ -465,5 +458,32 @@ var DashBoard_#(pageId) = {
 function initDashboard_#(pageId)() {
 	DashBoard_#(pageId).init();
 }
+
+// 框架标签页切换自动刷新：切回本页（数据分析）时整页刷新一次，获取最新统计数据
+// 复用平台自身的 tab 点击事件委托（与平台切换逻辑同源）：
+// - 捕获阶段监听（先于平台在 jboltBody 上的冒泡 handler 执行），此时能读到 tab 点击前的激活状态
+// - 仅"从其他标签页切回本页"（点击的 tab 非当前激活，且其 key 就是本页所在 tabcontent 的 key）时刷新一次
+// - 非 data-auto-refresh 周期机制，无周期轮询；页面整页刷新后重新执行脚本时先移除旧监听，避免累积泄漏
+(function(){
+	if (window.__dbTabRefreshCapture) {
+		document.removeEventListener('click', window.__dbTabRefreshCapture, true);
+	}
+	var handler = function(e) {
+		var t = e.target;
+		var li = t && t.closest ? t.closest('ul.jbolt_tabs>li') : null;
+		if (!li || li.classList.contains('active')) return; // 点击的是当前激活 tab，跳过
+		if (t.closest && t.closest('i.close')) return; // 点击关闭按钮不触发刷新
+		var clickedKey = li.getAttribute('data-key');
+		setTimeout(function() {
+			var portal = $('#dbPend_#(pageId)').closest('.jbolt_tabcontent');
+			// portal 仍挂载、本页已激活、且其 tab key 与点击的 tab 一致 → 确实切回了本页，刷新一次
+			if (portal.length === 1 && portal[0].isConnected && portal.hasClass('active') && portal.attr('data-key') === clickedKey) {
+				portal.ajaxPortal(true);
+			}
+		}, 80);
+	};
+	window.__dbTabRefreshCapture = handler;
+	document.addEventListener('click', handler, true);
+})();
 </script>
 #end

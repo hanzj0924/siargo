@@ -1,4 +1,4 @@
-﻿#@jboltLayout()
+#@jboltLayout()
 #define css()
 <link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
@@ -329,8 +329,8 @@
 				<div class="row">
 					<div class="col-sm-4 text-left">
 						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="1060,870"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单 <span style='color:#f0ad4e;font-size:12px;margin-left:20px;'><i class='fa fa-exclamation-circle'></i> 注意编号！请按实际情况填写产品编号</span>"
+							<button data-openpage="dialog" data-area="1115,822"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建 <span style='color:#f0ad4e;font-size:18px;position:absolute;left:50%;top:0;line-height:56px;transform:translateX(-50%);'><i class='fa fa-exclamation-circle'></i> 注意编号：请按实际情况填写产品编号！</span>"
 								data-url="admin/siargo/qarep/add"
 								class="btn btn-outline-primary ">
 								<i class="fa fa-plus"></i> 新增
@@ -390,8 +390,8 @@
 				<div class="row">
 					<div class="col-sm-4 text-left">
 						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="1060,870"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建报告单 <span style='color:#f0ad4e;font-size:12px;margin-left:20px;'><i class='fa fa-exclamation-circle'></i> 注意编号！请按实际情况填写产品编号</span>"
+							<button data-openpage="dialog" data-area="1115,822"
+								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建 <span style='color:#f0ad4e;font-size:18px;position:absolute;left:50%;top:0;line-height:56px;transform:translateX(-50%);'><i class='fa fa-exclamation-circle'></i> 注意编号：请按实际情况填写产品编号！</span>"
 								data-url="admin/siargo/qarep/add"
 								class="btn btn-outline-primary ">
 								<i class="fa fa-plus"></i> 新增
@@ -1077,6 +1077,33 @@ function refreshAllQarepTables_#(pageId)() {
 
 // 暴露刷新入口供审批 iframe 跨窗口调用（须位于 refreshAllQarepTables_#(pageId) 声明之后，函数声明提升不受影响）
 window._qarepRefresh = refreshAllQarepTables_#(pageId);
+
+// 框架标签页切换自动刷新：切回本页（报单号）时刷新一次列表数据与流程数量
+// 复用平台自身的 tab 点击事件委托（与平台切换逻辑同源）：
+// - 捕获阶段监听（先于平台在 jboltBody 上的冒泡 handler 执行），此时能读到 tab 点击前的激活状态
+// - 仅"从其他标签页切回本页"（点击的 tab 非当前激活，且其 key 就是本页所在 tabcontent 的 key）时刷新一次
+// - 非 data-auto-refresh 周期机制，无周期轮询；页面整页刷新后重新执行脚本时先移除旧监听，避免累积泄漏
+(function(){
+	if (window.__qarepTabRefreshCapture) {
+		document.removeEventListener('click', window.__qarepTabRefreshCapture, true);
+	}
+	var handler = function(e) {
+		var t = e.target;
+		var li = t && t.closest ? t.closest('ul.jbolt_tabs>li') : null;
+		if (!li || li.classList.contains('active')) return; // 点击的是当前激活 tab，跳过
+		if (t.closest && t.closest('i.close')) return; // 点击关闭按钮不触发刷新
+		var clickedKey = li.getAttribute('data-key');
+		setTimeout(function() {
+			var portal = $('.jbolt_page[data-page-id="#(pageId)"]').closest('.jbolt_tabcontent');
+			// portal 仍挂载、本页已激活、且其 tab key 与点击的 tab 一致 → 确实切回了本页，刷新一次
+			if (portal.length === 1 && portal[0].isConnected && portal.hasClass('active') && portal.attr('data-key') === clickedKey) {
+				refreshAllQarepTables_#(pageId)();
+			}
+		}, 80);
+	};
+	window.__qarepTabRefreshCapture = handler;
+	document.addEventListener('click', handler, true);
+})();
 
 </script>
 #end

@@ -2405,171 +2405,331 @@ mark.dms-search-hit {
 #qarepTabView > .jbolt_tab_links { display: none !important; }
 
 .flow-stepper-nav {
-	--flow-acc:#a2d2ff;--flow-leak:#cdb4db;--flow-vis:#e9c46a;--flow-pack:#ffafcc;--flow-appr:#f4a261;--flow-done:#2a9d8f;
-	--fs-ink:#264653;--fs-line:#d8e6f4;
-	display: flex;
-	align-items: flex-start;
-	gap: 20px;
-	padding: 8px 15px;
-	background: #fbfdff;
-	border-bottom: 1px solid var(--fs-line);
-}
-
-/* 左侧汇总徽章——白底细边，选中态墨色填充 */
-.flow-summary-badge {
+	--fs-ink: #0d253d;
+	--fs-mute: #64748d;
+	--fs-faint: #94a3b8;
+	--fs-line: #e3e8ee;
+	/* 步骤条作用域内重定义更鲜艳的环节色（保持业务色相、提升饱和度亮度，仅本容器生效，不影响全局 --flow-*） */
+	--flow-acc: #00b3d4;
+	--flow-leak: #8b5cf6;
+	--flow-vis: #3b82f6;
+	--flow-pack: #f97316;
+	--flow-appr: #f43f5e;
+	--flow-done: #22c55e;
+	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 10px 18px;
+	gap: 18px;
+	margin: 12px 14px 4px;
+	padding: 24px 20px 18px;
 	background: #fff;
-	border-radius: 24px;
+	border: 1px solid var(--fs-line);
+	border-radius: 14px;
+	box-shadow: 0 1px 2px rgba(13,37,61,.04), 0 8px 24px -18px rgba(83,58,253,.18);
+	overflow: hidden;
+}
+/* 顶部极淡氛围光——Stripe 式靛紫→青微光（不抢内容） */
+.flow-stepper-nav::before {
+	content: "";
+	position: absolute;
+	top: -80px;
+	left: 8%;
+	right: 8%;
+	height: 140px;
+	background: radial-gradient(55% 100% at 30% 0%, rgba(83,58,253,.07), transparent 70%),
+	            radial-gradient(45% 100% at 75% 0%, rgba(0,223,216,.06), transparent 70%);
+	pointer-events: none;
+}
+
+/* 左侧汇总徽章——中性石墨色（无色相，绝不与任何环节色重合），图标置于半透明白圆底中 */
+.flow-summary-badge {
+	position: relative;
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 10px 18px 10px 12px;
+	background: #fff;
+	border-radius: 999px;
 	cursor: pointer;
-	transition: all 0.25s;
-	border: 1px solid #e3edf7;
-	box-shadow: 0 1px 2px rgba(38,70,83,.04);
+	transition: all .25s ease;
+	border: 1px solid var(--fs-line);
+	box-shadow: 0 1px 2px rgba(13,37,61,.05);
 	white-space: nowrap;
 	flex-shrink: 0;
 }
 .flow-summary-badge:hover {
-	background: #f3f8fd;
-	border-color: var(--fs-line);
+	border-color: #c3d3e4;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(13,37,61,.08);
 }
 .flow-summary-badge.active {
-	background: var(--fs-ink);
-	border-color: var(--fs-ink);
-	box-shadow: 0 2px 0 rgba(38,70,83,.2);
+	background: linear-gradient(135deg, #1c1e54, #0d1b3a);
+	border-color: #0d1b3a;
+	color: #fff;
+	box-shadow: 0 4px 14px rgba(28,30,84,.4);
 }
 .flow-summary-badge i {
-	font-size: 16px;
-	color: var(--fs-ink);
+	font-size: 14px;
+	color: #64748b;
+	width: 26px;
+	height: 26px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: color-mix(in srgb, #64748b 12%, #fff);
+	transition: all .25s ease;
 }
 .flow-summary-badge.active i {
 	color: #fff;
+	background: rgba(255,255,255,.16);
 }
 .flow-summary-text {
 	font-size: 13px;
 	font-weight: 600;
-	color: var(--fs-ink);
+	color: #1e2a5a;
+	letter-spacing: .2px;
 }
 .flow-summary-badge.active .flow-summary-text {
 	color: #fff;
 }
 
-/* 右侧步骤条 */
+/* 右侧步骤条——现代化流线：环节节点骑在一条首→尾连续渐变的彩色流线上，
+   像地铁线路/流水线，数量气泡浮在节点上方，流转方向与状态一目了然 */
 .flow-stepper {
+	position: relative;
+	z-index: 1;
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	flex: 1;
-	padding-top: 2px;
+	min-width: 0;
+	counter-reset: flow-step;
 }
 
-/* 步骤项 */
+/* 步骤项——节点 + 名称；数量气泡绝对定位在节点上方 */
 .flow-stepper-item {
+	position: relative;
+	z-index: 2;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	cursor: pointer;
 	flex-shrink: 0;
-	min-width: 72px;
+	min-width: 58px;
+	padding-top: 26px;
 }
 
-/* 圆形节点 */
+/* 环节节点——白底微渐变 + 内高光 + 环节色实色描边 + 提亮的环节色图标（混 18% 白，比环节色亮一档） */
 .flow-node {
-	width: 42px;
-	height: 42px;
+	width: 44px;
+	height: 44px;
 	border-radius: 50%;
-	background: #fff;
-	border: 2.5px solid #dee2e6;
+	background: radial-gradient(circle at 35% 28%, #ffffff, #f4f7fa 78%);
+	border: 2.5px solid var(--c);
+	color: color-mix(in srgb, var(--c) 82%, #fff);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 16px;
-	color: #adb5bd;
-	transition: all 0.3s;
+	font-size: 17px;
+	transition: all .25s ease;
 	position: relative;
+	box-shadow: inset 0 1px 1px rgba(255,255,255,.9), 0 2px 6px color-mix(in srgb, var(--c) 22%, transparent);
 }
 .flow-stepper-item:hover .flow-node {
-	transform: scale(1.1);
+	transform: translateY(-3px);
+	box-shadow: inset 0 1px 1px rgba(255,255,255,.9), 0 0 0 5px color-mix(in srgb, var(--c) 14%, transparent), 0 8px 18px color-mix(in srgb, var(--c) 30%, transparent);
 }
 
-/* 节点下方标签 */
+/* 环节名称——节点下方，前置等宽步骤序号（01-06） */
 .flow-node-label {
-	font-size: 13px;
-	color: #868e96;
-	margin-top: 6px;
-	text-align: center;
-	transition: all 0.25s;
-	white-space: nowrap;
-}
-
-/* 节点数量——等宽数字 */
-.flow-node-count {
-	font-size: 15px;
+	font-size: 12px;
 	font-weight: 600;
-	color: #9fb3c4;
-	margin-top: 2px;
-	transition: all 0.25s;
-	font-family: Consolas,"Courier New",monospace;
-	font-variant-numeric: tabular-nums;
+	color: var(--fs-mute);
+	margin-top: 9px;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+	transition: color .25s ease;
+}
+.flow-node-label::before {
+	content: counter(flow-step, decimal-leading-zero);
+	font-family: Consolas, "Courier New", monospace;
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: .5px;
+	color: var(--fs-faint);
+	margin-right: 4px;
+	vertical-align: 1px;
+	transition: color .25s ease;
+}
+.flow-stepper-item {
+	counter-increment: flow-step;
 }
 
-/* 连接——冰蓝轨道 + 实心三角头 */
-.flow-connector {
-	flex: 1;
-	height: 2px;
-	background: #c7dcf0;
-	margin-top: 20px;
-	min-width: 20px;
-	position: relative;
-	border-radius: 1px;
-}
-.flow-connector::after {
-	content: '';
+/* 数量气泡——浮在节点正上方，带指向节点的小三角，像站台标签 */
+.flow-node-count {
 	position: absolute;
-	right: -4px;
+	top: 0;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	min-width: 24px;
+	height: 21px;
+	padding: 0 8px;
+	border-radius: 999px;
+	background: #fff;
+	border: 1.5px solid color-mix(in srgb, var(--c) 45%, #fff);
+	color: var(--c);
+	font-size: 11.5px;
+	font-weight: 700;
+	line-height: 18px;
+	text-align: center;
+	font-family: Consolas, "Courier New", monospace;
+	font-variant-numeric: tabular-nums;
+	box-shadow: 0 2px 5px rgba(13,37,61,.1);
+	transition: all .25s ease;
+}
+.flow-node-count::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	border: 4px solid transparent;
+	border-top-color: color-mix(in srgb, var(--c) 45%, #fff);
+	transition: border-top-color .25s ease;
+}
+
+/* 连接流线——轨道槽透明：本体承载淡渐变流线（4px 居中），
+   右侧留出 margin（30px）给外侧双箭头与间距，连接线相应变短，避免箭头超出面板宽度；
+   选中段进度填充（::before）与右端外侧箭头（::after）构成"流向下一环节"的完整表达 */
+.flow-connector {
+	position: relative;
+	z-index: 1;
+	flex: 1;
+	height: 12px;
+	margin-top: -3px;
+	margin-right: 30px;
+	min-width: 18px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, color-mix(in srgb, var(--flow-acc) 30%, transparent), color-mix(in srgb, var(--flow-leak) 30%, transparent));
+	background-size: 100% 4px;
+	background-repeat: no-repeat;
+	background-position: center;
+	border: none;
+}
+.flow-stepper-item[data-color="leak"] + .flow-connector { background: linear-gradient(90deg, color-mix(in srgb, var(--flow-leak) 30%, transparent), color-mix(in srgb, var(--flow-vis) 30%, transparent)); background-size: 100% 4px; background-repeat: no-repeat; background-position: center; }
+.flow-stepper-item[data-color="vis"]  + .flow-connector { background: linear-gradient(90deg, color-mix(in srgb, var(--flow-vis) 30%, transparent), color-mix(in srgb, var(--flow-pack) 30%, transparent)); background-size: 100% 4px; background-repeat: no-repeat; background-position: center; }
+.flow-stepper-item[data-color="pack"] + .flow-connector { background: linear-gradient(90deg, color-mix(in srgb, var(--flow-pack) 30%, transparent), color-mix(in srgb, var(--flow-appr) 30%, transparent)); background-size: 100% 4px; background-repeat: no-repeat; background-position: center; }
+.flow-stepper-item[data-color="appr"] + .flow-connector { background: linear-gradient(90deg, color-mix(in srgb, var(--flow-appr) 30%, transparent), color-mix(in srgb, var(--flow-done) 30%, transparent)); background-size: 100% 4px; background-repeat: no-repeat; background-position: center; }
+
+/* 箭头——位于进度条右端外侧（连接线 margin 留出的 24px 空间内，right 负值超出连接线右边界），
+   指向下一环节；SVG 流线箭头（圆头平滑曲线 + 箭头头，比三角更流线），取该段"流向的后环节"色，
+   z-index 高于节点避免被盖住 */
+.flow-connector::after {
+	content: "";
+	position: absolute;
+	right: -22px;
 	top: 50%;
 	transform: translateY(-50%);
+	width: 26px;
+	height: 26px;
+	opacity: 0;
+	pointer-events: none;
+	z-index: 3;
+	background: var(--arr) no-repeat center / contain;
+	transition: opacity .25s ease;
+}
+.flow-stepper-item[data-color="acc"]  + .flow-connector::after { --arr: var(--flow-leak); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; }
+.flow-stepper-item[data-color="leak"] + .flow-connector::after { --arr: var(--flow-vis); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; }
+.flow-stepper-item[data-color="vis"]  + .flow-connector::after { --arr: var(--flow-pack); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; }
+.flow-stepper-item[data-color="pack"] + .flow-connector::after { --arr: var(--flow-appr); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; }
+.flow-stepper-item[data-color="appr"] + .flow-connector::after { --arr: var(--flow-done); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 18 11 12 5 6'/%3E%3Cpolyline points='13 18 19 12 13 6'/%3E%3C/svg%3E") no-repeat center / contain; }
+/* 选中段：箭头明显呼吸（明暗起伏 + 大小缩放 + 亮度变化，2.2s 慢循环） */
+.flow-stepper-item.active + .flow-connector::after {
+	opacity: 1;
+	animation: flow-arrow-breathe 2.2s ease-in-out infinite;
+}
+@keyframes flow-arrow-breathe {
+	0%, 100% { opacity: .5; transform: translateY(-50%) scale(1); filter: brightness(1); }
+	50% { opacity: 1; transform: translateY(-50%) scale(1.28); filter: brightness(1.3); }
+}
+
+/* 进度填充层——表示"进入下一环节"的进度条动画：
+   推进仅播放一次（width 0 → 100%，transition），推进完成后流光循环扫过；无阴影 */
+.flow-connector::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
 	width: 0;
-	height: 0;
-	border-top: 5px solid transparent;
-	border-bottom: 5px solid transparent;
-	border-left: 7px solid #a9c6e2;
+	height: 10px;
+	border-radius: 999px;
+	pointer-events: none;
+	z-index: 2;
+	opacity: 0;
+	transition: width .9s cubic-bezier(.4, 0, .2, 1), opacity .25s ease;
+}
+/* 各段进度填充渐变（前环节色→后环节色，实色亮带，叠在淡流线上形成进度对比） */
+.flow-stepper-item[data-color="acc"]  + .flow-connector::before { --glow: var(--flow-acc); background: linear-gradient(90deg, var(--flow-acc), var(--flow-leak)); }
+.flow-stepper-item[data-color="leak"] + .flow-connector::before { --glow: var(--flow-leak); background: linear-gradient(90deg, var(--flow-leak), var(--flow-vis)); }
+.flow-stepper-item[data-color="vis"]  + .flow-connector::before { --glow: var(--flow-vis); background: linear-gradient(90deg, var(--flow-vis), var(--flow-pack)); }
+.flow-stepper-item[data-color="pack"] + .flow-connector::before { --glow: var(--flow-pack); background: linear-gradient(90deg, var(--flow-pack), var(--flow-appr)); }
+.flow-stepper-item[data-color="appr"] + .flow-connector::before { --glow: var(--flow-appr); background: linear-gradient(90deg, var(--flow-appr), var(--flow-done)); }
+/* 选中环节后的连接线：进度条一次性推进 0 → 100%（仅一次，transition 驱动，不循环），
+   推进完成后静止，无流光 */
+.flow-stepper-item.active + .flow-connector::before {
+	opacity: 1;
+	width: 100%;
 }
 
-/* ===== 各步骤主题色：data-color → --c，通用规则按 --c 派生（粉彩 62% 混墨色得可读中调） ===== */
-.flow-stepper-item[data-color="acc"] { --c: var(--flow-acc); --ac: #4d9de0; }
-.flow-stepper-item[data-color="leak"] { --c: var(--flow-leak); --ac: #a78bfa; }
-.flow-stepper-item[data-color="vis"] { --c: var(--flow-vis); --ac: #f0b429; }
-.flow-stepper-item[data-color="pack"] { --c: var(--flow-pack); --ac: #e76f51; }
-.flow-stepper-item[data-color="appr"] { --c: var(--flow-appr); --ac: #e5548b; }
-.flow-stepper-item[data-color="done"] { --c: var(--flow-done); --ac: #2a9d8f; }
-.flow-stepper-item[data-color] .flow-node {
-	border-color: color-mix(in srgb, var(--c) 55%, #fff);
-	color: color-mix(in srgb, var(--c) 62%, var(--fs-ink));
-	background: color-mix(in srgb, var(--c) 12%, #fff);
-}
-/* 选中态——节点底色用各环节正色（--ac，不淡不深），图标白字 */
+/* ===== 各步骤主题色：直接使用全局业务色 --flow-*（与报告单业务 stepper 强调色对齐） ===== */
+.flow-stepper-item[data-color="acc"]  { --c: var(--flow-acc); }
+.flow-stepper-item[data-color="leak"] { --c: var(--flow-leak); }
+.flow-stepper-item[data-color="vis"]  { --c: var(--flow-vis); }
+.flow-stepper-item[data-color="pack"] { --c: var(--flow-pack); }
+.flow-stepper-item[data-color="appr"] { --c: var(--flow-appr); }
+.flow-stepper-item[data-color="done"] { --c: var(--flow-done); }
+
+/* 选中态——节点环节色实底填充 + 白图标 + 明显放大（弹跳动画） + 光晕呼吸；名称/数量气泡同步反白 */
 .flow-stepper-item[data-color].active .flow-node {
-	background: var(--ac);
+	background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 72%, #000));
 	color: #fff;
-	border-color: var(--ac);
-	box-shadow: 0 0 0 4px color-mix(in srgb, var(--ac) 28%, transparent);
+	animation: flow-node-pop .5s cubic-bezier(.34, 1.56, .64, 1) both, flow-node-pulse 2.4s ease-in-out .5s infinite;
+	box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 20%, transparent), 0 8px 20px color-mix(in srgb, var(--c) 36%, transparent);
 }
-.flow-stepper-item[data-color].active .flow-node-count {
-	color: var(--ac);
+/* 点击后弹跳放大：1 → 1.32 → 1.2，明显变大且有动感 */
+@keyframes flow-node-pop {
+	0% { transform: translateY(-2px) scale(1); }
+	55% { transform: translateY(-4px) scale(1.32); }
+	100% { transform: translateY(-3px) scale(1.2); }
 }
-
-/* 选中态通用 */
-.flow-stepper-item.active .flow-node {
-	transform: scale(1.15);
+@keyframes flow-node-pulse {
+	0%, 100% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 20%, transparent), 0 8px 20px color-mix(in srgb, var(--c) 36%, transparent); }
+	50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--c) 10%, transparent), 0 10px 26px color-mix(in srgb, var(--c) 46%, transparent); }
 }
 .flow-stepper-item.active .flow-node-label {
-	font-weight: 600;
-	color: var(--fs-ink);
+	color: var(--c);
+	font-weight: 700;
+}
+.flow-stepper-item.active .flow-node-label::before {
+	color: var(--c);
 }
 .flow-stepper-item.active .flow-node-count {
-	font-size: 17px;
-	font-weight: 700;
+	background: var(--c);
+	border-color: var(--c);
+	color: #fff;
+	box-shadow: 0 2px 8px color-mix(in srgb, var(--c) 34%, transparent);
+}
+.flow-stepper-item.active .flow-node-count::after {
+	border-top-color: var(--c);
+}
+/* 数量气泡 hover 微放大 */
+.flow-stepper-item:hover .flow-node-count {
+	transform: translate(-50%, -50%) scale(1.1);
 }
 
 /* ===== 流程推进按钮 ===== */
@@ -2876,132 +3036,102 @@ mark.dms-search-hit {
 /* ================================================================ */
 
 /* --- 6.1 页面容器 --- */
-/* 页面底——纵向微渐变 + 两角粉彩环境光晕（淡紫右上/冰蓝左下，低透明度纵深感，无点状纹理） */
-.db-wrapper{min-height:100%;padding:14px 10px 12px;background:radial-gradient(900px 480px at 100% 0%,rgba(205,180,219,.1),transparent 60%),radial-gradient(900px 520px at 0% 100%,rgba(189,224,254,.14),transparent 60%),linear-gradient(180deg,#f8fbfe 0%,#eff4fa 100%)}
+/* 页面底——canvas-soft 微灰白，衬托白色卡片 */
+.db-wrapper{min-height:100%;padding:14px 10px 12px;background:#fafafa}
 /* 内容区竖向滚动（页面内容超出视口时不被遮挡） */
 .db-scroll{height:100%;overflow-y:auto;overflow-x:hidden}
 
-/* --- 6.2 流程环节看板（hero）—— 日光全息检验台：粉彩点缀 + charcoal 墨色，作用域内重定义 --flow-* 不影响其他页面 --- */
-.db-hero{--flow-acc:#e76f51;--flow-leak:#a78bfa;--flow-vis:#f0b429;--flow-pack:#ffafcc;--flow-pack-deep:#d6538e;--flow-appr:#f4a261;--flow-done:#5b8def;--db-ink:#264653;--db-mute:#6b7f8d;--db-line:#d8e6f4;--db-spectral:linear-gradient(90deg,#cdb4db,#ffc8dd,#ffafcc,#bde0fe,#a2d2ff);position:relative;margin:0 4px 14px;padding:20px 22px 18px;border:1px solid var(--db-line);border-radius:12px;background:#fbfdff;box-shadow:0 1px 2px rgba(38,70,83,.04),0 8px 24px rgba(38,70,83,.06)}
-/* 顶部光谱条——签名元素（五段粉彩渐变） */
-.db-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--db-spectral);border-radius:12px 12px 0 0;pointer-events:none;z-index:2}
-/* 状态条——与下方 PIPELINE 托盘同款样式（白底 + 硬阴影 + L 型角标） */
-.db-hero-top{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:8px 22px;margin-bottom:14px;padding:10px 16px;border:1px solid var(--db-line);border-radius:12px;background:#fff;box-shadow:inset 0 1px 0 #fff,0 2px 0 #dbe6f2,0 6px 14px rgba(38,70,83,.04)}
-.db-hero-top::before{content:"";position:absolute;top:6px;left:6px;width:10px;height:10px;border-top:2px solid #a9c6e2;border-left:2px solid #a9c6e2;border-top-left-radius:3px;pointer-events:none}
-.db-hero-top::after{content:"";position:absolute;bottom:6px;right:6px;width:10px;height:10px;border-bottom:2px solid #a9c6e2;border-right:2px solid #a9c6e2;border-bottom-right-radius:3px;pointer-events:none}
-.db-hero-top-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--db-mute);letter-spacing:.5px;font-family:Consolas,"Courier New",monospace}
-.db-hero-top-item i{font-size:11px;color:var(--flow-appr)}
-.db-hero-top-item b{font-size:13px;font-weight:700;color:var(--db-ink);font-variant-numeric:tabular-nums}
-/* 扫描线——光谱色掠过顶部（保留动画） */
-.db-hero::after{content:"";position:absolute;top:0;left:-45%;width:42%;height:3px;background:linear-gradient(90deg,transparent,#ffc8dd,#a2d2ff,transparent);animation:db-scan 4s linear infinite;pointer-events:none;z-index:3;border-radius:1px}
-/* 状态指示灯——固定绿色 LED，位于第一项（PIPELINE）图标之前 */
-.db-hero-top-item:nth-child(1)::before{content:"";width:6px;height:6px;border-radius:50%;background:#22c55e;animation:db-pulse 1.6s ease-in-out infinite}
-/* 顶部五段流程色条——加宽 + 流动微光 */
-/* 网格纹理背景层 */
-/* 背景光晕装饰——三个光斑，缓慢浮动 */
+/* --- 6.2 流程环节看板（hero）—— Stripe 科技数据风：浅色 canvas + 电光靛紫主强调 + 顶部 mesh 渐变氛围光 + 环节流转漏斗（非卡片） --- */
+.db-hero{
+	--db-ink:#0d253d;          /* Stripe 深海军蓝文字 */
+	--db-mute:#64748d;
+	--db-faint:#94a3b8;
+	--db-line:#e3e8ee;         /* Stripe hairline */
+	--db-line-soft:#f1f5f9;
+	--db-accent:#533afd;       /* Stripe 电光靛紫 */
+	--db-accent-cyan:#00dfd8;  /* Stripe 渐变青 */
+	--db-pend:#06b6d4;         /* 待处理/待办青色（避开下方环节蓝紫黄橙玫红与已完成绿） */
+	--db-pend-warn:#e03131;    /* 待处理大数字警示红（醒目提醒，与下方流转色及待处理图标青色均不重合） */
+	--db-sep:#14b8a6;          /* 分割色 teal 蓝绿（2 段横向短条 + 竖向分隔统一用色，不与现有颜色重复） */
+	/* 环节色与报告单业务（qarep stepper 强调色）对齐，仅看板作用域，不影响全局 --flow-* */
+	--flow-acc:#5b8def;        /* 精度：蓝色（对齐业务精度强调色系） */
+	--flow-vis:#f0b429;        /* 外观：报告单业务黄 */
+	--flow-pack:#e76f51;       /* 包装：报告单业务橙 */
+	position:relative;margin:0 4px 14px;padding:22px 24px 22px;border:1px solid var(--db-line);border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px -16px rgba(83,58,253,.12);overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale
+}
+/* 顶部 mesh 渐变氛围光——Stripe 式靛紫→青大气光（极淡，不抢内容） */
+.db-hero::before{content:"";position:absolute;top:-120px;left:8%;right:8%;height:240px;background:radial-gradient(60% 100% at 30% 0%,color-mix(in srgb,var(--db-accent) 9%,transparent),transparent 70%),radial-gradient(50% 100% at 75% 0%,color-mix(in srgb,var(--db-accent-cyan) 8%,transparent),transparent 70%);pointer-events:none}
+/* 数据面板网格背景——极淡科技网格线，从下到上渐隐（底部清晰，顶部淡出但保持可见，整体协调） */
+.db-hero::after{content:"";position:absolute;inset:0;background-image:linear-gradient(color-mix(in srgb,var(--db-ink) 3%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--db-ink) 3%,transparent) 1px,transparent 1px);background-size:26px 26px;pointer-events:none;mask-image:linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,.62) 40%,#000 72%,#000 100%)}
 /* 标题行 */
-.db-hero-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:16px;flex-wrap:wrap;z-index:1}
-.db-hero-title{margin:0;font-size:22px;font-weight:800;color:var(--db-ink);letter-spacing:.6px;display:flex;align-items:center;gap:10px}
-.db-hero-title::after{content:"_";margin-left:2px;color:var(--flow-acc);animation:db-blink 1.2s steps(2) infinite}
-/* 标题图标——冰蓝实底舱 + 墨色图形 */
-.db-hero-title-icon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:9px;color:var(--db-ink);background:#eaf3fd;border:1px solid var(--flow-vis);box-shadow:0 2px 0 #cfe3f7}
-.db-hero-title-icon::before{content:none}
-.db-hero-title-icon i{font-size:19px}
-/* 标题分隔——光谱短条 */
-.db-hero-divider{width:64px;height:3px;border-radius:2px;margin:10px 0 0 54px;background:var(--db-spectral)}
-.db-hero-sub{margin:8px 0 0 54px;font-size:13.5px;color:var(--db-mute);letter-spacing:.3px;display:flex;align-items:center;gap:5px}
-.db-hero-sub i{font-size:11px;color:#b0c4d6}
-.db-hero-sub b{color:var(--db-ink);font-weight:700;font-family:Consolas,"Courier New",monospace;font-size:14px;font-variant-numeric:tabular-nums}
-/* 年份标签——白底细边胶囊 */
-.db-hero-year{display:inline-flex;align-items:center;height:28px;padding:0 14px;margin-left:6px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--db-ink);background:#fff;border:1px solid #e3edf7;letter-spacing:.5px;box-shadow:0 1px 2px rgba(38,70,83,.04);position:relative;overflow:hidden}
-.db-hero-year::before{content:none}
-/* hero 右侧统计卡——仅保留待处理（白底 + sandy 竖带 + 墨色数字，数字前置） */
-.db-hero-stat-pend{position:relative;display:flex;align-items:center;gap:12px;padding:12px 18px 12px 20px;border-radius:10px;background:#fff;border:1px solid #e3edf7;box-shadow:0 2px 0 rgba(244,162,97,.25),0 6px 14px rgba(38,70,83,.05);z-index:1;overflow:hidden}
-.db-hero-stat-pend::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--flow-appr)}
-.db-hero-stat-pend-num{font-size:34px;font-weight:800;line-height:1;color:var(--db-ink);font-family:Consolas,"Courier New",monospace;font-variant-numeric:tabular-nums;letter-spacing:.5px}
-.db-hero-stat-pend-unit{font-size:13px;color:#94a3b8;margin-left:-6px}
-.db-hero-stat-pend-sep{width:1px;height:34px;background:#e3edf7;flex-shrink:0}
-.db-hero-stat-pend-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--db-ink);letter-spacing:.3px}
-.db-hero-stat-pend-label i{font-size:12px;color:var(--flow-appr)}
-/* 本年度完成进度条——细轨道 + verdigris 实色填充 */
-.db-progress{position:relative;margin:0 0 16px;padding:0;border-radius:0;background:transparent;border:none;box-shadow:none}
-.db-progress-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:var(--db-mute);letter-spacing:.3px}
-.db-progress-head>span{display:flex;align-items:center;gap:6px}
-.db-progress-head i{color:var(--db-ink);font-size:12px}
-.db-progress-head b{font-size:20px;font-weight:800;font-family:Consolas,"Courier New",monospace;font-variant-numeric:tabular-nums;color:var(--db-ink);letter-spacing:.5px}
-.db-progress-track{height:10px;border-radius:5px;background:#eef4fa;box-shadow:none;overflow:hidden;position:relative;border:1px solid #dbe7f3}
-.db-progress-track::before{content:none}
-.db-progress-track::after{content:"";position:absolute;top:50%;left:0;right:0;height:1px;background:repeating-linear-gradient(90deg,rgba(38,70,83,.08) 0 1px,transparent 1px 20px);transform:translateY(-50%);pointer-events:none}
-.db-progress-fill{height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,#8fd3ab 0%,#2a9d8f 100%);box-shadow:none;position:relative;overflow:hidden;transition:width .8s cubic-bezier(.22,1,.36,1)}
-.db-progress-fill::before{content:none}
-.db-progress-fill::after{content:none}
-
-/* --- 6.3 流程 pipeline --- */
-.db-flow-title{display:flex;align-items:center;gap:7px;margin:14px 0 10px;font-size:12.5px;font-weight:700;color:var(--db-ink);letter-spacing:2px}
-.db-flow-title i{font-size:12px;color:var(--flow-appr)}
-/* 托盘——淡冰蓝底座（与 hero 面板、白色舱体形成三层叠放） */
-.db-flow{position:relative;display:flex;align-items:stretch;gap:10px;padding:20px;background:#f3f8fd;border:1px solid var(--db-line);border-radius:12px;box-shadow:inset 0 1px 0 #fff,0 2px 0 #dbe6f2,0 8px 20px rgba(38,70,83,.05);z-index:1}
-/* HUD 角标——四角 L 型（粉彩蓝）；TL/BR 用托盘伪元素 */
-.db-flow::before{content:"";position:absolute;top:7px;left:7px;width:12px;height:12px;border-top:2px solid #a9c6e2;border-left:2px solid #a9c6e2;border-top-left-radius:3px;pointer-events:none}
-.db-flow::after{content:"";position:absolute;bottom:7px;right:7px;width:12px;height:12px;border-bottom:2px solid #a9c6e2;border-right:2px solid #a9c6e2;border-bottom-right-radius:3px;pointer-events:none}
-/* TR/BL 角标——单 div 双伪元素补齐四角 */
-.db-flow-corners{position:absolute;inset:0;pointer-events:none}
-.db-flow-corners::before{content:"";position:absolute;top:7px;right:7px;width:12px;height:12px;border-top:2px solid #a9c6e2;border-right:2px solid #a9c6e2;border-top-right-radius:3px}
-.db-flow-corners::after{content:"";position:absolute;bottom:7px;left:7px;width:12px;height:12px;border-bottom:2px solid #a9c6e2;border-left:2px solid #a9c6e2;border-bottom-left-radius:3px}
-/* 顶部高光线——纯白 1px 实线 */
-.db-flow-top-line{position:absolute;top:0;left:40px;right:40px;height:1px;background:#fff;pointer-events:none}
-/* 输送轨道基线——已移除（不要整根线连接，环节间仅保留实心三角箭头） */
-.db-flow-baseline{display:none}
-/* 底部装饰线/左右装饰条/刻度线/中央光晕/四角铆钉——已移除（小黑点来源） */
-.db-flow-bottom-line,.db-flow-left-bar,.db-flow-right-bar,.db-flow-ticks-top,.db-flow-ticks-bottom,.db-flow-center-glow,.db-flow-rivet{display:none}
-/* 环节舱体卡：语义色由 data-color 驱动（--c 主色）；白底舱体 + 粉彩细节，数字统一墨色 */
-.db-stage{--c:var(--flow-done);--c-text:var(--db-ink);flex:1;min-width:0;position:relative;padding:18px 16px 16px;border-radius:8px;background:#fff;border:1px solid #d5e3f1;box-shadow:0 2px 0 rgba(38,70,83,.04),0 6px 14px rgba(38,70,83,.05);transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s ease,border-color .28s ease;cursor:default;overflow:hidden}
-/* 顶部色带——3px 实色语义色带 */
-.db-stage::before{content:"";position:absolute;top:0;left:14px;right:14px;height:3px;border-radius:0 0 3px 3px;background:var(--c)}
-/* hover 效果——上浮 + 边框语义色 + 阴影加深 */
-.db-stage:hover{transform:translateY(-4px);border-color:var(--c);box-shadow:0 3px 0 rgba(38,70,83,.06),0 10px 22px rgba(38,70,83,.09)}
-.db-stage:hover::before{height:4px}
-.db-stage:hover .db-stage-icon{transform:rotate(-4deg) scale(1.08)}
-/* 右上角 HUD 刻度角标（语义色 L 型） */
-.db-stage::after{content:"";position:absolute;top:8px;right:8px;width:10px;height:10px;border-top:2px solid color-mix(in srgb,var(--c) 75%,#fff);border-right:2px solid color-mix(in srgb,var(--c) 75%,#fff);opacity:.9;pointer-events:none}
-/* 旧碎装饰类——保留兜底隐藏 */
-.db-stage-corner-bl,.db-stage-bottom,.db-stage-texture,.db-stage-num-reflect,.db-stage-icon-reflect{display:none}
-.db-stage[data-color="acc"]{--c:var(--flow-acc)}
-.db-stage[data-color="leak"]{--c:var(--flow-leak)}
-.db-stage[data-color="vis"]{--c:var(--flow-vis)}
-.db-stage[data-color="pack"]{--c:var(--flow-pack)}
-.db-stage[data-color="appr"]{--c:var(--flow-appr)}
-.db-stage[data-color="done"]{--c:var(--flow-done)}
-/* 大数字统一墨色（覆盖 pack 旧规则） */
-.db-stage,.db-stage[data-color="pack"]{--c-text:var(--db-ink)}
-/* 卡内顶部：眉标居左 + 图标舱居右（order 换序，DOM 不动） */
-.db-stage-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;position:relative;z-index:1}
-/* 图标舱——粉彩实底 + 墨色图形，移至右上 */
-.db-stage-icon{order:2;width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--db-ink);background:var(--c);border:1px solid color-mix(in srgb,var(--c) 55%,#fff);box-shadow:0 2px 0 color-mix(in srgb,var(--c) 45%,#fff);position:relative;transition:transform .28s cubic-bezier(.22,1,.36,1)}
-/* 右下角脉冲圆点（白底语义色环） */
-.db-stage-icon::after{content:"";position:absolute;right:-4px;bottom:-4px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--c);animation:db-pulse 1.8s ease-in-out infinite}
-.db-stage-icon i{font-size:18px}
-/* STAGE 眉标——白底细边 + 等宽字（居左） */
-.db-stage-step{display:inline-flex;align-items:center;justify-content:center;min-width:0;height:32px;padding:0 11px;border-radius:6px;font-size:14px;font-weight:800;color:var(--db-ink);background:#fff;border:1px solid color-mix(in srgb,var(--c) 65%,#fff);font-family:Consolas,"Courier New",monospace;letter-spacing:1px;font-style:normal}
-.db-stage-step::before{content:"STAGE ";font-size:11px;font-weight:600;margin-right:4px;color:var(--db-mute)}
-/* 大数字 + 单位——墨色等宽（去渐变文字） */
-.db-stage-num{font-size:38px;font-weight:800;line-height:1.1;letter-spacing:.5px;font-family:Consolas,"Courier New",monospace;font-variant-numeric:tabular-nums;position:relative;z-index:1;color:var(--c-text)}
-.db-stage-num small{font-size:13px;font-weight:500;color:#94a3b8;margin-left:4px}
-/* 环节标签——粉彩色点 + 底部短实线 */
-.db-stage-label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--db-ink);margin-top:8px;letter-spacing:.3px;position:relative;z-index:1;padding-bottom:4px}
-.db-stage-label::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c);border:1px solid color-mix(in srgb,var(--c) 60%,#fff);flex-shrink:0}
-.db-stage-label::after{content:"";position:absolute;left:0;bottom:0;width:24px;height:2px;border-radius:1px;background:color-mix(in srgb,var(--c) 55%,#fff)}
-/* 环节送检只数——细发丝线分隔 */
-.db-stage-qsi{font-size:13px;color:#8494ab;margin-top:12px;padding-top:11px;border-top:1px solid #e3edf7;letter-spacing:.3px;display:flex;align-items:center;gap:5px;position:relative;z-index:1}
-.db-stage-qsi i{font-size:11px;color:#b0c4d6}
-.db-stage-qsi b{color:var(--c-text);font-weight:700;font-family:Consolas,"Courier New",monospace;font-size:14px;font-variant-numeric:tabular-nums}
-/* 环节间箭头——细轨道 + 小三角，中性石板灰（避开托盘底色与卡片白，不带环节语义色） */
-.db-flow-arrow{display:flex;align-items:center;justify-content:center;width:36px;flex-shrink:0;position:relative;z-index:1}
-/* 细轨道 */
-.db-flow-arrow::before{content:"";width:14px;height:2px;border-radius:1px;background:#cdd5de}
-/* 小三角头 */
-.db-flow-arrow::after{content:"";width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #8a97a6}
-/* 原按目标环节变色的箭头映射——已移除（统一中性灰） */
+.db-hero-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;z-index:1}
+.db-hero-title-group{display:flex;align-items:center;gap:14px;min-width:0}
+/* 标题图标——电光靛紫舱 + 靛紫渐变图形 */
+.db-hero-title-icon{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:42px;height:42px;border-radius:11px;color:#fff;background:linear-gradient(135deg,var(--db-accent),color-mix(in srgb,var(--db-accent) 55%,var(--db-accent-cyan)));box-shadow:0 4px 12px -4px color-mix(in srgb,var(--db-accent) 55%,transparent)}
+.db-hero-title-icon i{font-size:18px}
+.db-hero-title{margin:0;font-size:19px;font-weight:700;color:var(--db-ink);letter-spacing:-.3px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* 年份标签——mono 技术标签 */
+.db-hero-year{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:6px;font-size:11.5px;font-weight:600;color:var(--db-mute);background:var(--db-line-soft);border:1px solid var(--db-line);font-variant-numeric:tabular-nums;letter-spacing:.3px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.db-hero-sub{display:flex;align-items:center;gap:0;margin:5px 0 0;flex-wrap:wrap}
+/* 副标题指标——轻量内联行：图标 + 文字 + 数值，无底无边框（避免与右侧状态芯片视觉重复） */
+.db-sub-item{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--db-faint);white-space:nowrap}
+.db-sub-item i{font-size:12px;color:var(--db-accent)}
+.db-sub-item b{color:var(--db-ink);font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+/* 指标间分隔点 */
+.db-sub-sep{width:3px;height:3px;border-radius:50%;background:var(--db-line);margin:0 10px;flex-shrink:0;align-self:center}
+/* 右侧状态芯片 */
+.db-hero-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.db-meta-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:9999px;font-size:12px;color:var(--db-mute);background:var(--db-line-soft);border:1px solid var(--db-line)}
+.db-meta-chip i{font-size:10px;color:var(--db-faint)}
+.db-meta-chip b{font-size:12.5px;font-weight:600;color:var(--db-ink);font-variant-numeric:tabular-nums}
+.db-meta-live i{color:var(--flow-done);font-size:8px;animation:db-pulse 1.6s ease-in-out infinite}
+/* 统计模块——待处理 vs 已完成（无面板，自由布局） */
+.db-hero-stats{position:relative;display:flex;align-items:center;gap:0;margin:18px 0 12px;z-index:1}
+.db-stat{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:2px 12px}
+.db-stat-head{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--db-mute);letter-spacing:.3px}
+.db-stat-ico{width:24px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.db-stat-ico-pend{color:var(--db-pend);background:color-mix(in srgb,var(--db-pend) 13%,#fff)}
+.db-stat-ico-done{color:var(--flow-done);background:color-mix(in srgb,var(--flow-done) 12%,#fff)}
+.db-stat-num{font-size:38px;font-weight:800;line-height:1.05;letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+.db-stat-num-pend{color:var(--db-pend-warn)}
+.db-stat-num-done{color:var(--flow-done)}
+.db-stat-sub{font-size:11px;color:var(--db-faint)}
+/* 模块底部短色条——2 段横向分割（待处理/已完成各一条）+ 一点竖向，统一用 --db-sep 色 */
+.db-stat-bar{width:300px;height:6px;border-radius:9999px;margin-top:12px;flex-shrink:0;background:var(--db-sep)}
+.db-stat-bar-pend,.db-stat-bar-done{background:var(--db-sep)}
+/* 竖向分隔——teal 色短竖线（一点竖向：固定高度覆盖数字区，居中，不贯穿；粗细与颜色均与横向短条一致，统一醒目） */
+.db-stat-divider{width:6px;height:70px;align-self:center;background:var(--db-sep);border-radius:9999px;flex-shrink:0}
+/* --- 6.3 环节堆叠占比条：一条 100% 宽大胶囊条按 6 环节在检单数占比分段（数据可视化，非卡片/列表） --- */
+.db-stack{position:relative;margin-top:16px;z-index:1}
+/* 堆叠条——浅灰轨道 + 内部环节色分段（flex 按 flex-grow 比例分布，段间 3px 白缝） */
+.db-stack-bar{position:relative;display:flex;align-items:stretch;height:34px;border-radius:9999px;background:var(--db-line-soft);border:1px solid var(--db-line);overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.05) inset}
+/* 分段——环节色渐变（左浅右深），hover 发光上浮 */
+.db-stack-seg{--c:var(--flow-done);position:relative;flex:0 0 auto;height:100%;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 88%,#fff),var(--c));transition:filter .2s ease,box-shadow .2s ease,transform .2s ease}
+.db-stack-seg + .db-stack-seg{margin-left:3px}
+.db-stack-seg[data-color="acc"]{--c:var(--flow-acc)}
+.db-stack-seg[data-color="leak"]{--c:var(--flow-leak)}
+.db-stack-seg[data-color="vis"]{--c:var(--flow-vis)}
+.db-stack-seg[data-color="pack"]{--c:var(--flow-pack)}
+.db-stack-seg[data-color="appr"]{--c:var(--flow-appr)}
+.db-stack-seg[data-color="done"]{--c:var(--flow-done)}
+.db-stack-seg:hover,.db-stack-seg-hot{filter:brightness(1.08);box-shadow:0 0 14px color-mix(in srgb,var(--c) 55%,transparent)}
+/* 标签列——5 列与段对齐：色点 + 环节名 + 大数字 + 送检量 */
+.db-stack-cols{position:relative;display:flex;margin-top:16px;gap:8px}
+.db-stack-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;transition:transform .2s ease}
+.db-stack-col:hover,.db-stack-col-hot{transform:translateY(-3px)}
+.db-stack-name{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--db-mute);white-space:nowrap}
+.db-stack-dot{width:8px;height:8px;border-radius:50%;background:var(--c);flex-shrink:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 15%,transparent)}
+.db-stack-col[data-color="acc"]{--c:var(--flow-acc)}
+.db-stack-col[data-color="leak"]{--c:var(--flow-leak)}
+.db-stack-col[data-color="vis"]{--c:var(--flow-vis)}
+.db-stack-col[data-color="pack"]{--c:var(--flow-pack)}
+.db-stack-col[data-color="appr"]{--c:var(--flow-appr)}
+.db-stack-col[data-color="done"]{--c:var(--flow-done)}
+/* 大数字——weight 800 + tabular，hover 染环节色 */
+.db-stack-num{font-size:26px;font-weight:800;line-height:1.05;letter-spacing:-.6px;font-variant-numeric:tabular-nums;color:var(--db-ink);transition:color .2s ease}
+.db-stack-col:hover .db-stack-num,.db-stack-col-hot .db-stack-num{color:var(--c)}
+.db-stack-qsi{font-size:12.5px;color:var(--db-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
+.db-stack-qsi b{color:var(--db-mute);font-weight:700}
 
 /* --- 6.4 图表卡片——玻璃拟态 + 顶部色条 + 渐变标题 --- */
 .db-chart-card{position:relative;border-radius:8px;background:#fff;border:1px solid #e0e6ef;box-shadow:0 1px 2px rgba(15,23,42,.04);margin-bottom:14px;overflow:hidden;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
@@ -3025,30 +3155,29 @@ mark.dms-search-hit {
 
 /* --- 6.5 入场动画 --- */
 @keyframes db-fadeInUp{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-/* db-flow-dash 流动虚线动画——已移除（箭头改为纯实心三角） */
-@keyframes db-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
-@keyframes db-scan{0%{left:-45%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:110%;opacity:0}}
 @keyframes db-shimmer{0%{left:-40%}60%,100%{left:110%}}
 @keyframes db-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
-/* 顶部色条流光 */
-/* 光斑浮动 */
-/* 箭头呼吸发光 */
 .db-anim{animation:db-fadeInUp .6s cubic-bezier(.22,1,.36,1) both}
-.db-d1{animation-delay:.06s}.db-d2{animation-delay:.14s}.db-d3{animation-delay:.22s}.db-d4{animation-delay:.30s}.db-d5{animation-delay:.38s}.db-d6{animation-delay:.18s}.db-d7{animation-delay:.28s}.db-d8{animation-delay:.38s}
-@media (prefers-reduced-motion:reduce){.db-anim{animation:none}.db-progress-fill{transition:none}.db-flow-arrow::before{animation:none}.db-flow-arrow::after{animation:none}.db-hero-title::after{animation:none}.db-hero::after{animation:none}.db-progress-fill::after{animation:none}.db-stage-icon::after{animation:none}.db-hero-top-item:nth-child(1)::before{animation:none}}
+.db-d1{animation-delay:.06s}.db-d2{animation-delay:.14s}.db-d3{animation-delay:.22s}.db-d4{animation-delay:.30s}.db-d5{animation-delay:.38s}.db-d6{animation-delay:.46s}.db-d7{animation-delay:.28s}.db-d8{animation-delay:.38s}
+@media (prefers-reduced-motion:reduce){.db-anim{animation:none}.db-meta-live i{animation:none}}
 
-/* --- 6.6 响应式：窄屏 pipeline 换行、隐藏箭头 --- */
+/* --- 6.6 响应式：窄屏堆叠条标签列收紧、统计模块收窄、hero 内边距收紧 --- */
 @media (max-width:1199px){
-	.db-flow{flex-wrap:wrap;gap:12px}
-	.db-stage{flex:1 1 calc(33.33% - 12px)}
-	.db-flow-arrow{display:none}
+	.db-stack-cols{gap:4px}
+	.db-stack-qsi{display:none}
+	.db-stat-num{font-size:32px}
+	.db-stat-bar{width:220px}
+	.db-stat-divider{height:44px}
 }
 @media (max-width:767px){
-	.db-stage{flex:1 1 calc(50% - 12px)}
-	.db-hero-stat-pend{width:100%}
-	.db-hero-sub{margin-left:0}
-	.db-hero-divider{margin-left:0}
-	.db-hero{padding:14px 14px 12px}
-	.db-hero-title{font-size:17px}
-	.db-stage-num{font-size:24px}
+	.db-stack-bar{height:28px}
+	.db-stack-cols{flex-wrap:wrap;gap:10px 4px}
+	.db-stack-col{flex:1 1 calc(33.33% - 4px)}
+	.db-stat-num{font-size:28px}
+	.db-stat{padding:2px 8px}
+	.db-stat-bar{width:150px}
+	.db-stat-divider{height:38px}
+	.db-hero{padding:16px 16px 14px}
+	.db-hero-title{font-size:16px}
+	.db-stack-num{font-size:22px}
 }

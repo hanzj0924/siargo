@@ -1,6 +1,13 @@
-# siargo_package — siargo 项目打包技能
+---
+name: siargo-package
+description: siargo 项目完整发布打包技能——代码变更比对、生成 CHANGELOG、版本号递增与双处同步、mvn clean 与打包（排除测试）、产出切 pro、压缩 siargo.rar、更新打包基线。
+whenToUse: 用户要求发布/打包 siargo 项目，或输入 siargo-package 主版本/子版本/修订版（缺参必须先询问用户）。
+user-invocable: true
+---
 
-> 触发方式：`siargo_package 主版本` / `siargo_package 子版本` / `siargo_package 修订版`
+# siargo-package — siargo 项目打包技能
+
+> 触发方式：`siargo-package 主版本` / `siargo-package 子版本` / `siargo-package 修订版`
 > 参数决定版本号递增级别；缺少参数时**必须先询问用户**（默认建议"修订版"），禁止自行假定。
 
 本技能完成一次完整发布打包：**代码变更比对 → 生成并追加 CHANGELOG → 版本号递增与双处同步 → 清理旧产物（clean）→ Maven 打包（排除测试）→ 产出配置切 pro → 压缩 siargo.rar → 更新打包基线**。
@@ -15,9 +22,9 @@
 
 | 技能参数 | 递增级别 | 新版本 |
 |----------|----------|--------|
-| `siargo_package 主版本` | major +1，minor/patch 归零 | `3.0.0` |
-| `siargo_package 子版本` | minor +1，patch 归零 | `2.10.0` |
-| `siargo_package 修订版` | patch +1 | `2.9.2` |
+| `siargo-package 主版本` | major +1，minor/patch 归零 | `3.0.0` |
+| `siargo-package 子版本` | minor +1，patch 归零 | `2.10.0` |
+| `siargo-package 修订版` | patch +1 | `2.9.2` |
 
 新版本号必须**同时**写入以下两处，缺一不可（打包前校验两处一致）：
 

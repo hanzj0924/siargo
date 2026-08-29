@@ -78,7 +78,7 @@ set APP_BASE_PATH=%~dp0
 set CP=%APP_BASE_PATH%config;%APP_BASE_PATH%lib\*
 echo   %ESC%[1;36m[*]%ESC%[0m %ESC%[32mStarting Siargo Server...%ESC%[0m
 set JDK_OPTS=--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/sun.reflect.annotation=ALL-UNNAMED
-java -Xverify:none %JDK_OPTS% %JAVA_OPTS% -cp %CP% %MAIN_CLASS%
+java -Xverify:none %JDK_OPTS% -Dfile.encoding=GBK %JAVA_OPTS% -cp %CP% %MAIN_CLASS%
 goto :eof
 
 

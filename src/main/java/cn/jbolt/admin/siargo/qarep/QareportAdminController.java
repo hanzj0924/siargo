@@ -756,6 +756,8 @@ public class QareportAdminController extends JBoltBaseController {
 		});
 		if (txOk) {
 			service.clearPaginateCache();
+			// 统一联动：产品信息变更后刷新流程统计/看板缓存（含首页 dashboard）
+			service.clearFlowCountsCache();
 		}
 		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("更新失败"));
 	}
