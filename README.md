@@ -2,7 +2,6 @@
 
 Siargo 是面向矽翔质管部的业务管理系统，覆盖客户与供应商、产品型号与参数、检验报告、设备、技术通知单和学习资料等日常工作。项目基于 JFinal 与 JBolt 开发，使用 MySQL 保存业务数据，通过 Enjoy 模板与 JBolt 前端组件提供管理页面。
 
-本项目位于 `D:\Workspace\siargo`，与 `D:\Workspace\siargo_ai` 独立维护，使用各自的代码、配置与 Git 仓库。
 
 - 代码仓库：[hanzj0924/siargo](https://github.com/hanzj0924/siargo)
 - 公司官网：[矽翔](https://www.siargo.com.cn)
