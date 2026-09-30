@@ -1,287 +1,235 @@
 ## 更新日志
 
+### v2.9.3 (2026-09-30)
+
+- PDF 导出：正式报告、月份归档及生成临时文件统一保存到独立导出目录，模板与 Excel 导入沿用原资源目录，并兼容旧目录报告的清理和版号删除检查。
+- 报告参数：简化缺失参数提示，直接列出缺少的参数名称。
+- 部署提示：报告输出路径配置改为 siargo_qarep_export_path，默认 export/siargo/qarep；升级时需保留原模板和历史 PDF 文件及其引用，已有文件迁移另行处理。
+
+### v2.9.2 (2026-09-29)
+
+- 产品目录：新增产品系列、目录分支及选型规则管理，支持按参数字典配置型号组合、适用规格并预览完整型号。
+- 参数管理：支持搜索、多选和重复段位，删除参数值时同步清理型号引用并保留空段位供补选；最大流量可保留输入原文。
+- 产品资料：集中维护产品简介、特点、机械尺寸图和多规格技术参数，按系列分支查看完整选型说明。
+- 报告单录入：支持同一报告单维护多个产品系列，Excel 导入优先依据备注匹配系列，未识别或存在歧义时提示人工确认，并支持快捷新增流量范围。
+- 报告单展示：统一展示产品系列与分支，调整编辑和详情布局，按产品显示适用的大表参数，集中展示各检验环节的驳回记录。
+- 报告模板：按版号关联产品系列，支持搜索和批量选择，修复已有绑定显示及再次编辑丢失的问题，导出时提示缺少的模板或参数。
+- PDF 归档：支持按批准放行时间导出本年已结束的连续月份，归档副本不影响正式报告；批量生成保留成功结果并列出失败和警告信息。
+- 报告单保存：完善混合系列保存和审批检查，修改产品、公共信息或备注后使旧 PDF 失效，避免继续使用过期报告。
+- 检验统计：当前在检数量不受年份限制，完成统计按批准时间归属月份、季度和年度，并按系列关联的模板统计产品类别。
+- 回收站：永久删除仅限回收站产品，混入有效产品时整批拒绝，保留共享文件引用保护并完善空报告单清理。
+- 技术通知单：同类别上传同名文件时先确认覆盖，保存成功后更新已有记录和文件，保存失败时恢复原文件。
+- 附件管理：完善图片批量上传、替换和改名；设备、对比记录与证书整体保存，证书处理失败时回滚，成功后再清理无引用的旧文件。
+- 部署提示：升级时需同步产品目录及系列关联所需数据结构、业务上传目录和模板文件，确保历史记录引用与实际文件一致。
+
 ### v2.9.1 (2026-08-27)
-- style(dashboard): 首页看板流程总览整体重设计——Stripe 浅色科技风 hero（mesh 氛围光+网格背景+细分隔线），标题行改轻量副标题（jbi-send/jbi-experiment 送检/检验只数+圆点分隔+右侧状态芯片）；统计模块重构为"待处理(青色沙漏警示红大数字) vs 已完成放行(绿勾)"双模块，竖向短分隔+模块底部短色条（teal #14b8a6，横竖同色不与其他环节色重复）；废弃旧 PIPELINE 六环节托盘与"本年度完成进度"进度条
-- style(dashboard): 环节流转改占比堆叠条——一条 100% 宽胶囊条按 5 个在检环节（精度/成品检漏/外观/包装/待批准）单数占比 flex-grow 分段，0 值段保留占位；下方 5 标签列（色点+环节名+大数字+送检只数），段↔列 hover 双向联动；环节色与报告单业务 stepper 对齐（acc 蓝/vis 黄/pack 橙，.db-hero 作用域重定义不影响全局）
-- style(qarep): 报告单列表步骤条重设计为现代化流线风格——深海军蓝面板+靛紫氛围光，环节节点骑在首→尾连续渐变流线上，数量气泡浮节点上方带指向三角，步骤序号 01-06；选中环节节点弹跳放大+光晕呼吸，其后连接线进度条一次性推进（0→100%）+双 >> 箭头指向下一环节；全部报告单徽章改中性石墨/深海军蓝（不与环节色重合）
-- style(qarep): 步骤条细节层次——节点径向渐变+内高光立体，连接线本体淡渐变流线+选中段实色点亮，hover 点亮路径，prefers-reduced-motion 兼容；步骤图标混 18% 白提亮一档
-- feat(dashboard): 首页看板标签页切换自动刷新——复用平台 tab 点击事件委托（捕获阶段监听 ul.jbolt_tabs>li），从其他标签页切回数据分析页时整页刷新一次获取最新统计；非 data-auto-refresh 周期机制，无周期轮询，监听器防累积泄漏
-- feat(qarep): 报告单标签页切换自动刷新——切回报单号页时刷新当前子 Tab 表格与流程数量徽章（保留页内筛选/子 Tab 状态），复用平台 tab 事件委托，捕获阶段防时序竞态
-- fix(qarep): 编辑保存产品信息后统一联动清流程统计/看板缓存——QareportAdminController.update 事务提交后追加 clearFlowCountsCache()（与 paginate 缓存联动），修复看板待处理/环节数字不更新
-- chore(build): 新建报告单按钮调整弹窗尺寸与标题提示样式（data-area 1115x822，注意编号提示居中加大）
-- fix(build): 启动脚本强制 JVM 输出编码 GBK——siargo.bat 的 java 启动命令追加 -Dfile.encoding=GBK，修复 JDK 18+（JEP 400 默认 UTF-8）下中文 Windows 控制台/日志中文乱码，与旧 JDK 17 行为一致
+
+- 首页看板：重新组织待处理、已放行和各检验环节统计，通过占比条展示在检分布。
+- 检验流程：更新步骤条、阶段数量和选中状态，使当前环节与下一步更清晰。
+- 数据刷新：切回看板或报告单时自动更新数据，报告单保留原筛选和所选阶段；修复编辑后统计未同步的问题。
+- 报告单录入：调整新增弹窗尺寸，突出报告单编号提示。
+- 运行日志：修复中文 Windows 环境下控制台及日志乱码。
 
 ### v2.9.0 (2026-08-06)
-- feat(qarep): 新增成品检漏检验环节——创建报告单选择"有/无成品检漏"（product.lt_status：1有/2无）；有检漏产品流程为 精度→成品检漏→外观→包装→批准→已完成（insp=6 成品检漏待检），无检漏产品保持原流程；新增角色 SN=215 成品检漏检验员
-- feat(qarep): 报告单列表新增"成品检漏待检"Tab 与步骤条节点（入口 admin/siargo/qarep），成品检漏审批按钮按 215 角色显示；外观/包装/待批准/已完成列表增加成品检漏列，全部 Tab 检验进度徽章支持 insp=6
-- feat(qarep): 审批工作台支持 insp=6（成品检漏待检→外观待检），精度审批的下一环节按选中产品 lt_status 动态显示（全有/全无/混合）
-- feat(qarep): 驳回按 lt_status 分支——外观驳回退回成品检漏（清空 lt 签名）或退回精度（清空 accq）；成品检漏驳回退回精度；编辑页切换 lt_status 自动归一化状态并补/清签名
-- feat(qarep): 详情页产品型号右侧新增"检漏环节"只读单选；检验进度流程仅在成品检漏已完成或驳回重检时显示对应节点，待检不显示
-- feat(api): 订单状态 API 增加成品检漏——status.hasLeakTest、timeline.leakTest（lt_time/lt_name）、insp=6 枚举；接口文档升级 V2.1（/api/siargo/order/status、/batchStatus）
-- style(qarep): 成品检漏环节使用紫色主题色与压力表图标（贴合水压/气压检漏业务），徽章白字，siargo.css/.min.css 同步
-- feat(dashboard): 首页看板流程总览新增"成品检漏待检"环节卡片，待处理总数计入 ltq/ltq_qsi
-- chore(model): BaseProduct 重新生成新增 lt_status/lt_uid/lt_time 字段，ModelGenerator 聚焦生成 siargo_product
-- feat(equipment): 设备列表页仪表盘重构——状态统计卡与表格操作列（查看证书/详情/对比维修记录）
-- feat(equipment): 设备时间线页新增可折叠设备概要条（含下次检校等汇总信息）
-- refactor(equipment): 证书删除与对比记录级联删除改为 Db.tx + afterCommit 物理文件统一删除（事务内仅删 DB，提交后删物理文件）
-- fix(equipment): 维修记录关联的对比记录已审核（audit_status=2）时禁止修改
-- refactor(imi): 图片删除改为 Db.tx + afterCommit 物理文件统一删除（queryFilePathsByIds 事务外收集路径）
-- refactor(pdffolder): 版号文件夹删除改为事务外收集目录 + 事务内删 DB + 提交后统一删除物理目录
-- feat(qarep): PDF 数据映射新增成品检漏字段 lt_name/lt_time/lt_email（可选取值，模板可绑定）
+
+- 成品检漏：新增检漏环节及专属检验角色，有检漏产品在精度检验后进入检漏，无检漏产品沿用原流程。
+- 检验审批：列表、工作台和详情同步展示检漏进度，审批及驳回根据产品是否需要检漏自动衔接。
+- 统计与报告：首页看板、订单状态接口和 PDF 模板同步支持成品检漏信息。
+- 设备管理：更新状态统计和证书、详情、维修记录入口，时间线新增可折叠概要；已审核对比记录关联的维修记录禁止修改。
+- 附件管理：调整设备附件、图片和模板目录的删除流程，数据删除成功后再清理文件。
 
 ### v2.8.4 (2026-08-04)
-- feat(equipment): 批量编制/批量更改状态表单页增加设备列表数据回显——EquipmentAdminController 批量表单 action 查询设备列表传入页面，batchInspection.html/batchStatus.html 展示设备信息表格
-- feat(equipment): 设备时间线分页增加类型筛选——paginateTimelineDatas 支持 type 参数过滤，timeline/index.html 增加类型筛选下拉
-- style(dashboard): hero 卡片层次感全面增强——多层渐变背景、分层阴影系统、玻璃拟态状态栏、标题图标芯片感立体样式、统计卡片渐变光条与数字渐变、年份标签渐变边框胶囊
-- style(dashboard): 进度条科技感重构——去除白色卡片容器改为透明融合设计，轨道增加凹陷立体感与刻度线，填充条多段渐变+发光效果，百分比数字纯绿发光
-- style(dashboard): pipeline 托盘细节丰富——四段渐变背景、六层阴影系统、顶部/底部装饰线、左右侧装饰条、刻度线、中央光晕、四角金属铆钉
-- style(dashboard): 环节卡片细节增强——三段渐变背景、顶部五段渐变发光色带、底部色带、背景纹理、图标容器三层渐变+光晕+反射、序号徽章增大发光、大数字渐变+反射线、标签色点发光+底部微光、送检只数渐变分隔线
-- style(dashboard): 动画系统优化——入场动画增加 scale 缩放与更流畅 easing，新增箭头流光 db-flow-glow 与箭头脉冲 db-arrow-pulse 动画，扫描线增加透明度渐变
+
+- 设备管理：批量编制和状态修改时展示所选设备，时间线支持按记录类型筛选。
+- 首页看板：优化统计卡片、完成进度和环节流转的视觉层次与动效。
 
 ### v2.8.3 (2026-08-03)
-- feat(dashboard): 首页看板流程统计改为报告单级本年度口径——QareportService 新增 getDashboardFlowCounts（当年创建报告单下全部有效产品按 insp 分环节，含各环节送检只数），带 30 分钟 DCL+TTL 缓存，clearFlowCountsCache 联动失效；hero 右卡由"在流程报告单"改为"已完成报告单"，与环形图口径一致
-- feat(dashboard): hero 新增"本年度完成进度"进度条（已完成/本年度总量百分比，db-progress 样式 + 动效，prefers-reduced-motion 降级）
-- fix(dashboard): 环形图统计口径修正——getDonutData 改为统计当年 insp=5（已完成）的有效产品数（COUNT(*) 不去重 + INNER JOIN），修复扇区合计与看板"已完成"总数不一致
-- fix(dashboard): 退修趋势图去年对比线改灰色实线并固定 emphasis 样式，消除鼠标移入时线型/粗细跳动
-- fix(qarep): 报告单列表页多标签页清理逻辑增加 data-page-id 判断，F5 后 JBolt 从 sessionStorage 恢复标签页时不再清空当前实例，修复报告单页面空白
-- refactor(qarep): QarepConst 新增 REP_TYPE_NORMAL/REPAIR 报告单类型常量，退修月度统计 SQL 魔法数字替换为 QarepConst.REP_TYPE_REPAIR
-- style(dashboard): siargo.css 新增 hero 网格/光晕背景、环节卡水印图标、db-flow-arrow 语义色渐变箭头等样式（+117/-50），同步 siargo.min.css
+
+- 首页统计：统一按本年度报告单统计检验流程，增加完成进度，并修正产品占比与已完成总数不一致的问题。
+- 趋势图表：调整去年退修对比线，修复悬停时样式跳动。
+- 报告单：修复刷新浏览器后恢复标签页时页面空白的问题。
+- 看板展示：优化环节卡片、背景和流程连接效果。
 
 ### v2.8.2 (2026-08-03)
-- refactor(qarep): 报告单模块全栈审查修复——PDFService 输出目录/模板路径三层路径穿越校验（拒绝 `..`、强制相对路径、canonical 二次确认），生成/批量导出失败返回明确原因
-- fix(qarep): PDFService 空值 NPE——订单号/报告单编号缺失时提前返回失败信息，不再进入模板渲染；sp_pdfstr 异常值跳过旧文件删除
-- fix(qarep): 新增/删除报告单服务端校验——id 注入拦截、订单号/客户必填、批量删除必填删除原因
-- fix(qarep): 报告单编号并发冲突自动重试（捕获 Duplicate 重试上限 3 次，FORMNUM_RETRY_MAX 常量化），消除并发创建偶发失败
-- refactor(qarep): 永久删除物理文件移至事务提交后统一删除（getPdfPathsByIds 事务外收集 + deletePhysicalPdfs 带穿越二次检测），符合 afterCommit 纪律
-- perf(qarep): 首页年度送检/检验总量统一 getTotalCount 30 分钟 DCL+TTL 缓存，clearFlowCountsCache 联动失效
-- feat(qarep): 编辑报告单检验进度服务端支持——select 五个环节可选，update() 校验合法范围（1~5）并联动维护环节签名（前进 COALESCE 补签缺失环节/回退清空超出环节，条件更新防并发覆盖）
-- improve(qarep): 首页流程计数改用 Ajax.get 平台对象族（自动处理登录失效/锁定/离线）；新增页删除跨窗口 DOM 注入 hack 改为表单顶部编号提示条；删除 flow-summary-count 死代码，siargo.css/.min.css 同步
-- refactor(dms): 类别/文件 Controller 全部写操作 @Before(Tx.class) → 手动 Db.tx() + afterCommit（save/update/deleteByIds/toggleActive/up/down），删除未实现的 move 端点与重复端点 changeActive（统一 toggleActive）
-- feat(dms): 文件编辑支持替换物理文件——新文件事务内落位、旧文件事务提交后删除（oldFilePath 带出），编辑表单上传时提示"保存后替换原文件"
-- fix(dms): 上传安全加固——文件名净化 sanitizeFileName + validateTempFile 三层路径校验（拒绝 `..`、强制 temp 目录前缀、canonical 二次确认）；批量保存事务化，失败时数据库回滚且已移动文件移回临时目录（moveFilesBack 补偿）
-- fix(dms): 文件/类别列表雪花 ID 统一 CAST AS CHAR 防前端精度丢失；关键字搜索改 EXISTS 子查询，GROUP_CONCAT 关键字聚合不再丢失
-- feat(dms): 类别删除保护——类别下仍有有效文件时阻止删除（checkInUse 覆盖）；初始化排序按 sort_rank, id 稳定重排
-- fix(dms): PDF 链接重复 id="pdfFrame" 改 class（多行渲染 id 冲突），加载统一时间戳防缓存
-- chore: 清理 upload/equipment_certificate 目录 3 个测试图片
+
+- 报告单维护：完善必填校验和并发编号处理，编辑检验进度时同步更新签名，批量删除须填写原因。
+- PDF 报告：生成和导出失败时说明原因，修复缺失信息导致的异常，并加强文件路径及删除保护。
+- 资料管理：编辑时支持替换附件，批量上传失败时撤销本次变更；类别下仍有有效文件时禁止删除。
+- 资料查询：修复搜索结果遗漏关联关键词和部分记录操作异常，改善 PDF 预览刷新。
+- 页面响应：减少首页统计重复查询，流程统计支持登录失效、锁定和离线提示。
 
 ### v2.8.1 (2026-07-31)
-- refactor(dashboard): 首页数据看板整体重构——顶部 hero 流程看板（精度→外观→包装→批准→完成五环节卡片，引用 --flow-* 共享色库）+ ECharts 四图表（送检总量柱状/季度同比堆叠柱/退修趋势双年折线/产品占比环图），替代原静态数字卡片
-- feat(dashboard): 环节卡展示在制报告单数 + 送检只数（flowCounts 统计 SQL 并入 SUM(qsi)，复用 30 分钟缓存），hero 右侧展示在流程/待处理报告单双统计
-- feat(dashboard): 新增季度送检同比图——QareportService.getQuarterCompareData() 单 SQL 查两年按季度×产品类型（传感器/小流量/大流量）分列统计，去年淡色/今年实色双堆叠柱，tooltip 逐类型及合计展示同比涨跌百分比（去年为 0 标「新增」）
-- feat(dashboard): 退修总量折线图增加去年对比——getRepData() 重写为一次查两年返回 {curYear,lastYear,cur[12],last[12]}，今年红色实线+渐变面积、去年灰色虚线，ECharts 原生 legend 切换显隐
-- improve(dashboard): 页面内容区增加竖向滚动（.db-scroll 仅本页生效），环节卡尺寸缩小、底色/边框加深提升识别度；图表 dispose 重建 + ResizeObserver 自适应，侧边栏折叠/全屏无变形
-- improve(dashboard): 季度图 legend 强制不透明实色，与送检总量图产品三色（蓝/青/红）完全一致；同名系列合并 legend，点击联动切换两年同类型
-- refactor(admin): AdminIndexController.dashboard() 移除旧 dashboard map 拼接逻辑，改为 flowCounts/totalQsi/quarterData 结构化数据直出
-- style(dashboard): siargo.css 新增 Dashboard 独立分区（db-* 前缀样式组：hero/环节卡/图表卡/入场动画），同步更新 siargo.min.css
-- chore(config): WinRAR 可执行文件路径外置为 winrar_exe_path 配置项（config/config-pro.properties），报告单批量导出 PDF 压缩前增加配置与程序存在性前置校验
+
+- 首页看板：新增检验流程总览，集中展示各环节报告单数及送检数量。
+- 数据分析：新增季度送检同比和退修年度对比，结合送检总量、产品占比展示业务变化。
+- 图表交互：支持按产品类型联动筛选，页面滚动及图表尺寸随窗口调整。
+- PDF 导出：压缩工具路径支持配置，导出前检查工具是否可用并给出提示。
 
 ### v2.8.0 (2026-07-31)
-- refactor(qarep): 全部 Controller 写操作改用手动 `Db.tx()` + afterCommit 缓存清理模式，彻底消除事务内清缓存导致的并发脏读风险（替代原 `@Before(Tx.class)` 声明式事务）
-- refactor(qarep): Service 写方法（save/update/permanentDelete）失败时返回 `Ret.fail()` 而非抛 RuntimeException，修复 try/catch 吞异常导致事务不回滚的潜在 bug
-- refactor(qarep): `clearFlowCountsCache()` 统一收敛至 Controller afterCommit 节点，Service 内不再调用，消除职责分散问题
-- feat(qarep): 新增审批工作台页面 approval.html（JBoltLayer 抽屉 iframe 加载），支持按 formnum 分组卡片、全选/单选、通过/驳回二态操作、驳回原因输入 + 两次点击确认
-- feat(qarep): 新增产品驳回历史记录服务 ProductRejectLogService + 弹窗页面 reject_history.html（紫色时间线 UI）
-- feat(qarep): 新增 QarepConst 常量类，消除全模块魔法数字（insp 1~5、角色 SN 211~214、产品类型等）
-- feat(qarep): 列表页同 formnum 产品自动合并行（rowspan）+ 主表与固定列双向 hover 同步（基于 .jbolt_table_box 容器委托）
-- feat(qarep): 流程计数 DCL 缓存（flowCounts 30min TTL + paginate 30s TTL）、Tab 懒加载 + 脏标记、visibilitychange 暂停刷新
-- feat(qarep): 详情页检验流程图显示 per-stage 驳回角标（reject_count_2/3/4 > 0）+ 重检中/已驳回状态节点
-- feat(qarep): 产品表新增 `reject_count` 冗余字段，列表/审批查询改读字段替代子查询，消除 N+1 性能问题
-- improve(qarep): batchSoftDeleteProduct 改为返回 Ret，删除失败时可感知并回滚
-- improve(qarep): 审批页跨 iframe 通知 `_qarepRefresh` 增加 try/catch 兜底，父页未注册时降级为关闭弹窗
-- improve(qarep): notifyNextStageUsers 移至事务提交后执行，确保通知读到已提交数据
-- fix(qarep): 详情页驳回显示消失——ProductService LEFT JOIN siargo_product_reject_log 取最新驳回记录 + 每环节独立计数
-- fix(qarep): SQL CASE 缺少 ELSE 兜底导致未知环节返回 NULL，增加 `ELSE '未知环节'`
-- style(qarep): 审批页全套 CSS 设计（卡片分组、勾选高亮、驳回输入框、动画箭头、主题色适配）
-- style(qarep): 驳回历史时间线 CSS（紫色圆点+卡片+左侧线）、合并组视觉（accent 边框+悬停高亮+计数徽标）
-- style(qarep): siargo.css qarep 分区大幅重组，新增 flow 按钮渐变色、搜索栏、回收站、驳回角标等样式组
-- refactor(cme): 首页 index.html 重设计为学习门户介绍页——Hero 大标题 + 三学科介绍卡片（法规蓝/实务青绿/案例紫主题色，含核心知识点列表）+ 学习路径流程图（法规→实务→案例），唯一入口"进入学习"，移除原知识点/思维导图 6 个入口按钮
-- feat(cme): 新增学习界面（/admin/siargo/cme/learn），左侧目录树按法规→实务→案例→补充知识→计算器说明书固定顺序展示（默认全折叠、根节点主题色、关键词搜索过滤自动展开祖先），右侧复用 embed 机制查看 PDF、img 查看 PNG，含空状态插画与面包屑路径
-- feat(cme): CMEController 新增 listFiles 目录树 JSON 接口（递归扫描 pdf/png、目录在前文件在后按拼音排序、排除空目录）与 viewFile 动态文件流接口（canonicalPath 路径穿越校验加分隔符防同前缀绕过 + pdf/png 扩展名白名单）
-- fix(cme): 重复点击"进入学习"新开第二个空白标签页，CTA 链接增加 data-key="cme_learn" 固定标识触发 JBolt 标签页去重，再次点击切换至已打开的学习页
-- style(cme): siargo.css CME 分区整体重写——清除旧首页/思维导图/PDF viewer 废弃样式（含污染全局的裸 * 与 body 选择器），新增 cme-/cme-learn- 前缀样式组，learn.html 页内仅保留 JBolt 容器全局覆盖，同步更新 siargo.min.css
-- chore(cme): 学习资料库重组为五大分类目录（法规/实务/案例/补充知识/计算器说明书，60+ 份 PDF/PNG），移除旧版三科合集 PDF 及 viewer 页面
+
+- 审批工作台：按报告单分组选择产品，支持批量通过、驳回及原因填写，增加二次确认。
+- 驳回记录：新增历史时间线，详情展示各环节驳回次数及重检状态。
+- 报告单列表：同单产品合并展示，优化分组高亮、阶段切换及数据加载。
+- 流程一致性：完善保存、删除失败时的回滚，审批成功后再更新统计和通知，修复驳回信息遗漏。
+- 学习门户：重组法规、实务、案例、补充知识和计算器说明书资料，提供目录搜索、PDF 与图片预览，修复重复进入产生空白标签页的问题。
 
 ### v2.7.16 (2026-07-28)
-- refactor(dms): 类别管理页（category/index.html）表格内重设计：四列布局（序号/类别名称/文件数/操作）消除空白区域，删除勾选列，操作列改为行内编辑/删除/上移/下移/移动到（JBolt 裸图标风格），工具栏简化为新增类别+初始化排序+刷新+搜索
-- feat(dms): 文件管理页左侧新增类别文件夹树导航，按类别 id 哈希着色文件夹图标，选中类别后右侧加载文件列表，未选择类别时右侧保持空白
-- improve(dms): DmsFileService.paginateAdminDatas 类别 ID 为空时返回带分页参数的空页对象（原裸 new Page 会导致前端分页组件异常），类别过滤条件改为动态拼接
-- improve(dms): DmsCategoryService.getCategoryListWithCount 增加 lastupdatetime（类别下文件最近上传时间），供文件页类别树展示
-- style(dms): 类别页引入 siargo.css（原页面从未加载导致自定义样式全部失效），新增 dms-cat-* 样式组：960px 限宽居中、48px 行高、黄色描边文件夹图标、文件数药丸徽标
-- style(global): 上移/下移全局 outline 边框按钮规则加 :not(.dms-cat-table) 排除类别页，类别页保持 JBolt 裸图标风格，supplier 等其他模块不受影响
+
+- 资料类别：简化类别列表和排序操作，展示文件数量。
+- 文件管理：新增类别目录导航及最近上传时间，选择类别后查看文件；修复未选择类别时分页异常。
 
 ### v2.7.15 (2026-07-24)
-- feat(pdffolder): 新增报告单模板管理模块（/admin/siargo/qarep/pdffolder），支持版号与PDF模板规则CRUD，含首页/分页/新增编辑版号/复制删除版号/规则增删改
-- feat(pdffolder): PdfRule 新增 error_hint 错误提示字段，规则编辑弹窗支持配置匹配失败时的提示信息
-- fix(layout): supplier/customer/dms category 页面分页消失，改用 jb_vflex + jb_vbody + fill_box 弹性布局恢复分页组件显示
-- improve(qarep): 报告单版号下拉框 data-value-attr 从 sn 改为 name，兼容字典新格式
-- improve(qarep): 新增报告单页面版号下拉框增加模板配置快捷入口（齿轮按钮），可快速跳转 pdffolder 管理
-- style(qarep): 新增/编辑报告单页面 input-group-append 改为 input-group-btn 统一样式
+
+- 报告模板：新增版号和 PDF 模板规则管理，支持复制版号及配置匹配失败提示。
+- 报告单录入：版号选择适配新字典格式，增加模板配置快捷入口，统一表单操作样式。
+- 列表分页：修复供应商、客户和资料类别页面分页不显示的问题。
 
 ### v2.7.14 (2026-07-15)
-- feat(qarep): Excel导入自动判定产品类型，根据型号通过ProductModelClassifier分类并映射到siargo_prod_type字典sn，前端上传后自动选择产品类型下拉框并触发change事件联动送检/检验数量
-- feat(qarep): ProductModelClassifier新增MF3000S前缀映射为传感器类型(type=3)
-- fix(qarep): 报告单详情页html/body背景色统一为#eef1f5，dt-wrap容器背景色同步调整
+
+- Excel 导入：自动识别产品类型并联动填写数量，补充 MF3000S 传感器识别。
+- 报告单详情：统一页面背景，改善弹窗阅读效果。
 
 ### v2.7.13 (2026-07-09)
-- chore(changelog): CHANGELOG.md 从项目根目录移至 Controller 同包，改由 classpath getResourceAsStream 加载，消除文件系统路径依赖
-- chore(build): Maven resources 配置新增 src/main/java 资源目录，确保 CHANGELOG.md 随构建复制至 target/classes
-- chore(path): README 及 siargo_package SKILL.md 同步更新 CHANGELOG.md 引用路径
+
+- 更新日志：调整日志加载和打包方式，确保发布包携带版本说明。
 
 ### v2.7.12 (2026-07-09)
-- feat(changelog): 新增更新日志显示页面（/admin/changelog），读取 CHANGELOG.md 以 Markdown→HTML 渲染，权限 siargo_change_log
-- feat(admin): ProjectConfig 新增 changelog 包扫描注册，确保 JFinal 路由自动发现
-- chore(changelog): CHANGELOG.md v1.x 条目格式统一为 type(scope): 描述
+
+- 更新日志：新增版本记录页面，按权限查看历次功能更新与问题修复。
 
 ### v2.7.11 (2026-07-09)
-- improve(qarep): 已完成 tab 排序按 formnum→order_id→type→allq_time 全部倒序，最新产品优先
-- fix(qarep): 详情弹窗竖向滚动条消失，添加 body overflow-y:auto 覆盖 layui iframe 的 overflow:hidden 裁剪导致内容超出 733px 固定高度被隐藏
-- refactor(qarep): 首页引入 Enjoy 宏消除 6 个行模板+5 个搜索表单的重复代码（35%），文件从 1152 行减至 1006 行
-- fix(qarep): 首页 loadFlowCounts 因 JBolt 双重渲染被调用 4 次，添加 window._qarepReady 全局守卫防重复初始化
-- refactor(qarep): 首页 flow-stepper nth-of-type 改为 data-color 属性选择器，消除对 DOM 顺序的隐式依赖
-- style(qarep): 首页清除所有内联样式提取至 siargo.css，dt-wrap 移除 min-height:100vh 避免 layui iframe 弹窗高度计算异常
+
+- 报告单列表：已完成记录优先展示最新数据，修复页面重复初始化的问题。
+- 报告单详情：恢复弹窗滚动，避免较长内容被截断。
 
 ### v2.7.10 (2026-07-08)
-- refactor(css): 13 个页面内联 `<style>` 块集中提取至 siargo.css（CME 7页 / DMS 1页 / Equipment 5页），按模块分区组织减轻页面体积
-- style(qarep): 新增审批流程步进器样式（5步主题色/连接线/选中态/过渡动效）、流程推进按钮渐变色、检验 badge 配色、行合并交替背景色、非活跃列表搜索栏样式
+
+- 检验流程：优化步骤导航、操作按钮及状态标识，统一报告单分组和回收站搜索区样式。
 
 ### v2.7.9 (2026-07-07)
-- fix(qarep): 修改产品备注或生成 PDF 后对应 tab 分页缓存未同步刷新，数据展示与实际不一致
+
+- 报告单列表：修改备注或生成 PDF 后及时刷新对应列表，避免显示旧数据。
 
 ### v2.7.8 (2026-07-06)
-- feat(api): 请求追踪 traceId 机制，响应体 JSON/X-Trace-Id 响应头/数据库独立字段三通道透传，便于日志串联排查
-- feat(api): 新增 ApiErrorCode 错误码常量（1001-1007），统一 API 错误标识与客户端解析
-- feat(api): 订单状态查询新增 found 字段区分"订单不存在"与"无检验记录"，单查/批量行为统一
-- feat(apicalllog): 调用记录页新增 traceId 搜索列、路径超链接跳转详情页、修复搜索按钮无响应及筛选条件失效（responseStatus/日期范围）
-- refactor(api): OrderStatusApiController 统一输出格式，ApiContext 消除冗余字段，批量查询 N+1 改为 IN 单次查询
-- test(api): 新增 7 个多场景覆盖测试（检验进度/不存在订单/批量混合/超限），累计 21 个全通过
-- chore(qarep): 检验进度 inspLabel 映射更新至 v6.7 版
-- chore(api): siargo_api_call_log 表新增 trace_id VARCHAR(32) 字段及索引
+
+- 订单状态接口：统一响应及错误标识，区分订单不存在与暂无检验记录，优化批量查询。
+- 调用日志：新增请求追踪标识和详情跳转，修复搜索按钮及状态、日期筛选失效的问题。
 
 ### v2.7.7 (2026-07-06)
-- fix(api): 外部订单查询 API 被 JBoltAdminAuthInterceptor 误拦截（/api/siargo/* 路径无登录态），路由扫描拆分为独立 Routes 排除 api 子包
-- improve(qarep): PDF 报告生成兼容旧型号 MFXX-F-E/MFXX-F-D 参数映射，避免旧型号传感器数据缺失
-- chore: io.undertow 日志级别调至 DEBUG 便于请求排查
+
+- 订单查询：修复外部接口被后台登录校验拦截的问题。
+- PDF 报告：兼容旧版 MFXX-F-E、MFXX-F-D 型号，补齐传感器参数。
 
 ### v2.7.6 (2026-07-06)
-- chore: 启用 Undertow Access Log 访问日志配置，记录所有 HTTP 请求详情
+
+- 运行日志：新增 HTTP 访问记录，便于排查请求问题。
 
 ### v2.7.5 (2026-07-03)
-- feat(cache): 管理端分页数据缓存（30秒TTL），减少重复查询开销
-- feat(ui): Tab 懒加载机制，首次切换时才加载表格数据，避免页面初始化时全部 tab 同时请求
-- feat(auth): 终端下线自动检测与重新登录提示，全局 AJAX 响应拦截下线状态后跳转登录页
+
+- 页面加载：分页数据支持短时缓存，标签页在首次切换时加载，减少重复请求。
+- 登录状态：终端下线后自动提示重新登录。
 
 ### v2.7.4 (2026-06-30)
-- feat(qarep): Excel 双模板导入（104842+PFQVF81007 自动检测），解决不同客户模板格式差异导致的字段映射问题
-- feat(equipment): 设备分类卡片动态化，分类配置化替代硬编码，支持无限扩展
-- feat(permission): RoleService 新增 hasRoleOrAbove 层级角色权限校验方法
-- fix(qarep): Excel 导入 qsi/qsis 键名不匹配导致数据无法填充，统一映射逻辑
-- refactor(qarep): importExcel 统一入口 processExcelFile，消除双模板分支判断重复
-- chore: pom.xml 新增 spring-core 依赖
+
+- Excel 导入：自动识别两种客户模板，修复送检和检验数量无法填充的问题。
+- 设备分类：分类支持配置和扩展。
+- 角色权限：增加按角色层级判断操作权限的支持。
 
 ### v2.7.3 (2026-06-27)
-- refactor(permission): 报告单/设备权限覆盖逻辑重构，引入 hasRoleOrAbove 层级角色遍历替代硬编码角色 ID 比较
-- feat(permission): 角色管理新增菜单权限与功能权限类型区分（jb_role.type 字段），支持菜单角色与操作角色分离
-- chore: siargo.bat 添加 JDK --add-opens 模块开放启动参数，适配 JDK 16+ 反射限制
+
+- 权限管理：区分菜单权限与功能权限，报告单和设备操作按角色层级判断。
+- 启动兼容：调整启动参数，适配新版 JDK。
 
 ### v2.7.2 (2026-06-27)
-- feat(qarep): 批量审批功能，支持精度/外观/包装/批准合格一键批量更新产品状态，替代逐个审批提升效率
-- feat(qarep): 产品回收站功能，支持批量软删除与还原，删除原因必填
-- feat(qarep): 进度统计缓存实时刷新，审批按钮点击后自动更新流程数量，无需手动刷新页面
-- refactor(qarep): 报告单列表排序规则优化，按上一进度完成时间倒序排列
-- feat(admin): 路由添加 JBoltAdminAuthInterceptor 统一鉴权拦截器
-- chore(db): 数据库配置从 siargodev 切换至 siargo
+
+- 批量审批：支持精度、外观、包装及批准环节批量通过，操作后自动更新阶段数量。
+- 产品回收站：支持批量删除和还原，删除时须填写原因。
+- 报告单列表：按上一环节完成时间优先展示最新记录，并统一后台访问校验。
 
 ### v2.7.0 (2026-05-25)
-- feat(qarep): PDFService 新增 MFI 型号（插入式）报告生成支持，复用工业表模板避免重复代码
-- fix(qarep): FD-D 型号 else if 阻断后续型号参数填充，改为独立 if 分支确保各型号互不干扰
+
+- PDF 报告：新增 MFI 插入式型号支持，修复 FD-D 等型号参数填充互相影响的问题。
 
 ### v2.6.0 (2026-05-25)
-- feat(cme): 学习门户模块卡片新增思维导图入口按钮，法规/实务/案例三科各支持双入口（重要知识点 + 思维导图）
-- style(cme): 思维导图按钮采用蓝/绿/紫三色主题区分，卡片布局改为 flex column 响应式
-- chore: 删除 .qoder/commands/comment.md 命令文件
+
+- 学习门户：法规、实务和案例新增思维导图入口，与知识点资料分类展示。
 
 ### v2.5.0 (2026-05-15)
-- refactor(equipment): 移除独立的检校批次和设备记录管理页面，整合至时间线视图减少页面跳转
-- feat(equipment): 新增设备状态"异常"(status=5)展示支持
-- feat(equipment): 证书按钮增加证书日期显示
-- fix(equipment): 修复设备ID未加引号导致的 JS 类型问题
-- fix(equipment): 修复设备状态刷新时空值未处理的 JS 错误
-- feat(cme): 新增计量资料学习模块（CME），支持法规/实务/案例三科分类学习
+
+- 设备管理：检校批次和维修记录整合到时间线，新增异常状态及证书日期展示，修复设备操作和状态刷新异常。
+- 计量学习：新增法规、实务和案例分类学习入口。
 
 ### v2.4.0 (2026-04-29)
-- feat(equipment): 设备搜索支持规格型号模糊查询
-- feat(equipment): 设备主页编制/审核列改由最新检校批次数据驱动，不再依赖静态字段
-- feat(equipment): 新增"检校结果"列展示最新批次检定状态
-- feat(equipment): 检校批次状态枚举值调整（不合格: 0→2）
-- feat(equipment): 设备状态与检校批次状态双向联动，编制操作同步更新设备使用状态
-- fix(equipment): 移除 siargo_equipment_record 表已删除字段的后端引用
-- fix(equipment): 修复 SQL 子查询 Unknown column 'lr.auditor_id' 错误
-- fix(equipment): 移除审核操作中设备状态前置校验，简化流程
-- refactor(equipment): 统一所有 Tab 表格列宽配置
-- fix(qarep): 修复质量报告单时间字段 ISO 格式显示问题
-- style(qarep): 详情弹窗尺寸和样式优化
+
+- 设备查询：支持按规格型号模糊搜索，展示最新检校批次的编制、审核及检校结果。
+- 检校流程：设备状态与批次结果联动，简化审核条件，修复记录查询异常。
+- 报告单详情：修正时间显示格式，调整弹窗尺寸和排版。
 
 ### v2.3.1 (2026-04-24)
-- feat(qarep): QA 报告详情页检验进度从报告单级别下沉到每个产品独立展示，支持产品级检验人和时间显示
-- feat(qarep): 批准 Tab 表格新增行合并功能，同一报告单的多个产品行自动合并显示，交替背景色区分
-- refactor(qarep): 批准 Tab 表格列布局调整，查看PDF列移至末尾，固定列配置优化
+
+- 产品进度：报告单详情按产品展示检验环节、检验人和时间。
+- 批准列表：同一报告单的产品合并展示，调整固定列及 PDF 查看入口。
 
 ### v2.3.0 (2026-04-23)
-- feat(dashboard): Dashboard 页面全面美化，统计卡片重构为清爽简约风格，图表卡片增加圆角阴影和标题装饰，甜甜圈图配色差异化
-- style(qarep): 报告单模块多页面 UI 一致性美化（add/edit/details/editdes/index/inactiveList），表单分区卡片化，详情页 CSS 抽象重构
-- style(apicalllog): API 调用日志详情页和列表页 UI 美化，样式对齐 qarep 模块规范
-- style(equipment): 设备记录页面微调优化
+
+- 界面展示：统一首页看板、报告单、接口日志及设备记录的卡片、表单和详情样式，改善信息层次。
 
 ### v2.2.0 (2026-04-22)
-- feat(apicalllog): 修复日期控件 data-datepicker 改为 data-date，修复 JBoltTable 布局与分页（添加 jb_vflex/jb_vbody/fill_box），优化 Morris 柱状图 Y 轴自适应取整与整数显示
-- feat(pdf): PDFService 增加 safeStr 空值安全处理，防止报告生成时字段空指针异常
-- feat(equipment): 设备记录事件日期升级为 datetime 格式（yyyy-MM-dd HH:mm:ss），描述列增加省略溢出样式，一键审核按钮增加权限控制（#if(audit)），隐藏 Tab 导航栏，调整弹窗尺寸
-- feat(qarep): 质检报告精度/外观/包装检验按钮优化权限控制（#if(accuracy/appearance/packaging)）
-- feat(api): 新增 API 调用日志管理模块，记录外部接口请求/响应详情
+
+- 接口日志：新增外部接口请求与响应记录，完善日期筛选、列表分页及统计图显示。
+- 操作权限：设备审核和质检操作按钮按权限展示。
+- 详情与报告：设备记录时间精确到秒，优化描述和弹窗展示，修复 PDF 空字段导致的生成异常。
 
 ### v2.1.0 (2026-04-21)
-- feat(equipment): 批量编制增加设备状态选择功能
-- feat(equipment): 设备记录事件日期升级为日期时间格式（精确到秒）
-- feat(permission): 设备管理和质量报告操作按钮增加权限控制
-- fix(pdf): PDF 报告生成增加空值安全处理（safeStr），避免空字段导致 NPE
-- style(equipment): 优化批量操作弹窗尺寸和记录描述列样式
-- style(equipment): 隐藏设备分类 Tab 标签栏
+
+- 设备管理：批量编制支持选择设备状态，记录时间精确到秒，优化记录列表及操作弹窗。
+- 操作权限：设备管理和质量报告按钮按权限展示。
+- PDF 报告：修复空字段导致的生成异常。
 
 ### v2.0.0 (2026-04-20)
-- refactor(qarep): 检验流程 UI 重构，流程步骤条替代审批进度条，新增流程操作按钮样式，添加 Tab 切换和流程数量实时统计，整体交互从单一进度条升级为分步操作流
-- feat(login): 登录页使用 Client Hints API 获取平台版本及 CPU 架构信息，精准识别操作系统版本
-- feat(equipment): 新增设备管理模块，支持设备分类、检校批次、维修记录及证书附件管理
+
+- 检验流程：采用分步导航和阶段数量统计，支持切换查看各环节。
+- 设备管理：新增设备分类、检校批次、维修记录及证书附件管理。
+- 登录识别：完善操作系统版本与处理器架构识别。
 
 ### v1.9.1 (2026-04-17)
-- refactor(qarep): 审批流程 UI 改为现代化步骤条导航
-- style(qarep): 检验操作按钮样式与交互体验增强
-- feat(qarep): 流程阶段数量实时统计，支持定时刷新
-- feat(login): 登录页新增平台版本与 CPU 架构精准识别
+
+- 检验流程：更新步骤导航和操作按钮，支持阶段数量定时刷新。
+- 登录识别：补充系统版本与处理器架构信息。
 
 ### v1.9.0 (2026-04-15)
-- style(qarep): 报告单前端 UI 优化
+
+- 报告单：优化页面布局与交互展示。
 
 ### v1.8.1 (2026-04-14)
-- fix(qarep): 表单验证逻辑及显示 UI
+
+- 报告单：修复表单校验和界面显示问题。
 
 ### v1.8.0 (2026-04-14)
-- feat(api): 新增对外订单查询接口
-- refactor(qarep): Excel 导入逻辑优化
+
+- 订单查询：新增对外查询接口。
+- 报告单导入：优化 Excel 导入处理。
 
 ### v1.7.0 (2026-04-10)
-- feat(qarep): 报告单回收站与删除日志功能
+
+- 报告单：新增回收站和删除日志，便于追溯删除记录。
 
 ### v1.6.3 (2026-04-09)
-- fix(qarep): 修复注释和搜索条件
+
+- 报告单：修正搜索条件。
 
 ### v1.6.2 (2026-04-09)
-- fix(qarep): 进度条显示异常
+
+- 检验进度：修复进度条显示异常。
 
 ### v1.6.1 (2026-04-09)
-- fix(qarep): 保存功能异常
+
+- 报告单：修复保存异常。
 
 ### v1.6.0 (2026-04-09)
-- style(qarep): 进度条显示效果更新
+
+- 检验进度：调整进度条展示效果。
 
 ### v1.0.0 (2026-01-01)
-- siargo: 版本上线
+
+- 系统上线：发布首个版本。

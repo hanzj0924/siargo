@@ -30,6 +30,7 @@ public class ExtendProjectConfig {
 	 */
 	public static void configConstant(Constants me) {
 		LOG.debug("调用二开扩展配置:configConstant");
+		cn.jbolt.common.storage.SiargoStorage.validateConfiguration();
 	}
 	/**
 	 * 路由配置

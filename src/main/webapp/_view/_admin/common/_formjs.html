@@ -68,8 +68,8 @@ function submitThisForm#(randomFunctionName??)(successCallback){
                                 cancelLayerDialogFormSubmiting(form);
                                 cancelParentLayerDialogOkBtnStateToSubmiting();
                                 cancelParentLayerAllDialogBtnStateToDisabled();
-                                if(warningCallback){
-                                    warningCallback();
+                                if(typeof window.warningCallback === "function"){
+                                    window.warningCallback();
                                 }else{
                                     if(successCallback){
                                         successCallback();

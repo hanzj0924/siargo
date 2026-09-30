@@ -1,0 +1,48 @@
+<div class="jbolt_ajaxportal_content">
+    <div style="position:absolute;top:6px;right:20px;text-align:right;z-index:5;">
+        <a tooltip data-title="新增【#(paramType.typeName)】下的参数值" data-title="新增参数值" data-area="700,480"
+           data-handler="refreshPortal" data-portal="prodParamValuePortal" class="jbolt_table_addbtn text-primary mr-4"
+           href="admin/siargo/prodparam/value/add/#(paramType.id)"><i class="fa fa-plus"></i></a>
+        <a tooltip data-title="初始化【#(paramType.typeName)】下参数值的顺序" data-ajaxbtn
+           data-confirm="确认初始化【#(paramType.typeName)】下参数值的顺序？" data-handler="refreshPortal"
+           data-portal="prodParamValuePortal" class="text-primary mr-4"
+           href="admin/siargo/prodparam/value/initRank/#(paramType.id)"><i class="fa fa-sort"></i></a>
+    </div>
+    <table class="jbolt_table table_striped table-center thead_font_normal prod-param-value-table"
+           data-jbolttable
+           data-height="fill_box"
+           data-column-resize="true"
+    >
+        <thead>
+        <tr>
+            <th style="width:60px;" data-nochange>序号</th>
+            <th data-min-width="120">参数值</th>
+            <th data-min-width="160">描述</th>
+            <th data-width="180" data-nochange>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        #for(data:paramValues??)
+        <tr>
+            <td>#(for.count)</td>
+            <td>#(data.paramValue??)</td>
+            <td title="#(data.description??)">#(data.description??)</td>
+            <td>
+                <a data-title="编辑参数值" data-area="700,480" data-handler="refreshPortal"
+                   data-portal="prodParamValuePortal" class="jbolt_table_editbtn"
+                   href="admin/siargo/prodparam/value/edit/#(data.id)"><i class="fa fa-edit text-primary"></i></a>
+                <a data-confirm="确认永久删除此参数值，并移除产品型号中对应的可选值？" data-handler="refreshPortal" data-portal="prodParamValuePortal"
+                   class="jbolt_table_delbtn" href="admin/siargo/prodparam/value/deleteByIds?ids=#(data.id)"><i
+                        class="fa fa-remove text-danger"></i></a>
+                <a href="admin/siargo/prodparam/value/up/#(data.id)" data-ajaxbtn data-loading="执行中 " tooltip
+                   data-title="上移" data-handler="refreshPortal" data-portal="prodParamValuePortal"
+                   class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+                <a href="admin/siargo/prodparam/value/down/#(data.id)" data-ajaxbtn data-loading="执行中 " tooltip
+                   data-title="下移" data-handler="refreshPortal" data-portal="prodParamValuePortal"
+                   class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+            </td>
+        </tr>
+        #end
+        </tbody>
+    </table>
+</div>

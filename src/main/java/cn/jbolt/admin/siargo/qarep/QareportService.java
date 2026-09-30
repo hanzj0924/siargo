@@ -1,25 +1,33 @@
 package cn.jbolt.admin.siargo.qarep;
 
+import cn.jbolt.admin.siargo.qarep.product.ProductRejectLogService;
+import cn.jbolt.admin.siargo.qarep.product.ProductService;
+import cn.jbolt.admin.siargo.qarep.product.ProductSeriesService;
+import cn.jbolt.admin.siargo.qarep.product.ReportProductInput;
+import cn.jbolt.admin.siargo.qarep.pdffolder.PdfTemplateService;
+import cn.jbolt.admin.siargo.customer.CustomerService;
+import cn.jbolt.core.kit.JBoltSnowflakeKit;
+import cn.jbolt.admin.siargo.qarep.siargoconst.QarepConst;
 import cn.jbolt.siargo.model.Product;
+import cn.jbolt.siargo.model.PdfTemplate;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
-import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
@@ -46,34 +54,44 @@ import net.dreamlu.event.EventKit;
 public class QareportService extends JBoltBaseService<Qareport> {
 
 	private static final Log LOG = Log.getLog(QareportService.class);
-
-	/** 检验报告单数据访问对象 */
-	private final Qareport dao = new Qareport().dao();
+    private static final String PRODUCT_TYPE_NAME_SQL = ProductSeriesService.typeNameSql("pm", "d_type");
+    private static final List<Map.Entry<String, String>> DASHBOARD_CATEGORIES = List.of(
+            Map.entry("large_meter", "大表"), Map.entry("small_flow", "小流量计"), Map.entry("sensor", "传感器"));
+    // 同系列、同版号先合并到唯一模板类别，避免一对多关联重复累计；停用不改变历史报告分类。
+    private static final String DASHBOARD_TEMPLATE_CATEGORY_JOIN =
+            " INNER JOIN (SELECT mapped.siargo_prod_model_id, mapped.pdfver, MIN(mapped.category) AS sn"
+            + " FROM (SELECT b.siargo_prod_model_id, t.pdfver, CASE"
+            + " WHEN t.template_file IN ('中低压模板.pdf','工业表模板.pdf') THEN 'large_meter'"
+            + " WHEN t.template_file IN ('小流量计模板.pdf','控制器模板.pdf') THEN 'small_flow'"
+            + " WHEN t.template_file = '传感器模板.pdf' THEN 'sensor' END AS category"
+            + " FROM siargo_pdf_template_prod b INNER JOIN siargo_pdf_template t ON t.id=b.siargo_pdf_template_id) mapped"
+            + " GROUP BY mapped.siargo_prod_model_id, mapped.pdfver"
+            + " HAVING COUNT(*)=COUNT(mapped.category) AND COUNT(DISTINCT mapped.category)=1) category"
+            + " ON category.siargo_prod_model_id=sp.siargo_prod_model_id"
+            + " AND category.pdfver COLLATE utf8mb4_general_ci=sp.pdfver COLLATE utf8mb4_general_ci ";
 	// ========== 流程统计缓存（30分钟有效期） ==========
 	private static final long FLOW_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
-	private volatile Map<String, Long> cachedFlowCounts;
-	private volatile long flowCountsCacheTimestamp;
-	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
-
 	// ========== 看板报告单级流程统计缓存（30分钟有效期，与列表页产品级 flowCounts 分开） ==========
 	private static final long DASHBOARD_FLOW_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
-	private volatile Map<String, Long> cachedDashboardFlowCounts;
-	private volatile long dashboardFlowCountsCacheTimestamp;
-	private final ReentrantLock dashboardFlowCountsCacheLock = new ReentrantLock();
-
 	// ========== 年度数量总计缓存（30分钟有效期，key = 列名+类型） ==========
 	private static final long TOTAL_COUNTS_CACHE_TTL = 30 * 60 * 1000L; // 30分钟
-	private volatile Map<String, Long> cachedTotalCounts;
-	private volatile long totalCountsCacheTimestamp;
-	private final ReentrantLock totalCountsCacheLock = new ReentrantLock();
-
 	// ========== 管理端分页数据缓存（30秒有效期，降低重复查询开销） ==========
 	// 仅缓存"空关键字 + 无日期范围 + 第一页"的查询，key空间有限（prodType×insp×pageSize），防止无限增长
 	private static final long PAGINATE_CACHE_TTL = 30 * 1000L;
+	/** 检验报告单数据访问对象 */
+	private final Qareport dao = new Qareport().dao();
+	private final ReentrantLock flowCountsCacheLock = new ReentrantLock();
+	private final ReentrantLock dashboardFlowCountsCacheLock = new ReentrantLock();
+	private final ReentrantLock totalCountsCacheLock = new ReentrantLock();
+	private final ReentrantLock paginateCacheLock = new ReentrantLock();
+	private volatile Map<String, Long> cachedFlowCounts;
+	private volatile long flowCountsCacheTimestamp;
+	private volatile Map<String, Long> cachedDashboardFlowCounts;
+	private volatile long dashboardFlowCountsCacheTimestamp;
+	private volatile Map<String, Long> cachedTotalCounts;
+	private volatile long totalCountsCacheTimestamp;
 	private volatile Map<String, Page<Record>> cachedPaginateData;
 	private volatile long paginateCacheTimestamp;
-	private final ReentrantLock paginateCacheLock = new ReentrantLock();
-
 	/** 用户服务（用于查询拥有指定角色的用户列表） */
 	@Inject
 	private UserService userService;
@@ -89,12 +107,65 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	/** 产品服务 */
 	@Inject
 	private ProductService productService;
+    @Inject private ProductSeriesService seriesService;
+    @Inject private PdfTemplateService templateService;
+    @Inject private CustomerService customerService;
+
+    /** 备注编辑与完整编辑采用相同长度、有效状态和PDF失效规则。 */
+    static Ret prepareDescriptionEdit(Product product, String description) {
+        if (product == null) return Ret.fail(JBoltMsg.DATA_NOT_EXIST);
+        if (!Integer.valueOf(QarepConst.VD_VALID).equals(product.getInt("vd")))
+            return Ret.fail("产品已删除，请从回收站恢复后编辑");
+        String value = description == null ? "" : description.trim();
+        if (value.length() > 1000) return Ret.fail("产品描述不能超过 1000 个字符");
+        List<String> stalePdfs = new ArrayList<>();
+        boolean changed = !Objects.equals(product.getStr("des"), value);
+        if (changed) {
+            addPdfUrl(stalePdfs, product.getStr("pdfstr"));
+            product.set("des", value).set("pdfstr", null);
+        }
+        return Ret.ok().set("descriptionChanged", changed).set("pdfCleanupUrls", stalePdfs);
+    }
+	
+    static String validatePermanentDeleteProducts(List<Product> products) {
+        for (Product product : products) {
+            if (!Integer.valueOf(QarepConst.VD_DELETED).equals(product.getInt("vd")))
+                return "仅允许永久删除回收站中的产品，请先移入回收站（ID=" + product.getLong("id") + "）";
+        }
+        return null;
+    }
+
+    private static void addPdfUrl(List<String> urls, String url) {
+        if (url != null && !url.isBlank() && !urls.contains(url)) urls.add(url);
+    }
+
+    static List<String> splitLogDescription(String text) {
+        List<String> parts = new ArrayList<>();
+        String source = text == null ? "" : text;
+        for (int offset = 0; offset < source.length();) {
+            int end = source.offsetByCodePoints(offset, Math.min(180, source.codePointCount(offset, source.length())));
+            parts.add(source.substring(offset, end));
+            offset = end;
+        }
+        return parts.isEmpty() ? List.of("") : parts;
+    }
+
+    static boolean samePdfSnapshot(Qareport expected, Qareport current) {
+        return expected != null && current != null && expected.toMap().equals(current.toMap());
+    }
+
+    static String chartTypeName(String key, String label) {
+        if (label != null && !label.isBlank()) return label;
+        if (key == null || key.isEmpty()) return "未关联系列";
+        if ("__unclassified__".equals(key)) return "系列类型未设置";
+        return "类型（" + key + "）";
+    }
 
 	@Override
 	protected Qareport dao() {
 		return dao;
 	}
-	
+
 	/**
 	 * 获取各流程阶段的数量统计（带30分钟缓存）
 	 * <p>返回不可变Map，防止调用方误改缓存内容</p>
@@ -123,10 +194,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	}
 
 	/**
-	 * 获取首页看板报告单级流程统计（本年度，带30分钟缓存）
-	 * <p>产品级、本年度口径：查询当年创建报告单下的全部有效产品（vd=1），按 insp 分环节，
-	 * 不去重；allq 即当年 insp=5 的产品数，与环形图“本年度报告单来源”总数一致。</p>
-	 * @return Map包含各阶段数量：all(本年度产品总数), noq/ltq/accq/funq/appq/allq(按 insp 分环节),
+	 * 获取首页看板流程统计（当前在检、本年度已完成，带30分钟缓存）
+	 * <p>产品级口径：有效产品（vd=1）的在检环节按当前 insp 统计，不限制时间；
+	 * 已完成产品（insp=5）按批准时间 allq_time 归属年度，不去重。</p>
+	 * @return Map包含各阶段数量：all(在检与本年度已完成总数), allq(本年度已完成数), noq/ltq/accq/funq/appq(当前在检数),
 	 *         noq_qsi~allq_qsi(各环节产品送检只数)
 	 */
 	public java.util.Map<String, Long> getDashboardFlowCounts() {
@@ -257,14 +328,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		}
 		String now = DateUtil.getDateString(DateUtil.YMDHMS);
 		List<String> failedItems = new ArrayList<>();
+        List<String> stalePdfs = new ArrayList<>();
 		int successCount = 0;
-		for (Long id : ids) {
-			if (id == null) {
-				continue;
-			}
+		for (Long id : ids.stream().filter(Objects::nonNull).distinct().sorted().toList()) {
 			// 读取产品当前状态与成品检漏标记，逐产品计算目标状态
 			Record cur = Db.findFirst(
-					"SELECT insp, lt_status FROM siargo_product WHERE id = ? AND vd = " + QarepConst.VD_VALID, id);
+					"SELECT insp, lt_status, pdfstr FROM siargo_product WHERE id = ? AND vd = " + QarepConst.VD_VALID + " FOR UPDATE", id);
 			if (cur == null) {
 				failedItems.add("ID:" + id + "（数据不存在）");
 				continue;
@@ -302,24 +371,25 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			}
 			// 条件更新：仅当前状态匹配且有效时才更新，避免并发重复处理/状态跳跃
 			int rows = Db.update(
-					"UPDATE siargo_product SET insp = ?, " + stageCol + "_uid = ?, " + stageCol + "_time = ? "
+					"UPDATE siargo_product SET insp = ?, pdfstr = NULL, " + stageCol + "_uid = ?, " + stageCol + "_time = ? "
 					+ "WHERE id = ? AND insp = ? AND vd = " + QarepConst.VD_VALID,
 					newInsp, userId, now, id, prevInsp);
 			if (rows > 0) {
 				successCount++;
+                addPdfUrl(stalePdfs, cur.getStr("pdfstr"));
 			} else {
 				failedItems.add(describeProduct(id));
 			}
 		}
 		if (failedItems.isEmpty()) {
-			return Ret.ok();
+			return Ret.ok().set("pdfCleanupUrls", stalePdfs);
 		}
 		String failMsg = "以下产品未处理成功（当前状态已变化或已被他人处理）：" + String.join("、", failedItems);
 		if (successCount == 0) {
 			return fail(failMsg);
 		}
 		// 部分成功：成功的行保留，失败明细通过msg返回
-		return Ret.ok().set("msg", "已成功处理 " + successCount + " 条。" + failMsg);
+		return Ret.ok().set("msg", "已成功处理 " + successCount + " 条。" + failMsg).set("pdfCleanupUrls", stalePdfs);
 	}
 
 	/**
@@ -344,12 +414,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		}
 		Long userId = JBoltUserKit.getUserId();
 		List<String> failedItems = new ArrayList<>();
+        List<String> stalePdfs = new ArrayList<>();
 		int successCount = 0;
-		for (Long id : ids) {
-			if (id == null) {
-				continue;
-			}
-			Product product = productService.findById(id);
+		for (Long id : ids.stream().filter(Objects::nonNull).distinct().sorted().toList()) {
+			Product product = productService.findForUpdate(id);
 			if (product == null) {
 				failedItems.add("ID:" + id + "（数据不存在）");
 				continue;
@@ -397,11 +465,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			}
 			// 条件更新：清空被驳回阶段的完成记录并回退，仅当状态未被他人变更时生效
 			int rows = Db.update(
-					"UPDATE siargo_product SET insp = ?, " + clearCol + "_uid = NULL, " + clearCol + "_time = NULL "
+					"UPDATE siargo_product SET insp = ?, pdfstr = NULL, " + clearCol + "_uid = NULL, " + clearCol + "_time = NULL "
 					+ "WHERE id = ? AND insp = ? AND vd = " + QarepConst.VD_VALID,
 					newInsp, id, cur);
 			if (rows > 0) {
 				successCount++;
+                addPdfUrl(stalePdfs, product.getStr("pdfstr"));
 				// 追加驳回历史记录：环节（2=外观检验 3=包装检验 4=批准 6=成品检漏）、原因、驳回人、时间
 				productRejectLogService.saveLog(id, cur, rejectDes, userId);
 			} else {
@@ -409,13 +478,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			}
 		}
 		if (failedItems.isEmpty()) {
-			return Ret.ok();
+			return Ret.ok().set("pdfCleanupUrls", stalePdfs);
 		}
 		String failMsg = "以下产品未驳回成功：" + String.join("、", failedItems);
 		if (successCount == 0) {
 			return fail(failMsg);
 		}
-		return Ret.ok().set("msg", "已成功驳回 " + successCount + " 条。" + failMsg);
+		return Ret.ok().set("msg", "已成功驳回 " + successCount + " 条。" + failMsg).set("pdfCleanupUrls", stalePdfs);
 	}
 
 	/**
@@ -432,7 +501,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				product.set("delete_time", DateUtil.getDateString(DateUtil.YMDHMS));
 				product.set("vd", QarepConst.VD_DELETED);
 				product.set("delete_des", deleteDes);
-				if (!product.update()) {
+				if (!productService.updateReportProduct(product)) {
 					return fail("软删除产品失败，ID=" + id);
 				}
 			}
@@ -453,7 +522,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		product.set("vd", QarepConst.VD_VALID);
 		product.set("delete_time", null);
 		product.set("delete_des", null);
-		return product.update();
+		return productService.updateReportProduct(product);
 	}
 
 	/**
@@ -466,13 +535,16 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		if (notOk(id)) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		Product product = productService.findById(id);
-		if (product == null) {
-			return fail(JBoltMsg.DATA_NOT_EXIST);
-		}
-		product.setDes(des == null ? "" : des.trim());
-		boolean success = product.update();
-		return ret(success);
+		String description = des == null ? "" : des.trim();
+        if (description.length() > 1000) return fail("产品描述不能超过 1000 个字符");
+        // 调用方持有事务；锁定当前内容与PDF地址，发布请求必须等本次备注修改提交。
+		Product product = productService.findForUpdate(id);
+        Ret prepared = prepareDescriptionEdit(product, description);
+        if (prepared.isFail()) return prepared;
+        boolean changed = Boolean.TRUE.equals(prepared.get("descriptionChanged"));
+        prepared.remove("descriptionChanged");
+        if (changed && !productService.updateReportProduct(product)) return fail("产品描述更新失败");
+        return prepared;
 	}
 
 	/**
@@ -483,94 +555,115 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 *   <li>删除产品记录</li>
 	 *   <li>若报告单下已无产品，一并删除 siargo_qareport</li>
 	 * </ol>
-	 * <p>物理文件删除不可回滚，已移至 Controller afterCommit 统一执行（规范 6.3）</p>
-	 * <p>DB删除失败时抛出RuntimeException触发事务回滚（需在事务中调用）</p>
+	 * <p>锁定全部现存产品后先验证回收站状态，再级联删除；混入有效产品时整批拒绝。</p>
+	 * <p>只参与调用方事务，返回锁内读取的pdfCleanupUrls，由调用方在提交后清理文件。</p>
 	 * @param ids 产品ID列表
 	 * @return 操作结果
 	 */
-	public Ret permanentDelete(List<Long> ids) {
+    public Ret permanentDelete(List<Long> ids) {
 		if (ids == null || ids.isEmpty()) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
 		Long userId = JBoltUserKit.getUserId();
-		for (Long id : ids) {
-			if (id == null) {
-				continue;
-			}
-			Product product = productService.findById(id);
-			if (product == null) {
-				continue;
-			}
+        if (ids.stream().anyMatch(id -> id != null && id <= 0)) return fail(JBoltMsg.PARAM_ERROR);
+        List<Long> orderedIds = ids.stream().filter(Objects::nonNull).distinct().sorted().toList();
+        java.util.SortedSet<Long> reportIds = new java.util.TreeSet<>();
+        for (Long id : orderedIds) {
+            Product snapshot = productService.findById(id);
+            if (snapshot != null && snapshot.getLong("report_id") != null) reportIds.add(snapshot.getLong("report_id"));
+        }
+        // 删除也遵循报告头→产品，避免与发布/编辑持锁次序倒置。
+        for (Long reportId : reportIds) dao.findFirst("SELECT id FROM siargo_qareport WHERE id=? FOR UPDATE", reportId);
+        List<Product> lockedProducts = new ArrayList<>();
+        java.util.Set<Long> requestedIds = new java.util.HashSet<>(orderedIds);
+        for (Product product : productService.findDeletionScopeForUpdate(reportIds, orderedIds)) {
+            // 不存在的ID维持幂等跳过；已有记录必须逐项通过回收站校验。
+            if (requestedIds.contains(product.getLong("id"))) lockedProducts.add(product);
+        }
+        String validation = validatePermanentDeleteProducts(lockedProducts);
+        if (validation != null) return fail(validation);
+        List<String> stalePdfs = new ArrayList<>();
+		for (Product product : lockedProducts) {
+            Long id = product.getLong("id");
+            addPdfUrl(stalePdfs, product.getStr("pdfstr"));
 			// 删除前组装日志描述（报告单编号/订单号/型号/编号/客户/删除原因）
 			String logDesc = buildPermanentDeleteLogDesc(product);
 			// 1. 级联删除驳回历史
 			Db.delete("DELETE FROM siargo_product_reject_log WHERE product_id = ?", id);
 		// 2. 删除产品记录（失败返回 fail，配合 Db.tx() 回滚）
-			if (!product.delete()) {
+			if (!productService.deleteReportProduct(product)) {
 				return fail("产品记录删除失败，ID=" + id);
 			}
 			// 3. 报告单下已无产品（含回收站中的）则一并删除报告单
 			Long reportId = product.getReportId();
 			if (reportId != null) {
-				Long remain = Db.queryLong("SELECT COUNT(*) FROM siargo_product WHERE report_id = ?", reportId);
-				if (remain != null && remain == 0) {
+				if (!productService.hasReportProductsForUpdate(reportId)) {
 					Db.deleteById("siargo_qareport", reportId);
 				}
 			}
 			// 4. 记录永久删除系统日志
-			addDeleteSystemLog(id, userId, logDesc);
+            // 系统日志标题上限255，完整业务描述按段保存，避免合法长型号使删除事务失败。
+            List<String> parts = splitLogDescription(EscapeUtil.escapeHtml4(logDesc));
+            for (int index = 0; index < parts.size(); index++) {
+                // 原生完整标题接口不再叠加HTML/姓名前缀，用户与操作类型仍分别写入日志字段。
+                addSystemLogWithTitle(id, userId, cn.jbolt.core.common.enums.JBoltSystemLogType.DELETE.getValue(),
+                        systemLogTargetType(), "报告产品永久删除（" + (index + 1) + "/" + parts.size() + "）：" + parts.get(index));
+            }
 		}
-		return Ret.ok();
+		return Ret.ok().set("pdfCleanupUrls", stalePdfs);
 	}
 
-	/**
-	 * 事务外收集产品PDF物理文件绝对路径（供 Controller afterCommit 统一删除）
-	 * <p>文件删除不可回滚，必须在 Db.tx() 提交成功后执行（规范 6.3）</p>
-	 * @param ids 产品ID列表
-	 * @return PDF文件绝对路径列表（不含空值/穿越路径）
-	 */
-	public List<String> getPdfPathsByIds(List<Long> ids) {
-		List<String> paths = new ArrayList<>();
-		if (ids == null || ids.isEmpty()) {
-			return paths;
-		}
-		String webRoot = PathKit.getWebRootPath();
-		for (Long id : ids) {
-			if (id == null) {
-				continue;
-			}
-			String pdfstr = Db.queryStr("SELECT pdfstr FROM siargo_product WHERE id = ?", id);
-			if (pdfstr == null || pdfstr.isEmpty() || pdfstr.contains("..")) {
-				if (pdfstr != null && pdfstr.contains("..")) {
-					LOG.warn("检测到非法PDF路径，跳过删除: " + pdfstr);
-				}
-				continue;
-			}
-			paths.add(webRoot + (pdfstr.startsWith("/") ? pdfstr : "/" + pdfstr));
-		}
-		return paths;
-	}
+    /** 仅在删除事务提交成功后调用，共用历史 PDF 的其他产品不会受影响。 */
+    public void deletePhysicalPdfs(List<String> urls) {
+        if (urls == null) return;
+        for (String url : urls) {
+            try { productService.deleteUnreferencedPdf(url); }
+            catch (Exception ex) { LOG.error("PDF 文件清理失败：" + url, ex); }
+        }
+    }
 
-	/**
-	 * 批量删除PDF物理文件（带路径穿越二次检测）
-	 * <p>由 Controller 在 Db.tx() 提交成功后调用（规范 6.3：文件删除不可回滚）</p>
-	 * @param pdfPaths 待删除的PDF文件绝对路径列表（getPdfPathsByIds 收集）
-	 */
-	public void deletePhysicalPdfs(List<String> pdfPaths) {
-		if (pdfPaths == null || pdfPaths.isEmpty()) {
-			return;
-		}
-		for (String path : pdfPaths) {
-			if (path == null || path.contains("..")) {
-				LOG.warn("检测到非法PDF路径，跳过删除: " + path);
-				continue;
-			}
-			File pdfFile = new File(path);
-			if (pdfFile.exists() && pdfFile.isFile() && !pdfFile.delete()) {
-				LOG.warn("PDF文件删除失败: " + pdfFile.getAbsolutePath());
-			}
-		}
-	}
+    /** 审批/驳回等由外层持有事务的入口，只能在提交成功后调用。 */
+    public void cleanupInvalidatedPdfs(Ret result) {
+        if (result != null && result.isOk()) deletePhysicalPdfs(result.getAs("pdfCleanupUrls"));
+    }
+
+    /** 正式发布前在同一事务中复核模板和生成快照，防止发布编辑前的内容。 */
+    public Ret publishPdf(Qareport expectedReport, PdfTemplate expectedTemplate, String newPdfUrl) {
+        if (expectedReport == null || expectedTemplate == null || newPdfUrl == null || newPdfUrl.isBlank()) return fail("PDF发布参数错误");
+        final Long productId, reportId, seriesId;
+        try {
+            productId = Long.valueOf(Objects.toString(expectedReport.get("proid"), ""));
+            reportId = Long.valueOf(Objects.toString(expectedReport.get("id"), ""));
+            seriesId = Long.valueOf(Objects.toString(expectedReport.get("siargo_prod_model_id"), ""));
+            if (productId <= 0 || reportId <= 0 || seriesId <= 0) return fail("PDF发布记录无效");
+        } catch (RuntimeException invalid) { return fail("PDF发布记录无效"); }
+        Ret[] result = {fail("PDF发布失败")};
+        try {
+            // 模板校验可能先进行普通查询；READ_COMMITTED保证等待产品锁后仍能读取最新快照。
+            boolean committed = Db.tx(java.sql.Connection.TRANSACTION_READ_COMMITTED, () -> {
+                result[0] = templateService.validatePublication(seriesId, expectedReport.getStr("sp_pdfver"), expectedTemplate);
+                if (result[0].isFail()) return false;
+                // 与编辑统一：版号/模板/系列 → 报告头 → 产品。
+                Qareport header = dao.findFirst("SELECT * FROM siargo_qareport WHERE id=? FOR UPDATE", reportId);
+                Product product = productService.findForUpdate(productId);
+                if (header == null || product == null || !Objects.equals(product.getLong("report_id"), reportId)) {
+                    result[0] = fail("报告单已被修改或删除，请刷新后重新生成"); return false;
+                }
+                Qareport current = qareportFindByProId(productId);
+                if (!samePdfSnapshot(expectedReport, current)) {
+                    result[0] = fail("报告信息、检验参数或审批记录已变化，请重新生成PDF"); return false;
+                }
+                if (!productService.publishPdfInTransaction(productId, expectedReport.getStr("sp_pdfstr"), newPdfUrl)) {
+                    result[0] = fail("报告审批状态或PDF地址已变化，请重新生成"); return false;
+                }
+                result[0] = Ret.ok(); return true;
+            });
+            return committed ? result[0] : (result[0].isFail() ? result[0] : fail("PDF发布失败"));
+        } catch (Exception error) {
+            LOG.error("PDF发布事务失败", error);
+            return fail("PDF发布失败，请刷新后重试");
+        }
+    }
 
 	/**
 	 * 组装永久删除操作的日志描述
@@ -597,7 +690,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		return " 报告单编号：" + formnum + " ==订单号：" + orderId + " ==型号：" + model
 				+ " ==编号：" + number + " ==客户：" + customerName + " ==删除原因：" + deleteDes;
 	}
-
+	
 	/**
 	 * 从数据库加载各流程阶段的数量统计
 	 * <p>合并为单条SQL：一次性统计全部数量及insp=1~5各分类数量，避免多次查询导致的性能损耗</p>
@@ -654,9 +747,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	}
 	
 	/**
-	 * 从数据库加载首页看板报告单级流程统计（本年度）
-	 * <p>产品级统计：当年创建报告单（YEAR(sq.create_time)=YEAR(CURDATE())）下的
-	 * 全部有效产品（vd=1），按产品 insp 分环节，不去重。</p>
+	 * 从数据库加载首页看板流程统计
+	 * <p>当前在检记录没有批准时间，按 insp 分环节统计；
+	 * 仅已完成记录按 allq_time 筛选本年度，两者均要求 vd=1。</p>
 	 */
 	private Map<String, Long> loadDashboardFlowCountsFromDb() {
 		Map<String, Long> counts = new java.util.HashMap<>();
@@ -666,17 +759,18 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ ", SUM(CASE WHEN insp = 2 THEN 1 ELSE 0 END) AS insp_2"
 				+ ", SUM(CASE WHEN insp = 3 THEN 1 ELSE 0 END) AS insp_3"
 				+ ", SUM(CASE WHEN insp = 4 THEN 1 ELSE 0 END) AS insp_4"
-				+ ", SUM(CASE WHEN insp = 5 THEN 1 ELSE 0 END) AS insp_5"
+				+ ", SUM(CASE WHEN insp = 5 THEN 1 ELSE 0 END) AS approved_count"
 				+ ", SUM(CASE WHEN insp = 6 THEN 1 ELSE 0 END) AS insp_6"
 				+ ", SUM(CASE WHEN insp = 1 THEN sp.qsi ELSE 0 END) AS qsi_1"
 				+ ", SUM(CASE WHEN insp = 2 THEN sp.qsi ELSE 0 END) AS qsi_2"
 				+ ", SUM(CASE WHEN insp = 3 THEN sp.qsi ELSE 0 END) AS qsi_3"
 				+ ", SUM(CASE WHEN insp = 4 THEN sp.qsi ELSE 0 END) AS qsi_4"
-				+ ", SUM(CASE WHEN insp = 5 THEN sp.qsi ELSE 0 END) AS qsi_5"
+				+ ", SUM(CASE WHEN insp = 5 THEN sp.qsi ELSE 0 END) AS approved_qsi"
 				+ ", SUM(CASE WHEN insp = 6 THEN sp.qsi ELSE 0 END) AS qsi_6"
 				+ " FROM siargo_product sp"
 				+ " INNER JOIN siargo_qareport sq ON sq.id = sp.report_id"
-				+ " WHERE YEAR(sq.create_time) = YEAR(CURDATE()) AND sp.vd = 1";
+				+ " WHERE sp.vd = 1 AND (sp.insp IN (1, 6, 2, 3, 4)"
+				+ " OR (sp.insp = 5 AND YEAR(sp.allq_time) = YEAR(CURDATE())))";
 		Record row = Db.findFirst(sql);
 		if (row != null) {
 			counts.put("all", row.getLong("all_count") != null ? row.getLong("all_count") : 0L);
@@ -684,13 +778,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			counts.put("accq", row.getLong("insp_2") != null ? row.getLong("insp_2") : 0L);
 			counts.put("funq", row.getLong("insp_3") != null ? row.getLong("insp_3") : 0L);
 			counts.put("appq", row.getLong("insp_4") != null ? row.getLong("insp_4") : 0L);
-			counts.put("allq", row.getLong("insp_5") != null ? row.getLong("insp_5") : 0L);
+			counts.put("allq", row.getLong("approved_count") != null ? row.getLong("approved_count") : 0L);
 			counts.put("ltq", row.getLong("insp_6") != null ? row.getLong("insp_6") : 0L);
 			counts.put("noq_qsi", row.getLong("qsi_1") != null ? row.getLong("qsi_1") : 0L);
 			counts.put("accq_qsi", row.getLong("qsi_2") != null ? row.getLong("qsi_2") : 0L);
 			counts.put("funq_qsi", row.getLong("qsi_3") != null ? row.getLong("qsi_3") : 0L);
 			counts.put("appq_qsi", row.getLong("qsi_4") != null ? row.getLong("qsi_4") : 0L);
-			counts.put("allq_qsi", row.getLong("qsi_5") != null ? row.getLong("qsi_5") : 0L);
+			counts.put("allq_qsi", row.getLong("approved_qsi") != null ? row.getLong("approved_qsi") : 0L);
 			counts.put("ltq_qsi", row.getLong("qsi_6") != null ? row.getLong("qsi_6") : 0L);
 		} else {
 			counts.put("all", 0L);
@@ -709,24 +803,16 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		}
 		return counts;
 	}
-	
-	/**
-	 * 获取上个月已完成最终放行的产品ID列表
-	 * <p>用于批量生成上个月的归档PDF文件</p>
-	 * <p>查询条件：vd=1（有效）、insp=5（已放行）、allq_time在上月范围内</p>
-	 * @return 上月已放行产品的ID列表
-	 */
-	public List<Record> getIds() {
-	    // 构建查询：查询上个月完成最终放行的有效产品
+
+	/** 按最终放行时间查询有效、已完成产品，起始日包含、截止日不包含。 */
+	public List<Record> getIdsByReleaseMonthRange(LocalDate startInclusive, LocalDate endExclusive) {
 	    Sql sql = Sql.mysql()
 	            .select("sp.id")
 	            .from("siargo_product", "sp")
-	            .eq("sp.vd", QarepConst.VD_VALID)  // 有效数据
-	            .eq("sp.insp", QarepConst.INSP_COMPLETED)  // 已完成最终放行
-	            .bwDate("sp.allq_time",  // 最终放行时间在上月范围内
-	                    DateUtil.lastMonthFirstDay(DateUtil.getNow()),
-	                    DateUtil.lastMonthLastDay(DateUtil.getNow()));
-
+	            .eq("sp.vd", QarepConst.VD_VALID)
+	            .eq("sp.insp", QarepConst.INSP_COMPLETED)
+	            .ge("sp.allq_time", java.sql.Timestamp.valueOf(startInclusive.atStartOfDay()))
+	            .lt("sp.allq_time", java.sql.Timestamp.valueOf(endExclusive.atStartOfDay()));
 	    return findRecord(sql);
 	}
 
@@ -751,12 +837,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 后台管理分页查询报告单列表
-	 * <p>关联查询产品表、客户表、用户表和字典表，获取完整展示信息</p>
+	 * <p>关联查询产品、型号、报告单、用户和字典，仅返回列表展示所需字段</p>
 	 * <p>说明：id/spid 使用 CAST(... AS CHAR) 输出，避免前端雪花ID精度丢失；sp_des 输出前做HTML转义</p>
 	 * @param pageNumber 页码
 	 * @param pageSize 每页数量
 	 * @param keywords 搜索关键字（订单号模糊匹配）
-	 * @param prodType 产品类型（1=传感器，2=小流量，3=大流量，0=全部）
+	 * @param prodType 产品类型字典 SN（0=全部）
 	 * @param insp 检验进度（1-5，0=全部）
 	 * @param startTime 创建时间起始
 	 * @param endTime 创建时间结束
@@ -776,36 +862,31 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				}
 			}
 		}
-		
+
 		// ========== 构建基础查询 ==========
 		Sql sql = Sql.mysql()
 				// 选择字段：报告单基础信息（id/spid转CHAR防止前端雪花ID精度丢失）
-				.select("CAST(sq.id AS CHAR) AS id", "sq.order_id", "sc.name AS sc_name", "sq.formnum","sp.insp",
+				.select("CAST(sq.id AS CHAR) AS id", "sq.order_id", "sq.formnum","sp.insp",
 						// 检验时间信息
 						"sp.accq_time", "sp.funq_time", "sp.appq_time", "sp.allq_time", "sp.lt_status", "sp.lt_time",
 						// 检验人员姓名
 						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
 						"lt_user.name AS lt_name", "allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						// 产品信息字段
-						"CAST(sp.id AS CHAR) as spid", "sp.model as sp_model", "sp.number as sp_number", "sp.type as sp_type",
-						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.flow_range as sp_flow_range", "sp.des as sp_des", 
-						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv", 
-						"sp.thv as sp_thv", "sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax", 
-						"sp.cucmin as sp_cucmin", "sp.bv as sp_bv", "sp.la as sp_la", 
+						"CAST(sp.id AS CHAR) as spid", "sp.model as sp_model", "sp.number as sp_number", "pm.model_series", "pm.branch_label",
+						"sp.qsi as sp_qsi", "sp.qi as sp_qi", "sp.des as sp_des", "sp.pdfstr AS sp_pdfstr",
 						// 字典翻译字段
-						"d_type.name AS type_name","d_insp.name AS insp_name","d_flow.name AS flow_name",
-						"d_pdfver.name AS pdfver_name","d_retype.name AS retype_name",
+						PRODUCT_TYPE_NAME_SQL + " AS type_name","d_insp.name AS insp_name","d_retype.name AS retype_name",
 						// 驳回历史条数（>0 时前端显示「驳」角标，点击查看历史）
 						"sp.reject_count"
 						)
 				.page(pageNumber, pageSize).from("siargo_product", "sp")
+                .leftJoin("siargo_prod_model", "pm", "pm.id=sp.siargo_prod_model_id")
 				// ========== 关联报告单表 ==========
 				.leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
-				// ========== 关联客户表 ==========
-				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
 				// ========== 关联字典表获取产品类型名称 ==========
-				.leftJoin("jb_dictionary", "d_type", "d_type.type_key = 'siargo_prod_type' "
-						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+				.leftJoin(ProductSeriesService.TYPE_LABELS_SQL, "d_type", "d_type.type_key = 'siargo_prod_type' "
+						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(pm.prod_type AS CHAR) "
 						+ "AND d_type.enable = '1'")
 				// ========== 关联字典表获取报告类型名称 ==========
 				.leftJoin("jb_dictionary", "d_retype", "d_retype.type_key = 'siargo_rep_type' "
@@ -815,38 +896,30 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				.leftJoin("jb_dictionary", "d_insp", "d_insp.type_key = 'siargo_insp' "
 						+ "AND d_insp.sn COLLATE utf8mb4_general_ci = CAST(sp.insp AS CHAR) "
 						+ "AND d_insp.enable = '1'")
-				// ========== 关联字典表获取PDF版本名称 ==========
-				.leftJoin("jb_dictionary", "d_pdfver", "d_pdfver.type_key = 'siargo_pdfver' "
-						+ "AND d_pdfver.name COLLATE utf8mb4_general_ci = sp.pdfver "
-						+ "AND d_pdfver.enable = '1'")
-				// ========== 关联字典表获取流量范围名称 ==========
-				.leftJoin("jb_dictionary", "d_flow", "d_flow.type_key = 'siargo_flow_range' "
-						+ "AND d_flow.sn COLLATE utf8mb4_general_ci = sp.flow_range "
-						+ "AND d_flow.enable = '1'")
 				// ========== 关联用户表获取各阶段检验人员信息 ==========
 				.leftJoin("jb_user", "accq_user", "accq_user.id = sp.accq_uid")
 				.leftJoin("jb_user", "funq_user", "funq_user.id = sp.funq_uid")
 				.leftJoin("jb_user", "lt_user", "lt_user.id = sp.lt_uid")
 				.leftJoin("jb_user", "appq_user", "appq_user.id = sp.appq_uid")
 				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid").eq("sp.vd", QarepConst.VD_VALID);
-	
+
 		// ========== 应用搜索条件 ==========
 		sql.like("sq.order_id", keywords);
-			
+
 		// ========== 应用日期范围筛选 ==========
 		if (isOk(startTime) && isOk(endTime)) {
 			sql.bwDate("sq.create_time",startTime,endTime);
 		}
-			
+
 		// ========== 应用产品类型筛选 ==========
 		if (prodType > 0) {
-			sql.eq("sp.type", prodType);
+			sql.eq("pm.prod_type", prodType);
 		}
-			
+
 		// ========== 应用检验进度筛选并设置排序 ==========
 		if (insp > 0) {
 			sql.eq("sp.insp", insp);
-				
+
 			// 排序：按上一个进度的操作时间倒序，次要按创建时间、formnum保证同一报告单行相邻
 			switch(insp){
 	         case QarepConst.INSP_PENDING_ACCURACY:
@@ -855,46 +928,45 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	        	 break;
 	         case QarepConst.INSP_PENDING_APPEARANCE:
 	        	 sql.orderBy("sp.accq_time", true);  // 主排序：上一个进度(精度检验)完成时间
-	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.create_time", false);
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 	         case QarepConst.INSP_PENDING_LEAK_TEST:
 	        	 sql.orderBy("sp.accq_time", true);  // 主排序：上一个进度(精度检验)完成时间
-	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.create_time", false);
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 	         case QarepConst.INSP_PENDING_PACKAGING:
 	        	 sql.orderBy("sp.funq_time", true);  // 主排序：上一个进度(外观检验)完成时间
-	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.create_time", false);
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 	         case QarepConst.INSP_PENDING_APPROVAL:
 	        	 sql.orderBy("sp.appq_time", true);  // 主排序：上一个进度(包装检验)完成时间
-	        	 sql.orderBy("sq.create_time", true);
+	        	 sql.orderBy("sq.create_time", false);
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 	         case QarepConst.INSP_COMPLETED:
-	        	 sql.orderBy("sq.formnum", true);    // 报告单标号倒序
-	        	 sql.orderBy("sq.order_id", true);   // 订单号倒序
-	        	 sql.orderBy("sp.type", true);       // 产品类型倒序
-	        	 sql.orderBy("sp.allq_time", true);  // 批准时间倒序（最新优先）
+				 sql.orderBy("sp.allq_time", true);   // 批准时间倒序
+				 sql.orderBy("sq.create_time", false);
+				 sql.orderBy("sq.formnum", true);    // 报告单标号倒序
 	        	 break;
 	         default:
 	        	 sql.orderBy("sq.create_time", true);
 	        	 sql.orderBy("sq.formnum", true);
 	        	 break;
 			}
-				
+
 		}else {
 			sql.orderBy("sq.create_time", true);
 			sql.orderBy("sq.formnum", true);
 		}
-			
+
 		Page<Record> result = paginateRecord(sql, true);
-		
+
 		// ========== 列表展示数据防XSS：用户可控文本HTML转义（不影响编辑回显接口） ==========
 		escapeRecordFields(result.getList(), "sp_des");
-		
+
 		// ========== 将查询结果放入缓存（仅可缓存查询） ==========
 		if (cacheable) {
 			paginateCacheLock.lock();
@@ -908,143 +980,90 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				paginateCacheLock.unlock();
 			}
 		}
-		
+
 		return result;
 	}
 
-	/**
-	 * 保存报告单和产品数据
-	 * <p>事务协调说明：先保存报告单获取ID，再关联产品记录；所有业务校验在任何写库操作之前完成</p>
-	 * <p>如果检验进度为精度检验（insp=2），自动记录精度检验人员和时间</p>
-	 * <p>写库失败抛出RuntimeException触发事务回滚（需在事务中调用）</p>
-	 * @param qareport 报告单对象
-	 * @param product 产品对象
-	 * @return 操作结果
-	 */
-	public Ret save(Qareport qareport, Product product) {
-		// ========== 全部校验前置：任何写库操作之前 ==========
-		if (qareport == null || product == null || product.getInsp() == null) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
+    /** 逐产品校验后一次性保存报告头和全部产品；本方法完整持有事务。 */
+    public Ret saveProducts(Qareport input, Product defaults, String productsJson) {
+        String reportError = validateReportInput(input);
+        if (reportError != null) return fail(reportError);
+        if (input.getLong("id") != null || (defaults != null && defaults.getLong("id") != null)) {
+            return fail("新增报告单不能携带已有记录 ID");
+        }
+        Ret parsed = ReportProductInput.parse(productsJson, defaults);
+        if (parsed.isFail()) return parsed;
+        List<Product> products = parsed.getAs("data");
+        for (int index = 0; index < products.size(); index++) {
+            Product product = products.get(index);
+            Integer insp = product.getInt("insp");
+            if (insp == null || (insp != QarepConst.INSP_PENDING_ACCURACY && insp != QarepConst.INSP_PENDING_APPEARANCE)) {
+                return fail("新增产品只能选择精度待检或精度已检");
+            }
+            Ret series = seriesService.applySeries(product, false);
+            if (series.isFail()) return fail("产品 #" + (index + 1) + "：" + series.getStr("msg"));
+            String error = QarepConst.validateElectricalParams(product);
+            if (error != null) return fail("产品 #" + (index + 1) + "：" + error);
+        }
+        Qareport report = new Qareport().set("id", JBoltSnowflakeKit.me.nextId())
+                .set("order_id", input.getLong("order_id")).set("cust_id", input.getLong("cust_id"))
+                .set("rep_type", input.getInt("rep_type")).set("create_time", new Date());
+        Ret[] result = {Ret.ok()};
+        boolean committed;
+        try {
+            committed = Db.tx(() -> {
+                // 与系列删除使用同一行锁；固定锁顺序避免多产品交叉选择引起死锁。
+                List<Product> lockOrder = products.stream()
+                        .sorted(java.util.Comparator.comparing(p -> p.getLong("siargo_prod_model_id"))).toList();
+                for (Product product : lockOrder) {
+                    result[0] = seriesService.applySeriesForUpdate(product, false);
+                    if (result[0].isFail()) return false;
+                }
+                result[0] = saveReportHeader(report);
+                if (result[0].isFail()) return false;
+                for (Product product : products) {
+                    result[0] = productService.saveReportProduct(product, report.getLong("id"));
+                    if (result[0].isFail()) return false;
+                }
+                addSaveSystemLog(report.getLong("id"), JBoltUserKit.getUserId(), "报告单：" + report.getLong("formnum"));
+                return true;
+            });
+        } catch (Exception ex) {
+            LOG.error("报告单批量保存失败，事务已回滚", ex);
+            return fail("报告单保存失败，请重试");
+        }
+        if (!committed) return result[0].isFail() ? result[0] : fail("报告单保存失败，请重试");
+        clearFlowCountsCache();
+        Ret saved = Ret.ok().set("msg", "保存成功");
+        List<String> ids = products.stream().map(p -> String.valueOf(p.getLong("id"))).toList();
+        return saved.set("data", Kv.by("reportId", String.valueOf(report.getLong("id"))).set("productIds", ids));
+    }
 
-		// 校验检验进度：精度检验之前不能跳过
-		if (product.getInsp() > QarepConst.INSP_PENDING_APPEARANCE) {
-			return fail("未检验精度，请重新选择检验进度！");
-		}
+    private String validateReportInput(Qareport report) {
+        if (report == null || report.getLong("order_id") == null || report.getLong("order_id") <= 0) return "订单号必填";
+        if (report.getLong("cust_id") == null || customerService.findById(report.getLong("cust_id")) == null) return "请选择有效客户";
+        Integer kind = report.getInt("rep_type");
+        if (kind == null || (kind != QarepConst.REP_TYPE_NORMAL && kind != QarepConst.REP_TYPE_REPAIR)) return "请选择报告单类型";
+        return null;
+    }
 
-		// 校验数量：送检数量不能小于检验数量
-		if (product.getQsi() != null && product.getQi() != null && product.getQsi() < product.getQi()) {
-			return fail("送检数量小于检验数量，重新输入！");
-		}
-
-		// 成品检漏标记：缺失默认“无成品检漏”（兼容 Excel 导入等旧入口）
-		int ltStatus = product.getLtStatus() == null ? QarepConst.LT_STATUS_NO : product.getLtStatus();
-		if (ltStatus != QarepConst.LT_STATUS_YES && ltStatus != QarepConst.LT_STATUS_NO) {
-			return fail("成品检漏参数非法！");
-		}
-
-		// ========== 保存报告单（如果不存在）==========
-		if (notOk(qareport.getId())) {
-
-			// 设置创建时间和自动生成报告单编号
-			qareport.set("create_time", DateUtil.getDateString(DateUtil.YMDHMS));
-			// 并发重号重试：creatFormnum 的 FOR UPDATE 聚合查询在 InnoDB 下不产生行锁，
-			// 并发时可能生成相同编号，捕获 UNIQUE 索引冲突后重新生成（最多 FORMNUM_RETRY_MAX 次）
-			boolean qaSaved = false;
-			for (int attempt = 1; attempt <= QarepConst.FORMNUM_RETRY_MAX; attempt++) {
-				Ret formnumRet = creatFormnum();
-				if (formnumRet.isFail()) {
-					return formnumRet;
-				}
-				qareport.set("formnum", formnumRet.get("data"));
-				try {
-					qaSaved = qareport.save();
-					if (qaSaved) {
-						break;
-					}
-				} catch (Exception e) {
-					// UNIQUE索引冲突时重新生成编号重试，其他异常直接失败
-					String msg = e.getMessage();
-					boolean duplicate = msg != null && msg.contains("Duplicate");
-					if (duplicate && attempt < QarepConst.FORMNUM_RETRY_MAX) {
-						continue;
-					}
-					return fail(duplicate ? "报告单编号生成冲突（并发操作），请重试！"
-							: "报告单保存失败：" + (msg != null ? msg : e.getClass().getSimpleName()));
-				}
-			}
-			if (!qaSaved) {
-				return fail("报告单保存失败，请重试！");
-			}
-		}
-
-		// ========== 保存产品记录 ==========
-		boolean prodsuccess;
-		if (notOk(product.getId())) {
-			// 新建产品记录
-			Product pro = new Product();
-
-			// 如果检验进度为精度检验，记录精度检验数据
-			if (product.getInsp() == QarepConst.INSP_PENDING_APPEARANCE) {
-				pro.set("accq_uid", JBoltUserKit.getUserId());
-				pro.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
-			}
-
-			// 有成品检漏且精度已检：直接进入成品检漏待检（insp=6）
-			Integer inspValue = product.getInsp();
-			if (inspValue == QarepConst.INSP_PENDING_APPEARANCE && ltStatus == QarepConst.LT_STATUS_YES) {
-				inspValue = QarepConst.INSP_PENDING_LEAK_TEST;
-			}
-			
-			// 复制产品属性
-			pro.set("insp", inspValue);
-			pro.set("type", product.getType());
-			pro.set("model", product.getModel());
-			pro.set("qsi", product.getQsi());
-			pro.set("qi", product.getQi());
-			pro.set("number", product.getNumber());
-			pro.set("flow_range", product.getFlowRange());
-			pro.set("des", product.getDes());
-			pro.set("pdfver", product.getPdfver());
-			pro.set("lt_status", ltStatus);
-			// 关联报告单
-			pro.set("report_id", qareport.getId());
-			// 电气参数
-			pro.set("cuc", product.getCuc());
-			pro.set("cucmax", product.getCucmax());
-			pro.set("cucmin", product.getCucmin());
-			pro.set("pv", product.getPv());
-			pro.set("thv", product.getThv());
-			pro.set("zp", product.getZp());
-			pro.set("fl", product.getFl());
-			pro.set("bv", product.getBv());
-			pro.set("la", product.getLa());
-			pro.set("vd", QarepConst.VD_VALID);  // 标记为有效数据
-			prodsuccess = pro.save();
-
-		} else {
-			// 更新已有产品记录
-			// 如果检验进度为精度检验，记录精度检验数据
-			if (product.getInsp() == QarepConst.INSP_PENDING_APPEARANCE) {
-				product.set("accq_uid", JBoltUserKit.getUserId());
-				product.set("accq_time", DateUtil.getDateString(DateUtil.YMDHMS));
-			}
-			// 有成品检漏且精度已检：进入成品检漏待检（insp=6）
-			if (product.getInsp() == QarepConst.INSP_PENDING_APPEARANCE && ltStatus == QarepConst.LT_STATUS_YES) {
-				product.set("insp", QarepConst.INSP_PENDING_LEAK_TEST);
-			}
-
-			product.set("report_id", qareport.getId());
-			product.set("vd", QarepConst.VD_VALID);
-			product.set("lt_status", ltStatus);
-			prodsuccess = product.save();
-		}
-
-		if (!prodsuccess) {
-			return fail("产品记录保存失败，请重试！");
-		}
-		return Ret.ok();
-	}
+    /** 仅在外层报告单事务内调用，唯一索引冲突时重新分配报告编号。 */
+    private Ret saveReportHeader(Qareport report) {
+        for (int attempt = 1; attempt <= QarepConst.FORMNUM_RETRY_MAX; attempt++) {
+            Ret number = creatFormnum();
+            if (number.isFail()) return number;
+            report.set("formnum", number.get("data"));
+            try {
+                return report.save() ? Ret.ok() : fail("报告单保存失败");
+            } catch (Exception ex) {
+                String message = ex.getMessage();
+                if (message != null && message.contains("Duplicate") && attempt < QarepConst.FORMNUM_RETRY_MAX) continue;
+                LOG.error("报告单编号或记录保存失败", ex);
+                return fail("报告单编号保存失败，请重试");
+            }
+        }
+        return fail("报告单编号分配失败，请重试");
+    }
 
 	/**
 	 * 根据产品ID查询完整的报告单信息
@@ -1055,31 +1074,36 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 */
 	public Qareport qareportFindByProId(Long id) {
 		String sql = "SELECT\n" + "  sq.id,\n" + "  sc.NAME sc_name,\n" + "  sp.id AS proid,\n" + "  sq.order_id,\n"
-				+ "  sq.cust_id,\n" + "  sq.formnum,\n" + "  sp.type AS prod_type,\n" + "  sq.rep_type,\n"
+				+ "  sq.cust_id,\n" + "  sq.formnum,\n" + "  pm.prod_type AS prod_type,\n CAST(sp.siargo_prod_model_id AS CHAR) siargo_prod_model_id, pm.model_series, pm.prod_type prodType, " + PRODUCT_TYPE_NAME_SQL + " prodTypeName, sp.vd, sp.vd AS sp_vd,\n" + "  sq.rep_type,\n"
+				+ "  pm.model_desc AS selection_rule,\n"
+				+ "  (SELECT JSON_OBJECTAGG(CAST(pv.id AS CHAR), JSON_OBJECT('type', CAST(pv.param_type_id AS CHAR), 'value', pv.param_value))"
+				+ " FROM siargo_prod_model_param mp INNER JOIN siargo_prod_param_value pv ON pv.id=mp.param_value_id AND pv.param_type_id=mp.param_type_id"
+				+ " INNER JOIN siargo_prod_param_type pt ON pt.id=mp.param_type_id AND pt.is_active=1"
+				+ " WHERE mp.model_id=pm.id AND pv.is_active=1 AND pm.model_series='MF-FD') AS selection_values,\n"
 				+ "  sp.insp,\n" + "  DATE_FORMAT(sp.accq_time, '%Y-%m-%d %H:%i') AS accq_time,\n"
 				+ "  DATE_FORMAT(sp.funq_time, '%Y-%m-%d %H:%i') AS funq_time,\n"
 				+ "  DATE_FORMAT(sp.appq_time, '%Y-%m-%d %H:%i') AS appq_time,\n"
-				+ "  DATE_FORMAT(sp.allq_time, '%Y-%m-%d %H:%i') AS allq_time,\n" 
-				+ "  sp.lt_status,\n" + "  DATE_FORMAT(sp.lt_time, '%Y-%m-%d %H:%i') AS lt_time,\n"
-				+ "  accq_user.NAME AS accq_name,\n funq_user.NAME AS funq_name,\n" 
+				+ "  DATE_FORMAT(sp.allq_time, '%Y-%m-%d %H:%i') AS allq_time,\n"
+				+ " CAST(sp.accq_uid AS CHAR) accq_uid, CAST(sp.funq_uid AS CHAR) funq_uid, CAST(sp.appq_uid AS CHAR) appq_uid, CAST(sp.allq_uid AS CHAR) allq_uid, CAST(sp.lt_uid AS CHAR) lt_uid, sp.lt_status,\n" + "  DATE_FORMAT(sp.lt_time, '%Y-%m-%d %H:%i') AS lt_time,\n"
+				+ "  accq_user.NAME AS accq_name,\n funq_user.NAME AS funq_name,\n"
 				+ "  lt_user.NAME AS lt_name,\n appq_user.NAME AS appq_name,\n allq_user.NAME AS allq_name,\n"
-				+ "  accq_user.email AS accq_email,\n funq_user.email AS funq_email,\n" 
+				+ "  accq_user.email AS accq_email,\n funq_user.email AS funq_email,\n"
 				+ "  lt_user.email AS lt_email,\n appq_user.email AS appq_email,\n allq_user.email AS allq_email,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') AS create_time,\n"
 				+ "  DATE_FORMAT(sq.create_time, '%Y.%m.%d') AS c_time,\n" + "  sp.id AS spid,\n"
-				+ "  sp.model AS sp_model,\n" + "  sp.number AS sp_number,\n" + "  sp.type AS sp_type,\n"
+				+ "  sp.model AS sp_model,\n" + "  sp.number AS sp_number,\n" + "  pm.prod_type AS sp_type,\n"
 				+ "  sp.qsi AS sp_qsi,\n" + "  sp.qi AS sp_qi,\n" + "  sp.flow_range AS sp_flow_range,\n"
-				+ "  sp.des AS sp_des,\n" + "  sp.pdfstr AS sp_pdfstr,\n" + " sp.pdfver AS sp_pdfver,\n" + "  sp.cuc AS sp_cuc,\n" 
-				+ "  sp.pv AS sp_pv,\n" + "  sp.thv AS sp_thv,\n" + "  sp.zp AS sp_zp,\n" + "  sp.fl AS sp_fl,\n" 
+				+ "  sp.des AS sp_des,\n" + "  sp.pdfstr AS sp_pdfstr,\n" + " sp.pdfver AS sp_pdfver,\n" + "  sp.cuc AS sp_cuc,\n"
+				+ "  sp.pv AS sp_pv,\n" + "  sp.thv AS sp_thv,\n" + "  sp.zp AS sp_zp,\n" + "  sp.fl AS sp_fl,\n"
 				+ "  sp.cucmax AS sp_cucmax,\n" + "  sp.cucmin AS sp_cucmin,\n"
 				+ "	 sp.bv AS sp_bv,\n"+ "  sp.la AS sp_la\n, "
-				+ "  d_type.NAME AS type_name, d_insp.NAME AS insp_name, "
-				+ "  d_flow.NAME AS flow_name, d_pdfver.NAME AS pdfver_name, d_retype.NAME AS retype_name" 
+				+ "  " + PRODUCT_TYPE_NAME_SQL + " AS type_name, d_insp.NAME AS insp_name, "
+				+ "  d_flow.NAME AS flow_name, d_pdfver.NAME AS pdfver_name, d_retype.NAME AS retype_name"
 				+ "  FROM\n" + "  `siargo_qareport` sq\n"
-				+ "  LEFT JOIN `siargo_product` AS sp ON sq.id = sp.report_id\n"
+				+ "  LEFT JOIN `siargo_product` AS sp ON sq.id = sp.report_id\n LEFT JOIN siargo_prod_model pm ON pm.id=sp.siargo_prod_model_id\n"
 				+ "  LEFT JOIN `siargo_customer` AS sc ON sc.id = sq.cust_id\n"
-				+ "   LEFT JOIN `jb_dictionary` AS d_type ON d_type.type_key = 'siargo_prod_type'\r\n"
-				+ "  AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR)\r\n"
+				+ "   LEFT JOIN " + ProductSeriesService.TYPE_LABELS_SQL + " AS d_type ON d_type.type_key = 'siargo_prod_type'\r\n"
+				+ "  AND d_type.sn COLLATE utf8mb4_general_ci = CAST(pm.prod_type AS CHAR)\r\n"
 				+ "  AND d_type.ENABLE = '1'\r\n"
 				+ "  LEFT JOIN `jb_dictionary` AS d_retype ON d_retype.type_key = 'siargo_rep_type'\r\n"
 				+ "  AND d_retype.sn COLLATE utf8mb4_general_ci = CAST(sq.rep_type AS CHAR)\r\n"
@@ -1097,7 +1121,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "  LEFT JOIN jb_user AS funq_user ON funq_user.id = sp.funq_uid\n"
 				+ "  LEFT JOIN jb_user AS lt_user ON lt_user.id = sp.lt_uid\n"
 				+ "  LEFT JOIN jb_user AS appq_user ON appq_user.id = sp.appq_uid\n"
-				+ "  LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid\n" + "WHERE\n" 
+				+ "  LEFT JOIN jb_user AS allq_user ON allq_user.id = sp.allq_uid\n" + "WHERE\n"
 				+ "  sp.id = ? ";
 
 		return dao.findFirst(sql, id);
@@ -1105,12 +1129,27 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 根据报告单ID查询该报告单下的全部有效产品信息（含字典翻译）
-	 * <p>跨Model查询已收敛至 ProductService，此处仅做委托</p>
+	 * <p>产品查询委托 ProductService，并按模板系列关联补充详情页大表参数显示标记</p>
 	 * @param reportId 报告单ID
 	 * @return 产品列表
 	 */
 	public List<Product> findProductsByReportId(Long reportId) {
-		return productService.findProductsByReportId(reportId);
+		List<Product> products = productService.findProductsByReportId(reportId);
+		Map<Long, List<Record>> rejectLogsByProductId = productRejectLogService.findLogsByReportId(reportId);
+		Map<Long, Boolean> largeMeterSeries = new LinkedHashMap<>();
+		for (Product product : products) {
+			Long seriesId = product.getLong("siargo_prod_model_id");
+			// 仅供视图使用的附加属性，不作为数据库列参与持久化。
+			product.put("reject_logs", rejectLogsByProductId.getOrDefault(product.getLong("id"), Collections.emptyList()));
+			product.put("show_large_meter_params",
+					largeMeterSeries.computeIfAbsent(seriesId, templateService::isLargeMeterSeries));
+		}
+		return products;
+	}
+
+	/** 编辑页与详情页复用 PDF 模板的系列关联判断。 */
+	public List<String> findLargeMeterSeriesIds() {
+		return templateService.findLargeMeterSeriesIds();
 	}
 
 	/**
@@ -1137,13 +1176,13 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			+ "sp.reject_count, "
 			+ "sq.formnum, sq.order_id, "
 			+ "sc.name AS sc_name, "
-			+ "d_type.name AS type_name, "
+			+ PRODUCT_TYPE_NAME_SQL + " AS type_name, pm.prod_type AS prod_type, pm.model_series, CAST(sp.siargo_prod_model_id AS CHAR) siargo_prod_model_id, "
 			+ "d_retype.name AS retype_name "
-			+ "FROM siargo_product sp "
+			+ "FROM siargo_product sp LEFT JOIN siargo_prod_model pm ON pm.id=sp.siargo_prod_model_id "
 			+ "LEFT JOIN siargo_qareport sq ON sq.id = sp.report_id "
 			+ "LEFT JOIN siargo_customer sc ON sc.id = sq.cust_id "
-			+ "LEFT JOIN jb_dictionary AS d_type ON d_type.type_key = 'siargo_prod_type' "
-			+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+			+ "LEFT JOIN " + ProductSeriesService.TYPE_LABELS_SQL + " AS d_type ON d_type.type_key = 'siargo_prod_type' "
+			+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(pm.prod_type AS CHAR) "
 			+ "AND d_type.enable = '1' "
 			+ "LEFT JOIN jb_dictionary AS d_retype ON d_retype.type_key = 'siargo_rep_type' "
 			+ "AND d_retype.sn COLLATE utf8mb4_general_ci = CAST(sq.rep_type AS CHAR) "
@@ -1152,6 +1191,32 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			+ "ORDER BY sq.formnum ASC, sp.id ASC";
 		return Db.find(sql, ids.toArray());
 	}
+
+    /** 编辑由 Service 持有事务；与新增共用基础字段、系列归属和电气参数校验。 */
+    public Ret update(Qareport qareport, Product product) {
+        String reportError = validateReportInput(qareport);
+        if (reportError != null) return fail(reportError);
+        String productError = ReportProductInput.validateBasics(product);
+        if (productError != null) return fail(productError);
+        String electricalError = QarepConst.validateElectricalParams(product);
+        if (electricalError != null) return fail(electricalError);
+        Ret[] result = {Ret.ok()};
+        List<String> stalePdfs = new ArrayList<>();
+        boolean committed;
+        try {
+            committed = Db.tx(() -> {
+                result[0] = updateInTransaction(qareport, product, stalePdfs);
+                return result[0] != null && result[0].isOk();
+            });
+        } catch (Exception ex) {
+            LOG.error("报告单更新失败，事务已回滚", ex);
+            return fail("报告单更新失败，请重试");
+        }
+        if (!committed) return result[0] != null && result[0].isFail() ? result[0] : fail("报告单更新失败");
+        clearFlowCountsCache();
+        deletePhysicalPdfs(stalePdfs);
+        return Ret.ok().set("msg", "更新成功");
+    }
 
 	/**
 	 * 更新报告单和产品数据
@@ -1164,7 +1229,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	 * @param product 产品对象（前端提交）
 	 * @return 操作结果
 	 */
-	public Ret update(Qareport qareport, Product product) {
+	private Ret updateInTransaction(Qareport qareport, Product product, List<String> stalePdfs) {
 		// ========== 全部校验前置：任何写库操作之前 ==========
 		if (qareport == null || notOk(qareport.getId()) || product == null || notOk(product.getId())) {
 			return fail(JBoltMsg.PARAM_ERROR);
@@ -1176,21 +1241,37 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		if (product.getQsi() < product.getQi()) {
 			return fail("送检数量小于检验数量，重新输入！");
 		}
-		// 成品检漏标记：缺失默认“无成品检漏”（兼容旧数据/旧入口）
-		int ltStatus = product.getLtStatus() == null ? QarepConst.LT_STATUS_NO : product.getLtStatus();
+		// update入口的validateBasics已要求明确选择成品检漏状态，不自动补默认值。
+		int ltStatus = product.getInt("lt_status");
 		if (ltStatus != QarepConst.LT_STATUS_YES && ltStatus != QarepConst.LT_STATUS_NO) {
 			return fail("成品检漏参数非法！");
 		}
 
-		// 更新时需要判断数据存在
-		Qareport dbQareport = dao.findById(qareport.getId());
-		if (dbQareport == null) {
-			return fail(JBoltMsg.DATA_NOT_EXIST);
-		}
-		Product dbProduct = productService.findById(product.getId());
+        Product originalProduct = productService.findById(product.getLong("id"));
+        if (originalProduct == null) return fail(JBoltMsg.DATA_NOT_EXIST);
+        if (!Objects.equals(originalProduct.getLong("report_id"), qareport.getLong("id"))) return fail("产品不属于当前报告单");
+        Long originalSeriesId = originalProduct.getLong("siargo_prod_model_id");
+        // 与正式发布统一锁序：先升序锁原/新系列，再报告头，再产品。
+        seriesService.lockSeriesRowsForUpdate(java.util.Arrays.asList(originalSeriesId, product.getLong("siargo_prod_model_id")));
+        Qareport dbQareport = dao.findFirst("SELECT * FROM siargo_qareport WHERE id=? FOR UPDATE", qareport.getLong("id"));
+        if (dbQareport == null) return fail(JBoltMsg.DATA_NOT_EXIST);
+        Product dbProduct = productService.findReportProductsForUpdate(qareport.getLong("id")).stream()
+                .filter(item -> Objects.equals(item.getLong("id"), product.getLong("id"))).findFirst().orElse(null);
 		if (dbProduct == null) {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
 		}
+        if (!Objects.equals(dbProduct.getLong("report_id"), qareport.getLong("id"))) return fail("产品不属于当前报告单");
+        if (!Objects.equals(dbProduct.getLong("siargo_prod_model_id"), originalSeriesId)) return fail("产品型号系列已被修改，请刷新后重试");
+        if (!Integer.valueOf(QarepConst.VD_VALID).equals(dbProduct.getInt("vd"))) return fail("产品已删除，请从回收站恢复后编辑");
+        Ret series = seriesService.applySeriesForUpdate(product,
+                Objects.equals(dbProduct.getLong("siargo_prod_model_id"), product.getLong("siargo_prod_model_id")));
+        if (series.isFail()) return series;
+
+        boolean headerChanged = !Objects.equals(dbQareport.get("order_id"), qareport.get("order_id"))
+                || !Objects.equals(dbQareport.get("cust_id"), qareport.get("cust_id"))
+                || !Objects.equals(dbQareport.get("rep_type"), qareport.get("rep_type"));
+        boolean productChanged = ReportProductInput.EDITABLE_FIELDS.stream()
+                .anyMatch(field -> !Objects.equals(dbProduct.get(field), product.get(field)));
 
 		// ========== 白名单拷贝：报告单允许编辑的业务字段 ==========
 		dbQareport.set("order_id", qareport.getOrderId());
@@ -1202,10 +1283,6 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		Integer insp = product.getInsp();
 		if (insp == null || insp < QarepConst.INSP_PENDING_ACCURACY || insp > QarepConst.INSP_PENDING_LEAK_TEST) {
 			return fail("检验进度参数非法！");
-		}
-		// 成品检漏待检（insp=6）仅对有成品检漏的产品合法
-		if (insp == QarepConst.INSP_PENDING_LEAK_TEST && ltStatus != QarepConst.LT_STATUS_YES) {
-			return fail("成品检漏待检仅适用于有成品检漏的产品！");
 		}
 		Integer dbInsp = dbProduct.getInt("insp");
 		Integer dbLtStatus = dbProduct.getInt("lt_status");
@@ -1223,6 +1300,17 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				targetInsp = QarepConst.INSP_PENDING_APPEARANCE;
 			}
 		}
+        // 先允许原成品检漏待检产品切换为无检漏并归一化，再校验最终状态。
+        if (targetInsp == QarepConst.INSP_PENDING_LEAK_TEST && ltStatus != QarepConst.LT_STATUS_YES) {
+            return fail("成品检漏待检仅适用于有成品检漏的产品！");
+        }
+        if (headerChanged) {
+            stalePdfs.addAll(productService.invalidateReportPdfs(dbQareport.getLong("id")));
+            dbProduct.set("pdfstr", null);
+        } else if (productChanged || !Objects.equals(targetInsp, dbInsp) || ltChanged) {
+            addPdfUrl(stalePdfs, dbProduct.getStr("pdfstr"));
+            dbProduct.set("pdfstr", null);
+        }
 		if (dbInsp != null && (!targetInsp.equals(dbInsp) || ltChanged)) {
 			// 进度变更：联动维护各环节签名（前进补签缺失环节/回退清空超出环节），
 			// 条件更新（WHERE insp=库内旧值）防并发覆盖他人已推进的状态
@@ -1231,32 +1319,15 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			}
 		}
 
-		// ========== 白名单拷贝：产品允许编辑的业务字段（各环节 uid/time 以服务端生成为准，不拷贝） ==========
-		dbProduct.set("type", product.getType());
-		dbProduct.set("model", product.getModel());
-		dbProduct.set("number", product.getNumber());
-		dbProduct.set("qsi", product.getQsi());
-		dbProduct.set("qi", product.getQi());
-		dbProduct.set("flow_range", product.getFlowRange());
-		dbProduct.set("des", product.getDes());
-		dbProduct.set("pdfver", product.getPdfver());
-		dbProduct.set("cuc", product.getCuc());
-		dbProduct.set("cucmax", product.getCucmax());
-		dbProduct.set("cucmin", product.getCucmin());
-		dbProduct.set("pv", product.getPv());
-		dbProduct.set("thv", product.getThv());
-		dbProduct.set("zp", product.getZp());
-		dbProduct.set("fl", product.getFl());
-		dbProduct.set("bv", product.getBv());
-		dbProduct.set("la", product.getLa());
-		dbProduct.set("lt_status", ltStatus);
+        // 只复制允许编辑字段，签名及报告关联由服务端维护。
+        for (String field : ReportProductInput.EDITABLE_FIELDS) dbProduct.set(field, product.get(field));
 
 		boolean qasuccess = dbQareport.update();
 		if (!qasuccess) {
 			return fail("报告单更新失败，请联系开发人员！");
 		}
 
-		boolean prodSuccess = dbProduct.update();
+		boolean prodSuccess = productService.updateReportProduct(dbProduct);
 		if (!prodSuccess) {
 			return fail("产品信息更新失败，请联系开发人员！");
 		}
@@ -1350,44 +1421,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		return Ret.ok().set("data", fornum * 1000 + seq);
 	}
 
-
-	/**
-	 * 回收站分页查询（已软删除的报告单）
-	 * <p>查询 vd=0 的产品记录，关联报告单、客户、字典表获取完整信息</p>
-	 * @param pageNumber 页码
-	 * @param pageSize 每页数量
-	 * @param keywords 搜索关键字（订单号模糊匹配）
-	 * @return 分页数据
-	 */
-	public Page<Record> paginateInactiveDatas(int pageNumber, int pageSize, String keywords) {
-		Sql sql = Sql.mysql()
-				// CAST 雪花ID为字符串，避免前端 JS Number 精度丢失
-				.select("CAST(sp.id AS CHAR) AS spid", "sq.order_id", "sc.name AS sc_name",
-						"d_type.name AS type_name",
-						"sp.delete_des",
-						"DATE_FORMAT(sp.delete_time, '%Y-%m-%d %H:%i') AS delete_time")
-				.page(pageNumber, pageSize)
-				.from("siargo_product", "sp")
-				.leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
-				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
-				.leftJoin("jb_dictionary", "d_type",
-						"d_type.type_key = 'siargo_prod_type' "
-						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
-						+ "AND d_type.enable = '1'")
-				.eq("sp.vd", QarepConst.VD_DELETED);
-
-		sql.like("sq.order_id", keywords);
-		sql.orderBy("sp.delete_time", true);
-
-		Page<Record> page = paginateRecord(sql, true);
-		// 用户可控文本转义，防止列表展示时XSS
-		escapeRecordFields(page.getList(), "delete_des");
-		return page;
-	}
-
 	/**
 	 * 删除数据后执行的回调
-	 * 
+	 *
 	 * @param qareport 要删除的model
 	 * @param kv       携带额外参数一般用不上
 	 * @return
@@ -1401,7 +1437,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 
 	/**
 	 * 检测是否可以删除
-	 * 
+	 *
 	 * @param qareport 要删除的model
 	 * @param kv       携带额外参数一般用不上
 	 * @return
@@ -1411,10 +1447,10 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		// 如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
 		return checkInUse(qareport, kv);
 	}
-
+	
 	/**
 	 * 设置返回二开业务所属的关键systemLog的targetType
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -1424,30 +1460,29 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	
 	/**
 	 * 获取本年度送检数量总计
-	 * <p>统计当年所有有效产品的送检数量总和（带30分钟缓存）</p>
-	 * @param proType 产品类型（0=全部，1=传感器，2=小流量，3=大流量）
+	 * <p>按批准时间 allq_time 统计当年已完成有效产品（insp=5、vd=1）的送检数量总和（带30分钟缓存）</p>
+	 * @param proType 产品类型字典 SN（0=全部）
 	 * @return 送检数量总计
 	 */
 	public Long getTotalQSI(int proType) {
 		return getTotalCount("qsi", proType);
 	}
-	
-	
+
 	/**
 	 * 获取本年度检验数量总计
-	 * <p>统计当年所有有效产品的检验数量总和（带30分钟缓存）</p>
-	 * @param proType 产品类型（0=全部，1=传感器，2=小流量，3=大流量）
+	 * <p>按批准时间 allq_time 统计当年已完成有效产品（insp=5、vd=1）的检验数量总和（带30分钟缓存）</p>
+	 * @param proType 产品类型字典 SN（0=全部）
 	 * @return 检验数量总计
 	 */
 	public Long getTotalQI(int proType) {
 		return getTotalCount("qi", proType);
 	}
-
+	
 	/**
 	 * 年度数量总计统一查询入口（带30分钟 DCL+TTL 缓存）
 	 * <p>缓存 key = 统计列 + 产品类型，数据变更时由 clearFlowCountsCache 联动失效</p>
 	 * @param column 统计列（qsi=送检数量 / qi=检验数量）
-	 * @param proType 产品类型（0=全部，1=传感器，2=小流量，3=大流量）
+	 * @param proType 产品类型字典 SN（0=全部）
 	 * @return 数量总计
 	 */
 	private Long getTotalCount(String column, int proType) {
@@ -1472,12 +1507,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			Map<String, Long> counts = new java.util.HashMap<>();
 			// 参数化占位符，避免SQL拼接
 			String sql = "SELECT SUM( sp." + column + " ) AS total "
-					+ "FROM siargo_product sp "
+					+ "FROM siargo_product sp LEFT JOIN siargo_prod_model pm ON pm.id=sp.siargo_prod_model_id "
 					+ "INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-					+ "WHERE YEAR ( sq.create_time ) = YEAR (CURDATE()) "
-					+ "AND sp.vd = 1 ";
+					+ "WHERE sp.insp = 5 AND sp.vd = 1 "
+					+ "AND YEAR(sp.allq_time) = YEAR(CURDATE()) ";
 			if (proType > 0) {
-				counts.put(cacheKey, Db.queryLong(sql + " AND sp.type = ?", proType));
+				counts.put(cacheKey, Db.queryLong(sql + " AND pm.prod_type = ?", proType));
 			} else {
 				counts.put(cacheKey, Db.queryLong(sql));
 			}
@@ -1492,25 +1527,26 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	/**
 	 * 获取每月返修品送检数量统计数据（含今年与去年）
 	 * <p>用于生成首页图表，展示全年各月的返修品数量趋势，支持年度切换</p>
-	 * <p>SQL说明：按年份+月份分组统计rep_type=2（返修品）的送检数量，一次查出两年数据</p>
+	 * <p>SQL说明：按批准时间 allq_time 的年份+月份分组统计rep_type=2（返修品）的送检数量，一次查出两年数据</p>
 	 * @return {curYear今年年份, lastYear去年年份, cur今年[1..12月], last去年[1..12月]}
 	 */
 	public Map<String, Object> getRepData() {
 	    String sql = "SELECT "
-	    		+ "  YEAR(sq.create_time) AS yr, "
-	    		+ "  MONTH(sq.create_time) AS MONTH, "
-	    		+ "  SUM(sp.qsi) AS qsi_reTotal "
-	    		+ "FROM "
-	    		+ "  siargo_product sp "
-	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-	    		+ "WHERE "
-	    		+ "  YEAR(sq.create_time) IN (YEAR(CURDATE()), YEAR(CURDATE()) - 1) "
-	    		+ "  AND sp.vd = 1 AND sq.rep_type = " + QarepConst.REP_TYPE_REPAIR + "  "
-	    		+ "GROUP BY "
-	    		+ "  YEAR(sq.create_time), MONTH(sq.create_time) ";
+				+ "  YEAR(sp.allq_time) AS yr, "
+				+ "  MONTH(sp.allq_time) AS MONTH, "
+				+ "  SUM(sp.qsi) AS qsi_reTotal "
+				+ "FROM "
+				+ "  siargo_product sp "
+				+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
+				+ "WHERE "
+				+ "  sp.insp = 5 AND sp.vd = 1 "
+				+ "  AND YEAR(sp.allq_time) IN (YEAR(CURDATE()), YEAR(CURDATE()) - 1) "
+				+ "  AND sq.rep_type = " + QarepConst.REP_TYPE_REPAIR + "  "
+				+ "GROUP BY "
+				+ "  YEAR(sp.allq_time), MONTH(sp.allq_time) ";
 
 	    List<Record> records = Db.find(sql);
-	    
+
 	    int curYear = java.time.Year.now().getValue();
 	    long[] cur = new long[12];
 	    long[] last = new long[12];
@@ -1526,7 +1562,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    		last[month - 1] = qsi == null ? 0L : qsi;
 	    	}
 	    }
-	    
+
 	    Map<String, Object> result = new LinkedHashMap<>();
 	    result.put("curYear", curYear);
 	    result.put("lastYear", curYear - 1);
@@ -1534,113 +1570,59 @@ public class QareportService extends JBoltBaseService<Qareport> {
 	    result.put("last", last);
 	    return result;
 	}
-	
-	/**
-	 * 获取每月各类产品送检数量统计数据
-	 * <p>用于生成首页图表，按产品类型（传感器、小流量、大流量）分类统计</p>
-	 * <p>SQL说明：使用CASE WHEN按产品类型分别统计送检数量</p>
-	 * @return 1-12月的产品分类送检数量数据列表
-	 */
-	public List<Map<String, Object>> getRepAllData() {
-	    String sql = "SELECT "
-	    		+ "  MONTH(sq.create_time) AS MONTH, "
-	    		+ "  SUM(CASE WHEN sp.type = 1 THEN sp.qsi ELSE 0 END) AS sensor_qsi, "
-	    		+ "  SUM(CASE WHEN sp.type = 2 THEN sp.qsi ELSE 0 END) AS small_flow_qsi, "
-	    		+ "  SUM(CASE WHEN sp.type = 3 THEN sp.qsi ELSE 0 END) AS large_flow_qsi "
-	    		+ " FROM "
-	    		+ "  siargo_product sp "
-	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-	    		+ "WHERE "
-	    		+ "  YEAR(sq.create_time) = YEAR(CURDATE()) "
-	    		+ "  AND sp.vd = 1 "
-	    		+ "GROUP BY "
-	    		+ "  MONTH(sq.create_time) "
-	    		+ "ORDER BY "
-	    		+ "  MONTH(sq.create_time) ";
-	    		
-	    List<Record> records = Db.find(sql);
-	    
-	    Map<Integer, Integer> sensorData  = new LinkedHashMap<>();
-	    Map<Integer, Integer> smallFlowData  = new LinkedHashMap<>();
-	    Map<Integer, Integer> largeFlowData  = new LinkedHashMap<>();
-	    
-	    for (Record record : records) {
-	    	int month = record.getInt("MONTH");
-	        sensorData.put(month, record.getInt("sensor_qsi"));
-	        smallFlowData.put(month, record.getInt("small_flow_qsi"));
-	        largeFlowData.put(month, record.getInt("large_flow_qsi"));
-	    }
-	    
-	    List<Map<String, Object>> result = new ArrayList<>();
-	    for (int month = 1; month <= 12; month++) {
-	        Map<String, Object> item = new LinkedHashMap<>();
-	        item.put("y", month + "月");  
-	        item.put("a", sensorData.getOrDefault(month, 0));      // 传感器数据
-	        item.put("b", smallFlowData.getOrDefault(month, 0));   // 小流量数据
-	        item.put("c", largeFlowData.getOrDefault(month, 0));   // 大流量数据
-	        result.add(item);
-	    }
-	    return result;
-	}
-	
-	/**
-	 * 获取今年与去年各季度送检数量对比数据（按产品类型细分）
-	 * <p>用于首页仪表盘季度同比图表</p>
-	 * <p>SQL说明：按年份+季度分组，CASE WHEN按产品类型分列统计送检数量，一次查出两年数据</p>
-	 * @return {curYear今年年份, lastYear去年年份, curA/curB/curC今年各类型[Q1..Q4], lastA/lastB/lastC去年各类型[Q1..Q4]}（A=传感器 B=小流量 C=大流量）
-	 */
-	public Map<String, Object> getQuarterCompareData() {
-	    String sql = "SELECT "
-	    		+ "  YEAR(sq.create_time) AS yr, "
-	    		+ "  QUARTER(sq.create_time) AS qt, "
-	    		+ "  SUM(CASE WHEN sp.type = 1 THEN sp.qsi ELSE 0 END) AS sensor_qsi, "
-	    		+ "  SUM(CASE WHEN sp.type = 2 THEN sp.qsi ELSE 0 END) AS small_flow_qsi, "
-	    		+ "  SUM(CASE WHEN sp.type = 3 THEN sp.qsi ELSE 0 END) AS large_flow_qsi "
-	    		+ "FROM "
-	    		+ "  siargo_product sp "
-	    		+ "  INNER JOIN siargo_qareport sq ON sp.report_id = sq.id "
-	    		+ "WHERE "
-	    		+ "  sp.vd = 1 "
-	    		+ "  AND YEAR(sq.create_time) IN (YEAR(CURDATE()), YEAR(CURDATE()) - 1) "
-	    		+ "GROUP BY "
-	    		+ "  YEAR(sq.create_time), QUARTER(sq.create_time) ";
-	    List<Record> records = Db.find(sql);
-	    
-	    int curYear = java.time.LocalDate.now().getYear();
-	    long[] curA = new long[4], curB = new long[4], curC = new long[4];
-	    long[] lastA = new long[4], lastB = new long[4], lastC = new long[4];
-	    for (Record record : records) {
-	    	Integer qt = record.getInt("qt");
-	    	if (qt == null || qt < 1 || qt > 4) {
-	    		continue;
-	    	}
-	    	int i = qt - 1;
-	    	Long a = record.getLong("sensor_qsi");
-	    	Long b = record.getLong("small_flow_qsi");
-	    	Long c = record.getLong("large_flow_qsi");
-	    	if (record.getInt("yr") == curYear) {
-	    		curA[i] = a == null ? 0L : a;
-	    		curB[i] = b == null ? 0L : b;
-	    		curC[i] = c == null ? 0L : c;
-	    	} else {
-	    		lastA[i] = a == null ? 0L : a;
-	    		lastB[i] = b == null ? 0L : b;
-	    		lastC[i] = c == null ? 0L : c;
-	    	}
-	    }
-	    
-	    Map<String, Object> result = new LinkedHashMap<>();
-	    result.put("curYear", curYear);
-	    result.put("lastYear", curYear - 1);
-	    result.put("curA", curA);
-	    result.put("curB", curB);
-	    result.put("curC", curC);
-	    result.put("lastA", lastA);
-	    result.put("lastB", lastB);
-	    result.put("lastC", lastC);
-	    return result;
-	}
-	
+
+    /** 按批准时间allq_time进行月度统计，按报告系列及版号关联的模板归入三类。 */
+    public Map<String, Object> getRepAllData() {
+        Map<String, Map<String, Object>> series = newChartSeries(12, false);
+        List<Record> rows = Db.find("SELECT MONTH(sp.allq_time) period, category.sn, SUM(sp.qsi) quantity "
+                + "FROM siargo_product sp " + DASHBOARD_TEMPLATE_CATEGORY_JOIN
+                + "JOIN siargo_qareport sq ON sq.id=sp.report_id WHERE sp.insp=5 AND sp.vd=1 AND YEAR(sp.allq_time)=YEAR(CURDATE()) "
+                + "GROUP BY 1,2 ORDER BY period,sn");
+        for (Record row : rows) {
+            Map<String, Object> item = series.get(row.getStr("sn"));
+            ((long[]) item.get("data"))[row.getInt("period") - 1] = row.getLong("quantity") == null ? 0 : row.getLong("quantity");
+        }
+        List<Map<String, Object>> types = new ArrayList<>();
+        for (Map<String, Object> item : series.values()) types.add(Map.of("sn", item.get("sn"), "name", item.get("name")));
+        return Map.of("types", types, "months", List.of(1,2,3,4,5,6,7,8,9,10,11,12), "series", new ArrayList<>(series.values()));
+    }
+
+    /** 按批准时间allq_time进行本年和上年季度统计，与月度统计使用相同的模板三分类。 */
+    public Map<String, Object> getQuarterCompareData() {
+        int year = LocalDate.now().getYear();
+        Map<String, Map<String, Object>> series = newChartSeries(4, true);
+        List<Record> rows = Db.find("SELECT YEAR(sp.allq_time) yr,QUARTER(sp.allq_time) period,category.sn,SUM(sp.qsi) quantity "
+                + "FROM siargo_product sp " + DASHBOARD_TEMPLATE_CATEGORY_JOIN
+                + "JOIN siargo_qareport sq ON sq.id=sp.report_id WHERE sp.insp=5 AND sp.vd=1 AND YEAR(sp.allq_time) IN (?,?) "
+                + "GROUP BY 1,2,3", year, year - 1);
+        for (Record row : rows) {
+            Map<String, Object> item = series.get(row.getStr("sn"));
+            long[] values = (long[]) item.get(row.getInt("yr") == year ? "current" : "previous");
+            values[row.getInt("period") - 1] = row.getLong("quantity") == null ? 0 : row.getLong("quantity");
+        }
+        return Map.of("curYear", year, "lastYear", year - 1, "series", new ArrayList<>(series.values()));
+    }
+
+    private Map<String, Map<String, Object>> newChartSeries(int periods, boolean quarterly) {
+        Map<String, Map<String, Object>> result = new LinkedHashMap<>();
+        for (Map.Entry<String, String> category : DASHBOARD_CATEGORIES) {
+            chartSeries(result, category.getKey(), category.getValue(), periods, quarterly);
+        }
+        return result;
+    }
+
+    private Map<String, Object> chartSeries(Map<String, Map<String, Object>> series, String sn, String name, int periods, boolean quarterly) {
+        String key = sn == null ? "" : sn;
+        return series.computeIfAbsent(key, ignored -> {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("sn", key);
+            item.put("name", chartTypeName(key, name));
+            if (quarterly) { item.put("current", new long[periods]); item.put("previous", new long[periods]); }
+            else item.put("data", new long[periods]);
+            return item;
+        });
+    }
+
 	/**
 	 * 分页查询回收站中的报告单列表
 	 * <p>查询条件：vd=0（已删除）</p>
@@ -1660,25 +1642,26 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						"accq_user.name AS accq_name", "funq_user.name AS funq_name", "appq_user.name AS appq_name",
 						"allq_user.name AS allq_name", "DATE_FORMAT(sq.create_time, '%Y-%m-%d %H:%i') as create_time",
 						// 产品信息字段
-						"CAST(sp.id AS CHAR) as spid", "sp.model as sp_model", "sp.number as sp_number", "sp.type as sp_type",
+						"CAST(sp.id AS CHAR) as spid", "sp.model as sp_model", "sp.number as sp_number", "pm.prod_type as sp_type", "pm.prod_type AS prod_type", "CAST(sp.siargo_prod_model_id AS CHAR) AS siargo_prod_model_id", "pm.model_series",
 						"sp.flow_range as sp_flow_range",
 						"sp.pdfstr AS sp_pdfstr", "sp.pdfver AS sp_pdfver","sp.cuc as sp_cuc", "sp.pv as sp_pv",
 						"sp.thv as sp_thv", "sp.zp as sp_zp", "sp.fl as sp_fl", "sp.cucmax as sp_cucmax",
 						"sp.cucmin as sp_cucmin", "sp.bv as sp_bv", "sp.la as sp_la",
 						// 字典翻译字段
-						"d_type.name AS type_name","d_insp.name AS insp_name","d_flow.name AS flow_name",
+						PRODUCT_TYPE_NAME_SQL + " AS type_name","d_insp.name AS insp_name","d_flow.name AS flow_name",
 						"d_pdfver.name AS pdfver_name","d_retype.name AS retype_name",
 						// 删除信息
 						"sp.delete_des", "DATE_FORMAT(sp.delete_time, '%Y-%m-%d %H:%i') as delete_time"
 						)
 				.page(pageNumber, pageSize).from("siargo_product", "sp")
+                .leftJoin("siargo_prod_model", "pm", "pm.id=sp.siargo_prod_model_id")
 				// ========== 关联报告单表 ==========
 				.leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
 				// ========== 关联客户表 ==========
 				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
 				// ========== 关联字典表获取产品类型名称 ==========
-				.leftJoin("jb_dictionary", "d_type", "d_type.type_key = 'siargo_prod_type' "
-						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(sp.type AS CHAR) "
+				.leftJoin(ProductSeriesService.TYPE_LABELS_SQL, "d_type", "d_type.type_key = 'siargo_prod_type' "
+						+ "AND d_type.sn COLLATE utf8mb4_general_ci = CAST(pm.prod_type AS CHAR) "
 						+ "AND d_type.enable = '1'")
 				// ========== 关联字典表获取报告类型名称 ==========
 				.leftJoin("jb_dictionary", "d_retype", "d_retype.type_key = 'siargo_rep_type' "
@@ -1737,7 +1720,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				+ "u3.name AS appq_name, "
 				+ "u4.name AS allq_name, "
 				+ "u5.name AS lt_name "
-				+ "FROM siargo_product sp "
+				+ "FROM siargo_product sp LEFT JOIN siargo_prod_model pm ON pm.id=sp.siargo_prod_model_id "
 				+ "LEFT JOIN siargo_qareport sq ON sp.report_id = sq.id "
 				+ "LEFT JOIN jb_user u1 ON sp.accq_uid = u1.id "
 				+ "LEFT JOIN jb_user u2 ON sp.funq_uid = u2.id "
@@ -1768,7 +1751,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 			.append("sp.accq_time, sp.funq_time, sp.appq_time, sp.allq_time, sp.lt_time, ")
 			.append("u1.name AS accq_name, u2.name AS funq_name, ")
 			.append("u3.name AS appq_name, u4.name AS allq_name, u5.name AS lt_name ")
-			.append("FROM siargo_product sp ")
+			.append("FROM siargo_product sp LEFT JOIN siargo_prod_model pm ON pm.id=sp.siargo_prod_model_id ")
 			.append("LEFT JOIN siargo_qareport sq ON sp.report_id = sq.id ")
 			.append("LEFT JOIN jb_user u1 ON sp.accq_uid = u1.id ")
 			.append("LEFT JOIN jb_user u2 ON sp.funq_uid = u2.id ")
@@ -1802,45 +1785,21 @@ public class QareportService extends JBoltBaseService<Qareport> {
 		return result;
 	}
 
-	/**
-	 * 获取本年度产品类型分布统计数据
-	 * <p>用于生成首页环形图“本年度报告单来源/订单”</p>
-	 * <p>SQL说明：查询当年（YEAR(sq.create_time)=YEAR(CURDATE())）insp=5、vd=1 的
-	 * 全部产品行，按产品类型分组计数，不去重；扇区合计即“已完成”产品总数。</p>
-	 * @return 产品类型分布数据列表（传感器、小流量、大流量）
-	 */
-	public List<Map<String, Object>> getDonutData() {
-	    String sql = "SELECT sp.type AS type, COUNT(*) AS count "
-	    		+ "FROM siargo_product sp "
-	    		+ "INNER JOIN siargo_qareport sq ON sq.id = sp.report_id "
-	    		+ "WHERE YEAR(sq.create_time) = YEAR(CURDATE()) "
-	    		+ "AND sp.vd = 1 AND sp.insp = " + QarepConst.INSP_COMPLETED + " "
-	    		+ "GROUP BY sp.type ";
-	    
-	    List<Record> records = Db.find(sql);
-	    
-	    Map<Integer, Integer> monthData = new LinkedHashMap<>();
-	    for (Record record : records) {
-	        monthData.put(record.getInt("type"), record.getInt("count"));
-	    }
-	    
-	    List<Map<String, Object>> result = new ArrayList<>();
-	    for (Map.Entry<Integer, Integer> entry : monthData.entrySet()) {
-	        Map<String, Object> item = new LinkedHashMap<>();
-	        if (entry.getKey() == QarepConst.PROD_TYPE_SENSOR) {
-	        	item.put("label", "传感器" ); 
-			}
-	        if (entry.getKey() == QarepConst.PROD_TYPE_SMALL_FLOW) {
-	        	item.put("label", "小流量" ); 
-			}
-	        if (entry.getKey() == QarepConst.PROD_TYPE_LARGE_FLOW) {
-	        	item.put("label", "大流量" ); 
-			} 
-	        item.put("value", entry.getValue()); 
-	        result.add(item);
-	    }
-	    return result;
-	}
+    /** 按批准时间allq_time统计本年度已完成产品的模板三分类，与月度、季度统计保持一致。 */
+    public List<Map<String, Object>> getDonutData() {
+        List<Record> rows = Db.find("SELECT category.sn,COUNT(*) quantity "
+                + "FROM siargo_product sp " + DASHBOARD_TEMPLATE_CATEGORY_JOIN
+                + "JOIN siargo_qareport sq ON sq.id=sp.report_id WHERE sp.insp=5 AND sp.vd=1 AND YEAR(sp.allq_time)=YEAR(CURDATE()) "
+                + "GROUP BY category.sn");
+        Map<String, Long> quantities = new java.util.HashMap<>();
+        for (Record row : rows) quantities.put(row.getStr("sn"), row.getLong("quantity"));
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map.Entry<String, String> category : DASHBOARD_CATEGORIES) {
+            result.add(Map.of("sn", category.getKey(), "label", category.getValue(),
+                    "value", quantities.getOrDefault(category.getKey(), 0L)));
+        }
+        return result;
+    }
 
 	/**
 	 * 当 insp 状态变更时，为下一阶段对应权限的用户创建待办通知

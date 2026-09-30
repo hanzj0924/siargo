@@ -1,0 +1,101 @@
+#@jboltLayout()
+#define css()
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
+#end
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page pm-list-page" data-key="#(pmkey)">
+
+    <div class="jbolt_page_title">
+        <div class="row">
+            <div class="col-md-auto">
+                <h1>产品型号</h1>
+            </div>
+            <div class="col">
+                <form class="form-inline" id="prodModelForm_#(pageId)" onsubmit="return false;" method="post">
+                    <input type="text" autocomplete="off" class="form-control" placeholder="输入系列/分支/描述关键字搜索"
+                           name="keywords" value=""/>
+                    <button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i> 查询</button>
+                </form>
+            </div>
+            <div class="col-md-auto">
+            </div>
+        </div>
+    </div>
+    <div class="jbolt_page_content">
+        <!-- JBoltTable的数据模板定义-->
+        <textarea class="jb_tpl_box" id="prodModelRowtpl_#(pageId)">
+{@each datas as data,index}
+<tr data-id="${data.id}" >
+<td>${pageNumber,pageSize,index | rownum}</td>
+<td><a class="pm-series-selection-link" data-dialogbtn data-area="94%,94%" data-success-handler="SiargoProdModelDialogs.fit" data-btn="close" data-title="产品选型 · 完整型号描述" href="admin/siargo/prodmodel/selection/${data.selectionModelId}" title="查看 ${data.modelSeries} 全部分支的产品选型">${data.modelSeries}</a></td>
+<td class="pm-branch-label text-center" >{@if data.branchLabel}${data.branchLabel}{@else}—{@/if}</td>
+<td>${data.prodTypeName}</td>
+<td><a data-dialogbtn data-area="94%,94%" data-success-handler="SiargoProdModelDialogs.fit" data-btn="close" data-title="${data.modelSeries} · 产品资料" href="admin/siargo/prodmodel/materials/${data.id}" class="btn btn-outline-primary btn-sm"><i class="fa fa-folder-open-o"></i> 产品资料</a></td>
+<td><img data-switchbtn data-confirm="确定切换此产品型号的启用状态？"
+	data-value="${data.isActive}" data-handler="refreshJBoltTable"
+	data-url="admin/siargo/prodmodel/toggleActive/${data.id}" /></td>
+<td title="${data.remark}">${data.remark}</td>
+</tr>
+{@/each}
+</textarea>
+
+        <!-- 工具条 toolbar -->
+        <div class="jbolt_table_toolbar" id="prodModel_toolbar_#(pageId)">
+            <div class="btn-group" role="group" aria-label="btn-group">
+                <button data-dialogbtn data-area="94%,94%" data-success-handler="SiargoProdModelDialogs.fit" data-title="新增产品型号" data-handler="refreshJBoltTable"
+                        data-url="admin/siargo/prodmodel/add" class="btn btn-outline-primary btn-sm"><i
+                        class="fa fa-plus"></i> 新增
+                </button>
+                <button onclick="SiargoProdModel.edit(this)" class="btn btn-outline-info btn-sm"><i
+                        class="fa fa-edit"></i> 修改
+                </button>
+                <button data-ajaxbtn data-handler="refreshJBoltTable"
+                        data-check-handler="jboltTableGetCheckedIds" data-url="admin/siargo/prodmodel/deleteByIds?ids="
+                        data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm"><i
+                        class="fa fa-trash"></i> 删除
+                </button>
+                <button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm"><i
+                        class="fa fa-refresh"></i> 刷新
+                </button>
+            </div>
+
+            <div class="clearfix"></div>
+        </div>
+
+
+        <table class="jbolt_table jbolt_main_table table-center"
+               data-jbolttable
+               data-pagesize="100"
+               data-height="fill"
+               data-ajax="true"
+               data-url="admin/siargo/prodmodel/datas"
+               data-column-resize="true"
+               data-column-prepend="1:checkbox"
+               data-auto-merge-cell-cols="3"
+               data-conditions-form="prodModelForm_#(pageId)"
+               data-rowtpl="prodModelRowtpl_#(pageId)"
+               data-page="prodModelPage_#(pageId)"
+               data-toolbar="prodModel_toolbar_#(pageId)"
+               data-fixed-columns-left="1,2,3"
+        >
+            <thead class="fw-normal">
+            <tr>
+                <th data-width="60">序号</th>
+                <th data-width="200" data-column="model_series">产品系列</th>
+                <th data-width="250" data-column="branch_label">分支型号</th>
+                <th data-width="270" data-column="prod_type">产品类型</th>
+                <th data-width="170">产品资料</th>
+                <th data-width="120" data-column="is_active">产品状态</th>
+                <th data-min-width="100" data-column="remark">备注</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+
+    </div>
+</div>
+#end

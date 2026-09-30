@@ -56,39 +56,14 @@ public class EquipmentComparisonService extends JBoltBaseService<EquipmentCompar
 	 * @param certificateRemark 证书描述
 	 * @return
 	 */
-	public Ret save(EquipmentComparison equipmentComparison, String certificateImageUrls, String certificateDate, String certificateRemark) {
-		if(equipmentComparison==null || isOk(equipmentComparison.getId())) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-		// 前置校验：设备已封存或报废时不允许新增对比
-		Long equipmentId = equipmentComparison.getEquipmentId();
-		Integer equipmentStatus = Db.queryInt("SELECT status FROM siargo_equipment WHERE id = ?", equipmentId);
-		if (equipmentStatus != null && (equipmentStatus == 3 || equipmentStatus == 4)) {
-			String equipmentNo = Db.queryStr("SELECT equipment_no FROM siargo_equipment WHERE id = ?", equipmentId);
-			String statusText = (equipmentStatus == 3) ? "已封存" : "报废";
-			return fail("【" + (equipmentNo != null ? equipmentNo : "") + "】已" + statusText + "，不能新增对比记录！");
-		}
-		// 自动设置创建人、创建时间、审核状态
-		equipmentComparison.setCreatorId(JBoltUserKit.getUserId());
-		equipmentComparison.set("creator_time", DateUtil.getDateString(DateUtil.YMDHMS));
-		equipmentComparison.setAuditStatus(1);
-		boolean success=equipmentComparison.save();
-		if(success) {
-			// 根据对比结果联动设备状态
-			syncEquipmentStatus(equipmentId, equipmentComparison.getResult());
-			// 定期对比（comparison_type=1）时，同步更新设备检校日期
-			syncInspectionDate(equipmentComparison);
-			// 保存证书图片
-			if(isOk(certificateImageUrls)) {
-				try {
-					equipmentCertificateService.saveCertificatesForComparison(equipmentComparison.getId(), equipmentId, certificateImageUrls, certificateDate, certificateRemark);
-				} catch (Exception e) {
-					LOG.error("对比记录保存成功但证书图片保存失败: " + e.getMessage(), e);
-				}
-			}
-		}
-		return ret(success);
-	}
+    public Ret save(EquipmentComparison input, String urls, String date, String remark) {
+        if (input == null || isOk(input.getId())) return fail(JBoltMsg.PARAM_ERROR);
+        Integer state = Db.queryInt("SELECT status FROM siargo_equipment WHERE id=?", input.getEquipmentId());
+        if (state == null || state == 3 || state == 4) return fail("设备不存在、已封存或已报废，不能新增对比");
+        input.set("id", cn.hutool.core.util.IdUtil.getSnowflakeNextId()).set("creator_id", JBoltUserKit.getUserId())
+                .set("creator_time", DateUtil.getDateString(DateUtil.YMDHMS)).set("audit_status", 1);
+        return persistWithCertificates(input, urls, date, remark, false);
+    }
 	
 	/**
 	 * 更新
@@ -98,34 +73,29 @@ public class EquipmentComparisonService extends JBoltBaseService<EquipmentCompar
 	 * @param certificateRemark 证书描述
 	 * @return
 	 */
-	public Ret update(EquipmentComparison equipmentComparison, String certificateImageUrls, String certificateDate, String certificateRemark) {
-		if(equipmentComparison==null || notOk(equipmentComparison.getId())) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-		//更新时需要判断数据存在
-		EquipmentComparison dbEquipmentComparison=findById(equipmentComparison.getId());
-		if(dbEquipmentComparison==null) {return fail(JBoltMsg.DATA_NOT_EXIST);}
-		//if(existsName(equipmentComparison.getName(), equipmentComparison.getId())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
-		boolean success=equipmentComparison.update();
-		if(success) {
-			//添加日志
-			//addUpdateSystemLog(equipmentComparison.getId(), JBoltUserKit.getUserId(), equipmentComparison.getName());
-			// 根据对比结果联动设备状态（合格→正常，不合格→维修中）
-			syncEquipmentStatus(equipmentComparison.getEquipmentId(), equipmentComparison.getResult());
-			// 更新证书图片
-			if(isOk(certificateImageUrls)) {
-				try {
-					equipmentCertificateService.updateCertificatesForComparison(equipmentComparison.getId(), equipmentComparison.getEquipmentId(), certificateImageUrls, certificateDate, certificateRemark);
-				} catch (Exception e) {
-					LOG.error("对比记录更新成功但证书图片更新失败: " + e.getMessage(), e);
-				}
-			} else {
-				// 如果没有传图片URL，清空关联证书
-				equipmentCertificateService.deleteByComparisonId(equipmentComparison.getId());
-			}
-		}
-		return ret(success);
-	}
+    public Ret update(EquipmentComparison input, String urls, String date, String remark) {
+        if (input == null || notOk(input.getId()) || findById(input.getId()) == null) return fail(JBoltMsg.PARAM_ERROR);
+        return persistWithCertificates(input, urls, date, remark, true);
+    }
+
+    private Ret persistWithCertificates(EquipmentComparison input, String urls, String date, String remark, boolean update) {
+        EquipmentCertificateService.Prepared prepared = null;
+        boolean committed = false;
+        try {
+            prepared = equipmentCertificateService.prepare(input.getEquipmentId(), input.getId(), urls, date, remark, update);
+            var work = prepared;
+            boolean ok = Db.tx(() -> {
+                if (!(update ? input.update() : input.save())) return false;
+                syncEquipmentStatus(input.getEquipmentId(), input.getResult());
+                if (!update) syncInspectionDate(input);
+                return work.persist();
+            });
+            if (!ok) return work.rollback("对比记录或证书保存失败");
+            committed = true;
+            equipmentService.clearOverviewCountsCache();
+            return work.committed();
+        } catch (Exception e) { return prepared == null || committed ? fail(e.getMessage()) : prepared.rollback(e.getMessage()); }
+    }
 	
 	/**
 	 * 删除 指定多个ID
@@ -219,11 +189,9 @@ public class EquipmentComparisonService extends JBoltBaseService<EquipmentCompar
 		if (result == 1) {
 			Db.update("UPDATE siargo_equipment SET status = 1 WHERE id = ? AND status != 1",
 				equipmentId);
-			equipmentService.clearOverviewCountsCache();
 		} else if (result == 2) {
 			Db.update("UPDATE siargo_equipment SET status = 2 WHERE id = ? AND status != 2",
 				equipmentId);
-			equipmentService.clearOverviewCountsCache();
 		}
 	}
 

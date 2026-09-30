@@ -1,0 +1,20 @@
+<table class="table-center jbolt_table thead_font_normal prodParamTypeTable"
+data-jbolttable
+data-column-resize="true"
+data-height="fill_box"
+>
+<thead><tr><th data-min-width="120">种类名称</th><th data-width="150" data-nochange>操作</th></tr></thead>
+<tbody>
+#for(data:prodParamTypes??)
+<tr class="hand" onclick="readParamValues(this,'#(data.id)','#(data.typeName)',event)">
+<td title="#(data.typeName??)">#(data.typeName??)</td>
+<td>
+<a data-title="编辑参数种类" data-area="700,450" data-handler="refreshPortal" data-portal="prodParamTypePortal" class="jbolt_table_editbtn" href="admin/siargo/prodparam/edit/#(data.id)"><i class="fa fa-edit text-warning"></i></a>
+<a data-confirm="确认删除此参数种类？" data-handler="refreshAllProdParamPortal" data-portal="prodParamTypePortal" class="jbolt_table_delbtn" href="admin/siargo/prodparam/deleteByIds?ids=#(data.id)"><i class="fa fa-remove text-danger"></i></a>
+<a href="admin/siargo/prodparam/up/#(data.id)" data-ajaxbtn data-loading="执行中 " tooltip data-title="上移" data-handler="refreshPortal" data-portal="prodParamTypePortal" class="jbolt_table_btn"><i class="fa fa-arrow-up c-info"></i></a>
+<a href="admin/siargo/prodparam/down/#(data.id)" data-ajaxbtn data-loading="执行中 " tooltip data-title="下移" data-handler="refreshPortal" data-portal="prodParamTypePortal" class="jbolt_table_btn"><i class="fa fa-arrow-down c-info"></i></a>
+</td>
+</tr>
+#end
+</tbody>
+</table>

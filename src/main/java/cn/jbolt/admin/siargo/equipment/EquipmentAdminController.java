@@ -193,20 +193,9 @@ public class EquipmentAdminController extends JBoltBaseController {
   /**
 	* 保存
 	*/
-	public void save() {
-		final Ret[] retHolder = {null};
-		boolean txOk = Db.tx(() -> {
-			retHolder[0] = service.save(getModel(Equipment.class, "equipment"), get("certificateImageUrls"));
-			return retHolder[0] != null && retHolder[0].isOk();
-		});
-		if (!txOk) {
-			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "保存失败");
-			return;
-		}
-		// === afterCommit: 缓存清理 ===
-		service.clearOverviewCountsCache();
-		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("保存失败"));
-	}
+    public void save() {
+        renderJson(service.save(getModel(Equipment.class, "equipment"), get("certificateImageUrls")));
+    }
 	
    /**
 	* 更新

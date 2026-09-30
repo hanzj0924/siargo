@@ -1,89 +1,201 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
 
 #define main()
 #set(pageId=RandomUtil.random(6))
 
 #-- ===== Enjoy 宏：共享搜索表单 ===== --#
-#define qarepSearchForm(tabPrefix)
-<div class="col-sm-4 text-center">
-	<form class="form-inline d-inline-block" id="#(tabPrefix)Form_#(pageId)" onsubmit="return false;" method="post">
-		<input type="text" autocomplete="off" class="form-control qarep-search-input" data-with-clearbtn="true"
-			placeholder="输入订单号" name="keywords" value=""/>
-		<select class="form-control qarep-search-select" name="prodType" data-autoload
-			data-url="admin/dictionary/options?key=siargo_prod_type"
-			data-value-attr="sn"
-			data-text="=产品类型=" data-value=""></select>
-		<button type="submit" class="btn btn-outline-secondary">
-			<i class="fa fa-search"></i> 查询
-		</button>
-	</form>
+#define qarepSearchForm(tabPrefix, withDateRange)
+<div class="col-sm-#(withDateRange ? 6 : 4) text-center">
+    <form class="form-inline d-inline-block" id="#(tabPrefix)Form_#(pageId)" onsubmit="return false;" method="post">
+        <input type="text" autocomplete="off" class="form-control qarep-search-input" data-with-clearbtn="true"
+               placeholder="输入订单号" name="keywords" value=""/>
+        <select class="form-control qarep-search-select" name="prodType" data-autoload
+                data-url="admin/dictionary/options?key=siargo_prod_type"
+                data-value-attr="sn"
+                data-text="=产品类型=" data-value=""></select>
+        #if(withDateRange)
+        <input type="text" data-with-clearbtn="true" class="form-control" data-date
+               data-type="date"
+               placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange"
+               value="#(dateRange??)">
+        #end
+        <button type="submit" class="btn btn-outline-secondary">
+            <i class="fa fa-search"></i> 查询
+        </button>
+    </form>
 </div>
 #end
 
-#-- ===== Enjoy 宏：共享行模板列（序号~客户名称，共11列）；备注列最左侧渲染「曾驳回」角标 ===== --#
+#-- ===== Enjoy 宏：共享行模板列（序号~产品编号，共10列）；备注列最左侧渲染「曾驳回」角标 ===== --#
 #define sharedReportCols()
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
-	<a tooltip data-title="详情" data-dialogbtn data-area="790,860" data-btn="close"
-		href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum} 
-	</a>
+    <a tooltip data-title="详情" data-dialogbtn data-area="790,860" data-btn="close"
+       href="admin/siargo/qarep/details?id=${data.spid}"> ${data.formnum}
+    </a>
 </td>
 <td>${data.orderId}</td>
 <td>${data.retypeName}</td>
-<td>${data.typeName}</td>
+<td class="text-left">${data.modelSeries ? data.modelSeries : ''}${data.branchLabel ? '-'+data.branchLabel : ''}-${data.typeName ? data.typeName : ''}</td>
 <td>
-	#-- 驳回历史角标：有记录即显示，点击弹窗查看全部驳回历史 --#
-	{@if data.rejectCount!=null && data.rejectCount>0}<span class="qa-reject-flag qa-reject-flag-left" data-dialogbtn data-area="560,520" data-btn="close" data-title="驳回历史" data-url="admin/siargo/qarep/rejectHistory?productId=${data.spid}">驳</span>{@/if}
-	{@if data.spDes==null || data.spDes==""}
-		<span class="text-muted">-</span>
-	{@else}
-		<span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
-			data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
-			class="qarep-des-link">${data.spDes}</span>
-	{@/if}
+    #-- 驳回历史角标：有记录即显示，点击弹窗查看全部驳回历史 --#
+    {@if data.rejectCount!=null && data.rejectCount>0}
+    <span class="qa-reject-flag qa-reject-flag-left"
+        data-dialogbtn
+        data-area="560,520"
+        data-btn="close"
+        data-title="驳回历史"
+        data-url="admin/siargo/qarep/rejectHistory?productId=${data.spid}">驳</span>
+    {@/if}
+    {@if data.spDes==null || data.spDes==""}
+    <span class="text-muted">-</span>
+    {@else}
+    <span data-dialogbtn data-area="570,350" data-btn="close" data-title="产品备注"
+          data-content="<div style='white-space:pre-wrap;word-wrap:break-word;padding:10px;'>${data.spDes}</div>"
+          class="qarep-des-link">${data.spDes}</span>
+    {@/if}
 </td>
 <td>${data.spQsi}</td>
 <td>${data.spQi}</td>
-<td>${data.spModel}</td>
-<td>${data.spNumber}</td>
-<td>${data.scName}</td>
+<td class="text-left">${data.spModel}</td>
+<td class="text-left">${data.spNumber}</td>
+#end
+
+#define qarepSharedHeaders()
+<th data-width="60">序号</th>
+<th data-width="100" data-column="formnum">报告单编号</th>
+<th data-width="80" data-column="order_id">订单号</th>
+<th data-width="80" data-column="rep_type">报告单类型</th>
+<th data-width="250" data-column="prod_type">产品类型</th>
+<th data-width="200" data-column="sp_des">备注</th>
+<th data-width="80" data-column="sp_qsi">送检数量</th>
+<th data-width="80" data-column="sp_qi">检验数量</th>
+<th data-min-width="200" data-column="sp_model">产品型号</th>
+<th data-width="200" data-column="sp_number">产品编号</th>
+#end
+
+#define qarepAccuracySignatureCol()
+<td>
+	<span class="badge badge-info">${data.accqName}</span>
+	<small class="text-muted d-block">${data.accqTime}</small>
+</td>
+#end
+
+#define qarepLeakSignatureCol()
+<td>
+	{@if data.ltStatus==1 && data.ltName!=null}
+		<span class="badge badge-leak">${data.ltName}</span>
+		<small class="text-muted d-block">${data.ltTime}</small>
+	{@else}
+		<span class="text-muted">-</span>
+	{@/if}
+</td>
+#end
+
+#define qarepAppearanceSignatureCol()
+<td>
+	{@if data.funqName==null}
+		<span class="text-muted">-</span>
+	{@else}
+		<span class="badge badge-primary">${data.funqName}</span>
+		<small class="text-muted d-block">${data.funqTime}</small>
+	{@/if}
+</td>
+#end
+
+#define qarepAddButton()
+<button data-openpage="dialog" data-area="1180,800"
+        data-handler="refreshAllQarepTables_#(pageId)"
+        data-title="新建 <span style='color:#f0ad4e;font-size:18px;position:absolute;left:50%;top:0;line-height:56px;transform:translateX(-50%);'><i class='fa fa-exclamation-circle'></i> 注意编号：请按实际情况填写产品编号！</span>"
+        data-url="admin/siargo/qarep/add"
+        class="btn btn-outline-primary ">
+    <i class="fa fa-plus"></i> 新增
+</button>
+#end
+
+#define qarepRemarkButton()
+<button data-openpage="dialog" data-area="570,350"
+        data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
+        data-check-handler="jboltTableGetCheckedId"
+        data-url="admin/siargo/qarep/editDes/"
+        class="btn btn-outline-info ">
+    <i class="fa fa-edit"></i> 修改产品备注
+</button>
+#end
+
+#define qarepRefreshButton()
+<button onclick="jboltTableRefresh(this)"
+        class="btn btn-outline-secondary ">
+    <i class="fa fa-refresh"></i> 刷新
+</button>
 #end
 
 #-- ===== Enjoy 宏：7 个 Tab 的 JBoltTable 公共属性收敛。差异项经参数传入：
-     prefix    = id/搜索表单/行模板/分页/工具条的统一前缀（allreport/noq/ltq/accq/funq/appq/allq）
-     insp      = 检验进度过滤参数（0 = 不带 insp 参数，即"全部"Tab）
-     autoload  = 是否进入页面即自动加载（仅"全部"Tab 为 true，其余懒加载）
-     fixedRight= 是否固定最后一列（仅"已完成"Tab 的查看PDF列） ===== --#
+prefix    = id/搜索表单/行模板/分页/工具条的统一前缀（allreport/noq/ltq/accq/funq/appq/allq）
+insp      = 检验进度过滤参数（0 = 不带 insp 参数，即"全部"Tab）
+autoload  = 是否进入页面即自动加载（仅"全部"Tab 为 true，其余懒加载）
+fixedRight= 是否固定最后一列（仅"已完成"Tab 的查看PDF列） ===== --#
 #define qarepTableAttrs(prefix, insp, autoload, fixedRight)
-	class="jbolt_table jbolt_main_table table_striped table-center"
-	data-jbolttable
-	data-pagesize="50"
-	data-ajax="true"
-	#if(!autoload)data-autoload="false"
-	#end
-	id="#(prefix)_mgrtable_#(pageId)"
-	data-height="fill_box"
-	data-ajax-success-handler="mergeReportRows"
-	data-url="admin/siargo/qarep/datas#if(insp > 0)?insp=#(insp)#end"
-	data-column-resize="true"
-	data-column-prepend="1:checkbox"
-	data-conditions-form="#(prefix)Form_#(pageId)"
-	data-rowtpl="#(prefix)Rowtpl_#(pageId)"
-	data-page="#(prefix)Page_#(pageId)"
-	data-toolbar="#(prefix)_toolbar_#(pageId)"
-	data-fixed-columns-left="1,2,3,4,5,6"
-	#if(fixedRight)data-fixed-columns-right="-1"
-	#end
+class="jbolt_table jbolt_main_table table_striped table-center"
+data-jbolttable
+data-pagesize="50"
+data-ajax="true"
+#if(!autoload)data-autoload="false"
+#end
+id="#(prefix)_mgrtable_#(pageId)"
+data-height="fill_box"
+data-ajax-success-handler="SiargoQarepList.mergeReportRows"
+data-url="admin/siargo/qarep/datas#if(insp > 0)?insp=#(insp)#end"
+data-column-resize="true"
+data-column-prepend="1:checkbox"
+data-conditions-form="#(prefix)Form_#(pageId)"
+data-rowtpl="#(prefix)Rowtpl_#(pageId)"
+data-page="#(prefix)Page_#(pageId)"
+data-toolbar="#(prefix)_toolbar_#(pageId)"
+data-fixed-columns-left="1,2,3,4,5"
+#if(fixedRight)data-fixed-columns-right="-1"
+#end
 #end
 #-- qarep-scope：qarep 模块 badge 换色（siargo.css 4.3 区 .qarep-scope .badge-*）的作用域容器，防止污染其他模块 --#
-<div class="jbolt_page jb_vflex qarep-scope" data-key="#(pmkey)" data-page-id="#(pageId)">
+<div class="jbolt_page jb_vflex qarep-scope" data-key="#(pmkey)" data-page-id="#(pageId)"
+     data-init-handler="SiargoQarepList.init" data-close-handler="SiargoQarepList.close">
 
-<div class="jbolt_page_content jb_vbody">
-<!-- 全部 表单数据 -->
-<script type="text/template" id="allreportRowtpl_#(pageId)">
+    <div class="d-none" data-qarep-pdf-months>
+        <div class="qa-pdf-month-form">
+            <div class="qa-pdf-month-body">
+                <div class="qa-pdf-month-range">
+                    <label class="qa-pdf-month-field">
+                        <span>起始月份</span>
+                        <select class="form-control" name="startMonth">
+                            #for(month=1;month<=pdfExportMaxMonth;month++)
+                            <option value="#(month)">#(month) 月</option>
+                            #end
+                        </select>
+                    </label>
+                    <span class="qa-pdf-month-separator" aria-hidden="true"><i class="fa fa-long-arrow-right"></i></span>
+                    <label class="qa-pdf-month-field">
+                        <span>结束月份</span>
+                        <select class="form-control" name="endMonth">
+                            #for(month=1;month<=pdfExportMaxMonth;month++)
+                            <option value="#(month)">#(month) 月</option>
+                            #end
+                        </select>
+                    </label>
+                </div>
+                <p class="qa-pdf-month-hint"><i class="fa fa-info-circle" aria-hidden="true"></i> 可选今年 1 月至 #(pdfExportMaxMonth) 月（上个月）</p>
+            </div>
+            <div class="qa-pdf-month-actions">
+                <button type="button" class="btn btn-outline-secondary" data-qarep-month-cancel>取消</button>
+                <button type="button" class="btn btn-primary" data-qarep-month-submit><i class="fa fa-download" aria-hidden="true"></i> 导出 PDF</button>
+            </div>
+        </div>
+    </div>
+    <div class="jbolt_page_content jb_vbody">
+        <!-- 全部 表单数据 -->
+        <textarea class="jb_tpl_box" id="allreportRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 #@sharedReportCols()
@@ -107,107 +219,60 @@
 <td>${data.createTime}</td>
 </tr>
 {@/each}
-</script>
+</textarea>
 
-<!-- 待检验 表单数据 -->
-<script type="text/template" id="noqRowtpl_#(pageId)">
+        <!-- 待检验 表单数据 -->
+        <textarea class="jb_tpl_box" id="noqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 #@sharedReportCols()
 <td>${data.createTime}</td>
 </tr>
 {@/each}
-</script>
+</textarea>
 
-<!-- 成品检漏待检 表单数据 -->
-<script type="text/template" id="ltqRowtpl_#(pageId)">
+        <!-- 成品检漏待检 表单数据 -->
+        <textarea class="jb_tpl_box" id="ltqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 #@sharedReportCols()
-<td>
-	<span class="badge badge-info">${data.accqName}</span>
-	<small class="text-muted d-block">${data.accqTime}</small>
-</td>
+#@qarepAccuracySignatureCol()
 </tr>
 {@/each}
-</script>
+</textarea>
 
-<!-- 精度合格 表单数据 -->
-<script type="text/template" id="accqRowtpl_#(pageId)">
+        <!-- 精度合格 表单数据 -->
+        <textarea class="jb_tpl_box" id="accqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 #@sharedReportCols()
-<td>
-	<span class="badge badge-info">${data.accqName}</span>
-	<small class="text-muted d-block">${data.accqTime}</small>
-</td>
-<td>
-	{@if data.ltStatus==1 && data.ltName!=null}
-		<span class="badge badge-leak">${data.ltName}</span>
-		<small class="text-muted d-block">${data.ltTime}</small>
-	{@else}
-		<span class="text-muted">-</span>
-	{@/if}
-</td>
+#@qarepAccuracySignatureCol()
+#@qarepLeakSignatureCol()
 </tr>
 {@/each}
-</script>
+</textarea>
 
-<!-- 包装待检 表单数据 -->
-<script type="text/template" id="funqRowtpl_#(pageId)">
+        <!-- 包装待检 表单数据 -->
+        <textarea class="jb_tpl_box" id="funqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 #@sharedReportCols()
-<td>
-	<span class="badge badge-info">${data.accqName}</span>
-	<small class="text-muted d-block">${data.accqTime}</small>
-</td>
-<td>
-	{@if data.ltStatus==1 && data.ltName!=null}
-		<span class="badge badge-leak">${data.ltName}</span>
-		<small class="text-muted d-block">${data.ltTime}</small>
-	{@else}
-		<span class="text-muted">-</span>
-	{@/if}
-</td>
-<td>
-	{@if data.funqName==null}
-		<span class="text-muted">-</span>
-	{@else}
-		<span class="badge badge-primary">${data.funqName}</span>
-		<small class="text-muted d-block">${data.funqTime}</small>
-	{@/if}
-</td>
+#@qarepAccuracySignatureCol()
+#@qarepLeakSignatureCol()
+#@qarepAppearanceSignatureCol()
 </tr>
 {@/each}
 
-</script>
+</textarea>
 
-<!-- 待批准 表单数据 -->
-<script type="text/template" id="appqRowtpl_#(pageId)">
+        <!-- 待批准 表单数据 -->
+        <textarea class="jb_tpl_box" id="appqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 #@sharedReportCols()
-<td>
-	<span class="badge badge-info">${data.accqName}</span>
-	<small class="text-muted d-block">${data.accqTime}</small>
-</td>
-<td>
-	{@if data.ltStatus==1 && data.ltName!=null}
-		<span class="badge badge-leak">${data.ltName}</span>
-		<small class="text-muted d-block">${data.ltTime}</small>
-	{@else}
-		<span class="text-muted">-</span>
-	{@/if}
-</td>
-<td>
-	{@if data.funqName==null}
-		<span class="text-muted">-</span>
-	{@else}
-		<span class="badge badge-primary">${data.funqName}</span>
-		<small class="text-muted d-block">${data.funqTime}</small>
-	{@/if}
-</td>
+#@qarepAccuracySignatureCol()
+#@qarepLeakSignatureCol()
+#@qarepAppearanceSignatureCol()
 <td>
 	{@if data.appqName==null}
 		<span class="text-muted">-</span>
@@ -218,33 +283,16 @@
 </td>
 </tr>
 {@/each}
-</script>
+</textarea>
 
-<!-- 已完成 表单数据 -->
-<script type="text/template" id="allqRowtpl_#(pageId)">
+        <!-- 已完成 表单数据 -->
+        <textarea class="jb_tpl_box" id="allqRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.spid}">
 #@sharedReportCols()
-<td>
-	<span class="badge badge-info">${data.accqName}</span>
-	<small class="text-muted d-block">${data.accqTime}</small>
-</td>
-<td>
-	{@if data.ltStatus==1 && data.ltName!=null}
-		<span class="badge badge-leak">${data.ltName}</span>
-		<small class="text-muted d-block">${data.ltTime}</small>
-	{@else}
-		<span class="text-muted">-</span>
-	{@/if}
-</td>
-<td>
-	{@if data.funqName==null}
-		<span class="text-muted">-</span>
-	{@else}
-		<span class="badge badge-primary">${data.funqName}</span>
-		<small class="text-muted d-block">${data.funqTime}</small>
-	{@/if}
-</td>
+#@qarepAccuracySignatureCol()
+#@qarepLeakSignatureCol()
+#@qarepAppearanceSignatureCol()
 <td>
 	<span class="badge badge-warning">${data.appqName}</span>
 	<small class="text-muted d-block">${data.appqTime}</small>
@@ -265,845 +313,354 @@
 </td>
 </tr>
 {@/each}
-</script>
-<div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)" id="qarepTabView">
-	<div class="jbolt_tab_links jb_vheader">
-		<a class="jbolt_tab_link"  href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
-		<a class="jbolt_tab_link"  href="#noq_tabcontent"><i class="jbicon2 jbi-linechart"></i> 精度待检</a>
-		<a class="jbolt_tab_link"  href="#ltq_tabcontent"><i class="fa fa-tachometer"></i> 成品检漏待检</a>
-		<a class="jbolt_tab_link"  href="#accq_tabcontent"><i class="fa fa-eye"></i> 外观待检</a>
-		<a class="jbolt_tab_link"  href="#funq_tabcontent"><i class="jbicon2 jbi-gift"></i> 包装待检</a>
-		<a class="jbolt_tab_link"  href="#appq_tabcontent"><i class="jbicon2 jbi-edit-fill"></i> 待批准</a>
-		<a class="jbolt_tab_link"  href="#allq_tabcontent"><i class="jbicon jb-xiangmushouxubeian"></i> 已完成</a>
-	</div>
-	<!-- 流程状态导航 - 步骤条样式 -->	
-	 <div class="flow-stepper-nav">
-		<!-- 左侧汇总徽章 -->
-		<div class="flow-summary-badge active" onclick="switchTabByIndex_#(pageId)(0)">
-			<i class="jbicon jb-liebiao3"></i>
-			<span class="flow-summary-text">全部报告单</span>
-		</div>
-		<!-- 右侧步骤条 -->
-		<div class="flow-stepper">
-			<div class="flow-stepper-item" data-color="acc" onclick="switchTabByIndex_#(pageId)(1)">
-				<div class="flow-node"><i class="jbicon2 jbi-linechart"></i></div>
-				<div class="flow-node-label">精度待检</div>
-				<div class="flow-node-count" id="count-noq">-</div>
-			</div>
-			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="leak" onclick="switchTabByIndex_#(pageId)(2)">
-				<div class="flow-node"><i class="fa fa-tachometer"></i></div>
-				<div class="flow-node-label">成品检漏待检</div>
-				<div class="flow-node-count" id="count-ltq">-</div>
-			</div>
-			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="vis" onclick="switchTabByIndex_#(pageId)(3)">
-				<div class="flow-node"><i class="fa fa-eye"></i></div>
-				<div class="flow-node-label">外观待检</div>
-				<div class="flow-node-count" id="count-accq">-</div>
-			</div>
-			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="pack" onclick="switchTabByIndex_#(pageId)(4)">
-				<div class="flow-node"><i class="jbicon2 jbi-gift"></i></div>
-				<div class="flow-node-label">包装待检</div>
-				<div class="flow-node-count" id="count-funq">-</div>
-			</div>
-			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="appr" onclick="switchTabByIndex_#(pageId)(5)">
-				<div class="flow-node"><i class="jbicon2 jbi-edit-fill"></i></div>
-				<div class="flow-node-label">待批准</div>
-				<div class="flow-node-count" id="count-appq">-</div>
-			</div>
-			<div class="flow-connector"></div>
-			<div class="flow-stepper-item" data-color="done" onclick="switchTabByIndex_#(pageId)(6)">
-				<div class="flow-node"><i class="jbicon jb-xiangmushouxubeian"></i></div>
-				<div class="flow-node-label">已完成</div>
-				<div class="flow-node-count" id="count-allq">-</div>
-			</div>
-		</div>
-	</div>
-	<div class="jbolt_tab_contents jb_vbody">
-		<div class="jbolt_tab_content"  id="allreport_tabcontent">
-			<!-- 全部 工具条 toolbar -->
-			<div class="jbolt_table_toolbar" id="allreport_toolbar_#(pageId)">
-				<div class="row">
-					<div class="col-sm-4 text-left">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="1115,822"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建 <span style='color:#f0ad4e;font-size:18px;position:absolute;left:50%;top:0;line-height:56px;transform:translateX(-50%);'><i class='fa fa-exclamation-circle'></i> 注意编号：请按实际情况填写产品编号！</span>"
-								data-url="admin/siargo/qarep/add"
-								class="btn btn-outline-primary ">
-								<i class="fa fa-plus"></i> 新增
-							</button>
-							<button data-openpage="dialog" data-area="570,350"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-								data-check-handler="jboltTableGetCheckedId"
-								data-url="admin/siargo/qarep/editDes/"
-								class="btn btn-outline-info ">
-								<i class="fa fa-edit"></i> 修改产品备注
-							</button>
-							<button onclick="openDeleteDialog_#(pageId)('allreport_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
-								<i class="fa fa-trash"></i> 删除
-							</button>
-							<button onclick="jboltTableRefresh(this)"
-								class="btn btn-outline-secondary ">
-								<i class="fa fa-refresh"></i> 刷新
-							</button>
-						</div>
-					</div>
-					#@qarepSearchForm("allreport")
-					<div class="col-sm-4 text-right">
-						<button data-dialogbtn data-area="1300,760" data-title="&#128451; 废弃报告单"
-							data-url="admin/siargo/qarep/inactiveList"  type="button"
-							class="btn btn-outline-danger">
-							<i class="fa fa-trash"></i> 回收站
-						</button>
-					</div>
-				</div>
-			</div>
-			<table #@qarepTableAttrs("allreport", 0, true, false)>
-				<thead class="fw-normal">
-					<tr>
-						<th data-width="60">序号</th>
-						<th data-width="100" data-column="formnum">报告单编号</th>
-						<th data-width="80" data-column="order_id">订单号</th>
-						<th data-width="100" data-column="rep_type">报告单类型</th>
-						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="130" data-column="sp_des">备注</th>
-						<th data-width="80" data-column="sp_qsi">送检数量</th>
-						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="200" data-column="sp_model">产品型号</th>
-						<th data-width="200" data-column="sp_number">产品编号</th>
-						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="100" data-column="insp">检验进度</th>
-						<th data-width="130" data-column="create_time">创建时间</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-		
-		<div class="jbolt_tab_content"  id="noq_tabcontent">
-			<!-- 精度待检 工具条 toolbar -->
-			<div class="jbolt_table_toolbar" id="noq_toolbar_#(pageId)">
-				<div class="row">
-					<div class="col-sm-4 text-left">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="1115,822"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="新建 <span style='color:#f0ad4e;font-size:18px;position:absolute;left:50%;top:0;line-height:56px;transform:translateX(-50%);'><i class='fa fa-exclamation-circle'></i> 注意编号：请按实际情况填写产品编号！</span>"
-								data-url="admin/siargo/qarep/add"
-								class="btn btn-outline-primary ">
-								<i class="fa fa-plus"></i> 新增
-							</button>
-							<button data-openpage="dialog" data-area="1060,830"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改"
-								data-check-handler="jboltTableGetCheckedId"
-								data-url="admin/siargo/qarep/edit/"
-								class="btn btn-outline-info ">
-								<i class="fa fa-edit"></i> 修改
-							</button>
-							<button onclick="openDeleteDialog_#(pageId)('noq_mgrtable_#(pageId)')" class="btn btn-outline-danger ">
-								<i class="fa fa-trash"></i> 删除
-							</button>
-							<button onclick="jboltTableRefresh(this)"
-								class="btn btn-outline-secondary ">
-								<i class="fa fa-refresh"></i> 刷新
-							</button>
-						</div>
-					</div>
-					#@qarepSearchForm("noq")
-					<div class="col-sm-4 text-right">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							#if(accuracy)
-							<button type="button" onclick="openApprovalDrawer_#(pageId)(event, 'noq_mgrtable_#(pageId)', 2)"
-								class="btn flow-action-btn flow-action-accq"><i class="fa fa-check-circle"></i> 精度审批 <i class="fa fa-chevron-right"></i>
-							</button>
-							#end
-						</div>
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</div>
-			<table #@qarepTableAttrs("noq", 1, false, false)>
-				<thead class="fw-normal">
-					<tr>
-						<th data-width="60">序号</th>
-						<th data-width="100" data-column="formnum">报告单编号</th>
-						<th data-width="80" data-column="order_id">订单号</th>
-						<th data-width="100" data-column="rep_type">报告单类型</th>
-						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="130" data-column="sp_des">备注</th>
-						<th data-width="80" data-column="sp_qsi">送检数量</th>
-						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="220" data-column="sp_model">产品型号</th>
-						<th data-width="200" data-column="sp_number">产品编号</th>
-						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="130" data-column="create_time">创建时间</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-		
-		<div class="jbolt_tab_content"  id="ltq_tabcontent">
-			<!-- 成品检漏待检 工具条 toolbar -->
-			<div class="jbolt_table_toolbar" id="ltq_toolbar_#(pageId)">
-				<div class="row">
-					<div class="col-sm-4 text-left">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="570,350"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-								data-check-handler="jboltTableGetCheckedId"
-								data-url="admin/siargo/qarep/editDes/"
-								class="btn btn-outline-info ">
-								<i class="fa fa-edit"></i> 修改产品备注
-							</button>
-							<button onclick="jboltTableRefresh(this)"
-								class="btn btn-outline-secondary ">
-								<i class="fa fa-refresh"></i> 刷新
-							</button>
-						</div>
-					</div>
-					#@qarepSearchForm("ltq")
-					<div class="col-sm-4 text-right">
-						#if(leaktest)
-						<button type="button" onclick="openApprovalDrawer_#(pageId)(event, 'ltq_mgrtable_#(pageId)', 6)"
-								class="btn flow-action-btn flow-action-ltq"><i class="fa fa-check-circle"></i> 成品检漏审批 <i class="fa fa-chevron-right"></i>
-						</button>
-						#end
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</div>
-			<table #@qarepTableAttrs("ltq", 6, false, false)>
-				<thead class="fw-normal">
-					<tr>
-						<th data-width="60">序号</th>
-						<th data-width="100" data-column="formnum">报告单编号</th>
-						<th data-width="80" data-column="order_id">订单号</th>
-						<th data-width="100" data-column="rep_type">报告单类型</th>
-						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="130" data-column="sp_des">备注</th>
-						<th data-width="80" data-column="sp_qsi">送检数量</th>
-						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="220" data-column="sp_model">产品型号</th>
-						<th data-width="210" data-column="sp_number">产品编号</th>
-						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="130" data-column="accq_uid">精度检验</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-		
-		<div class="jbolt_tab_content"  id="accq_tabcontent">
-			<!-- 精度合格 工具条 toolbar -->
-			<div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
-				<div class="row">
-					<div class="col-sm-4 text-left">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="570,350"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-								data-check-handler="jboltTableGetCheckedId"
-								data-url="admin/siargo/qarep/editDes/"
-								class="btn btn-outline-info ">
-								<i class="fa fa-edit"></i> 修改产品备注
-							</button>
-							<button onclick="jboltTableRefresh(this)"
-								class="btn btn-outline-secondary ">
-								<i class="fa fa-refresh"></i> 刷新
-							</button>
-						</div>
-					</div>
-					#@qarepSearchForm("accq")
-					<div class="col-sm-4 text-right">
-						#if(appearance)
-						<button type="button" onclick="openApprovalDrawer_#(pageId)(event, 'accq_mgrtable_#(pageId)', 3)"
-							class="btn flow-action-btn flow-action-funq"><i class="fa fa-check-circle"></i> 外观审批 <i class="fa fa-chevron-right"></i>
-						</button>
-						#end
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</div>
-			<table #@qarepTableAttrs("accq", 2, false, false)>
-				<thead class="fw-normal">
-					<tr>
-						<th data-width="60">序号</th>
-						<th data-width="100" data-column="formnum">报告单编号</th>
-						<th data-width="80" data-column="order_id">订单号</th>
-						<th data-width="100" data-column="rep_type">报告单类型</th>
-						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="130" data-column="sp_des">备注</th>
-						<th data-width="80" data-column="sp_qsi">送检数量</th>
-						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="220" data-column="sp_model">产品型号</th>
-						<th data-width="210" data-column="sp_number">产品编号</th>
-						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="130" data-column="accq_uid">精度检验</th>
-						<th data-width="130" data-column="lt_uid">成品检漏</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-		
-		<div class="jbolt_tab_content"  id="funq_tabcontent">
-			<!-- 包装待检 工具条 toolbar -->
-			<div class="jbolt_table_toolbar" id="funq_toolbar_#(pageId)">
-				<div class="row">
-					<div class="col-sm-4 text-left">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="570,350"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-								data-check-handler="jboltTableGetCheckedId"
-								data-url="admin/siargo/qarep/editDes/"
-								class="btn btn-outline-info ">
-								<i class="fa fa-edit"></i> 修改产品备注
-							</button>
-							<button onclick="jboltTableRefresh(this)"
-								class="btn btn-outline-secondary ">
-								<i class="fa fa-refresh"></i> 刷新
-							</button>
-						</div>
-					</div>
-					#@qarepSearchForm("funq")
-					<div class="col-sm-4 text-right">
-						#if(packaging)
-						<button type="button" onclick="openApprovalDrawer_#(pageId)(event, 'funq_mgrtable_#(pageId)', 4)"
-								class="btn flow-action-btn flow-action-appq"><i class="fa fa-check-circle"></i> 包装审批 <i class="fa fa-chevron-right"></i>
-						</button>
-						#end
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</div>
-			<table #@qarepTableAttrs("funq", 3, false, false)>
-				<thead class="fw-normal">
-					<tr>
-						<th data-width="60">序号</th>
-						<th data-width="100" data-column="formnum">报告单编号</th>
-						<th data-width="80" data-column="order_id">订单号</th>
-						<th data-width="100" data-column="rep_type">报告单类型</th>
-						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="130" data-column="sp_des">备注</th>
-						<th data-width="80" data-column="sp_qsi">送检数量</th>
-						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="220" data-column="sp_model">产品型号</th>
-						<th data-width="210" data-column="sp_number">产品编号</th>
-						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="130" data-column="accq_uid">精度检验</th>
-						<th data-width="130" data-column="lt_uid">成品检漏</th>
-						<th data-width="130" data-column="funq_uid">外观检验</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-		
-		<div class="jbolt_tab_content"  id="appq_tabcontent">
-			<!-- 待批准 工具条 toolbar -->
-			<div class="jbolt_table_toolbar" id="appq_toolbar_#(pageId)">
-				<div class="row">
-					<div class="col-sm-4 text-left">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="570,350"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-								data-check-handler="jboltTableGetCheckedId"
-								data-url="admin/siargo/qarep/editDes/"
-								class="btn btn-outline-info ">
-								<i class="fa fa-edit"></i> 修改产品备注
-							</button>
-							<button onclick="jboltTableRefresh(this)"
-								class="btn btn-outline-secondary ">
-								<i class="fa fa-refresh"></i> 刷新
-							</button>
-						</div>
-					</div>
-					#@qarepSearchForm("appq")
-					<div class="col-sm-4 text-right">
-						#if(approval)
-							<button type="button" onclick="openApprovalDrawer_#(pageId)(event, 'appq_mgrtable_#(pageId)', 5)"
-								class="btn flow-action-btn flow-action-allq"><i class="fa fa-check-circle"></i> 批准审批 <i class="fa fa-chevron-right"></i>
-							</button>
-						#end
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</div>
-			<table #@qarepTableAttrs("appq", 4, false, false)>
-				<thead class="fw-normal">
-					<tr>
-						<th data-width="60">序号</th>
-						<th data-width="100" data-column="formnum">报告单编号</th>
-						<th data-width="80" data-column="order_id">订单号</th>
-						<th data-width="100" data-column="rep_type">报告单类型</th>
-						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="130" data-column="sp_des">备注</th>
-						<th data-width="80" data-column="sp_qsi">送检数量</th>
-						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="250" data-column="sp_model">产品型号</th>
-						<th data-width="200" data-column="sp_number">产品编号</th>
-						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="130" data-column="accq_uid">精度检验</th>
-						<th data-width="130" data-column="lt_uid">成品检漏</th>
-						<th data-width="130" data-column="funq_uid">外观检验</th>
-						<th data-width="130" data-column="appq_uid">包装检验</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-		
-		<div class="jbolt_tab_content"  id="allq_tabcontent">
-			<!-- 已完成 工具条 toolbar -->
-			<div class="jbolt_table_toolbar" id="allq_toolbar_#(pageId)">
-				<div class="row">
-					<div class="col-sm-3 text-left">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button data-openpage="dialog" data-area="570,350"
-								data-handler="refreshAllQarepTables_#(pageId)" data-title="修改产品备注"
-								data-check-handler="jboltTableGetCheckedId"
-								data-url="admin/siargo/qarep/editDes/"
-								class="btn btn-outline-info ">
-								<i class="fa fa-edit"></i> 修改产品备注
-							</button>
-							<button onclick="jboltTableRefresh(this)"
-								class="btn btn-outline-secondary ">
-								<i class="fa fa-refresh"></i> 刷新
-							</button>
-						</div>
-					</div>
-					<div class="col-sm-6 text-center">
-						<form class="form-inline d-inline-block" id="allqForm_#(pageId)" onsubmit="return false;" method="post">
-							<input type="text" autocomplete="off" class="form-control qarep-search-input" data-with-clearbtn="true"
-								placeholder="输入订单号" name="keywords" value=""/> 
-							<select class="form-control qarep-search-select" name="prodType" data-autoload
-								data-url="admin/dictionary/options?key=siargo_prod_type"
-								data-value-attr="sn" 
-								data-text="=产品类型=" data-value=""></select>
-							<input type="text" data-with-clearbtn="true" class="form-control" data-date data-type="date" 
-								placeholder="日期范围" data-range="~" data-fmt="yyyy-MM-dd" name="dateRange" value="#(dateRange??)">
-							<button type="submit" class="btn btn-outline-secondary">
-								<i class="fa fa-search"></i> 查询
-							</button>
-						</form>
-					</div>
-					<div class="col-sm-3 text-right">
-						<div class="btn-group " role="group" aria-label="btn-group">
-							<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-								data-check-handler="jboltTableGetCheckedIds" 
-								data-url="/admin/siargo/qarep/toPdf?ids=" 
-								data-confirm="确定生成选中数据？" 
-								class="btn flow-action-btn flow-action-pdf"><i class="jbicon2 jbi-file-pdf-fill"></i> 生成PDF
-							</button>
-							<button type="button" data-ajaxbtn data-handler="refreshAllQarepTables_#(pageId)" 
-								data-url="/admin/siargo/qarep/toPdfs" 
-								data-confirm="确定生成上月PDF？" 
-								data-success-time="15000"
-								class="btn flow-action-btn flow-action-pdf-batch"><i class="fa fa-download"></i> 一键导出上个月PDF
-							</button>
-						</div>
-					</div>
-				</div>
-				<div class="clearfix"></div>
-			</div>
-			<table #@qarepTableAttrs("allq", 5, false, true)>
-				<thead class="fw-normal">
-					<tr>
-						<th data-width="60">序号</th>
-						<th data-width="100" data-column="formnum">报告单编号</th>
-						<th data-width="80" data-column="order_id">订单号</th>
-						<th data-width="100" data-column="rep_type">报告单类型</th>
-						<th data-width="80" data-column="prod_type">产品类型</th>
-						<th data-width="110" data-column="sp_des">备注</th>
-						<th data-width="80" data-column="sp_qsi">送检数量</th>
-						<th data-width="80" data-column="sp_qi">检验数量</th>
-						<th data-min-width="250" data-column="sp_model">产品型号</th>
-						<th data-width="190" data-column="sp_number">产品编号</th>
-						<th data-width="150" data-column="sc_name">客户名称</th>
-						<th data-width="130" data-column="accq_uid">精度检验</th>
-						<th data-width="130" data-column="lt_uid">成品检漏</th>
-						<th data-width="130" data-column="funq_uid">外观检验</th>
-						<th data-width="130" data-column="appq_uid">包装检验</th>
-						<th data-width="130" data-column="allq_uid">批准</th>
-						<th data-width="100" data-column="pdfstr">查看PDF</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-	</div>
-</div>
-</div>
+</textarea>
+        <div class="jbolt_tab_view jb_vflex" data-active-index="#(tabIndex?? 0)" id="qarepTabView">
+            <div class="jbolt_tab_links jb_vheader">
+                <a class="jbolt_tab_link" href="#allreport_tabcontent"><i class="jbicon jb-liebiao3"></i> 全部</a>
+                <a class="jbolt_tab_link" href="#noq_tabcontent"><i class="jbicon2 jbi-linechart"></i> 精度待检</a>
+                <a class="jbolt_tab_link" href="#ltq_tabcontent"><i class="fa fa-tachometer"></i> 成品检漏待检</a>
+                <a class="jbolt_tab_link" href="#accq_tabcontent"><i class="fa fa-eye"></i> 外观待检</a>
+                <a class="jbolt_tab_link" href="#funq_tabcontent"><i class="jbicon2 jbi-gift"></i> 包装待检</a>
+                <a class="jbolt_tab_link" href="#appq_tabcontent"><i class="jbicon2 jbi-edit-fill"></i> 待批准</a>
+                <a class="jbolt_tab_link" href="#allq_tabcontent"><i class="jbicon jb-xiangmushouxubeian"></i>
+                    已完成</a>
+            </div>
+            <!-- 流程状态导航 - 步骤条样式 -->
+            <div class="flow-stepper-nav">
+                <!-- 左侧汇总徽章 -->
+                <div class="flow-summary-badge active" onclick="switchTabByIndex_#(pageId)(0)">
+                    <i class="jbicon jb-liebiao3"></i>
+                    <span class="flow-summary-text">全部报告单</span>
+                </div>
+                <!-- 右侧步骤条 -->
+                <div class="flow-stepper">
+                    <div class="flow-stepper-item" data-color="acc" onclick="switchTabByIndex_#(pageId)(1)">
+                        <div class="flow-node"><i class="jbicon2 jbi-linechart"></i></div>
+                        <div class="flow-node-label">精度待检</div>
+                        <div class="flow-node-count" id="count-noq">-</div>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-stepper-item" data-color="leak" onclick="switchTabByIndex_#(pageId)(2)">
+                        <div class="flow-node"><i class="fa fa-tachometer"></i></div>
+                        <div class="flow-node-label">成品检漏待检</div>
+                        <div class="flow-node-count" id="count-ltq">-</div>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-stepper-item" data-color="vis" onclick="switchTabByIndex_#(pageId)(3)">
+                        <div class="flow-node"><i class="fa fa-eye"></i></div>
+                        <div class="flow-node-label">外观待检</div>
+                        <div class="flow-node-count" id="count-accq">-</div>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-stepper-item" data-color="pack" onclick="switchTabByIndex_#(pageId)(4)">
+                        <div class="flow-node"><i class="jbicon2 jbi-gift"></i></div>
+                        <div class="flow-node-label">包装待检</div>
+                        <div class="flow-node-count" id="count-funq">-</div>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-stepper-item" data-color="appr" onclick="switchTabByIndex_#(pageId)(5)">
+                        <div class="flow-node"><i class="jbicon2 jbi-edit-fill"></i></div>
+                        <div class="flow-node-label">待批准</div>
+                        <div class="flow-node-count" id="count-appq">-</div>
+                    </div>
+                    <div class="flow-connector"></div>
+                    <div class="flow-stepper-item" data-color="done" onclick="switchTabByIndex_#(pageId)(6)">
+                        <div class="flow-node"><i class="jbicon jb-xiangmushouxubeian"></i></div>
+                        <div class="flow-node-label">已完成</div>
+                        <div class="flow-node-count" id="count-allq">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="jbolt_tab_contents jb_vbody">
+                <div class="jbolt_tab_content" id="allreport_tabcontent">
+                    <!-- 全部 工具条 toolbar -->
+                    <div class="jbolt_table_toolbar" id="allreport_toolbar_#(pageId)">
+                        <div class="row">
+                            <div class="col-sm-4 text-left">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #@qarepAddButton()
+                                    #@qarepRemarkButton()
+                                    <button onclick="openDeleteDialog_#(pageId)('allreport_mgrtable_#(pageId)')"
+                                            class="btn btn-outline-danger ">
+                                        <i class="fa fa-trash"></i> 删除
+                                    </button>
+                                    #@qarepRefreshButton()
+                                </div>
+                            </div>
+                            #@qarepSearchForm("allreport", false)
+                            <div class="col-sm-4 text-right">
+                                <button data-dialogbtn data-area="1300,760" data-title="&#128451; 废弃报告单"
+                                        data-url="admin/siargo/qarep/inactiveList" type="button"
+                                        class="btn btn-outline-danger">
+                                    <i class="fa fa-trash"></i> 回收站
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <table #@qarepTableAttrs(
+                    "allreport", 0, true, false)>
+                    <thead class="fw-normal">
+                    <tr>
+                        #@qarepSharedHeaders()
+                        <th data-width="90" data-column="insp">检验进度</th>
+                        <th data-width="130" data-column="create_time">创建时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                </div>
+
+                <div class="jbolt_tab_content" id="noq_tabcontent">
+                    <!-- 精度待检 工具条 toolbar -->
+                    <div class="jbolt_table_toolbar" id="noq_toolbar_#(pageId)">
+                        <div class="row">
+                            <div class="col-sm-4 text-left">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #@qarepAddButton()
+                                    <button data-openpage="dialog" data-area="820,680"
+                                            data-handler="refreshAllQarepTables_#(pageId)" data-title="修改"
+                                            data-check-handler="jboltTableGetCheckedId"
+                                            data-url="admin/siargo/qarep/edit/"
+                                            class="btn btn-outline-info ">
+                                        <i class="fa fa-edit"></i> 修改
+                                    </button>
+                                    <button onclick="openDeleteDialog_#(pageId)('noq_mgrtable_#(pageId)')"
+                                            class="btn btn-outline-danger ">
+                                        <i class="fa fa-trash"></i> 删除
+                                    </button>
+                                    #@qarepRefreshButton()
+                                </div>
+                            </div>
+                            #@qarepSearchForm("noq", false)
+                            <div class="col-sm-4 text-right">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #if(accuracy)
+                                    <button type="button"
+                                            onclick="openApprovalDrawer_#(pageId)(event, 'noq_mgrtable_#(pageId)', 2)"
+                                            class="btn flow-action-btn flow-action-accq"><i
+                                            class="fa fa-check-circle"></i> 精度审批 <i class="fa fa-chevron-right"></i>
+                                    </button>
+                                    #end
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table #@qarepTableAttrs(
+                    "noq", 1, false, false)>
+                    <thead class="fw-normal">
+                    <tr>
+                        #@qarepSharedHeaders()
+                        <th data-width="130" data-column="create_time">创建时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                </div>
+
+                <div class="jbolt_tab_content" id="ltq_tabcontent">
+                    <!-- 成品检漏待检 工具条 toolbar -->
+                    <div class="jbolt_table_toolbar" id="ltq_toolbar_#(pageId)">
+                        <div class="row">
+                            <div class="col-sm-4 text-left">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #@qarepRemarkButton()
+                                    #@qarepRefreshButton()
+                                </div>
+                            </div>
+                            #@qarepSearchForm("ltq", false)
+                            <div class="col-sm-4 text-right">
+                                #if(leaktest)
+                                <button type="button"
+                                        onclick="openApprovalDrawer_#(pageId)(event, 'ltq_mgrtable_#(pageId)', 6)"
+                                        class="btn flow-action-btn flow-action-ltq"><i class="fa fa-check-circle"></i>
+                                    成品检漏审批 <i class="fa fa-chevron-right"></i>
+                                </button>
+                                #end
+                            </div>
+                        </div>
+                    </div>
+                    <table #@qarepTableAttrs(
+                    "ltq", 6, false, false)>
+                    <thead class="fw-normal">
+                    <tr>
+                        #@qarepSharedHeaders()
+                        <th data-width="130" data-column="accq_uid">精度检验</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                </div>
+
+                <div class="jbolt_tab_content" id="accq_tabcontent">
+                    <!-- 精度合格 工具条 toolbar -->
+                    <div class="jbolt_table_toolbar" id="accq_toolbar_#(pageId)">
+                        <div class="row">
+                            <div class="col-sm-4 text-left">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #@qarepRemarkButton()
+                                    #@qarepRefreshButton()
+                                </div>
+                            </div>
+                            #@qarepSearchForm("accq", false)
+                            <div class="col-sm-4 text-right">
+                                #if(appearance)
+                                <button type="button"
+                                        onclick="openApprovalDrawer_#(pageId)(event, 'accq_mgrtable_#(pageId)', 3)"
+                                        class="btn flow-action-btn flow-action-funq"><i class="fa fa-check-circle"></i>
+                                    外观审批 <i class="fa fa-chevron-right"></i>
+                                </button>
+                                #end
+                            </div>
+                        </div>
+                    </div>
+                    <table #@qarepTableAttrs(
+                    "accq", 2, false, false)>
+                    <thead class="fw-normal">
+                    <tr>
+                        #@qarepSharedHeaders()
+                        <th data-width="130" data-column="accq_uid">精度检验</th>
+                        <th data-width="130" data-column="lt_uid">成品检漏</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                </div>
+
+                <div class="jbolt_tab_content" id="funq_tabcontent">
+                    <!-- 包装待检 工具条 toolbar -->
+                    <div class="jbolt_table_toolbar" id="funq_toolbar_#(pageId)">
+                        <div class="row">
+                            <div class="col-sm-4 text-left">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #@qarepRemarkButton()
+                                    #@qarepRefreshButton()
+                                </div>
+                            </div>
+                            #@qarepSearchForm("funq", false)
+                            <div class="col-sm-4 text-right">
+                                #if(packaging)
+                                <button type="button"
+                                        onclick="openApprovalDrawer_#(pageId)(event, 'funq_mgrtable_#(pageId)', 4)"
+                                        class="btn flow-action-btn flow-action-appq"><i class="fa fa-check-circle"></i>
+                                    包装审批 <i class="fa fa-chevron-right"></i>
+                                </button>
+                                #end
+                            </div>
+                        </div>
+                    </div>
+                    <table #@qarepTableAttrs(
+                    "funq", 3, false, false)>
+                    <thead class="fw-normal">
+                    <tr>
+                        #@qarepSharedHeaders()
+                        <th data-width="130" data-column="accq_uid">精度检验</th>
+                        <th data-width="130" data-column="lt_uid">成品检漏</th>
+                        <th data-width="130" data-column="funq_uid">外观检验</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                </div>
+
+                <div class="jbolt_tab_content" id="appq_tabcontent">
+                    <!-- 待批准 工具条 toolbar -->
+                    <div class="jbolt_table_toolbar" id="appq_toolbar_#(pageId)">
+                        <div class="row">
+                            <div class="col-sm-4 text-left">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #@qarepRemarkButton()
+                                    #@qarepRefreshButton()
+                                </div>
+                            </div>
+                            #@qarepSearchForm("appq", false)
+                            <div class="col-sm-4 text-right">
+                                #if(approval)
+                                <button type="button"
+                                        onclick="openApprovalDrawer_#(pageId)(event, 'appq_mgrtable_#(pageId)', 5)"
+                                        class="btn flow-action-btn flow-action-allq"><i class="fa fa-check-circle"></i>
+                                    批准审批 <i class="fa fa-chevron-right"></i>
+                                </button>
+                                #end
+                            </div>
+                        </div>
+                    </div>
+                    <table #@qarepTableAttrs(
+                    "appq", 4, false, false)>
+                    <thead class="fw-normal">
+                    <tr>
+                        #@qarepSharedHeaders()
+                        <th data-width="130" data-column="accq_uid">精度检验</th>
+                        <th data-width="130" data-column="lt_uid">成品检漏</th>
+                        <th data-width="130" data-column="funq_uid">外观检验</th>
+                        <th data-width="130" data-column="appq_uid">包装检验</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                </div>
+
+                <div class="jbolt_tab_content" id="allq_tabcontent">
+                    <!-- 已完成 工具条 toolbar -->
+                    <div class="jbolt_table_toolbar" id="allq_toolbar_#(pageId)">
+                        <div class="row">
+                            <div class="col-sm-3 text-left">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    #@qarepRemarkButton()
+                                    #@qarepRefreshButton()
+                                </div>
+                            </div>
+                            #@qarepSearchForm("allq", true)
+                            <div class="col-sm-3 text-right">
+                                <div class="btn-group " role="group" aria-label="btn-group">
+                                    <button type="button" data-qarep-pdf="selected"
+                                            data-table-id="allq_mgrtable_#(pageId)"
+                                            class="btn flow-action-btn flow-action-pdf"><i
+                                            class="jbicon2 jbi-file-pdf-fill"></i> 生成PDF
+                                    </button>
+                                    <button type="button" data-qarep-pdf="monthly"
+                                            data-export-year="#(pdfExportYear)" data-max-month="#(pdfExportMaxMonth)"
+                                            #if(pdfExportMaxMonth==0) disabled title="今年暂无可导出的已结束月份" #end
+                                            class="btn flow-action-btn flow-action-pdf-batch"><i
+                                            class="fa fa-download"></i> 按月份导出PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table #@qarepTableAttrs(
+                    "allq", 5, false, true)>
+                    <thead class="fw-normal">
+                    <tr>
+                        #@qarepSharedHeaders()
+                        <th data-width="130" data-column="accq_uid">精度检验</th>
+                        <th data-width="130" data-column="lt_uid">成品检漏</th>
+                        <th data-width="130" data-column="funq_uid">外观检验</th>
+                        <th data-width="130" data-column="appq_uid">包装检验</th>
+                        <th data-width="130" data-column="allq_uid">批准</th>
+                        <th data-width="100" data-column="pdfstr">查看PDF</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 #end
 
 #define js()
-<script type="text/javascript">
-/**
- * 报告单行合并 - AJAX成功回调入口
- * 同时合并主表和左侧固定列，确保无论 left_fixed 是否可见都能看到合并效果
- */
-function mergeReportRows(table, res) {
-    if (!table) return;
-    
-    // 分页参数
-    var currentPage = parseInt(table.data("currentpage")) || 1;
-    var pageSize = parseInt(table.data("pagesize")) || 15;
-    // 合并列索引（跳过 0=checkbox），formnum 在索引 2
-    var mergeColIndexes = [1, 2, 3, 4, 5];
-    var formnumColIdx = 2;
-    
-    // 1. 始终合并主表 tbody（确保无水平滚动条时用户也能看到合并效果）
-    var $mainTbody = table.find("tbody");
-    if ($mainTbody.length && $mainTbody.find("tr").length > 0) {
-        mergeFixedLeftRows($mainTbody, mergeColIndexes, formnumColIdx, currentPage, pageSize);
-    }
-    
-    // 2. 如果左侧固定列存在，也合并它（水平滚动条出现时覆盖层可见）
-    var $fixedLeftTbody = null;
-    if (table.left_fixed && table.left_fixed.body && table.left_fixed.body.table) {
-        $fixedLeftTbody = table.left_fixed.body.table.find("tbody");
-    }
-    if (!$fixedLeftTbody || !$fixedLeftTbody.length) {
-        // 降级：通过 DOM 查找
-        if (table.table_box) {
-            $fixedLeftTbody = table.table_box.find(".jbolt_table_fixed_left .jbolt_table_body table tbody");
-        }
-    }
-    if ($fixedLeftTbody && $fixedLeftTbody.length && $fixedLeftTbody.find("tr").length > 0) {
-        mergeFixedLeftRows($fixedLeftTbody, mergeColIndexes, formnumColIdx, currentPage, pageSize);
-    }
-    
-    // 3. 绑定整组 hover 联动（主表与左侧固定列同步高亮）
-    bindMergeGroupHover($mainTbody, $fixedLeftTbody);
-}
-
-/**
- * 合并组 hover 联动 - 悬停组内任意行时整组高亮，主表与左固定列同步
- * 从 .jbolt_table_box 容器委托事件，确保固定列重建后仍能正常工作
- * @param $mainTbody      主表 tbody（用于定位 table_box）
- * @param $fixedLeftTbody 左侧固定列 tbody（未使用，保留签名兼容）
- */
-function bindMergeGroupHover($mainTbody, $fixedLeftTbody) {
-    if (!$mainTbody || !$mainTbody.length) return;
-    var $tableBox = $mainTbody.closest('.jbolt_table_box');
-    if (!$tableBox.length) return;
-    // 从持久容器委托，解绑后重绑避免翻页重复
-    $tableBox.off('.mergehover')
-        .on('mouseenter.mergehover', 'tr[data-merge-gid]', function() {
-            var gid = $(this).attr('data-merge-gid');
-            $tableBox.find('tr[data-merge-gid="' + gid + '"]').addClass('merge-group-hover');
-        })
-        .on('mouseleave.mergehover', 'tr[data-merge-gid]', function() {
-            var gid = $(this).attr('data-merge-gid');
-            $tableBox.find('tr[data-merge-gid="' + gid + '"]').removeClass('merge-group-hover');
-        });
-}
-
-/**
- * 核心合并逻辑 - 按 formnum 分组并应用 rowspan
- * @param $tbody       左侧固定列的 tbody jQuery 对象
- * @param colIndexes   需要合并的列索引数组（基于固定列表格的 td 索引）
- * @param formnumColIdx formnum 所在的列索引（用于分组依据）
- * @param currentPage  当前页码
- * @param pageSize     每页条数
- */
-function mergeFixedLeftRows($tbody, colIndexes, formnumColIdx, currentPage, pageSize) {
-    var $rows = $tbody.find("tr");
-    if ($rows.length === 0) return;
-
-    // 1. 按 formnum 连续分组
-    var groups = [];
-    var currentFormnum = null;
-    $rows.each(function(i) {
-        var formnum = $(this).find("td").eq(formnumColIdx).text().trim();
-        if (formnum !== currentFormnum) {
-            groups.push({ startIdx: i, count: 1, formnum: formnum });
-            currentFormnum = formnum;
-        } else {
-            groups[groups.length - 1].count++;
-        }
+<script>
+    $(function () {
+        // ajaxPortal 仅自动扫描声明插件依赖的页面，这里显式初始化报告单列表。
+        SiargoQarepList.init($('.jbolt_page[data-page-id="#(pageId)"]'));
     });
-
-    // 2. 对每个分组执行合并
-    var pageOffset = (currentPage - 1) * pageSize;
-    groups.forEach(function(group, gIdx) {
-        colIndexes.forEach(function(colIdx) {
-            var $firstTd = $rows.eq(group.startIdx).find("td").eq(colIdx);
-            if (group.count > 1) {
-                $firstTd.attr("rowspan", group.count);
-                for (var r = 1; r < group.count; r++) {
-                    $rows.eq(group.startIdx + r).find("td").eq(colIdx).hide();
-                }
-            }
-            $firstTd.css("vertical-align", "middle");
-            // 序号列重算：每个分组只显示一个序号
-            if (colIdx === 1) {
-                $firstTd.text(pageOffset + gIdx + 1);
-            }
-        });
-        // 多行合并组：统一底色+左侧色带（merge-group）、hover 联动标识（data-merge-gid）、产品数徽章
-        if (group.count > 1) {
-            $rows.eq(group.startIdx).addClass("merge-group-first");
-            for (var r = 0; r < group.count; r++) {
-                $rows.eq(group.startIdx + r).addClass("merge-group").attr("data-merge-gid", group.startIdx);
-            }
-            // 报告单编号单元格追加产品数徽章，明确合并语义
-            var $formnumTd = $rows.eq(group.startIdx).find("td").eq(formnumColIdx);
-            if (!$formnumTd.find(".merge-count-badge").length) {
-                $formnumTd.append('<span class="merge-count-badge">' + group.count + ' 个</span>');
-            }
-        }
-        // 为分组最后一行添加加深边框样式（组间刻痕线，含单行组）
-        $rows.eq(group.startIdx + group.count - 1).addClass("merge-group-last");
-    });
-}
-
-// ===== Tab懒加载与脏标记 =====
-var loadedTabs_#(pageId) = {};
-var dirtyTabs_#(pageId) = {};
-var tableIds_#(pageId) = ['allreport', 'noq', 'ltq', 'accq', 'funq', 'appq', 'allq'];
-
-// 获取当前激活的Tab索引
-function getCurrentTabIndex_#(pageId)() {
-	var activeLink = $('#qarepTabView .jbolt_tab_link.active');
-	return activeLink.length ? $('#qarepTabView .jbolt_tab_link').index(activeLink) : 0;
-}
-
-// 切换Tab（函数名带 pageId 后缀，避免污染全局命名空间与其他页面冲突）
-function switchTabByIndex_#(pageId)(index) {
-	// 更新导航active状态
-	$('.flow-summary-badge').removeClass('active');
-	$('.flow-stepper-item').removeClass('active');
-	if (index === 0) {
-		$('.flow-summary-badge').addClass('active');
-	} else {
-		$('.flow-stepper-item').eq(index - 1).addClass('active');
-	}
-	
-	// 懒加载 + 脏标记刷新
-	if (!loadedTabs_#(pageId)[index]) {
-		loadedTabs_#(pageId)[index] = true;
-		dirtyTabs_#(pageId)[index] = false;
-		var tableId = tableIds_#(pageId)[index] + '_mgrtable_#(pageId)';
-		setTimeout(function() {
-			refreshJBoltTableById(tableId);
-		}, 50);
-	} else if (dirtyTabs_#(pageId)[index]) {
-		dirtyTabs_#(pageId)[index] = false;
-		var tableId = tableIds_#(pageId)[index] + '_mgrtable_#(pageId)';
-		setTimeout(function() {
-			refreshJBoltTableById(tableId);
-		}, 50);
-	}
-	
-	// 切换底层JBolt Tab
-	$('#qarepTabView .jbolt_tab_link').eq(index).trigger('click');
-}
-
-// 获取各流程阶段数量（带防抖，避免短时间内重复请求）
-var loadFlowCountsTimer_#(pageId) = null;
-function loadFlowCounts() {
-	if (loadFlowCountsTimer_#(pageId)) clearTimeout(loadFlowCountsTimer_#(pageId));
-	loadFlowCountsTimer_#(pageId) = setTimeout(function() {
-		// 规范 98：使用平台 Ajax 对象族（自动处理登录失效/系统锁定/终端离线等全局状态）
-		Ajax.get('admin/siargo/qarep/getFlowCounts', function(res) {
-			$('#count-noq').text(res.data.noq || 0);
-			$('#count-ltq').text(res.data.ltq || 0);
-			$('#count-accq').text(res.data.accq || 0);
-			$('#count-funq').text(res.data.funq || 0);
-			$('#count-appq').text(res.data.appq || 0);
-			$('#count-allq').text(res.data.allq || 0);
-		});
-	}, 100);
-}
-
-// 页面加载时获取数量（守卫：防止 JBolt 双重渲染导致重复初始化）
-$(function() {
-	if (window.__siargo_qarepReady) return;
-	window.__siargo_qarepReady = true;
-	// 清理 JBolt 初次直接访问时残留在默认标签页中的重复 qarep 内容
-	// 仅清理“其他”标签页里的旧 qarep 实例，绝不能清空当前实例所在的标签页：
-	// F5 后 JBolt 从 sessionStorage 恢复多标签页时，报告单页会在非激活的
-	// jbolt_tabcontent 中被重新注入，此时若按旧逻辑清理，会把刚注入的内容清空，导致报告单空白。
-	$('#jbolt-container > .jbolt_tabcontent:not(.active)').each(function(){
-		var $tc = $(this);
-		if($tc.find('.jbolt_tab_view').length && !$tc.find('.jbolt_page[data-page-id="#(pageId)"]').length){
-			$tc.empty();
-		}
-	});
-	
-	// 初始化步骤条active状态并触发首次流程数量加载（内建防抖）
-	const activeIndex = $('#qarepTabView').data('active-index') || 0;
-	
-	// 预标记默认tab为已加载，防止switchTabByIndex_#(pageId)中重复触发
-	loadedTabs_#(pageId)[activeIndex] = true;
-	switchTabByIndex_#(pageId)(activeIndex);
-	
-	// 首次加载流程数量（防抖100ms确保只发一次请求）
-	loadFlowCounts();
-	
-	// 定时刷新数量（每30秒），页面不可见时暂停以节省资源；
-	// 用 AbortController 管理监听器生命周期，页面卸载/重载时可整体中止，避免监听器泄漏
-	var flowCountTimer_#(pageId) = setInterval(loadFlowCounts, 30000);
-	var visibilityAbort_#(pageId) = new AbortController();
-	document.addEventListener('visibilitychange', function() {
-		if (document.hidden) {
-			clearInterval(flowCountTimer_#(pageId));
-		} else {
-			loadFlowCounts();
-			flowCountTimer_#(pageId) = setInterval(loadFlowCounts, 30000);
-		}
-	}, { signal: visibilityAbort_#(pageId).signal });
-	window.addEventListener('pagehide', function() {
-		visibilityAbort_#(pageId).abort();
-		clearInterval(flowCountTimer_#(pageId));
-	}, { once: true });
-
-	// PDF 查看链接防缓存：捕获阶段委托（第三参 true，先于 JBolt data-openpage 的冒泡委托执行），
-	// 从 data-pdf-url（dataset 读取，天然免字符串拼接注入）取原始地址并拼时间戳改写 href，
-	// 随后 JBolt 的 jboltlayer 机制按改写后的 href 正常打开
-	document.addEventListener('click', function(e) {
-		var link = e.target && e.target.closest ? e.target.closest('a[data-pdf-url]') : null;
-		if (!link) return;
-		var pdfUrl = link.dataset.pdfUrl;
-		if (pdfUrl) {
-			link.setAttribute('href', pdfUrl + (pdfUrl.indexOf('?') >= 0 ? '&t=' : '?t=') + Date.now());
-		}
-	}, true);
-});
-
-// 打开删除确认弹窗
-function openDeleteDialog_#(pageId)(tableId) {
-    // 获取选中的ID
-    const ids = jboltTableGetCheckedIds(tableId);
-    if (!ids || ids.length === 0) {
-        LayerMsgBox.alert('请先选择要删除的数据', 2);
-        return;
-    }
-    
-    // 打开layer弹窗
-    layer.open({
-        type: 1,
-        title: '删除确认',
-        area: ['450px', '320px'],
-        content: '<div class="p-3">' +
-            '<div class="form-group">' +
-            '<label class="mb-2"><span class="text-danger">*</span> <i class="fa fa-question-circle text-warning mr-1"></i>确定把选中数据放入回收站？</label>' +
-            '<textarea id="deleteReason_#(pageId)" class="form-control" rows="4" placeholder="请输入删除原因（必填）..."></textarea>' +
-            '</div></div>',
-        btn: ['确定', '取消'],
-        yes: function(index) {
-            var reason = $('#deleteReason_#(pageId)').val();
-            if (!reason || $.trim(reason) === '') {
-                LayerMsgBox.alert('请输入删除原因', 2);
-                return;
-            }
-            var idsStr = $.isArray(ids) ? ids.join(',') : ids;
-            LayerMsgBox.loading('正在处理...', 10000);
-            $.ajax({
-                url: 'admin/siargo/qarep/deleteByIds',
-                type: 'post',
-                data: { ids: idsStr, delete_des: reason },
-                success: function(res) {
-                    LayerMsgBox.closeLoading();
-                    layer.close(index);
-                    if (res.msg && res.msg == 'jbolt_terminal_offline') {
-                        showReloginDialog();
-                        LayerMsgBox.alert('当前用户已在其它终端登录，本机已下线', 2, function() {
-                            top.location.href = '/admin';
-                        });
-                    } else if ('ok' == res.state) {
-                        LayerMsgBox.success('删除成功', 800, function() {
-                            refreshAllQarepTables_#(pageId)();
-                        });
-                    } else {
-                        LayerMsgBox.alert(res.msg || '删除失败', 2);
-                    }
-                },
-                error: function() {
-                    LayerMsgBox.closeLoading();
-                    layer.close(index);
-                    LayerMsgBox.error('请求失败，请重试');
-                }
-            });
-        }
-    });
-}
-
-// 打开审批工作台抽屉（JBoltLayer 右侧滑出，iframe 加载独立审批页）
-// 注意：必须阻断点击冒泡，否则事件冒泡到 .jbolt_admin_main 会触发 JBoltLayerUtil.close 导致抽屉闪退
-function openApprovalDrawer_#(pageId)(e, tableId, insp) {
-    if (e) { e.stopPropagation(); e.preventDefault(); }
-    var ids = jboltTableGetCheckedIds(tableId);
-    if (!ids || ids.length === 0) {
-        LayerMsgBox.alert('请先勾选要审批的产品', 2);
-        return;
-    }
-    var idsStr = $.isArray(ids) ? ids.join(',') : ids;
-    JBoltLayerUtil.openByNav('admin/siargo/qarep/approval?insp=' + insp + '&ids=' + idsStr, {
-        dir: 'right', width: 620, resize: true, loadType: 'iframe'
-    });
-}
-
-// 刷新当前Tab + "全部"Tab，其余Tab标记为脏（切换时再刷新）
-function refreshAllQarepTables_#(pageId)() {
-    // 始终刷新"全部"Tab
-    refreshJBoltTableById('allreport_mgrtable_#(pageId)');
-    var currentIdx = getCurrentTabIndex_#(pageId)();
-    // 刷新当前激活的Tab（非"全部"时）
-    if (currentIdx > 0) {
-        refreshJBoltTableById(tableIds_#(pageId)[currentIdx] + '_mgrtable_#(pageId)');
-    }
-    // 清除当前Tab的脏标记（已刷新，无需再标记）
-    dirtyTabs_#(pageId)[currentIdx] = false;
-    // 标记其余Tab为脏，切换时自动刷新
-    for (var i = 1; i < tableIds_#(pageId).length; i++) {
-        if (i !== currentIdx) {
-            dirtyTabs_#(pageId)[i] = true;
-        }
-    }
-    loadFlowCounts();
-}
-
-// 暴露刷新入口供审批 iframe 跨窗口调用（须位于 refreshAllQarepTables_#(pageId) 声明之后，函数声明提升不受影响）
-window._qarepRefresh = refreshAllQarepTables_#(pageId);
-
-// 框架标签页切换自动刷新：切回本页（报单号）时刷新一次列表数据与流程数量
-// 复用平台自身的 tab 点击事件委托（与平台切换逻辑同源）：
-// - 捕获阶段监听（先于平台在 jboltBody 上的冒泡 handler 执行），此时能读到 tab 点击前的激活状态
-// - 仅"从其他标签页切回本页"（点击的 tab 非当前激活，且其 key 就是本页所在 tabcontent 的 key）时刷新一次
-// - 非 data-auto-refresh 周期机制，无周期轮询；页面整页刷新后重新执行脚本时先移除旧监听，避免累积泄漏
-(function(){
-	if (window.__qarepTabRefreshCapture) {
-		document.removeEventListener('click', window.__qarepTabRefreshCapture, true);
-	}
-	var handler = function(e) {
-		var t = e.target;
-		var li = t && t.closest ? t.closest('ul.jbolt_tabs>li') : null;
-		if (!li || li.classList.contains('active')) return; // 点击的是当前激活 tab，跳过
-		if (t.closest && t.closest('i.close')) return; // 点击关闭按钮不触发刷新
-		var clickedKey = li.getAttribute('data-key');
-		setTimeout(function() {
-			var portal = $('.jbolt_page[data-page-id="#(pageId)"]').closest('.jbolt_tabcontent');
-			// portal 仍挂载、本页已激活、且其 tab key 与点击的 tab 一致 → 确实切回了本页，刷新一次
-			if (portal.length === 1 && portal[0].isConnected && portal.hasClass('active') && portal.attr('data-key') === clickedKey) {
-				refreshAllQarepTables_#(pageId)();
-			}
-		}, 80);
-	};
-	window.__qarepTabRefreshCapture = handler;
-	document.addEventListener('click', handler, true);
-})();
-
 </script>
 #end

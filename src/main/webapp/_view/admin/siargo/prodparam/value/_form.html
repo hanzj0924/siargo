@@ -1,0 +1,39 @@
+<form onsubmit="return false;" id="prodParamValueForm" action="#(action)" method="post">
+    <input type="hidden" name="prodParamValue.id" value="#(prodParamValue.id??)"/>
+    <input type="hidden" name="prodParamValue.paramTypeId" value="#(prodParamValue.paramTypeId??)"/>
+    <div class="row">
+        <div class="col">
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">所属参数种类</label>
+                <div class="col">
+                    <input type="text" readonly="readonly" class="form-control bg-light" value="#(paramTypeName??)"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">参数值</label>
+                <div class="col">
+                    <input type="text" data-with-clearbtn="true" autocomplete="off" class="form-control"
+                           data-rule="required" data-tips="请输入参数值"
+                           placeholder="请输入参数值" maxlength="50" name="prodParamValue.paramValue"
+                           value="#(prodParamValue.paramValue??)"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">描述</label>
+                <div class="col">
+                    <input type="text" data-with-clearbtn="true" autocomplete="off" class="form-control"
+                           placeholder="请输入描述（可选）" maxlength="200" name="prodParamValue.description"
+                           value="#(prodParamValue.description??)"/>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+        </div>
+    </div>
+
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="prodParamValueForm")
+#end

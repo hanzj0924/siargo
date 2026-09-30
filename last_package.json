@@ -1,6 +1,56 @@
 {
-  "head": "3cfb838",
-  "packageTime": "2026-08-29 17:40:15",
-  "headFull": "3cfb83895b49febb577348088339ff93846a884e",
-  "version": "2.9.1"
+  "head": "023ca42",
+  "packageTime": "2026-09-30 09:21:57",
+  "headFull": "023ca42e437ed33d56758059ad7da0a46fec1a8c",
+  "version": "2.9.3",
+  "assetHashes": {
+    "assets/css/jbolt-admin.css": {
+      "sourceSha256": "545a8684f3580973a5645f619772145637a1b25ffccc0505512c366dd52f0206",
+      "minSha256": "c9a22de9ff5cd013a044653c844336979d76799a931e9dc9d1d7e5919e20a06b"
+    },
+    "assets/css/jbolt-mine.css": {
+      "sourceSha256": "0b9b77123c5be9347a9b482c65ed1cd881b5982e99b399cbe3e87ea04972a7ea",
+      "minSha256": "eeda6f6208cf7226321ea4ff61ec9b93fde032d5dd25cff49a4941fbca6b2816"
+    },
+    "assets/css/jbolt-page-loading.css": {
+      "sourceSha256": null,
+      "minSha256": "0a2e080fe891b580d99acbb1b0039b20946dcf13b1560853f2194c363c79e791"
+    },
+    "assets/css/jbolt-wechat-menu.css": {
+      "sourceSha256": null,
+      "minSha256": "3e039fa1c099ead93451fc0ae8a22b330280db3fc0c227929643418204022960"
+    },
+    "assets/css/login.css": {
+      "sourceSha256": "8847d4f62866c939db806b7f6fabc492a2aace3f7887d95b5ccb44989c8c8641",
+      "minSha256": "33eda2939dc94187f62a9f2da1f90809dc7ab1898368615c4dbce96265255e7e"
+    },
+    "assets/css/siargo.css": {
+      "sourceSha256": "38ef38fa36b2724fb669aec31db0bc0a03ce7e00d24980a8a48b72c825253d7b",
+      "minSha256": "47456f780506d7446bd7c5301c7c3103616ce6378a22cd8f85530e491b9c846f"
+    },
+    "assets/js/jbolt-admin.js": {
+      "sourceSha256": "a60ddf94be48ebc25284da201644935abff010581649983ab0e6f2cac2b85b40",
+      "minSha256": "3fe6a3961c6afb5b930e4eee68ce03fccccd4b92a54f81e5be5b6387880dbec8"
+    },
+    "assets/js/jbolt-mine.js": {
+      "sourceSha256": "5113ce4005d16e3f3eeb1a8bafe25b7e111f0008fae35ede148b523096db147e",
+      "minSha256": "285e2fe37236025db86065945b6edf02974667e918f161ad4b13c668d5d2adb4"
+    },
+    "assets/js/jbolt-wechat-menu.js": {
+      "sourceSha256": null,
+      "minSha256": "57445bc71fcebefb011d9fc010b48b6692fb5a6f8d9c41118add8e222b99428d"
+    },
+    "assets/js/login.js": {
+      "sourceSha256": "67c369caacaaab50864b4ed433a761905fb35e2e743a74eb1679976b1d355182",
+      "minSha256": "f39f5bfee2bf037375411869dd4285b769ec7aa9ebf04026d75a9fa7f9857b0f"
+    },
+    "assets/js/relogin.js": {
+      "sourceSha256": "e6ca8e7f47bb15ad177d69656a00a157568c24545eb9e5482df46c28ca17a1c4",
+      "minSha256": "a7243c3b6150243358c77af78f3c2b4cc0a6dc4ee45891288cd2c9691e1391b6"
+    },
+    "assets/js/siargo.js": {
+      "sourceSha256": "ee87d0a74860a4d845cf4293bbdcac54ad25e2df8163b9e5c13cbcfb8463d3bd",
+      "minSha256": "d569c2f89acd4da86d02d9311bc6e100a0c6fd413923a593ec8cc5a5d021d91c"
+    }
+  }
 }

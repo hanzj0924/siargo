@@ -91,8 +91,7 @@ public class EquipmentComparisonAdminController extends JBoltBaseController {
   /**
 	* 保存
 	*/
-    @Before(Tx.class)
-	public void save() {
+    public void save() {
 		String certificateImageUrls = getPara("certificateImageUrls");
 		String certificateDate = getPara("equipmentCertificate.certificateDate");
 		String certificateRemark = getPara("equipmentCertificate.remark");
@@ -102,8 +101,7 @@ public class EquipmentComparisonAdminController extends JBoltBaseController {
    /**
 	* 更新
 	*/
-    @Before(Tx.class)
-	public void update() {
+    public void update() {
 		String certificateImageUrls = getPara("certificateImageUrls");
 		String certificateDate = getPara("equipmentCertificate.certificateDate");
 		String certificateRemark = getPara("equipmentCertificate.remark");
@@ -154,6 +152,7 @@ public class EquipmentComparisonAdminController extends JBoltBaseController {
 			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "批量审核失败");
 			return;
 		}
+		equipmentService.clearOverviewCountsCache();
 		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("批量审核失败"));
 	}
 	

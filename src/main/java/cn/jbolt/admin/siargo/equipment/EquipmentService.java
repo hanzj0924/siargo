@@ -598,30 +598,20 @@ public class EquipmentService extends JBoltBaseService<Equipment> {
 	 * @param certificateImageUrls 证书图片路径（逗号分隔），可为空
 	 * @return
 	 */
-	public Ret save(Equipment equipment, String certificateImageUrls) {
-		if(equipment==null || isOk(equipment.getId())) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-		//if(existsName(equipment.getName())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
-		boolean success=equipment.save();
-		if(success) {
-			clearOverviewCountsCache();
-			//添加日志
-			//addSaveSystemLog(equipment.getId(), JBoltUserKit.getUserId(), equipment.getName());
-			//关联证书图片入库（非必填，失败不阻断设备保存）
-			if(isOk(certificateImageUrls)) {
-				try {
-					equipmentCertificateService.saveCertificateImages(equipment.getId(), certificateImageUrls);
-				} catch (com.jfinal.plugin.activerecord.NestedTransactionHelpException e) {
-					// 证书保存失败：通知外层 Db.tx() 回滚整体，避免部分证书记录入库但文件已清理
-					throw e;
-				} catch (Exception e) {
-					LOG.error("设备保存成功但证书图片保存失败，equipmentId=" + equipment.getId() + "，原因：" + e.getMessage(), e);
-				}
-			}
-		}
-		return ret(success);
-	}
+    public Ret save(Equipment equipment, String certificateImageUrls) {
+        if (equipment == null || isOk(equipment.getId())) return fail(JBoltMsg.PARAM_ERROR);
+        equipment.set("id", cn.hutool.core.util.IdUtil.getSnowflakeNextId());
+        cn.jbolt.admin.siargo.equipment.certificate.EquipmentCertificateService.Prepared prepared = null;
+        boolean committed = false;
+        try {
+            prepared = equipmentCertificateService.prepare(equipment.getId(), null, certificateImageUrls, null, null, false);
+            var work = prepared;
+            if (!Db.tx(() -> equipment.save() && work.persist())) return work.rollback("设备或证书保存失败");
+            committed = true;
+            clearOverviewCountsCache();
+            return work.committed();
+        } catch (Exception e) { return prepared == null || committed ? fail(e.getMessage()) : prepared.rollback(e.getMessage()); }
+    }
 	
 	/**
 	 * 更新

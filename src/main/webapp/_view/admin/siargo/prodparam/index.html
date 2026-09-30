@@ -1,0 +1,48 @@
+#@jboltLayout()
+#define css()
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
+#end
+#define main()
+<div class="jbolt_page" data-key="#(pmkey)">
+    <div class="jbolt_page_title">
+        <div class="row">
+            <div class="col-sm-auto"></div>
+            <div class="col"></div>
+            <div class="col-sm-auto"></div>
+        </div>
+    </div>
+    <div class="jbolt_page_content">
+        <div class="row">
+            <div class="col-12 col-xl-5 col-lg-6 col-md-6">
+                <div class="card prod-param-card mb-3 mb-md-0">
+                    <div class="card-header d-flex align-items-center">
+                        种类管理
+                        <a href="admin/siargo/prodparam/add" tooltip class="ml-auto" data-handler="refreshPortal"
+                           data-portal="prodParamTypePortal" data-dialogbtn data-area="700,450"
+                           data-title="新增参数种类"><i class="fa fa-plus text-primary"></i></a>
+                    </div>
+                    <div class="card-body overflow-auto jbolt_table_fill_box">
+                        #ajaxPortal("/admin/siargo/prodparam/mgr","prodParamTypePortal",true)
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-7 col-lg-6 col-md-6">
+                <div class="card prod-param-card">
+                    <div class="card-header d-flex flex-nowrap align-items-center prod-param-value-header">
+                        <span class="prod-param-value-title text-nowrap">参数种类 : <span id="selectParamTypeName" class="text-danger">未选</span></span>
+                        <div class="prod-param-value-search mx-auto" role="search">
+                            <input id="prodParamValueSearch" type="text" class="form-control" placeholder="输入参数值，回车筛选"
+                                   data-with-clearbtn="true" data-clear-handler="onkeyup"
+                                   aria-label="搜索当前种类的参数值" aria-controls="prodParamValuePortal" autocomplete="off" disabled>
+                        </div>
+                    </div>
+                    <div class="card-body overflow-auto jbolt_table_fill_box">
+
+                        #ajaxPortal("/admin/siargo/prodparam/value/mgr/0","prodParamValuePortal",true)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#end

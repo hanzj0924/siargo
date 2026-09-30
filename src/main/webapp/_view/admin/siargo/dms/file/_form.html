@@ -1,4 +1,5 @@
-<form onsubmit="return false;" id="dmsFileForm" action="#(action)"
+#set(pageId=RandomUtil.random(6))
+<form onsubmit="return false;" id="dmsFileForm_#(pageId)" data-dms-form action="#(action)"
 	method="post">
 	<input type="hidden" name="dmsFile.id" value="#(dmsFile.id??)" />
 	<div class="row">
@@ -42,45 +43,26 @@
 			<div class="form-group row">
 				<label class="col-sm-2 col-form-label">关键字</label>
 				<div class="col">
-					<input type="hidden" name="keywords" id="keywordsHidden"
+					<input type="hidden" name="keywords" data-dms="keywords"
 						value="#(keywords??)" /> <input type="text" autocomplete="off"
-						class="form-control mb-2" id="keywordInput"
+						class="form-control mb-2" data-dms="keyword"
 						placeholder="输入关键字后按回车添加" />
-					<div id="keywordTags" class="d-flex flex-wrap"></div>
+					<div data-dms="tags" class="d-flex flex-wrap"></div>
 				</div>
 			</div>
 			<div class="form-group row">
 				<label class="col-sm-2 col-form-label">文件上传</label>
 				<div class="col">
-					<input type="hidden" name="tempFilePath" id="tempFilePath" value="" />
-					#if(!dmsFile.id)
-					<!-- 新增模式：批量上传 -->
-					<div id="multiUploadArea">
-						<input type="file" id="multiFileInput" multiple style="display:none"
-							accept=".pdf" />
-						<button type="button" class="btn btn-outline-primary" id="multiUploadBtn">
-							<i class="fa fa-upload mr-1"></i>选择文件上传
-						</button>
-						<span class="ml-2 text-muted" id="uploadProgress"></span>
-					</div>
-					<div id="uploadedFileList" class="mt-2"></div>
-					<small class="text-muted mt-2 d-block">提示：仅支持pdf批量上传，最多10个文件，每个最大100MB</small>
-					#else
-					<!-- 编辑模式：单文件上传 -->
-					<div class="j_upload_file_box"
-						data-name="file"
-						data-btn-class="btn btn-outline-primary"
-						data-placeholder="选择文件上传"
-						data-url="/admin/siargo/dms/file/uploadFile"
-						data-handler="uploadFile"
-						data-hidden-input="tempFilePath"
-						data-upload-success-handler="dmsFileUploadHandler"
-						data-maxsize="102400"
-						data-accept="pdf"
-					></div>
-					<small class="text-muted mt-2 d-block">提示：仅支持pdf，最大100MB</small>
-					<div id="replaceFileTip" class="text-info mt-1" style="display:none"></div>
-					#end
+					<input type="hidden" name="tempFilePath" value="" />
+                    <input type="hidden" name="overwriteTokens" value="{}" />
+                    <input type="file" data-dms="input" hidden accept=".pdf"
+                        #if(!dmsFile.id) multiple #end />
+                    <button type="button" class="btn btn-outline-primary" data-dms="choose">
+                        <i class="fa fa-upload mr-1"></i>选择文件上传
+                    </button>
+                    <span class="ml-2 text-muted" data-dms="progress"></span>
+                    <div data-dms="list" class="mt-2"></div>
+                    <small class="text-muted mt-2 d-block">仅支持PDF，每个最大100MB；#if(!dmsFile.id)最多10个；#end同名文件确认覆盖后上传，保存后生效。</small>
 				</div>
 			</div>
 		</div>
@@ -91,288 +73,6 @@
 </form>
 #define js()
 <script>
-	// ── 生效日期默认值 ──────────────────────────────────
-	// 新增模式下，生效日期默认为今天
-	(function() {
-		var $dateInput = $('input[name="dmsFile.activeDate"]');
-		if (!$.trim($dateInput.val())) {
-			var today = new Date();
-			var y = today.getFullYear();
-			var m = ('0' + (today.getMonth() + 1)).slice(-2);
-			var d = ('0' + today.getDate()).slice(-2);
-			$dateInput.val(y + '-' + m + '-' + d);
-		}
-	})();
-
-	// ── 关键字标签管理 ──────────────────────────────────
-	(function() {
-		var $input = $('#keywordInput');
-		var $hidden = $('#keywordsHidden');
-		var $tags = $('#keywordTags');
-
-		// 初始化已有关键字
-		function initKeywords() {
-			var keywords = $.trim($hidden.val());
-			if (keywords) {
-				var arr = keywords.split(',');
-				for (var i = 0; i < arr.length; i++) {
-					var kw = $.trim(arr[i]);
-					if (kw) {
-						addTag(kw, false);
-					}
-				}
-			}
-		}
-
-		// 添加标签
-		function addTag(keyword, updateHidden) {
-			keyword = $.trim(keyword);
-			if (!keyword)
-				return;
-
-			// 检查是否已存在
-			var exists = false;
-			$tags.find('.keyword-tag').each(function() {
-				if ($(this).data('keyword') === keyword) {
-					exists = true;
-					return false;
-				}
-			});
-			if (exists)
-				return;
-
-			var $tag = $('<span class="badge badge-primary mr-1 mb-1 keyword-tag" style="font-size: 14px; padding: 5px 10px;">'
-					+ '<span class="keyword-text">'
-					+ keyword
-					+ '</span>'
-					+ '<span class="ml-1 keyword-remove" style="cursor: pointer;">&times;</span>'
-					+ '</span>');
-			$tag.data('keyword', keyword);
-			$tags.append($tag);
-
-			if (updateHidden !== false) {
-				syncHiddenField();
-			}
-		}
-
-		// 同步隐藏字段
-		function syncHiddenField() {
-			var keywords = [];
-			$tags.find('.keyword-tag').each(function() {
-				keywords.push($(this).data('keyword'));
-			});
-			$hidden.val(keywords.join(','));
-		}
-
-		// 回车添加标签
-		$input.on('keydown', function(e) {
-			if (e.keyCode === 13) {
-				e.preventDefault();
-				var keyword = $.trim($(this).val());
-				if (keyword) {
-					addTag(keyword);
-					$(this).val('');
-				}
-			}
-		});
-
-		// 点击删除标签
-		$tags.on('click', '.keyword-remove', function() {
-			$(this).closest('.keyword-tag').remove();
-			syncHiddenField();
-		});
-
-		// 页面加载时初始化
-		initKeywords();
-	})();
-
-	// ── 文件上传成功回调（仅编辑模式使用） ──────────────────────────────────
-	function dmsFileUploadHandler(uploader, type, fileInput, result) {
-		if (result && result.data) {
-			// 提示用户新文件将在保存后替换原文件
-			var filePath = result.data;
-			var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-			$('#replaceFileTip').text('已选择新文件：' + fileName + '（保存后替换原文件）').show();
-		}
-	}
-
-	// ── 新增模式：批量上传功能 ──────────────────────────────────
-	(function() {
-		// 检查是否为新增模式
-		if (!$('#multiUploadArea').length) return;
-		
-		// 存储已上传文件信息 [{name, path}]
-		var uploadedFiles = [];
-		// 上传状态标记
-		var isUploading = false;
-		
-		// 点击按钮触发文件选择
-		$('#multiUploadBtn').click(function() {
-			$('#multiFileInput').click();
-		});
-		
-		// 选择文件后处理
-		$('#multiFileInput').change(function() {
-			var files = this.files;
-			var totalCount = uploadedFiles.length + files.length;
-			if (totalCount > 10) {
-				layer.msg('最多上传10个文件', {icon: 2});
-				return;
-			}
-			// 逐个上传
-			isUploading = true;
-			uploadFilesSequentially(files, 0);
-			// 清空 input 以便再次选择
-			$(this).val('');
-		});
-		
-		// 顺序上传文件
-		function uploadFilesSequentially(files, index) {
-			if (index >= files.length) {
-				isUploading = false;
-				return;
-			}
-			var file = files[index];
-			// 检查文件名中点号数量
-			if ((file.name.match(/\./g) || []).length > 1) {
-				layer.msg('【'+ file.name + ' 】文件名不合规，不允许包含"."', {icon: 2, time: 5000});
-				uploadFilesSequentially(files, index + 1);
-				return;
-			}
-			// 检查文件大小 (100MB = 102400KB)
-			if (file.size > 102400 * 1024) {
-				layer.msg(file.name + ' 超过100MB限制', {icon: 2});
-				uploadFilesSequentially(files, index + 1);
-				return;
-			}
-			var formData = new FormData();
-			formData.append('file', file);
-			$('#uploadProgress').text('正在上传 ' + (index + 1) + '/' + files.length + '...');
-			$.ajax({
-				url: actionUrl('/admin/siargo/dms/file/uploadFile'),
-				type: 'POST',
-				data: formData,
-				processData: false,
-				contentType: false,
-				success: function(res) {
-					if (res.state == 'ok' && res.data) {
-						uploadedFiles.push({name: file.name, path: res.data});
-						refreshFileList();
-						syncTempFilePath();
-					} else {
-						layer.msg(file.name + ' 上传失败: ' + (res.msg || '未知错误'), {icon: 2});
-					}
-					uploadFilesSequentially(files, index + 1);
-				},
-				error: function() {
-					layer.msg(file.name + ' 上传失败', {icon: 2});
-					uploadFilesSequentially(files, index + 1);
-				}
-			});
-		}
-		
-		// 刷新文件列表显示
-		function refreshFileList() {
-			var $list = $('#uploadedFileList');
-			$list.empty();
-			for (var i = 0; i < uploadedFiles.length; i++) {
-				var f = uploadedFiles[i];
-				var $item = $('<div class="d-flex align-items-center mb-1">'
-					+ '<i class="fa fa-file mr-2"></i>'
-					+ '<span class="mr-2">' + f.name + '</span>'
-					+ '<button type="button" class="btn btn-sm btn-outline-danger" data-index="' + i + '">'
-					+ '<i class="fa fa-times"></i></button>'
-					+ '</div>');
-				$list.append($item);
-			}
-			$('#uploadProgress').text(uploadedFiles.length > 0 ? '已上传 ' + uploadedFiles.length + ' 个文件' : '');
-		}
-		
-		// 同步隐藏字段
-		function syncTempFilePath() {
-			var paths = [];
-			for (var i = 0; i < uploadedFiles.length; i++) {
-				paths.push(uploadedFiles[i].path);
-			}
-			$('#tempFilePath').val(paths.join(','));
-		}
-		
-		// 删除已上传文件
-		$('#uploadedFileList').on('click', '.btn-outline-danger', function() {
-			var idx = $(this).data('index');
-			var removed = uploadedFiles.splice(idx, 1)[0];
-			// 清理临时文件
-			if (removed && removed.path) {
-				var url = actionUrl('/admin/siargo/dms/file/deleteTempFile?filePath=' + encodeURIComponent(removed.path));
-				$.ajax({ url: url, async: true });
-			}
-			refreshFileList();
-			syncTempFilePath();
-		});
-		
-		// 表单提交前拦截：检查是否仍在上传中
-		window.beforeFormSubmit = function() {
-			if (isUploading) {
-				layer.msg('文件正在上传中，请等待上传完成', {icon: 2});
-				return false;
-			}
-			if (!$('#multiUploadArea').length) {
-				return true;
-			}
-			if ($.trim($('#tempFilePath').val()) === '') {
-				layer.msg('请上传文件', {icon: 2});
-				return false;
-			}
-			return true;
-		};
-	})();
-
-	// ── 页面关闭时清理临时文件 ──────────────────────────────────
-	var _dmsFormSaved = false;
-	var _dmsCleaned = false;
-
-	// 表单提交成功后标记
-	function afterFormSubmit(ret, callback) {
-		_dmsFormSaved = true;
-		if (callback)
-			callback();
-	}
-
-	// 清理临时文件（支持多文件路径）
-	function cleanupTempFiles() {
-		if (_dmsFormSaved || _dmsCleaned)
-			return;
-		var tempPath = $.trim($('#tempFilePath').val());
-		if (!tempPath)
-			return;
-		_dmsCleaned = true;
-		// 支持多路径清理
-		var paths = tempPath.split(',');
-		for (var i = 0; i < paths.length; i++) {
-			var p = $.trim(paths[i]);
-			if (!p) continue;
-			var url = actionUrl('/admin/siargo/dms/file/deleteTempFile?filePath=' + encodeURIComponent(p));
-			if (navigator.sendBeacon) {
-				navigator.sendBeacon(url);
-			} else {
-				$.ajax({ url: url, async: false });
-			}
-		}
-	}
-
-	// 拦截 layer 弹窗关闭
-	$(function() {
-		try {
-			var idx = parent.layer.getFrameIndex(window.name);
-			var $layer = parent.$('#layui-layer' + idx);
-			$layer.find('.layui-layer-close, .layui-layer-btn1').on(
-					'mousedown.dmsCleanup', cleanupTempFiles);
-		} catch (e) {
-			console.warn('无法绑定 layer 关闭事件', e);
-		}
-	});
-
-	// 页面卸载时清理
-	$(window).on('beforeunload', cleanupTempFiles);
+$(function () { SiargoDmsFileForm.init("dmsFileForm_#(pageId)"); });
 </script>
-#include("/_view/_admin/common/_formjs.html",formId="dmsFileForm") #end
+#end

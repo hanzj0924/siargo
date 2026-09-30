@@ -144,6 +144,8 @@ public class ProjectConfig extends JBoltProjectConfig {
 				this.scan("cn.jbolt.admin.siargo.imi");
 				this.scan("cn.jbolt.admin.siargo.qarep");
 				this.scan("cn.jbolt.admin.siargo.supplier");
+                this.scan("cn.jbolt.admin.siargo.prodmodel");
+                this.scan("cn.jbolt.admin.siargo.prodparam");
 			}
 		});
         // Siargo 对外API路由（无登录认证）
@@ -178,6 +180,11 @@ public class ProjectConfig extends JBoltProjectConfig {
 
         // 添加JBoltConfig的访问
         me.addSharedObject("JBoltConfig", new JBoltConfig());
+        //仅选择 application.properties 清单中的本地 CSS/JS，外部资源保持原样。
+        me.addSharedObject("ProjectAssets", new cn.jbolt.common.util.ProjectAssetResolver(
+                java.nio.file.Path.of(com.jfinal.kit.PathKit.getWebRootPath()),
+                com.jfinal.kit.PropKit.get("project_assets.environment_files", ""),
+                JBoltConfig::pdevIsPro));
         // 添加JBoltUserKit的访问
         me.addSharedObject("JBoltUserKit", new JBoltUserKit());
         // 添加JBoltStringUtil的访问

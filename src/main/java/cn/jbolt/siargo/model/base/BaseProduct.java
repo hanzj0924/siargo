@@ -15,11 +15,6 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String ID = "id";
     /**检验报告单ID*/
     public static final String REPORT_ID = "report_id";
-    /**产品类型:
-1传感器, 
-2小流量, 
-3大流量*/
-    public static final String TYPE = "type";
     /**产品型号*/
     public static final String MODEL = "model";
     /**送检数量 (Quantity Submitted for Inspection)*/
@@ -41,7 +36,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 2精度合格, 
 3功能合格, 
 4外观合格, 
-5全部合格,
+5全部合格, 
 6成品检漏*/
     public static final String INSP = "insp";
     /**驳回历史总次数（冗余字段，驳回时+1，简化列表查询）*/
@@ -92,6 +87,8 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
     public static final String LA = "la";
     /**删除原因*/
     public static final String DELETE_DES = "delete_des";
+    /**关联型号系列siargo_prod_model.id*/
+    public static final String SIARGO_PROD_MODEL_ID = "siargo_prod_model_id";
 	/**
 	 * 产品ID
 	 */
@@ -127,25 +124,6 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	}
 
 	/**
-	 * 产品类型:
-1传感器, 
-2小流量, 
-3大流量
-	 */
-	public M setType(java.lang.Integer type) {
-		set("type", type);
-		return (M)this;
-	}
-	
-	/**
-	 * 产品类型:1传感器, 2小流量, 3大流量
-	 */
-	@JBoltField(name="type" ,columnName="type",type="Integer", remark="产品类型:1传感器, 2小流量, 3大流量", required=true, maxLength=10, fixed=0, order=3)
-	public java.lang.Integer getType() {
-		return getInt("type");
-	}
-
-	/**
 	 * 产品型号
 	 */
 	public M setModel(java.lang.String model) {
@@ -156,7 +134,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 产品型号
 	 */
-	@JBoltField(name="model" ,columnName="model",type="String", remark="产品型号", required=false, maxLength=255, fixed=0, order=4)
+	@JBoltField(name="model" ,columnName="model",type="String", remark="产品型号", required=false, maxLength=255, fixed=0, order=3)
 	public java.lang.String getModel() {
 		return getStr("model");
 	}
@@ -172,7 +150,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 送检数量 (Quantity Submitted for Inspection)
 	 */
-	@JBoltField(name="qsi" ,columnName="qsi",type="Integer", remark="送检数量 (Quantity Submitted for Inspection)", required=true, maxLength=10, fixed=0, order=5)
+	@JBoltField(name="qsi" ,columnName="qsi",type="Integer", remark="送检数量 (Quantity Submitted for Inspection)", required=true, maxLength=10, fixed=0, order=4)
 	public java.lang.Integer getQsi() {
 		return getInt("qsi");
 	}
@@ -188,7 +166,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 检验数量 (Quantity Inspected)
 	 */
-	@JBoltField(name="qi" ,columnName="qi",type="Integer", remark="检验数量 (Quantity Inspected)", required=true, maxLength=10, fixed=0, order=6)
+	@JBoltField(name="qi" ,columnName="qi",type="Integer", remark="检验数量 (Quantity Inspected)", required=true, maxLength=10, fixed=0, order=5)
 	public java.lang.Integer getQi() {
 		return getInt("qi");
 	}
@@ -204,7 +182,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 产品编号
 	 */
-	@JBoltField(name="number" ,columnName="number",type="String", remark="产品编号", required=false, maxLength=255, fixed=0, order=7)
+	@JBoltField(name="number" ,columnName="number",type="String", remark="产品编号", required=false, maxLength=255, fixed=0, order=6)
 	public java.lang.String getNumber() {
 		return getStr("number");
 	}
@@ -220,7 +198,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 流量范围(Flow Range)
 	 */
-	@JBoltField(name="flowRange" ,columnName="flow_range",type="String", remark="流量范围(Flow Range)", required=false, maxLength=255, fixed=0, order=8)
+	@JBoltField(name="flowRange" ,columnName="flow_range",type="String", remark="流量范围(Flow Range)", required=false, maxLength=255, fixed=0, order=7)
 	public java.lang.String getFlowRange() {
 		return getStr("flow_range");
 	}
@@ -236,7 +214,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 备注
 	 */
-	@JBoltField(name="des" ,columnName="des",type="String", remark="备注", required=false, maxLength=1000, fixed=0, order=9)
+	@JBoltField(name="des" ,columnName="des",type="String", remark="备注", required=false, maxLength=1000, fixed=0, order=8)
 	public java.lang.String getDes() {
 		return getStr("des");
 	}
@@ -252,7 +230,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 删除时间
 	 */
-	@JBoltField(name="deleteTime" ,columnName="delete_time",type="Date", remark="删除时间", required=false, maxLength=19, fixed=0, order=10)
+	@JBoltField(name="deleteTime" ,columnName="delete_time",type="Date", remark="删除时间", required=false, maxLength=19, fixed=0, order=9)
 	public java.util.Date getDeleteTime() {
 		return getDate("delete_time");
 	}
@@ -268,7 +246,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 有效数据(valid data)
 	 */
-	@JBoltField(name="vd" ,columnName="vd",type="Integer", remark="有效数据(valid data)", required=true, maxLength=10, fixed=0, order=11)
+	@JBoltField(name="vd" ,columnName="vd",type="Integer", remark="有效数据(valid data)", required=true, maxLength=10, fixed=0, order=10)
 	public java.lang.Integer getVd() {
 		return getInt("vd");
 	}
@@ -279,7 +257,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 2精度合格, 
 3功能合格, 
 4外观合格, 
-5全部合格,
+5全部合格, 
 6成品检漏
 	 */
 	public M setInsp(java.lang.Integer insp) {
@@ -288,9 +266,9 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	}
 	
 	/**
-	 * 检验进度(Inspection Progress)：1未开始检验, 2精度合格, 3功能合格, 4外观合格, 5全部合格,6成品检漏
+	 * 检验进度(Inspection Progress)：1未开始检验, 2精度合格, 3功能合格, 4外观合格, 5全部合格, 6成品检漏
 	 */
-	@JBoltField(name="insp" ,columnName="insp",type="Integer", remark="检验进度(Inspection Progress)：1未开始检验, 2精度合格, 3功能合格, 4外观合格, 5全部合格,6成品检漏", required=true, maxLength=3, fixed=0, order=12)
+	@JBoltField(name="insp" ,columnName="insp",type="Integer", remark="检验进度(Inspection Progress)：1未开始检验, 2精度合格, 3功能合格, 4外观合格, 5全部合格, 6成品检漏", required=true, maxLength=3, fixed=0, order=11)
 	public java.lang.Integer getInsp() {
 		return getInt("insp");
 	}
@@ -306,7 +284,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 驳回历史总次数（冗余字段，驳回时+1，简化列表查询）
 	 */
-	@JBoltField(name="rejectCount" ,columnName="reject_count",type="Integer", remark="驳回历史总次数（冗余字段，驳回时+1，简化列表查询）", required=true, maxLength=10, fixed=0, order=13)
+	@JBoltField(name="rejectCount" ,columnName="reject_count",type="Integer", remark="驳回历史总次数（冗余字段，驳回时+1，简化列表查询）", required=true, maxLength=10, fixed=0, order=12)
 	public java.lang.Integer getRejectCount() {
 		return getInt("reject_count");
 	}
@@ -322,7 +300,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 精度检验日期(Accuracy qualified)
 	 */
-	@JBoltField(name="accqTime" ,columnName="accq_time",type="Date", remark="精度检验日期(Accuracy qualified)", required=false, maxLength=19, fixed=0, order=14)
+	@JBoltField(name="accqTime" ,columnName="accq_time",type="Date", remark="精度检验日期(Accuracy qualified)", required=false, maxLength=19, fixed=0, order=13)
 	public java.util.Date getAccqTime() {
 		return getDate("accq_time");
 	}
@@ -338,7 +316,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 功能检验日期(Function qualified)
 	 */
-	@JBoltField(name="funqTime" ,columnName="funq_time",type="Date", remark="功能检验日期(Function qualified)", required=false, maxLength=19, fixed=0, order=15)
+	@JBoltField(name="funqTime" ,columnName="funq_time",type="Date", remark="功能检验日期(Function qualified)", required=false, maxLength=19, fixed=0, order=14)
 	public java.util.Date getFunqTime() {
 		return getDate("funq_time");
 	}
@@ -354,7 +332,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 外观检验日期(Appearance qualified)
 	 */
-	@JBoltField(name="appqTime" ,columnName="appq_time",type="Date", remark="外观检验日期(Appearance qualified)", required=false, maxLength=19, fixed=0, order=16)
+	@JBoltField(name="appqTime" ,columnName="appq_time",type="Date", remark="外观检验日期(Appearance qualified)", required=false, maxLength=19, fixed=0, order=15)
 	public java.util.Date getAppqTime() {
 		return getDate("appq_time");
 	}
@@ -370,7 +348,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 最终审核日期(All qualified)
 	 */
-	@JBoltField(name="allqTime" ,columnName="allq_time",type="Date", remark="最终审核日期(All qualified)", required=false, maxLength=19, fixed=0, order=17)
+	@JBoltField(name="allqTime" ,columnName="allq_time",type="Date", remark="最终审核日期(All qualified)", required=false, maxLength=19, fixed=0, order=16)
 	public java.util.Date getAllqTime() {
 		return getDate("allq_time");
 	}
@@ -386,7 +364,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 精度合格检验人
 	 */
-	@JBoltField(name="accqUid" ,columnName="accq_uid",type="Long", remark="精度合格检验人", required=false, maxLength=19, fixed=0, order=18)
+	@JBoltField(name="accqUid" ,columnName="accq_uid",type="Long", remark="精度合格检验人", required=false, maxLength=19, fixed=0, order=17)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getAccqUid() {
 		return getLong("accq_uid");
@@ -403,7 +381,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 功能合格检验人
 	 */
-	@JBoltField(name="funqUid" ,columnName="funq_uid",type="Long", remark="功能合格检验人", required=false, maxLength=19, fixed=0, order=19)
+	@JBoltField(name="funqUid" ,columnName="funq_uid",type="Long", remark="功能合格检验人", required=false, maxLength=19, fixed=0, order=18)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getFunqUid() {
 		return getLong("funq_uid");
@@ -420,7 +398,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 成品检漏检验人（Leak Test for Finished Products）
 	 */
-	@JBoltField(name="ltUid" ,columnName="lt_uid",type="Long", remark="成品检漏检验人（Leak Test for Finished Products）", required=false, maxLength=19, fixed=0, order=20)
+	@JBoltField(name="ltUid" ,columnName="lt_uid",type="Long", remark="成品检漏检验人（Leak Test for Finished Products）", required=false, maxLength=19, fixed=0, order=19)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getLtUid() {
 		return getLong("lt_uid");
@@ -437,7 +415,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 成品检漏时间
 	 */
-	@JBoltField(name="ltTime" ,columnName="lt_time",type="Date", remark="成品检漏时间", required=false, maxLength=19, fixed=0, order=21)
+	@JBoltField(name="ltTime" ,columnName="lt_time",type="Date", remark="成品检漏时间", required=false, maxLength=19, fixed=0, order=20)
 	public java.util.Date getLtTime() {
 		return getDate("lt_time");
 	}
@@ -453,7 +431,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 成品检漏状态
 	 */
-	@JBoltField(name="ltStatus" ,columnName="lt_status",type="Integer", remark="成品检漏状态", required=false, maxLength=3, fixed=0, order=22)
+	@JBoltField(name="ltStatus" ,columnName="lt_status",type="Integer", remark="成品检漏状态", required=false, maxLength=3, fixed=0, order=21)
 	public java.lang.Integer getLtStatus() {
 		return getInt("lt_status");
 	}
@@ -469,7 +447,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 外观合格检验人
 	 */
-	@JBoltField(name="appqUid" ,columnName="appq_uid",type="Long", remark="外观合格检验人", required=false, maxLength=19, fixed=0, order=23)
+	@JBoltField(name="appqUid" ,columnName="appq_uid",type="Long", remark="外观合格检验人", required=false, maxLength=19, fixed=0, order=22)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getAppqUid() {
 		return getLong("appq_uid");
@@ -486,7 +464,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 最终审核人
 	 */
-	@JBoltField(name="allqUid" ,columnName="allq_uid",type="Long", remark="最终审核人", required=false, maxLength=19, fixed=0, order=24)
+	@JBoltField(name="allqUid" ,columnName="allq_uid",type="Long", remark="最终审核人", required=false, maxLength=19, fixed=0, order=23)
 	@JSONField(serializeUsing= ToStringSerializer.class)
 	public java.lang.Long getAllqUid() {
 		return getLong("allq_uid");
@@ -503,7 +481,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * pdf地址
 	 */
-	@JBoltField(name="pdfstr" ,columnName="pdfstr",type="String", remark="pdf地址", required=false, maxLength=255, fixed=0, order=25)
+	@JBoltField(name="pdfstr" ,columnName="pdfstr",type="String", remark="pdf地址", required=false, maxLength=255, fixed=0, order=24)
 	public java.lang.String getPdfstr() {
 		return getStr("pdfstr");
 	}
@@ -519,7 +497,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * PDF报告单版本号
 	 */
-	@JBoltField(name="pdfver" ,columnName="pdfver",type="String", remark="PDF报告单版本号", required=false, maxLength=10, fixed=0, order=26)
+	@JBoltField(name="pdfver" ,columnName="pdfver",type="String", remark="PDF报告单版本号", required=false, maxLength=10, fixed=0, order=25)
 	public java.lang.String getPdfver() {
 		return getStr("pdfver");
 	}
@@ -535,7 +513,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机最大电流 8v(Complete Unit Current)
 	 */
-	@JBoltField(name="cuc" ,columnName="cuc",type="Double", remark="整机最大电流 8v(Complete Unit Current)", required=false, maxLength=4, fixed=2, order=27)
+	@JBoltField(name="cuc" ,columnName="cuc",type="Double", remark="整机最大电流 8v(Complete Unit Current)", required=false, maxLength=4, fixed=2, order=26)
 	public java.lang.Double getCuc() {
 		return getDouble("cuc");
 	}
@@ -551,7 +529,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流24v
 	 */
-	@JBoltField(name="cucmax" ,columnName="cucmax",type="Double", remark="整机电流24v", required=false, maxLength=4, fixed=2, order=28)
+	@JBoltField(name="cucmax" ,columnName="cucmax",type="Double", remark="整机电流24v", required=false, maxLength=4, fixed=2, order=27)
 	public java.lang.Double getCucmax() {
 		return getDouble("cucmax");
 	}
@@ -567,7 +545,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 整机电流12v
 	 */
-	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流12v", required=false, maxLength=4, fixed=2, order=29)
+	@JBoltField(name="cucmin" ,columnName="cucmin",type="Double", remark="整机电流12v", required=false, maxLength=4, fixed=2, order=28)
 	public java.lang.Double getCucmin() {
 		return getDouble("cucmin");
 	}
@@ -583,7 +561,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 脉冲电压(Pulse Voltage)
 	 */
-	@JBoltField(name="pv" ,columnName="pv",type="Double", remark="脉冲电压(Pulse Voltage)", required=false, maxLength=5, fixed=3, order=30)
+	@JBoltField(name="pv" ,columnName="pv",type="Double", remark="脉冲电压(Pulse Voltage)", required=false, maxLength=5, fixed=3, order=29)
 	public java.lang.Double getPv() {
 		return getDouble("pv");
 	}
@@ -599,7 +577,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 热头电压(Thermal Head Voltage)
 	 */
-	@JBoltField(name="thv" ,columnName="thv",type="Integer", remark="热头电压(Thermal Head Voltage)", required=false, maxLength=10, fixed=0, order=31)
+	@JBoltField(name="thv" ,columnName="thv",type="Integer", remark="热头电压(Thermal Head Voltage)", required=false, maxLength=10, fixed=0, order=30)
 	public java.lang.Integer getThv() {
 		return getInt("thv");
 	}
@@ -615,7 +593,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 零点内码(Zero Point)
 	 */
-	@JBoltField(name="zp" ,columnName="zp",type="Integer", remark="零点内码(Zero Point)", required=false, maxLength=10, fixed=0, order=32)
+	@JBoltField(name="zp" ,columnName="zp",type="Integer", remark="零点内码(Zero Point)", required=false, maxLength=10, fixed=0, order=31)
 	public java.lang.Integer getZp() {
 		return getInt("zp");
 	}
@@ -631,7 +609,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 故障电平(Fault Level)
 	 */
-	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=4, fixed=2, order=33)
+	@JBoltField(name="fl" ,columnName="fl",type="Double", remark="故障电平(Fault Level)", required=false, maxLength=4, fixed=2, order=32)
 	public java.lang.Double getFl() {
 		return getDouble("fl");
 	}
@@ -647,7 +625,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 电池电压(Battery Voltage)
 	 */
-	@JBoltField(name="bv" ,columnName="bv",type="Double", remark="电池电压(Battery Voltage)", required=false, maxLength=5, fixed=4, order=34)
+	@JBoltField(name="bv" ,columnName="bv",type="Double", remark="电池电压(Battery Voltage)", required=false, maxLength=5, fixed=4, order=33)
 	public java.lang.Double getBv() {
 		return getDouble("bv");
 	}
@@ -663,7 +641,7 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 本地地址(Local Address)
 	 */
-	@JBoltField(name="la" ,columnName="la",type="Integer", remark="本地地址(Local Address)", required=false, maxLength=10, fixed=0, order=35)
+	@JBoltField(name="la" ,columnName="la",type="Integer", remark="本地地址(Local Address)", required=false, maxLength=10, fixed=0, order=34)
 	public java.lang.Integer getLa() {
 		return getInt("la");
 	}
@@ -679,9 +657,26 @@ public abstract class BaseProduct<M extends BaseProduct<M>> extends JBoltBaseMod
 	/**
 	 * 删除原因
 	 */
-	@JBoltField(name="deleteDes" ,columnName="delete_des",type="String", remark="删除原因", required=false, maxLength=255, fixed=0, order=36)
+	@JBoltField(name="deleteDes" ,columnName="delete_des",type="String", remark="删除原因", required=false, maxLength=255, fixed=0, order=35)
 	public java.lang.String getDeleteDes() {
 		return getStr("delete_des");
+	}
+
+	/**
+	 * 关联型号系列siargo_prod_model.id
+	 */
+	public M setSiargoProdModelId(java.lang.Long siargoProdModelId) {
+		set("siargo_prod_model_id", siargoProdModelId);
+		return (M)this;
+	}
+	
+	/**
+	 * 关联型号系列siargo_prod_model.id
+	 */
+	@JBoltField(name="siargoProdModelId" ,columnName="siargo_prod_model_id",type="Long", remark="关联型号系列siargo_prod_model.id", required=false, maxLength=19, fixed=0, order=36)
+	@JSONField(serializeUsing= ToStringSerializer.class)
+	public java.lang.Long getSiargoProdModelId() {
+		return getLong("siargo_prod_model_id");
 	}
 
 }

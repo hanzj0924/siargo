@@ -19,15 +19,10 @@ public abstract class BaseQareport<M extends BaseQareport<M>> extends JBoltBaseM
     public static final String CUST_ID = "cust_id";
     /**表单编号(Form Number)*/
     public static final String FORMNUM = "formnum";
-    /**产品类型：0大流量计，1小流量计，2传感器*/
-    public static final String PROD_TYPE = "prod_type";
-    /**报告单类型：0产成品，1返修品*/
+    /**报告单类型：1产成品，2返修品*/
     public static final String REP_TYPE = "rep_type";
-
-
     /**录入时间*/
     public static final String CREATE_TIME = "create_time";
-
 	/**
 	 * 主键ID
 	 */
@@ -107,7 +102,7 @@ public abstract class BaseQareport<M extends BaseQareport<M>> extends JBoltBaseM
 	/**
 	 * 报告单类型：1产成品，2返修品
 	 */
-	@JBoltField(name="repType" ,columnName="rep_type",type="Integer", remark="报告单类型：0产成品，1返修品", required=true, maxLength=3, fixed=0, order=6)
+	@JBoltField(name="repType" ,columnName="rep_type",type="Integer", remark="报告单类型：1产成品，2返修品", required=true, maxLength=3, fixed=0, order=5)
 	public java.lang.Integer getRepType() {
 		return getInt("rep_type");
 	}
@@ -123,11 +118,10 @@ public abstract class BaseQareport<M extends BaseQareport<M>> extends JBoltBaseM
 	/**
 	 * 录入时间
 	 */
-	@JBoltField(name="createTime" ,columnName="create_time",type="Date", remark="录入时间", required=false, maxLength=19, fixed=0, order=7)
+	@JBoltField(name="createTime" ,columnName="create_time",type="Date", remark="录入时间", required=false, maxLength=19, fixed=0, order=6)
 	public java.util.Date getCreateTime() {
 		return getDate("create_time");
 	}
-	
 
 }
 

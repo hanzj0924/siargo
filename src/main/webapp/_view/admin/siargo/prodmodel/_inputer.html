@@ -1,0 +1,94 @@
+#set(pageId=RandomUtil.random(6))
+#set(sid=pageId)
+<div class="jbolt_page pm-inputer-page" data-page-id="#(sid)" data-submit-url="#(submitUrl??)" data-init-handler="SiargoProdModel.init" data-close-handler="SiargoProdModel.close">
+<div class="jbolt_page_content">
+	<!-- 编辑回显数据注入（RCDATA，经 val() 读回，id 全字符串化） -->
+	<textarea id="pmEditDataTxt_#(sid)" class="hidden">#(editDataJson??'')</textarea>
+
+	<form onsubmit="return false;">
+		<section class="pm-form-section pm-basic-section" aria-labelledby="pmBasicTitle_#(sid)">
+			<div class="pm-section-heading">
+				<span class="pm-eyebrow">01 · 基础资料</span>
+				<button type="button" class="btn btn-link pm-section-toggle" aria-expanded="true" aria-controls="pmBasicBody_#(sid)" aria-label="收起产品型号信息"><i class="fa fa-chevron-up" aria-hidden="true"></i> <span>收起</span></button>
+			</div>
+			<div class="pm-section-body" id="pmBasicBody_#(sid)">
+			<div class="pm-basic-grid">
+				<div class="form-group">
+					<label for="pmSeries_#(sid)">产品系列 <span class="pm-mat-required">*</span></label>
+					<input id="pmSeries_#(sid)" name="prodModel.modelSeries" type="text" class="form-control" autocomplete="off" maxlength="50" aria-required="true" aria-describedby="pmSeriesHelp_#(sid)" placeholder="如：FS8000、MF4700"/>
+					<p id="pmSeriesHelp_#(sid)" class="pm-series-help">填写 PDF 目录中的系列名称；仅目录明确列出独立选型方案时，才按分支分别保存。</p>
+				</div>
+				<div class="form-group">
+					<label for="pmProdType_#(sid)">产品类型</label>
+					<select id="pmProdType_#(sid)" name="prodModel.prodType" class="form-control" data-autoload
+							data-url="admin/dictionary/options?key=siargo_prod_type" data-text="=请选择=" data-value=""
+							data-value-attr="sn" data-select="#(prodModel.prodType??)"></select>
+				</div>
+				<div class="form-group">
+					<label for="pmIsActive_#(sid)">状态</label>
+					<select id="pmIsActive_#(sid)" name="prodModel.isActive" class="form-control" data-autoload data-options="启用:1,停用:0" data-select="#(prodModel.isActive??1)"></select>
+				</div>
+			</div>
+			<div class="pm-basic-grid pm-catalog-grid">
+				<div class="form-group">
+					<label for="pmBranchLabel_#(sid)">目录分支名称</label>
+					<input id="pmBranchLabel_#(sid)" name="prodModel.branchLabel" type="text" class="form-control" maxlength="100" placeholder="如：FS8001（非线性）"/>
+					<p class="pm-series-help">填写目录独立选型方案的名称，无目录分支时留空。管径、量程、供电等差异作为参数或规格条件维护。</p>
+				</div>
+				<div class="form-group">
+					<label for="pmCatalogSort_#(sid)">展示顺序</label>
+					<input id="pmCatalogSort_#(sid)" name="prodModel.catalogSort" type="number" class="form-control" min="0" max="999999999" step="1" placeholder="选填，数值小的在前"/>
+				</div>
+			</div>
+			<div class="pm-basic-copy-grid">
+				<div class="form-group">
+					<label for="pmProductIntro_#(sid)">产品简介</label>
+					<textarea id="pmProductIntro_#(sid)" name="prodModel.productIntro" class="form-control" rows="4" maxlength="10000" placeholder="介绍产品用途、测量原理与适用场景"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="pmProductFeatures_#(sid)">产品特点</label>
+					<textarea id="pmProductFeatures_#(sid)" name="prodModel.productFeatures" class="form-control" rows="4" maxlength="10000" placeholder="按行填写产品特点，如测量范围、响应速度、接口与安装方式"></textarea>
+				</div>
+			</div>
+			<div class="form-group mb-0">
+				<label for="pmRemark_#(sid)">备注</label>
+				<input id="pmRemark_#(sid)" name="prodModel.remark" type="text" class="form-control" autocomplete="off" maxlength="200" placeholder="请输入备注（可选）"/>
+			</div>
+			</div>
+		</section>
+	</form>
+
+	<section id="pmInputerArea_#(sid)" class="pm-form-section pm-selection-section" aria-labelledby="pmSelectionTitle_#(sid)">
+		<div class="pm-section-heading">
+				<span class="pm-eyebrow">02 · 型号结构</span>
+			<div class="pm-section-actions">
+				<button type="button" class="btn btn-link pm-section-toggle" aria-expanded="true" aria-controls="pmSelectionBody_#(sid)" aria-label="收起参数种类"><i class="fa fa-chevron-up" aria-hidden="true"></i> <span>收起</span></button>
+			</div>
+		</div>
+
+		<div class="pm-section-body" id="pmSelectionBody_#(sid)">
+		<div id="pmBranches_#(sid)"></div>
+		</div>
+	</section>
+
+	<section class="pm-form-section pm-materials-section" aria-labelledby="pmMaterialsTitle_#(sid)">
+		<div class="pm-section-heading">
+			<span class="pm-eyebrow">03 · 产品资料</span>
+			<button type="button" class="btn btn-link pm-section-toggle" aria-expanded="true" aria-controls="pmMaterialsBody_#(sid)" aria-label="收起产品资料"><i class="fa fa-chevron-up" aria-hidden="true"></i> <span>收起</span></button>
+		</div>
+		<div class="pm-section-body" id="pmMaterialsBody_#(sid)">
+		#if(prodModel.id??)
+		<div class="pm-inputer-materials" data-page-id="#(sid)" data-model-id="#(prodModel.id)">
+			#include("_materials.html",matSid=sid,matModelId=prodModel.id,matHeight=330)
+		</div>
+		#else
+		<div class="pm-mat-empty">
+			<i class="fa fa-folder-open-o" aria-hidden="true"></i>
+			<span>请先保存产品型号，再在编辑页面维护机械尺寸图和技术参数。</span>
+		</div>
+		#end
+		</div>
+	</section>
+
+</div>
+</div>

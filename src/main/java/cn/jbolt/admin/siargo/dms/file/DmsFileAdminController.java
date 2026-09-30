@@ -1,5 +1,7 @@
 package cn.jbolt.admin.siargo.dms.file;
 
+import cn.jbolt.common.storage.SiargoStorage;
+import cn.jbolt.common.storage.SiargoUploadFiles;
 import com.jfinal.aop.Inject;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
@@ -43,14 +45,14 @@ public class DmsFileAdminController extends JBoltBaseController {
 	private DmsFileService service;
 	
 	/** Web 根目录路径 */
-	private static final String webRootPath = PathKit.getWebRootPath();
+
 	/** 允许上传的文件扩展名集合（文档和图片类型） */
 	private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<>(Arrays.asList(
 			"doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",
 			"jpg", "jpeg", "png", "gif", "bmp"
 	));
 	/** 文件上传路径前缀 */
-	private static final String UPLOAD_PATH_PREFIX = "/upload/";
+
 	
 	/**
 	 * 进入文件管理首页
@@ -151,55 +153,23 @@ public class DmsFileAdminController extends JBoltBaseController {
 	 * 临时目录：/upload/siargo/dms/temp/
 	 * @return 临时文件路径JSON
 	 */
-	public void uploadFile() {
-		String tempUploadPath = JBoltUploadFolder.SIARGO_UPLOAD_DMS + "/temp/";
-		UploadFile uploadFile = getFile("file", tempUploadPath);
-		if (uploadFile == null) {
-			renderJsonFail("请选择文件后上传");
-			return;
-		}
-		
-		// 净化文件名：截取路径分隔符后的纯文件名，剔除路径穿越片段
-		String originalFileName = uploadFile.getOriginalFileName();
-		String fileName = sanitizeFileName(StrKit.notBlank(originalFileName) ? originalFileName : uploadFile.getFileName());
-		if (StrKit.isBlank(fileName)) {
-			uploadFile.getFile().delete();
-			renderJsonFail("文件名不合法");
-			return;
-		}
-		
-		// 校验文件类型
-		String extension = getFileExtension(fileName);
-		if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
-			// 删除不允许的文件
-			uploadFile.getFile().delete();
-			renderJsonFail("不支持的文件类型，仅允许: doc, docx, xls, xlsx, ppt, pptx, pdf, jpg, jpeg, png, gif, bmp");
-			return;
-		}
-		
-		// 重命名为净化后的原始文件名，并二次校验目标仍位于临时目录内
-		File currentFile = uploadFile.getFile();
-		File targetFile = new File(currentFile.getParent(), fileName);
-		try {
-			String canonicalParent = currentFile.getParentFile().getCanonicalPath();
-			if (!targetFile.getCanonicalPath().startsWith(canonicalParent + File.separator)) {
-				currentFile.delete();
-				renderJsonFail("文件名不合法");
-				return;
-			}
-		} catch (IOException e) {
-			currentFile.delete();
-			renderJsonFail("路径解析失败");
-			return;
-		}
-		
-		if (!currentFile.renameTo(targetFile)) {
-			targetFile = currentFile;
-		}
-		
-		String tempPath = UPLOAD_PATH_PREFIX + tempUploadPath + targetFile.getName();
-		renderJsonData(tempPath);
-	}
+    public void uploadFile() {
+        SiargoStorage storage = SiargoStorage.forBusiness(SiargoStorage.Business.DMS);
+        try {
+            UploadFile file = getFile("file", SiargoUploadFiles.newUploadDirectory(storage));
+            if (file == null) { renderJsonFail("请选择文件后上传"); return; }
+            String name = SiargoStorage.safeSegment(file.getOriginalFileName());
+            if (!ALLOWED_EXTENSIONS.contains(getFileExtension(name).toLowerCase())) {
+                storage.deleteFile(file.getFile().toPath()); renderJsonFail("不支持的文件类型"); return;
+            }
+            renderJsonData(SiargoUploadFiles.accept(storage, file));
+        } catch (Exception e) { renderJsonFail("上传失败：" + e.getMessage()); }
+    }
+
+    /** 同名覆盖的只读预检；用户拒绝后不执行上传和保存。 */
+    public void checkOverwrite() {
+        renderJson(service.checkOverwrite(getLong("categoryId"), getPara("fileName")));
+    }
 	
 	/**
 	 * 删除临时目录中的文件
@@ -208,40 +178,11 @@ public class DmsFileAdminController extends JBoltBaseController {
 	 * @param filePath 要删除的文件路径
 	 * @return 操作结果JSON
 	 */
-	public void deleteTempFile() {
-		String filePath = getPara("filePath");
-		if (StrKit.isBlank(filePath)) {
-			renderJsonFail("文件路径不能为空");
-			return;
-		}
-		String normalizedPath = filePath.replace("\\", "/");
-		String tempPrefix = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_DMS + "/temp/";
-		if (!normalizedPath.startsWith(tempPrefix)) {
-			renderJsonFail("只能删除临时目录下的文件");
-			return;
-		}
-		File file = new File(webRootPath + normalizedPath);
-		try {
-			String canonicalBase = new File(webRootPath + tempPrefix).getCanonicalPath();
-			String canonicalFile = file.getCanonicalPath();
-			if (!canonicalFile.startsWith(canonicalBase)) {
-				renderJsonFail("只能删除临时目录下的文件");
-				return;
-			}
-		} catch (IOException e) {
-			renderJsonFail("路径解析失败");
-			return;
-		}
-		if (!file.exists()) {
-			renderJsonSuccess("文件不存在，已跳过");
-			return;
-		}
-		if (file.delete()) {
-			renderJsonSuccess("临时文件已删除");
-		} else {
-			renderJsonFail("删除失败，请重试");
-		}
-	}
+    public void deleteTempFile() {
+        String url = getPara("filePath");
+        if (url == null || url.isBlank()) { renderJsonFail("文件路径不能为空"); return; }
+        renderJson(SiargoUploadFiles.delete(SiargoStorage.forBusiness(SiargoStorage.Business.DMS), java.util.List.of(url), true));
+    }
 	
 	/**
 	 * 文件下载
@@ -263,7 +204,9 @@ public class DmsFileAdminController extends JBoltBaseController {
 		}
 		
 		String filePath = dmsFile.getFilePath();
-		File file = new File(webRootPath + filePath);
+		File file;
+        try { file = SiargoStorage.forBusiness(SiargoStorage.Business.DMS).resolveUrl(filePath).toFile(); }
+        catch (IllegalArgumentException e) { renderJsonFail("文件不存在或地址不属于本业务目录"); return; }
 		if (!file.exists()) {
 			renderJsonFail("文件不存在");
 			return;
@@ -336,7 +279,7 @@ public class DmsFileAdminController extends JBoltBaseController {
 		}
 		
 		// 支持多文件：逗号分隔
-		renderJson(service.saveBatch(dmsFileTemplate, keywordsStr, tempFilePath.split(",")));
+		renderJson(service.saveBatch(dmsFileTemplate, keywordsStr, tempFilePath.split(","), getPara("overwriteTokens")));
 	}
 	
 	/**
@@ -348,30 +291,9 @@ public class DmsFileAdminController extends JBoltBaseController {
 	 * @param tempFilePath 新上传的临时文件路径（可选，非空时替换原文件）
 	 * @return 操作结果JSON
 	 */
-	public void update() {
-		DmsFile dmsFile = getModel(DmsFile.class, "dmsFile");
-		String keywordsStr = getPara("keywords");
-		String tempFilePath = getPara("tempFilePath");
-		final Ret[] retHolder = {null};
-		boolean txOk = Db.tx(() -> {
-			retHolder[0] = service.update(dmsFile, keywordsStr, tempFilePath);
-			return retHolder[0].isOk();
-		});
-		if (txOk && retHolder[0] != null) {
-			// 事务提交后删除被替换的旧物理文件
-			String oldFilePath = retHolder[0].getStr("oldFilePath");
-			if (StrKit.notBlank(oldFilePath)) {
-				service.deletePhysicalFiles(Collections.singletonList(oldFilePath));
-			}
-			renderJsonSuccess();
-			return;
-		}
-		if (retHolder[0] != null) {
-			renderJson(retHolder[0]);
-		} else {
-			renderJsonFail("更新失败");
-		}
-	}
+    public void update() {
+        renderJson(service.update(getModel(DmsFile.class, "dmsFile"), getPara("keywords"), getPara("tempFilePath"), getPara("overwriteTokens")));
+    }
 	
 	/**
 	 * 批量删除文件

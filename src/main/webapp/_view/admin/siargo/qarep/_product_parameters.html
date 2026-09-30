@@ -1,0 +1,85 @@
+<div class="fm-card qa-parameter-grid" data-shared-product-parameters>
+<div class="form-group">
+	<label>流量范围</label>
+	<div class="input-group qa-flow-range-control">
+		<select class="form-control" data-autoload
+			data-refresh="true"
+			data-url="admin/dictionary/options?key=siargo_flow_range"
+			name="product.flow_range" data-field="flow_range" data-text="（选填）..."
+			data-value-attr="sn" data-select="#(qapro.sp_flow_range??)"
+			data-notnull="false" data-rule="select"
+			data-select-type="select2">
+		</select>
+		#include("_flow_range_addon.html")
+	</div>
+</div>
+<div class="form-group">
+	<label>电池电压</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false"
+			data-rule="siargo_tofixed_4" class="form-control"
+			placeholder="3.2505-3.3495V" maxlength="6"
+			name="product.bv" data-field="bv" value="#(qapro.sp_bv??)" />
+</div>
+<div class="form-group">
+	<label>故障电平</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false"
+			data-rule="siargo_tofixed_2" class="form-control"
+			placeholder="≧2.7V" maxlength="5" name="product.fl" data-field="fl"
+			value="#(qapro.sp_fl??)" />
+</div>
+<div class="form-group">
+	<label>24V电流</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false"
+			data-rule="siargo_tofixed_2" class="form-control"
+			placeholder="≤0.5mA/10~20mA" maxlength="5"
+			name="product.cucmax" data-field="cucmax" value="#(qapro.sp_cucmax??)" />
+</div>
+<div class="form-group">
+	<label>12V电流</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false"
+			data-rule="siargo_tofixed_2" class="form-control"
+			placeholder="≤0.5mA/10~30mA" maxlength="5"
+			name="product.cucmin" data-field="cucmin" value="#(qapro.sp_cucmin??)" />
+</div>
+<div class="form-group">
+	<label>8V电流</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false"
+			data-rule="siargo_tofixed_2" class="form-control"
+			placeholder="6-24mA" maxlength="5" name="product.cuc" data-field="cuc"
+			value="#(qapro.sp_cuc??)" />
+</div>
+<div class="form-group">
+	<label>脉冲电压</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false"
+			data-rule="siargo_tofixed_3" class="form-control"
+			placeholder="≧2.7V/≧4.75V" maxlength="6"
+			name="product.pv" data-field="pv" value="#(qapro.sp_pv??)" />
+</div>
+<div class="form-group">
+	<label>本地地址</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false" data-rule="pint"
+			class="form-control" placeholder="≤50" maxlength="2"
+			name="product.la" data-field="la" value="#(qapro.sp_la??)" />
+</div>
+<div class="form-group">
+	<label>热头电压</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false" data-rule="pint"
+			class="form-control" placeholder="≤1690" maxlength="4"
+			name="product.thv" data-field="thv" value="#(qapro.sp_thv??)" />
+</div>
+<div class="form-group">
+	<label>零点内码</label>
+		<input type="text" data-with-clearbtn="true"
+			autocomplete="off" data-notnull="false" data-rule="pint"
+			class="form-control" placeholder="≤30" maxlength="2"
+			name="product.zp" data-field="zp" value="#(qapro.sp_zp??)" />
+</div>
+</div>

@@ -6,8 +6,6 @@ import cn.jbolt.core.permission.CheckPermission;
 import cn.jbolt._admin.permission.PermissionKey;
 import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import com.jfinal.core.Path;
-import com.jfinal.aop.Before;
-import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.kit.Ret;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
@@ -70,26 +68,29 @@ public class PdfFolderAdminController extends JBoltBaseController {
   /**
 	* 保存
 	*/
-    @Before(Tx.class)
-	public void save() {
+    public void save() {
 		renderJson(service.save(getModel(PdfFolder.class, "pdfFolder")));
 	}
 	
    /**
 	* 更新
 	*/
-    @Before(Tx.class)
-	public void update() {
+    public void update() {
 		renderJson(service.update(getModel(PdfFolder.class, "pdfFolder")));
 	}
 	
    /**
 	* 批量删除
 	*/
-    @Before(Tx.class)
-	public void deleteByIds() {
-		renderJson(service.deleteByBatchIds(get("ids")));
-	}
+    public void deleteByIds() {
+        final Ret[] result = {null};
+        boolean committed = Db.tx(() -> {
+            result[0] = service.deleteByBatchIds(get("ids"));
+            return result[0] != null && result[0].isOk();
+        });
+        if (committed) service.clearCache();
+        renderJson(committed ? result[0] : Ret.fail("版号删除失败"));
+    }
 
 	// ======================== 版号文件夹管理 ========================
 
@@ -104,7 +105,6 @@ public class PdfFolderAdminController extends JBoltBaseController {
 	}
 
 	/** 创建版号文件夹（从字典联动） */
-	@Before(Tx.class)
 	public void createFolder() {
 		renderJson(service.createVersionFolder(getLong("dictId")));
 	}
@@ -129,7 +129,9 @@ public class PdfFolderAdminController extends JBoltBaseController {
 			return;
 		}
 		// 3. afterCommit: 删除物理目录
-		service.deletePhysicalDirs(dirs);
+		service.clearCache();
+        pdfTemplateService.clearCache();
+        service.deletePhysicalDirs(dirs);
 		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
 	}
 
@@ -141,11 +143,14 @@ public class PdfFolderAdminController extends JBoltBaseController {
 	}
 
 	/** 上传模板文件 */
-	public void upload() {
-		String ver = get("pdfver");
-		com.jfinal.upload.UploadFile file = getFile("file");
-		renderJson(pdfTemplateService.uploadTemplate(ver, file));
-	}
+    public void upload() {
+        try {
+            String ver = get("pdfver");
+            String directory = cn.jbolt.common.storage.SiargoStorage.forReportResources()
+                    .uploadDirectory("imports", java.util.UUID.randomUUID().toString());
+            renderJson(pdfTemplateService.uploadTemplate(ver, getFile("file", directory)));
+        } catch (Exception e) { renderJsonFail("上传失败：" + e.getMessage()); }
+    }
 
 	/** 删除模板文件 */
 	public void deleteFile() {
@@ -159,14 +164,20 @@ public class PdfFolderAdminController extends JBoltBaseController {
 		renderJsonData(pdfTemplateService.paginateRules(get("pdfver"), getPageNumber(), getPageSize()));
 	}
 
+    public void seriesOptions() {
+        String version = getPara("pdfver");
+        if (StrKit.isBlank(version)) { renderJsonFail("请先选择版号"); return; }
+        renderJsonData(pdfTemplateService.seriesOptions(version, getLong("templateId"), getPara("keywords"), getPara("selectedIds")));
+    }
+
 	/** 保存规则（新增/编辑） */
-	@Before(Tx.class)
 	public void saveRule() {
-		renderJson(pdfTemplateService.saveRule(getModel(PdfTemplate.class, "rule")));
+        String[] values = getParaValues("modelIds");
+        String modelIds = values == null ? "" : String.join(",", values);
+		renderJson(pdfTemplateService.saveRule(getModel(PdfTemplate.class, "rule"), modelIds));
 	}
 
 	/** 删除规则 */
-	@Before(Tx.class)
 	public void deleteRule() {
 		renderJson(pdfTemplateService.deleteRule(getLong("id")));
 	}

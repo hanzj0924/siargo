@@ -1,0 +1,32 @@
+<form onsubmit="return false;" id="prodParamTypeForm" action="#(action)" method="post">
+    <input type="hidden" name="prodParamType.id" value="#(prodParamType.id??)"/>
+    <div class="row">
+        <div class="col">
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">种类名称</label>
+                <div class="col">
+                    <input type="text" data-with-clearbtn="true" autocomplete="off" class="form-control"
+                           data-rule="required" placeholder="请输入种类名称"
+                           maxlength="20" name="prodParamType.typeName" value="#(prodParamType.typeName??)"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">种类顺序</label>
+                <div class="col">
+                    <input type="text" readonly="readonly" class="form-control bg-light"
+                           value="#(prodParamType.sortRank?? 0)"/>
+                    <span class="form-text text-secondary">顺序在列表中用 上移/下移 调整</span>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+        </div>
+    </div>
+
+</form>
+#define js()
+<script>
+</script>
+#include("/_view/_admin/common/_formjs.html",formId="prodParamTypeForm")
+#end
+

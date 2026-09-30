@@ -13,7 +13,7 @@ import com.jfinal.plugin.activerecord.Record;
 
 import cn.jbolt.admin.siargo.apicalllog.ApiCallLogService;
 import cn.jbolt.admin.siargo.qarep.QareportService;
-import cn.jbolt.admin.siargo.qarep.QarepConst;
+import cn.jbolt.admin.siargo.qarep.siargoconst.QarepConst;
 import cn.jbolt.core.util.JBoltIpUtil;
 import cn.jbolt.core.api.JBoltApiBaseController;
 import cn.jbolt.core.api.OpenAPI;

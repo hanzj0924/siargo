@@ -1,0 +1,202 @@
+<!-- 产品资料（机械尺寸图 + 技术参数）共享片段：资料按产品型号独立维护 -->
+<!-- 参数：matSid 页面唯一标识，matModelId 产品型号 ID，matHeight 表格高度（可选） -->
+
+<!-- 机械尺寸图行模板 -->
+<textarea class="jb_tpl_box" id="pmDimRowtpl_#(matSid)">
+{@each datas as data,index}
+<tr data-id="${data.id}" data-title="${data.title}" data-image="${data.imagePath}" data-rank="${data.sortRank}" data-remark="${data.remark}">
+	<td>${+index+1}</td>
+	<td><a href="${data.imagePath}" target="_blank" rel="noopener" title="新窗口查看原图"><img class="pm-mat-thumb" src="${data.imagePath}" alt="${data.title}" /></a></td>
+	<td title="${data.title}">${data.title}</td>
+	<td title="${data.remark}">${data.remark}</td>
+	<td>
+		<a href="javascript:void(0)" tooltip data-title="编辑" class="jbolt_table_btn pm-mat-edit"><i class="fa fa-pencil c-primary"></i></a>
+		<a href="admin/siargo/prodmodel/dimensionDelete/${data.id}" data-ajaxbtn data-confirm="确定删除此机械尺寸图？" data-handler="refreshJBoltTable" tooltip data-title="删除" class="jbolt_table_btn"><i class="fa fa-remove c-danger"></i></a>
+	</td>
+</tr>
+{@/each}
+</textarea>
+
+<!-- 技术参数行模板：param_name/param_value/unit/sort_rank/remark 映射为 paramName/paramValue/unit/sortRank/remark -->
+<textarea class="jb_tpl_box" id="pmTechRowtpl_#(matSid)">
+{@each datas as data,index}
+<tr data-id="${data.id}" data-name="${data.paramName}" data-value="${data.paramValue}" data-unit="${data.unit}" data-rank="${data.sortRank}" data-remark="${data.remark}" data-row-key="${data.catalogRowKey ? data.catalogRowKey : ''}" data-cell-key="${data.catalogCellKey ? data.catalogCellKey : ''}" data-column-key="${data.catalogColumnKey ? data.catalogColumnKey : ''}" data-column-label="${data.catalogColumnLabel ? data.catalogColumnLabel : ''}" data-column-sort="${data.catalogColumnSort==null?'':data.catalogColumnSort}">
+	<td>${+index+1}</td>
+	<td title="${data.catalogColumnLabel ? data.catalogColumnLabel : ''}">${data.catalogColumnLabel ? data.catalogColumnLabel : '默认规格'}</td>
+	<td title="${data.paramName}">${data.paramName}</td>
+	<td class="pm-mat-value" title="${data.paramValue}">${data.paramValue}</td>
+	<td>${data.unit}</td>
+	<td title="${data.remark}">${data.remark}</td>
+	<td>
+		<a href="javascript:void(0)" tooltip data-title="编辑" class="jbolt_table_btn pm-mat-edit"><i class="fa fa-pencil c-primary"></i></a>
+		<a href="admin/siargo/prodmodel/technicalDelete/${data.id}" data-ajaxbtn data-confirm="确定删除此技术参数？" data-handler="refreshJBoltTable" tooltip data-title="删除" class="jbolt_table_btn"><i class="fa fa-remove c-danger"></i></a>
+	</td>
+</tr>
+{@/each}
+</textarea>
+
+<div class="row pm-material-grid">
+	<div class="col-lg-6 pm-material-card-col">
+		<section class="pm-material-card" aria-labelledby="pmDimensionTitle_#(matSid)">
+			<div class="pm-material-card-head">
+				<div>
+					<h3 id="pmDimensionTitle_#(matSid)" class="pm-material-card-title">机械尺寸图</h3>
+					<p class="pm-material-card-description">上传并维护当前产品型号的图纸预览、标题、排序和备注。</p>
+				</div>
+				<div class="btn-group pm-mat-actions" role="group" aria-label="dimension-toolbar">
+					<button type="button" class="btn btn-outline-primary btn-sm pm-mat-add" data-kind="dimension"><i class="fa fa-plus"></i> 新增尺寸图</button>
+					<button type="button" onclick="jboltTableRefresh(this)" data-table-id="pmDimTable_#(matSid)" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+				</div>
+			</div>
+			<div class="pm-material-table-wrap">
+				<table id="pmDimTable_#(matSid)" class="jbolt_table table_striped table-center thead_font_normal"
+					data-jbolttable
+					data-ajax="true"
+					data-height="#(matHeight??330)"
+					data-column-resize="true"
+					data-url="admin/siargo/prodmodel/dimensionList?modelId=#(matModelId)"
+					data-rowtpl="pmDimRowtpl_#(matSid)">
+					<thead>
+					<tr>
+						<th data-width="50" data-nochange>序号</th>
+						<th data-width="86" data-nochange>预览</th>
+						<th data-min-width="160">标题</th>
+						<th data-min-width="120">备注</th>
+						<th data-width="80" data-nochange>操作</th>
+					</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</section>
+	</div>
+
+	<div class="col-lg-6 pm-material-card-col">
+		<section class="pm-material-card" aria-labelledby="pmTechnicalTitle_#(matSid)">
+			<div class="pm-material-card-head">
+				<div>
+					<h3 id="pmTechnicalTitle_#(matSid)" class="pm-material-card-title">技术参数</h3>
+					<p class="pm-material-card-description">按产品型号维护参数名称、参数值、单位、排序和备注。</p>
+				</div>
+				<div class="btn-group pm-mat-actions" role="group" aria-label="technical-toolbar">
+					<button type="button" class="btn btn-outline-primary btn-sm pm-mat-add" data-kind="technical"><i class="fa fa-plus"></i> 新增参数</button>
+					<button type="button" onclick="jboltTableRefresh(this)" data-table-id="pmTechTable_#(matSid)" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+				</div>
+			</div>
+			<div class="pm-material-table-wrap">
+				<table id="pmTechTable_#(matSid)" class="jbolt_table table_striped table-center thead_font_normal"
+					data-jbolttable
+					data-ajax="true"
+					data-height="#(matHeight??330)"
+					data-column-resize="true"
+					data-url="admin/siargo/prodmodel/technicalList?modelId=#(matModelId)"
+					data-ajax-success-handler="SiargoProdModelMaterials.technicalLoaded"
+					data-rowtpl="pmTechRowtpl_#(matSid)">
+					<thead>
+					<tr>
+						<th data-width="50" data-nochange>序号</th>
+						<th data-min-width="130">所属规格列</th>
+						<th data-min-width="120">参数名称</th>
+						<th data-min-width="140">参数值</th>
+						<th data-width="80" data-nochange>单位</th>
+						<th data-min-width="120">备注</th>
+						<th data-width="80" data-nochange>操作</th>
+					</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</section>
+	</div>
+</div>
+
+<!-- 独立弹窗表单：打开时移入弹窗，关闭后放回，避免重复生成字段 ID -->
+<div class="pm-mat-editor-store">
+<!-- 机械尺寸图编辑表单 -->
+<div class="pm-mat-panel pm-mat-editor pm-dim-editor" id="pmDimPanel_#(matSid)" data-kind="dimension" role="region" aria-label="机械尺寸图资料">
+	<div class="pm-panel-body">
+		<div class="pm-dim-layout">
+			<div class="pm-dim-visual">
+				<label for="pmDimImage_#(matSid)">尺寸图 <span class="pm-mat-required">*</span></label>
+				<div class="pm-mat-preview" id="pmDimPreview_#(matSid)"></div>
+				<div class="pm-mat-upload">
+					<input type="file" id="pmDimImage_#(matSid)" class="pm-mat-file" accept=".png,.jpg,.jpeg,.gif,.bmp" hidden aria-label="选择尺寸图文件"/>
+					<button type="button" class="btn btn-outline-primary btn-sm" id="pmDimPick_#(matSid)"><i class="fa fa-upload"></i> 选择图片上传</button>
+					<span class="pm-mat-tip-inline">PNG / JPG / JPEG / GIF / BMP，单张不超过 20MB</span>
+				</div>
+			</div>
+			<div class="pm-dim-fields">
+				<div class="form-group">
+					<label for="pmDimTitle_#(matSid)">标题 <span class="pm-mat-required">*</span></label>
+					<input type="text" id="pmDimTitle_#(matSid)" class="form-control" autocomplete="off" maxlength="200" aria-required="true" placeholder="如：FS1015E 外形及接口尺寸"/>
+				</div>
+				<div class="form-group pm-dim-rank">
+					<label for="pmDimRank_#(matSid)">排序 <span class="pm-mat-required">*</span></label>
+					<input type="number" id="pmDimRank_#(matSid)" class="form-control" min="0" step="1" autocomplete="off" aria-required="true" aria-describedby="pmDimRankHint_#(matSid)" placeholder="非负整数"/>
+					<small class="pm-mat-field-hint" id="pmDimRankHint_#(matSid)">数值小的在前</small>
+				</div>
+				<div class="form-group">
+					<label for="pmDimRemark_#(matSid)">备注</label>
+					<textarea id="pmDimRemark_#(matSid)" class="form-control" rows="5" maxlength="500" placeholder="选填，如图纸来源、比例说明"></textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="pm-panel-ft">
+		<button type="button" class="btn btn-primary btn-sm" id="pmDimOk_#(matSid)">保存</button>
+		<button type="button" class="btn btn-outline-secondary btn-sm" id="pmDimCancel_#(matSid)">取消</button>
+	</div>
+</div>
+
+<!-- 技术参数编辑表单 -->
+<div class="pm-mat-panel pm-mat-editor pm-tech-editor" id="pmTechPanel_#(matSid)" data-kind="technical" role="region" aria-label="技术参数资料">
+	<div class="pm-panel-body">
+		<input type="hidden" id="pmTechRowKey_#(matSid)"/>
+		<input type="hidden" id="pmTechCellKey_#(matSid)"/>
+		<div class="pm-tech-meta pm-tech-columns">
+			<div class="form-group">
+				<label for="pmTechColumn_#(matSid)">所属规格列 <span class="pm-mat-required">*</span></label>
+				<select id="pmTechColumn_#(matSid)" class="form-control" aria-required="true"></select>
+			</div>
+			<div class="form-group">
+				<label for="pmTechColumnLabel_#(matSid)">规格列名称</label>
+				<input type="text" id="pmTechColumnLabel_#(matSid)" class="form-control" maxlength="100" placeholder="选填"/>
+			</div>
+			<div class="form-group">
+				<label for="pmTechColumnSort_#(matSid)">列顺序</label>
+				<input type="number" id="pmTechColumnSort_#(matSid)" class="form-control" min="0" max="999999999" step="1" placeholder="选填"/>
+			</div>
+		</div>
+		<p class="pm-mat-field-hint pm-tech-column-hint">名称和列顺序的修改会应用到当前型号的整列参数。</p>
+		<div class="pm-tech-meta">
+			<div class="form-group pm-tech-name">
+				<label for="pmTechName_#(matSid)">参数名 <span class="pm-mat-required">*</span></label>
+				<input type="text" id="pmTechName_#(matSid)" class="form-control" autocomplete="off" maxlength="200" aria-required="true" placeholder="如：流量范围"/>
+				<small class="pm-mat-field-hint">目录已有参数修改名称后将作为独立参数行展示，其他分支不变。</small>
+			</div>
+			<div class="form-group">
+				<label for="pmTechUnit_#(matSid)">单位</label>
+				<input type="text" id="pmTechUnit_#(matSid)" class="form-control" autocomplete="off" maxlength="100" placeholder="如：SLPM"/>
+			</div>
+			<div class="form-group">
+				<label for="pmTechRank_#(matSid)">排序 <span class="pm-mat-required">*</span></label>
+				<input type="number" id="pmTechRank_#(matSid)" class="form-control" min="0" step="1" autocomplete="off" aria-required="true" aria-describedby="pmTechRankHint_#(matSid)" placeholder="非负整数"/>
+				<small class="pm-mat-field-hint" id="pmTechRankHint_#(matSid)">数值小的在前</small>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="pmTechValue_#(matSid)">参数值</label>
+			<textarea id="pmTechValue_#(matSid)" class="form-control pm-tech-value-input" rows="3" maxlength="16000" aria-required="true" placeholder="填写当前规格的参数值，如：0～100"></textarea>
+			<small id="pmTechValueHint_#(matSid)" class="pm-mat-field-hint">普通参数须填写数值；目录已有参数可留空，表示该规格不适用。</small>
+		</div>
+		<div class="form-group">
+			<label for="pmTechRemark_#(matSid)">备注</label>
+			<textarea id="pmTechRemark_#(matSid)" class="form-control" rows="2" maxlength="500" placeholder="选填，如适用条件、测试说明"></textarea>
+		</div>
+	</div>
+	<div class="pm-panel-ft">
+		<button type="button" class="btn btn-primary btn-sm" id="pmTechOk_#(matSid)">保存</button>
+		<button type="button" class="btn btn-outline-secondary btn-sm" id="pmTechCancel_#(matSid)">取消</button>
+	</div>
+</div>
+</div>

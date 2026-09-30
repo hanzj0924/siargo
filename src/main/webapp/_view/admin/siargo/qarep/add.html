@@ -1,28 +1,29 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
 
 #define main()
-<div class="jbolt_page">
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page qa-product-form" data-page-id="#(pageId)" data-form-mode="add" data-init-handler="SiargoQarepForm.init" data-close-handler="SiargoQarepForm.close">
 	<div class="jbolt_page_content">
-		<form onsubmit="return false;" id="qareportForm"
+		<form onsubmit="return false;" id="qareportForm_#(pageId)"
 			action="admin/siargo/qarep/save" method="post">
 			<input type="hidden" name="qareport.id" value="#(qareport.id??)" />
+			<input type="hidden" name="productsJson" value="[]" />
 			<div class="fm-wrap">
-				<!-- 上半部分：左右两栏 -->
-				<div class="row">
-					<!-- 左栏：报告单信息 + 产品信息 -->
-					<div class="col">
+				<div class="qa-add-layout">
+					<!-- 左栏：报告单信息、独立参数区与订单导入 -->
+					<div class="qa-add-sidebar">
 						<!-- 报告单信息 -->
 						<div class="fm-sec">
 							<div class="fm-hd">
 								<span>&#128203; 报告单信息</span><i></i>
 							</div>
-							<div class="fm-card">
-								<div class="form-group row">
-									<label class="col-auto col-form-label">类型</label>
-									<div class="col input-group">
+							<div class="fm-card qa-report-fields">
+								<div class="form-group qa-report-field">
+									<label class="col-form-label">类型</label>
+									<div class="qa-report-control">
 										<select class="form-control" data-autoload
 											name="qareport.rep_type"
 											data-url="admin/dictionary/options?key=siargo_rep_type"
@@ -31,9 +32,11 @@
 											data-select="#(qareport.repType ??)">
 										</select>
 									</div>
-									<label class="col-auto col-form-label">版号</label>
-									<div class="col input-group" style="height:34px;">
-										<select class="form-control" data-autoload style="height:34px;"
+								</div>
+								<div class="form-group qa-report-field">
+									<label class="col-form-label">版号</label>
+									<div class="qa-report-control input-group">
+										<select class="form-control" data-autoload
 											name="product.pdfver"
 											data-url="admin/dictionary/options?key=siargo_pdfver"
 											data-rule="select" data-tips="请选择版号" data-value=""
@@ -41,48 +44,27 @@
 											data-select="#(qareport.pdfver ??)">
 										</select>
 										<span class="input-group-btn">
-											<button class="btn btn-default" type="button" style="height:34px;line-height:1;padding:6px 12px;border:1px solid #ccc;border-left:none;border-top-left-radius:0;border-bottom-left-radius:0;"
-											        data-dialogbtn data-area="1045,725"
-											        data-handler="refreshCustSelect"
-											        data-url="/admin/siargo/qarep/pdffolder">
+											<button class="btn btn-default qa-report-addon" type="button" aria-label="管理报告单版号"
+												data-dialogbtn data-area="1045,725"
+												data-handler="SiargoQarepForm.refreshVersions"
+												data-url="/admin/siargo/qarep/pdffolder">
 												<i class="fa fa-cog"></i>
 											</button>
 										</span>
-
 									</div>
 								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">订单号</label>
-									<div class="col">
+								<div class="form-group qa-report-field">
+									<label class="col-form-label">订单号</label>
+									<div class="qa-report-control">
 										<input type="text" data-with-clearbtn="true"
 											autocomplete="off" class="form-control" data-rule="pint"
 											placeholder="=请填写=" maxlength="10" name="qareport.order_id"
 											value="#(qareport.orderId??)" />
 									</div>
 								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">客户名称</label>
-									<div class="col input-group">
-										<select class="form-control " data-autoload
-											data-refresh="true" data-url="admin/siargo/qarep/getCustName"
-											name="qareport.cust_id" data-text="=请选择=" data-value-attr="id"
-											data-rule="select" data-text-attr="name"
-											data-select="#(qareport.custId ??)"
-											data-select-type="select2" id="custSelect">
-										</select>
-										<span class="input-group-btn">
-											<button class="btn btn-default" type="button" style="height:34px;border:1px solid #ccc;border-left:none;border-top-left-radius:0;border-bottom-left-radius:0;"
-												data-dialogbtn data-area="350,250"
-												data-handler="refreshCustSelect" data-title="新增客户"
-												data-url="admin/siargo/customer/add">
-												<i class="fa fa-plus"></i>
-											</button>
-										</span>
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">检验进度</label>
-									<div class="col input-group">
+								<div class="form-group qa-report-field">
+									<label class="col-form-label">检验进度</label>
+									<div class="qa-report-control">
 										<select class="form-control" data-autoload name="product.insp"
 											data-rule="select" data-tips="请选择检验进度" data-value=""
 											data-options="精度待检:1,精度已检:2"
@@ -90,205 +72,60 @@
 										</select>
 									</div>
 								</div>
-							</div>
-						</div>
-						<!-- 产品信息 -->
-						<div class="fm-sec">
-							<div class="fm-hd">
-								<span>&#128230; 产品信息</span><i></i>
-							</div>
-							<div class="fm-card">
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">产品类型</label>
-									<div class="col input-group">
-										<select class="form-control" data-autoload name="product.type"
-											data-url="admin/dictionary/options?key=siargo_prod_type"
-											data-rule="select" data-tips="请选择产品类型" data-text="=请选择="
-											data-value="" data-value-attr="sn"
-											data-select="#(qareport.prodType ??)"
-											data-beforechange="prodTypeChange">
-										</select>
-									</div>
-									<label class="col-auto col-form-label">成品检漏环节</label>
-									<div class="col input-group">
-										<select class="form-control" data-autoload name="product.lt_status"
-											data-rule="select" data-tips="请选择是否有成品检漏" data-text="=请选择="
-											data-value="" data-options="已检验:1,无:2"
-											data-select="#(qareport.lt_status ??)">
-										</select>
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">送检数量</label>
-									<div class="col">
-										<textarea class="form-control" style="height: 35px"
-											data-rule="required" placeholder="如果多型号，英文逗号分割"
-											data-tips="如果多型号，英文逗号分割" maxlength="500" name="qsis"
-											data-with-clearbtn="true"></textarea>
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">检验数量</label>
-									<div class="col">
-										<textarea class="form-control" style="height: 35px"
-											data-rule="required" placeholder="如果多型号，英文逗号分割"
-											data-tips="如果多型号，英文逗号分割" maxlength="500" name="qis"
-											data-with-clearbtn="true"></textarea>
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">型号</label>
-									<div class="col">
-										<textarea class="form-control" style="height: 50px"
-											data-rule="required" placeholder="如果多型号，英文逗号分割"
-											data-tips="如果多型号，英文逗号分割" maxlength="500" name="models"
-											data-with-clearbtn="true"></textarea>
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">编号</label>
-									<div class="col">
-										<textarea class="form-control" style="height: 50px"
-											data-rule="required" placeholder="如果多型号，英文逗号分割"
-											data-tips="如果多型号，英文逗号分割" maxlength="500" name="numbers"
-											data-with-clearbtn="true"></textarea>
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-2 col-form-label">备注</label>
-									<div class="col">
-										<textarea class="form-control"
-											style="height: 50px; white-space: pre;"
-											placeholder="如果多型号，英文逗号分割" data-tips="如果多型号，英文逗号分割"
-											maxlength="900" name="dess" data-with-clearbtn="true"></textarea>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- 右栏：技术参数 -->
-					<div class="col">
-						<!-- 技术参数 -->
-						<div class="fm-sec">
-							<div class="fm-hd">
-								<span>&#9889; 大流量计参数</span><i></i>
-							</div>
-							<div class="fm-card">
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">流量范围</label>
-									<div class="col input-group">
+								<div class="form-group qa-report-field qa-report-field-wide">
+									<label class="col-form-label">客户名称</label>
+									<div class="qa-report-control input-group">
 										<select class="form-control " data-autoload
-											data-refresh="true"
-											data-url="admin/dictionary/options?key=siargo_flow_range"
-											name="product.flow_range" data-text="（选填）..."
-											data-value-attr="sn" data-select="#(qareport.spFlowRange ??)"
-											data-notnull="false" data-rule="select"
-											data-select-type="select2">
+											data-refresh="true" data-url="admin/siargo/qarep/getCustName"
+											name="qareport.cust_id" data-text="=请选择=" data-value-attr="id"
+											data-rule="select" data-text-attr="name"
+											data-select="#(qareport.custId ??)"
+											data-select-type="select2" id="custSelect_#(pageId)">
 										</select>
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">电池电压</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false"
-											data-rule="siargo_tofixed_4" class="form-control"
-											placeholder="（选填）3.2505-3.3495V" maxlength="6"
-											name="product.bv" value="#(qareport.spBv??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">故障电平</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false"
-											data-rule="siargo_tofixed_2" class="form-control"
-											placeholder="（选填）≧2.7V" maxlength="5" name="product.fl"
-											value="#(qareport.spFl??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">整机电流 24v</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false"
-											data-rule="siargo_tofixed_2" class="form-control"
-											placeholder="（选填）≤0.5mA/10~20mA" maxlength="5"
-											name="product.cucmax" value="#(qareport.spCucmax??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">整机电流 12v</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false"
-											data-rule="siargo_tofixed_2" class="form-control"
-											placeholder="（选填）≤0.5mA/10~30mA" maxlength="5"
-											name="product.cucmin" value="#(qareport.spCucimin??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">整机电流 8v</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false"
-											data-rule="siargo_tofixed_2" class="form-control"
-											placeholder="（选填）6-24mA" maxlength="5" name="product.cuc"
-											value="#(qareport.spCuc??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">脉冲电压</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false"
-											data-rule="siargo_tofixed_3" class="form-control"
-											placeholder="（选填）≧2.7V/≧4.75V" maxlength="6"
-											name="product.pv" value="#(qareport.spPv??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">本地地址</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false" data-rule="pint"
-											class="form-control" placeholder="（选填）≤50" maxlength="2"
-											name="product.la" value="#(qareport.spLa??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">热头电压</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false" data-rule="pint"
-											class="form-control" placeholder="（选填）≤1690" maxlength="4"
-											name="product.thv" value="#(qareport.spThv??)" />
-									</div>
-								</div>
-								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">零点内码</label>
-									<div class="col">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" data-notnull="false" data-rule="pint"
-											class="form-control" placeholder="（选填）≤30" maxlength="2"
-											name="product.zp" value="#(qareport.spZp??)" />
+										<span class="input-group-btn">
+											<button class="btn btn-default qa-report-addon" type="button" aria-label="新增客户"
+												data-dialogbtn data-area="350,250"
+												data-handler="SiargoQarepForm.refreshCustomer" data-title="新增客户"
+												data-url="admin/siargo/customer/add">
+												<i class="fa fa-plus"></i>
+											</button>
+										</span>
 									</div>
 								</div>
 							</div>
+						</div>
+
+						<div class="fm-sec">
+							<div class="fm-hd"><span>&#9889; 大流量计参数</span><i></i></div>
+							#include("_product_parameters.html")
 						</div>
 						<!-- 数据导入 -->
 						<div class="fm-sec">
 							<div class="fm-hd">
 								<span>&#128229; 订单导入</span><i></i>
 							</div>
-							<div class="fm-card" style="display:flex;align-items:center;justify-content:center;padding:16px;gap:10px;">
+							<div class="fm-card qa-order-import">
 								<div class="j_upload_file_box" data-name="file"
 									data-btn-class="btn btn-success" data-placeholder="导入Excel"
 									data-accept="excel" data-maxsize="20480"
 									data-handler="uploadFile"
 									data-url="admin/siargo/qarep/importExcel"
-									data-upload-success-handler="uploadSuccessHandler"></div>
+									data-upload-success-handler="SiargoQarepForm.importSuccess"></div>
+								<p class="help-block" data-order-import-status role="status" aria-live="polite" hidden></p>
+							</div>
+						</div>
+					</div>
+					<!-- 右栏与左栏等高，每个型号独立维护产品信息 -->
+					<div class="qa-add-products">
+						<div class="fm-sec qa-products-panel">
+							<div class="fm-hd"><span>&#128230; 产品信息</span><i></i></div>
+							<div class="fm-card">
+								<div class="prod-scroll">
+									<div data-product-list></div>
+									<template data-product-template>#include("_product_fields.html",separateParameters=true)</template>
+									<div data-product-empty class="prod-empty-tip">暂无产品，点击下方按钮添加</div>
+								</div>
+								<button type="button" class="prod-add-btn align-self-center" data-product-add>+ 添加产品</button>
 							</div>
 						</div>
 					</div>
@@ -296,57 +133,10 @@
 
 			</div>
 		</form>
-		#define js()
-		<script>
-			$(function() {
-				// 页面初始化
-			});
-
-			function refreshCustSelect() {
-				SelectUtil.refresh($('#custSelect'));
-			}
-
-			// 大流量计(sn=3)时，送检数量=检验数量=1
-			function prodTypeChange(selectEl) {
-				var sn = selectEl.val();
-				if (sn === '3') {
-					$('textarea[name="qsis"]').val('1');
-					$('textarea[name="qis"]').val('1');
-				}
-			}
-
-			function uploadSuccessHandler(uploader, type, fileInput, result) {
-				var data = result.data;
-
-				// 填充数据（使用 != null 精确判断，区分 null 和空字符串）
-				if (data.orderId != null) {
-					$('input[name="qareport.order_id"]').val(data.orderId);
-				}
-				if (data.models != null) {
-					$('textarea[name="models"]').val(data.models);
-				}
-				if (data.numbers != null) {
-					$('textarea[name="numbers"]').val(data.numbers);
-				}
-				if (data.qsis != null) {
-					$('textarea[name="qsis"]').val(data.qsis);
-				}
-				if (data.qis != null) {
-					$('textarea[name="qis"]').val(data.qis);
-				}
-				if (data.repType != null) {
-					$('select[name="qareport.rep_type"]').val(data.repType);
-				}
-				if (data.prodType != null) {
-					$('select[name="product.type"]').val(data.prodType);
-					setTimeout(function() {
-						$('select[name="product.type"]').trigger('change');
-					}, 100);
-				}
-			}
-		</script>
-		#include("/_view/_admin/common/_formjs.html",formId="qareportForm")
-		#end
 	</div>
 </div>
+#end
+
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="qareportForm_"+pageId)
 #end

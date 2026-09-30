@@ -1,0 +1,16 @@
+#@jboltLayout()
+#define css()
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
+#end
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page pm-catalog-selection-page" id="prodModelSelection_#(pageId)"
+     data-init-handler="SiargoProdModelSelection.init" data-close-handler="SiargoProdModelSelection.close">
+    <div class="jbolt_page_content pm-catalog-selection-scroll" role="region" aria-label="完整型号描述" tabindex="0">
+        <div class="pm-catalog-selection-sheet">
+            <div class="pm-catalog-selection-content"></div>
+        </div>
+    </div>
+    <script type="application/json" class="pm-catalog-selection-data">#(selectionDataJson??)</script>
+</div>
+#end

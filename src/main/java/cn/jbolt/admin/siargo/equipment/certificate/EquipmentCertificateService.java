@@ -1,5 +1,7 @@
 package cn.jbolt.admin.siargo.equipment.certificate;
 
+import cn.jbolt.common.storage.SiargoStorage;
+import cn.jbolt.common.storage.SiargoUploadFiles;
 import com.jfinal.plugin.activerecord.Page;
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
@@ -33,9 +35,9 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	private final EquipmentCertificate dao=new EquipmentCertificate().dao();
 
 	/** Web 根目录绝对路径 */
-	public static final String webRootPath = PathKit.getWebRootPath();
+	private SiargoStorage storage() { return SiargoStorage.forBusiness(SiargoStorage.Business.EQCERT); }
 	/** 证书图片本地存储路径前缀（统一 "/" 分隔符）*/
-	public static final String localPath = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_EQUIPMENT_CERTIFICATE + "/";
+	
 
 	@Override
 	protected EquipmentCertificate dao() {
@@ -46,7 +48,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * 获取 Web 根目录路径（供 Controller 调用）
 	 */
 	public String getWebRootPath() {
-		return webRootPath;
+		return PathKit.getWebRootPath();
 	}
 		
 	/**
@@ -69,7 +71,12 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 		if(equipmentCertificate==null || isOk(equipmentCertificate.getId())) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		//if(existsName(equipmentCertificate.getName())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+		try {
+            var file = storage().resolveUrl(equipmentCertificate.getStr("image_url"));
+            if (equipmentCertificate.getLong("equipment_id") == null
+                    || !file.startsWith(storage().path(equipmentCertificate.getEquipmentId().toString()))
+                    || !Files.isRegularFile(file)) return fail("证书文件必须已归入对应设备目录");
+        } catch (Exception e) { return fail("证书文件路径无效"); }
 		boolean success=equipmentCertificate.save();
 		if(success) {
 			//添加日志
@@ -90,7 +97,10 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 		//更新时需要判断数据存在
 		EquipmentCertificate dbEquipmentCertificate=findById(equipmentCertificate.getId());
 		if(dbEquipmentCertificate==null) {return fail(JBoltMsg.DATA_NOT_EXIST);}
-		//if(existsName(equipmentCertificate.getName(), equipmentCertificate.getId())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+		// 文件替换只由检校/设备业务入口处理，普通编辑保留文件及归属。
+        equipmentCertificate.set("image_url", dbEquipmentCertificate.getStr("image_url"));
+        equipmentCertificate.set("equipment_id", dbEquipmentCertificate.getLong("equipment_id"));
+        equipmentCertificate.set("comparison_id", dbEquipmentCertificate.getLong("comparison_id"));
 		boolean success=equipmentCertificate.update();
 		if(success) {
 			//添加日志
@@ -190,9 +200,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * @param equipmentId 设备ID
 	 * @param imageUrls 逗号分隔的临时文件相对路径列表
 	 */
-	public void saveCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls) {
-		saveCertificatesForComparison(comparisonId, equipmentId, imageUrls, null, null);
-	}
+
 
 	/**
 	 * 为对比记录保存证书（含证书日期和描述）
@@ -203,57 +211,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * @param certificateDate 证书日期（可为null）
 	 * @param certificateRemark 证书描述（可为null）
 	 */
-	public void saveCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls, String certificateDate, String certificateRemark) {
-		if (notOk(comparisonId) || notOk(equipmentId) || imageUrls == null || imageUrls.trim().isEmpty()) {
-			return;
-		}
-		// 将该设备当前的有效证书更新为无效
-		Db.update("UPDATE siargo_equipment_certificate SET status = 2 WHERE equipment_id = ? AND status = 1", equipmentId);
 
-		List<String> urls = Arrays.stream(imageUrls.split(","))
-				.map(String::trim)
-				.filter(s -> !s.isEmpty())
-				.collect(Collectors.toList());
-
-		String tempPrefix = localPath + "temp/";
-
-		for (String url : urls) {
-			String finalUrl = url;
-			// 判断是否为临时路径，需要移动文件到正式目录
-			if (url.startsWith(tempPrefix)) {
-				try {
-					String safePath = normalizeTempPath(url);
-					File tempFile = new File(webRootPath + safePath);
-					if (!tempFile.exists()) continue;
-
-					String targetDir = localPath + equipmentId + "/";
-					File targetFolder = new File(webRootPath + targetDir);
-					if (!targetFolder.exists()) targetFolder.mkdirs();
-
-					String targetPath = targetDir + tempFile.getName();
-					File targetFile = new File(webRootPath + targetPath);
-					Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					finalUrl = targetPath;
-				} catch (Exception e) {
-					LOG.error("移动证书文件异常: " + url, e);
-					continue; // 单张失败不阻断整体
-				}
-			}
-			// 创建证书记录
-			EquipmentCertificate cert = new EquipmentCertificate();
-			cert.set("comparison_id", comparisonId);
-			cert.set("equipment_id", equipmentId);
-			cert.set("image_url", finalUrl);
-			cert.setStatus(1);
-			if (certificateDate != null && !certificateDate.trim().isEmpty()) {
-				cert.set("certificate_date", certificateDate);
-			}
-			if (certificateRemark != null && !certificateRemark.trim().isEmpty()) {
-				cert.set("remark", certificateRemark);
-			}
-			cert.save();
-		}
-	}
 
 	/**
 	 * 更新对比记录的证书
@@ -262,9 +220,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * @param equipmentId 设备ID
 	 * @param imageUrls 逗号分隔的图片路径
 	 */
-	public void updateCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls) {
-		updateCertificatesForComparison(comparisonId, equipmentId, imageUrls, null, null);
-	}
+
 
 	/**
 	 * 更新对比记录的证书（含证书日期和描述）
@@ -275,29 +231,13 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * @param certificateDate 证书日期（可为null）
 	 * @param certificateRemark 证书描述（可为null）
 	 */
-	public void updateCertificatesForComparison(Long comparisonId, Long equipmentId, String imageUrls, String certificateDate, String certificateRemark) {
-		// 先删除旧证书记录和文件
-		deleteByComparisonId(comparisonId);
-		// 再保存新证书
-		if (isOk(imageUrls)) {
-			saveCertificatesForComparison(comparisonId, equipmentId, imageUrls, certificateDate, certificateRemark);
-		}
-	}
+
 
 	/**
 	 * 删除某对比记录的所有证书（含磁盘文件）
 	 * @param comparisonId 对比记录ID
 	 */
-	public void deleteByComparisonId(Long comparisonId) {
-		if (notOk(comparisonId)) return;
-		List<EquipmentCertificate> certs = findByComparisonId(comparisonId);
-		if (certs != null && !certs.isEmpty()) {
-			for (EquipmentCertificate cert : certs) {
-				deleteCertificateFile(cert.getStr("image_url"));
-			}
-		}
-		Db.delete("DELETE FROM siargo_equipment_certificate WHERE comparison_id = ?", comparisonId);
-	}
+
 
 	// -------------------------------------------------------------------------
 	// 物理文件删除辅助（afterCommit 使用）
@@ -323,7 +263,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 			for (Record row : rows) {
 				String url = row.getStr("image_url");
 				if (url != null && !url.isEmpty() && !url.contains("..")) {
-					paths.add(webRootPath + url);
+					paths.add(storage().resolveUrl(url).toString());
 				}
 			}
 		}
@@ -350,7 +290,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 			for (Record row : rows) {
 				String url = row.getStr("image_url");
 				if (url != null && !url.isEmpty() && !url.contains("..")) {
-					paths.add(webRootPath + url);
+					paths.add(storage().resolveUrl(url).toString());
 				}
 			}
 		}
@@ -361,24 +301,11 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * 批量删除物理文件（供 Controller 在事务提交后调用；带路径穿越二次过滤）
 	 * @param paths 待删除的物理文件绝对路径列表
 	 */
-	public void deletePhysicalFiles(List<String> paths) {
-		if (paths == null) {
-			return;
-		}
-		for (String path : paths) {
-			if (path == null || path.contains("..")) {
-				continue;
-			}
-			try {
-				File file = new File(path);
-				if (file.exists() && file.isFile()) {
-					file.delete();
-				}
-			} catch (Exception e) {
-				LOG.error("删除证书图片文件异常: " + path, e);
-			}
-		}
-	}
+    public void deletePhysicalFiles(List<String> paths) {
+        if (paths == null) return;
+        for (String path : paths) try { storage().deleteFile(java.nio.file.Path.of(path)); }
+        catch (Exception e) { LOG.error("证书文件清理失败：" + path, e); }
+    }
 
 	/**
 	 * 仅删除某对比记录关联的证书记录（不删物理文件，供删除对比记录 afterCommit 流程使用）
@@ -404,60 +331,17 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * @param imageUrls   逗号分隔的临时文件相对路径列表（相对于 webRootPath）
 	 * @return Ret 操作结果
 	 */
-	public Ret saveCertificateImages(Long equipmentId, String imageUrls) {
-		if (notOk(equipmentId) || imageUrls == null || imageUrls.trim().isEmpty()) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-
-		List<String> tempPaths = Arrays.stream(imageUrls.split(","))
-				.map(String::trim)
-				.filter(s -> !s.isEmpty())
-				.collect(Collectors.toList());
-
-		if (tempPaths.isEmpty()) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-
-		List<String> movedFilePaths = new ArrayList<>();
-		final String[] errorMsg = {null};
-
-		boolean txSuccess = Db.tx(() -> {
-			for (int i = 0; i < tempPaths.size(); i++) {
-				String tempPath = tempPaths.get(i);
-				Ret ret;
-				try {
-					// 路径安全校验：禁止路径穿越，强制前缀校验
-					String safePath = normalizeTempPath(tempPath);
-					ret = saveSingleCertificateImage(equipmentId, safePath);
-				} catch (IllegalArgumentException e) {
-					ret = fail("第" + (i + 1) + "张图片路径非法：" + e.getMessage());
-				} catch (Exception e) {
-					ret = fail("保存第" + (i + 1) + "张图片时异常：" + e.getMessage());
-				}
-				if (ret.isFail()) {
-					errorMsg[0] = (String) ret.get("msg");
-					// 删除已移动到目标位置的文件
-					for (String filePath : movedFilePaths) {
-						File f = new File(webRootPath + filePath);
-						if (f.exists()) f.delete();
-					}
-					// 删除当前及剩余的临时文件
-					for (int j = i; j < tempPaths.size(); j++) {
-						File tempFile = new File(webRootPath + tempPaths.get(j));
-						if (tempFile.exists()) tempFile.delete();
-					}
-					return false; // 回滚事务
-				}
-				movedFilePaths.add((String) ret.get("filePath"));
-			}
-			return true; // 提交事务
-		});
-
-		if (!txSuccess) {
-			return fail(errorMsg[0] != null ? errorMsg[0] : "保存失败");
-		}
-		return ret(true);
-	}
+    public Ret saveCertificateImages(Long equipmentId, String imageUrls) {
+        Prepared prepared = null;
+        boolean committed = false;
+        try {
+            prepared = prepare(equipmentId, null, imageUrls, null, null, false);
+            Prepared work = prepared;
+            if (!Db.tx(work::persist)) return work.rollback("证书保存失败");
+            committed = true;
+            return work.committed();
+        } catch (Exception e) { return prepared == null || committed ? fail(e.getMessage()) : prepared.rollback(e.getMessage()); }
+    }
 
 	/**
 	 * 保存单张证书图片（须在事务内调用）。
@@ -469,49 +353,7 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * @param tempPath    临时文件相对路径（相对于 webRootPath）
 	 * @return Ret，成功时携带 filePath（相对路径）
 	 */
-	public Ret saveSingleCertificateImage(Long equipmentId, String tempPath) {
-		File tempFile = new File(webRootPath + tempPath);
-		if (!tempFile.exists() || !tempFile.isFile()) {
-			return fail("临时文件不存在：" + tempPath);
-		}
 
-		// 目标目录：localPath + equipmentId + /
-		String targetDir = localPath + equipmentId + "/";
-		File targetFolder = new File(webRootPath + targetDir);
-		if (!targetFolder.exists()) {
-			targetFolder.mkdirs();
-		}
-
-		String targetPath = targetDir + tempFile.getName();
-		File targetFile = new File(webRootPath + targetPath);
-
-		// ① 先移动文件
-		try {
-			Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return fail("文件移动失败：" + e.getMessage());
-		}
-
-		// ② 再写数据库
-		EquipmentCertificate cert = new EquipmentCertificate();
-		cert.set("equipment_id", equipmentId);
-		cert.set("image_url", targetPath);
-
-		boolean success = cert.save();
-		if (!success) {
-			// 数据库写入失败，回滚文件（移回临时位置）
-			try {
-				Files.move(targetFile.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				targetFile.delete();
-			}
-			return fail("数据保存失败");
-		}
-
-		return ret(true).set("filePath", targetPath);
-	}
 
 	/**
 	 * 校验并规范化临时文件路径，防止路径穿越。
@@ -522,22 +364,9 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * @return 规范化后的安全路径
 	 * @throws IllegalArgumentException 如果路径不合法
 	 */
-	public String normalizeTempPath(String path) {
-		if (path == null || path.trim().isEmpty()) {
-			throw new IllegalArgumentException("文件路径不能为空");
-		}
-		String normalized = path.replace("\\", "/").trim();
-		// 禁止路径穿越
-		if (normalized.contains("..")) {
-			throw new IllegalArgumentException("非法文件路径");
-		}
-		// 必须以证书临时目录前缀开头
-		String prefix = localPath + "temp/";
-		if (!normalized.startsWith(prefix)) {
-			throw new IllegalArgumentException("只能操作证书临时目录下的文件");
-		}
-		return normalized;
-	}
+    public String normalizeTempPath(String path) {
+        return storage().toUrl(SiargoUploadFiles.temp(storage(), path, true));
+    }
 
 	/**
 	 * 获取文件名（不含扩展名）
@@ -560,24 +389,73 @@ public class EquipmentCertificateService extends JBoltBaseService<EquipmentCerti
 	 * 文件不存在时静默跳过，删除失败只记录警告
 	 * @param imageUrl 图片相对路径
 	 */
-	private void deleteCertificateFile(String imageUrl) {
-		if (imageUrl == null || imageUrl.isEmpty()) {
-			return;
-		}
-		try {
-			String physicalPath = webRootPath + imageUrl;
-			File file = new File(physicalPath);
-			if (file.exists() && file.isFile()) {
-				boolean deleted = file.delete();
-				if (deleted) {
-					LOG.info("证书图片删除成功: " + physicalPath);
-				} else {
-					LOG.warn("证书图片删除失败: " + physicalPath);
-				}
-			}
-		} catch (Exception e) {
-			LOG.error("删除证书图片文件异常: " + imageUrl, e);
-		}
-	}
+    private void deleteCertificateFile(String imageUrl) {
+        Ret r = SiargoUploadFiles.delete(storage(), java.util.List.of(imageUrl), false);
+        if (r.isFail()) LOG.error("证书清理失败：" + r.get("failedFiles"));
+    }
 
+
+    /** 文件准备在事务外完成；数据库写入和设备/对比记录共用一个真正的事务。 */
+    public Prepared prepare(Long equipmentId, Long comparisonId, String urls, String date, String remark, boolean replace) throws IOException {
+        if (equipmentId == null || equipmentId <= 0) throw new IOException("设备编号无效");
+        Prepared prepared = new Prepared(equipmentId, comparisonId, replace);
+        try {
+            if (replace && comparisonId != null) {
+                prepared.oldFiles.addAll(findByComparisonId(comparisonId).stream().map(r -> r.getStr("image_url")).toList());
+            }
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            for (String url : (urls == null || urls.isBlank() ? new String[0] : urls.split(","))) {
+                String normalized = url.trim();
+                if (normalized.isEmpty() || !seen.add(normalized)) continue;
+                java.nio.file.Path source = storage().resolveUrl(normalized), target = source;
+                if (!Files.isRegularFile(source)) throw new IOException("证书文件不存在");
+                if (source.startsWith(storage().path("temp"))) {
+                    source = SiargoUploadFiles.temp(storage(), normalized, true);
+                    target = storage().path(String.valueOf(equipmentId), java.util.UUID.randomUUID() + "_" + source.getFileName());
+                    prepared.moves.move(source, target);
+                } else {
+                    if (!prepared.oldFiles.contains(normalized) || !source.startsWith(storage().path(String.valueOf(equipmentId))))
+                        throw new IOException("只能保留当前对比记录已有证书或使用新上传临时文件");
+                }
+                EquipmentCertificate row = new EquipmentCertificate();
+                row.set("equipment_id", equipmentId).set("comparison_id", comparisonId).set("image_url", storage().toUrl(target)).set("status", 1);
+                if (date != null && !date.isBlank()) row.set("certificate_date", date);
+                if (remark != null && !remark.isBlank()) row.set("remark", remark);
+                prepared.rows.add(row);
+            }
+            return prepared;
+        } catch (Exception e) {
+            Ret result = prepared.rollback("证书准备失败：" + e.getMessage());
+            throw new IOException(result.getStr("msg"), e);
+        }
+    }
+
+    public final class Prepared {
+        private final Long equipmentId, comparisonId;
+        private final boolean replace;
+        private final SiargoUploadFiles.Moves moves = new SiargoUploadFiles.Moves(storage());
+        private final List<EquipmentCertificate> rows = new ArrayList<>();
+        private final List<String> oldFiles = new ArrayList<>();
+        private Prepared(Long equipmentId, Long comparisonId, boolean replace) {
+            this.equipmentId = equipmentId; this.comparisonId = comparisonId; this.replace = replace;
+        }
+        public boolean persist() {
+            if (!rows.isEmpty() && comparisonId != null)
+                Db.update("UPDATE siargo_equipment_certificate SET status=2 WHERE equipment_id=? AND status=1", equipmentId);
+            if (replace && comparisonId != null) deleteRecordsByComparisonId(comparisonId);
+            for (EquipmentCertificate row : rows) if (!row.save()) return false;
+            return true;
+        }
+        public Ret rollback(String message) { return moves.rollback(message); }
+        public Ret committed() {
+            List<String> failures = new ArrayList<>();
+            for (String old : oldFiles) {
+                if (rows.stream().anyMatch(row -> java.util.Objects.equals(row.getStr("image_url"), old))) continue;
+                if (Db.queryLong("SELECT COUNT(*) FROM siargo_equipment_certificate WHERE image_url=?", old) > 0) continue;
+                try { storage().deleteFile(storage().resolveUrl(old)); }
+                catch (Exception e) { failures.add(old + "：" + e.getMessage()); }
+            }
+            return Ret.ok().set("cleanupFailures", failures);
+        }
+    }
 }

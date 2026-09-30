@@ -38,15 +38,9 @@
 			<excludes>
 				<exclude>WEB-INF</exclude>
 				<exclude>WEB-INF/web.xml</exclude>
-				<exclude>assets/js/jbolt-admin.js</exclude>
-				<exclude>assets/css/jbolt-admin.css</exclude>
-				<exclude>assets/css/jbolt-mine.css</exclude>
-				<exclude>assets/css/jbolt-wechat-menu.css</exclude>
-				<exclude>assets/css/login.css</exclude>
-				<exclude>assets/js/jbolt-mine.js</exclude>
-				<exclude>assets/js/jbolt-wechat-menu.js</exclude>
-				<exclude>assets/js/login.js</exclude>
-				<exclude>assets/js/relogin.js</exclude>
+				<!-- 技术通知单内容由用户单独复制；排除所有子项，保留空的 dms 目录。 -->
+				<exclude>upload/siargo/dms/**/*</exclude>
+				<!-- 环境资源清单中的源文件与 min 都保留，缺少首选版本时使用另一版本。 -->
 				<exclude>assets/js/docs/**</exclude>
 				<exclude>assets/plugins/jbolt-table/docs/**</exclude>
 				<exclude>assets/plugins/jbolt-table/jbolt-table.js</exclude>

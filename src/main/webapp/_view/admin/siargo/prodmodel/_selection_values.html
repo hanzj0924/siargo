@@ -1,0 +1,16 @@
+#if(selection.values.size() == 0)
+<span class="pmv-selection-note">待补充参数值</span>
+#end
+#for(value : selection.values)
+<span class="pmv-sel-value"><b#if(value.value != null && value.value != value.paramValue) title="型号编码：#escape(value.value)"#end>#if(value.paramValue == "")空白#else#escape(value.paramValue??)#end</b>#if(value.description != null && value.description != "")<span class="pmv-sel-desc">（#(value.description)）</span>#end#if(for.last == false)<em class="pmv-sel-sep">，</em>#end</span>
+#end
+#if(selection.optional??false)
+<p class="pmv-selection-note">可留空</p>
+#end
+#if(selection.allowedCombinations != null && selection.allowedCombinations.size() > 0)
+<p class="pmv-selection-note">允许组合：#for(combination : selection.allowedCombinations)#if(for.first == false)、#end#if(combination.size() == 0)空白#else#for(code : combination)#escape(code??)#end#end#end</p>
+#else
+#if(selection.selection == "multiple")
+<p class="pmv-selection-note">可多选</p>
+#end
+#end

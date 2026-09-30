@@ -1,6 +1,6 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
 #end
 
 #define main()
@@ -101,11 +101,4 @@
 		</table>
 	</div>
 </div>
-#end
-
-#define js()
-<script type="text/javascript">
-$(function(){
-});
-</script>
 #end

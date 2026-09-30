@@ -1,0 +1,74 @@
+<section class="prod-card qa-product-card">
+  <div class="prod-card-hd">
+    <strong class="prod-idx">产品信息</strong>
+    <button type="button" class="btn-remove" data-product-remove aria-label="移除产品">&times;</button>
+  </div>
+  <div class="row">
+    <div class="col-sm-12 form-group">
+      <label>型号系列</label>
+      <select class="form-control qa-series-select" name="product.siargo_prod_model_id" data-field="siargo_prod_model_id"
+              data-autoload data-select-type="select2" data-url="admin/siargo/prodmodel/options"
+              data-text="搜索型号系列、产品类型或分支" data-value-attr="id" data-text-attr="model_series,prodtypename" data-delimiter=" - "
+              data-text-format-handler="SiargoQarepForm.formatSeriesOption"
+              data-rule="select" data-tips="请选择型号系列" data-select="#(qapro.siargo_prod_model_id??)"></select>
+    </div>
+  </div>
+  <p class="help-block qa-series-hint" data-series-hint aria-live="polite"></p>
+  <div class="row qa-product-quantities">
+    <div class="col-sm-3 form-group">
+      <label>送检数量</label>
+      <input type="text" class="form-control" name="product.qsi" data-field="qsi" data-rule="required;pint"
+             data-tips="请输入送检数量" maxlength="9" inputmode="numeric" value="#(qapro.sp_qsi??)"/>
+    </div>
+    <div class="col-sm-3 form-group">
+      <label>检验数量</label>
+      <input type="text" class="form-control" name="product.qi" data-field="qi" data-rule="required;pint"
+             data-tips="请输入检验数量" maxlength="9" inputmode="numeric" value="#(qapro.sp_qi??)"/>
+    </div>
+    <div class="col-sm-6 form-group">
+      <label>成品检漏</label>
+      <select class="form-control" name="product.lt_status" data-field="lt_status" data-rule="select" data-text="=请选择=" data-value="" data-tips="请选择成品检漏状态"
+              data-autoload data-options="已检漏:1,无:2" data-select="#(qapro.lt_status??)"></select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>产品型号</label>
+    <input type="text" class="form-control" name="product.model" data-field="model" data-rule="required"
+           data-tips="请输入产品型号" maxlength="255" value="#(qapro.sp_model??)"/>
+  </div>
+  <div class="form-group">
+    <label>产品编号</label>
+    <input type="text" class="form-control" name="product.number" data-field="number" data-rule="required"
+           data-tips="请输入产品编号" maxlength="255" value="#(qapro.sp_number??)"/>
+  </div>
+  <div class="form-group qa-product-notes">
+    <label>产品备注</label>
+    <textarea class="form-control" name="product.des" data-field="des" maxlength="1000" rows="2" placeholder="选填">#(qapro.sp_des??)</textarea>
+  </div>
+  #if(separateParameters??false)
+  #else
+  <details class="qa-product-params" open#if(!(showLargeMeterParams??true)) hidden#end>
+    <summary>大表参数 <span class="text-muted">按该产品实际检验结果填写</span></summary>
+    <div class="qa-parameter-grid">
+      <div class="form-group">
+        <label>流量范围</label>
+        <div class="input-group qa-flow-range-control">
+        <select class="form-control" name="product.flow_range" data-field="flow_range" data-autoload
+                data-refresh="true" data-select-type="select2" data-url="admin/dictionary/options?key=siargo_flow_range"
+                data-text="选填" data-value-attr="sn" data-select="#(qapro.sp_flow_range??)"></select>
+        #include("_flow_range_addon.html")
+        </div>
+      </div>
+      <div class="form-group"><label>电池电压 / V</label><input class="form-control" name="product.bv" data-field="bv" data-rule="siargo_tofixed_4" data-notnull="false" value="#(qapro.sp_bv??)"/></div>
+      <div class="form-group"><label>24V 电流 / mA</label><input class="form-control" name="product.cucmax" data-field="cucmax" data-rule="siargo_tofixed_2" data-notnull="false" value="#(qapro.sp_cucmax??)"/></div>
+      <div class="form-group"><label>12V 电流 / mA</label><input class="form-control" name="product.cucmin" data-field="cucmin" data-rule="siargo_tofixed_2" data-notnull="false" value="#(qapro.sp_cucmin??)"/></div>
+      <div class="form-group"><label>8V 电流 / mA</label><input class="form-control" name="product.cuc" data-field="cuc" data-rule="siargo_tofixed_2" data-notnull="false" value="#(qapro.sp_cuc??)"/></div>
+      <div class="form-group"><label>脉冲电压 / V</label><input class="form-control" name="product.pv" data-field="pv" data-rule="siargo_tofixed_3" data-notnull="false" value="#(qapro.sp_pv??)"/></div>
+      <div class="form-group"><label>故障电平 / V</label><input class="form-control" name="product.fl" data-field="fl" data-rule="siargo_tofixed_2" data-notnull="false" value="#(qapro.sp_fl??)"/></div>
+      <div class="form-group"><label>本地地址</label><input class="form-control" name="product.la" data-field="la" data-rule="pint" data-notnull="false" value="#(qapro.sp_la??)"/></div>
+      <div class="form-group"><label>热头电压</label><input class="form-control" name="product.thv" data-field="thv" data-rule="pint" data-notnull="false" value="#(qapro.sp_thv??)"/></div>
+      <div class="form-group"><label>零点内码</label><input class="form-control" name="product.zp" data-field="zp" data-rule="pint" data-notnull="false" value="#(qapro.sp_zp??)"/></div>
+    </div>
+  </details>
+  #end
+</section>

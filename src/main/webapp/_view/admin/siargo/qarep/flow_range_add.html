@@ -1,0 +1,26 @@
+#@jboltLayout()
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page" data-init-handler="SiargoDialogForm.focusFirstInput">
+  <div class="jbolt_page_content">
+    <form onsubmit="return false;" id="flowRangeForm_#(pageId)" action="admin/siargo/qarep/saveFlowRange" method="post">
+      <div class="form-group">
+        <label for="flowRangeName_#(pageId)">流量范围名称</label>
+        <input id="flowRangeName_#(pageId)" class="form-control" name="name" type="text"
+               autocomplete="off" data-rule="required" maxlength="40"
+               placeholder="请输入流量范围名称" data-tips="请输入流量范围名称"/>
+      </div>
+      <div class="form-group">
+        <label for="flowRangeSn_#(pageId)">编码</label>
+        <input id="flowRangeSn_#(pageId)" class="form-control" name="sn" type="text"
+               value="#(nextFlowRangeSn??)"
+               autocomplete="off" data-rule="required" maxlength="40"
+               placeholder="请输入流量范围编码" data-tips="请输入流量范围编码"/>
+      </div>
+    </form>
+  </div>
+</div>
+#end
+#define js()
+#include("/_view/_admin/common/_formjs.html",formId="flowRangeForm_"+pageId)
+#end

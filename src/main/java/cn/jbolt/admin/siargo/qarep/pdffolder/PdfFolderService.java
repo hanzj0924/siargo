@@ -1,15 +1,15 @@
 package cn.jbolt.admin.siargo.qarep.pdffolder;
 
 import java.io.File;
+import cn.jbolt.common.storage.SiargoStorage;
+import cn.jbolt.admin.siargo.qarep.uploadImport.PdfStoragePaths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Kv;
-import com.jfinal.kit.Okv;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
@@ -39,7 +39,8 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	private volatile long cacheTimestamp;
 	private final ReentrantLock cacheLock = new ReentrantLock();
 	private static final long CACHE_TTL = 2 * 60 * 60 * 1000L; // 2小时
-	private static final String BATCH_PATH = "/export/LastMonth"; // 上月打包固定路径
+	private SiargoStorage storage() { return SiargoStorage.forReportResources(); }
+	private SiargoStorage exportStorage() { return SiargoStorage.forBusiness(SiargoStorage.Business.QAREP); }
 
 	// ========================== 路径查询方法 ==========================
 
@@ -81,28 +82,9 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 * @param pdfver 版号
 	 * @return 模板路径，未找到返回null
 	 */
-	public String getTemplatePath(String pdfver) {
-		PdfFolder folder = getByVersion(pdfver);
-		return folder != null ? folder.getTemplatePath() : null;
-	}
-
-	/**
-	 * 获取指定版号的日常PDF输出路径
-	 * @param pdfver 版号
-	 * @return 输出路径，未找到返回null
-	 */
-	public String getExportPath(String pdfver) {
-		PdfFolder folder = getByVersion(pdfver);
-		return folder != null ? folder.getExportPath() : null;
-	}
-
-	/**
-	 * 获取上月打包输出路径（固定常量）
-	 * @return 批量输出路径
-	 */
-	public String getBatchPath() {
-		return BATCH_PATH;
-	}
+    public String getTemplatePath(String pdfver) {
+        return getByVersion(pdfver) == null ? null : PdfStoragePaths.url(storage(), "templates", pdfver);
+    }
 
 	/**
 	 * 清空缓存（数据变更后调用）
@@ -119,7 +101,7 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 * @return 版号列表（含dict_id, sn, name, created标记）
 	 */
 	public List<Map<String, Object>> listDictVersions() {
-		String sql = "SELECT d.id AS dict_id, d.sn, d.name, "
+		String sql = "SELECT CAST(d.id AS CHAR) AS dict_id, d.sn, d.name, "
 				+ "(SELECT COUNT(*) FROM siargo_pdf_folder f WHERE f.dict_id = d.id) AS created "
 				+ "FROM jb_dictionary d "
 				+ "WHERE d.type_key = 'siargo_pdfver' AND d.enable = '1' "
@@ -128,7 +110,7 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 		List<Map<String, Object>> result = new ArrayList<>();
 		for (Record r : records) {
 			Map<String, Object> item = new HashMap<>();
-			item.put("dict_id", r.getLong("dict_id"));
+			item.put("dict_id", r.getStr("dict_id"));
 			item.put("sn", r.getStr("sn"));
 			item.put("name", r.getStr("name"));
 			item.put("created", r.getInt("created") > 0);
@@ -162,20 +144,14 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 		}
 
 		// 3. 派生路径
-		String templatePath = "/_view/admin/siargo/pdffolder/reporttemplates/" + name;
-		String exportPath = "/export/" + name;
+		String templatePath = PdfStoragePaths.url(storage(), "templates", name);
+		String exportPath = PdfStoragePaths.url(exportStorage(), "reports", name);
 
-		// 4. 创建物理目录（模板目录）
-		String webRoot = PathKit.getWebRootPath();
-		File templateDir = new File(webRoot + templatePath);
-		if (!templateDir.exists()) {
-			templateDir.mkdirs();
-		}
-		// 创建输出目录
-		File exportDir = new File(webRoot + exportPath);
-		if (!exportDir.exists()) {
-			exportDir.mkdirs();
-		}
+		// 4. 共享存储创建目录；目录失败不能继续写入数据库。
+        try {
+            storage().ensureDirectory(PdfStoragePaths.versionSegments("templates", name));
+            exportStorage().ensureDirectory(PdfStoragePaths.versionSegments("reports", name));
+        } catch (Exception e) { return fail("创建版号目录失败：" + e.getMessage()); }
 
 		// 5. INSERT folder记录（主键由SNOWFLAKE自动生成）
 		PdfFolder folder = new PdfFolder();
@@ -206,24 +182,35 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
 		PdfFolder folder = dao.findFirst(
-				"SELECT * FROM siargo_pdf_folder WHERE pdfver = ?", pdfver);
+				"SELECT * FROM siargo_pdf_folder WHERE pdfver = ? FOR UPDATE", pdfver);
 		if (folder == null) {
 			return fail("版号 [" + pdfver + "] 对应的文件夹不存在");
 		}
-		// 1. 删除关联的模板规则（DB）
-		Db.delete("DELETE FROM siargo_pdf_template WHERE pdfver = ?", pdfver);
+		if (Db.queryLong("SELECT COUNT(*) FROM siargo_product WHERE pdfver=?", pdfver) > 0) {
+            return fail("版号仍被产品引用，不能删除模板及报告目录");
+        }
+        // 不删除含文件目录，避免删除未引用但仍需保留的历史产物。
+        for (String directory : collectFolderDirs(pdfver)) {
+            try (var entries = java.nio.file.Files.walk(checkedFolderDirectory(java.nio.file.Path.of(directory)))) {
+                if (entries.anyMatch(java.nio.file.Files::isRegularFile)) return fail("版号目录仍有文件，请先处理文件");
+            } catch (java.nio.file.NoSuchFileException ignored) {
+            } catch (Exception e) { return fail("目录检查失败：" + e.getMessage()); }
+        }
+		// 模板及其系列关联须从模板管理显式解除，版号删除不得隐式级联。
+        if (Db.queryLong("SELECT COUNT(*) FROM siargo_pdf_template WHERE pdfver=?", pdfver) > 0) {
+            return fail("版号仍有报告模板，请先处理模板及关联系列");
+        }
 		// 2. 删除folder记录（DB）
 		boolean success = folder.delete();
 		if (!success) {
 			return fail("删除版号 [" + pdfver + "] 记录失败");
 		}
-		clearCache();
 		// 3. 物理目录删除由 Controller 在事务提交后统一执行（afterCommit，deletePhysicalDirs）
 		return Ret.ok();
 	}
 
 	/**
-	 * 收集版号对应待删物理目录（模板目录 + 输出目录），供 Controller afterCommit 删除
+	 * 收集版号对应待删物理目录（模板目录 + 新旧输出目录），供 Controller afterCommit 删除
 	 * @param pdfver 版号
 	 * @return 物理目录绝对路径列表
 	 */
@@ -234,16 +221,24 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 		if (folder == null) {
 			return dirs;
 		}
-		String templatePath = folder.getTemplatePath();
-		String exportPath = folder.getExportPath();
+		String templatePath = PdfStoragePaths.url(storage(), "templates", pdfver);
+		String exportPath = PdfStoragePaths.url(exportStorage(), "reports", pdfver);
 		if (templatePath != null && !templatePath.isEmpty()) {
-			dirs.add(PathKit.getWebRootPath() + templatePath);
+			dirs.add(storage().resolveUrl(templatePath).toString());
 		}
 		if (exportPath != null && !exportPath.isEmpty()) {
-			dirs.add(PathKit.getWebRootPath() + exportPath);
+			dirs.add(exportStorage().resolveUrl(exportPath).toString());
 		}
+        // 保留对旧上传目录报告的检查，避免版号删除漏掉未迁移的历史文件。
+        dirs.add(PdfStoragePaths.path(storage(), "reports", pdfver).toString());
 		return dirs;
 	}
+
+    private java.nio.file.Path checkedFolderDirectory(java.nio.file.Path directory) {
+        SiargoStorage exports = exportStorage();
+        return directory.toAbsolutePath().normalize().startsWith(exports.root())
+                ? exports.checked(directory) : storage().checked(directory);
+    }
 
 	/**
 	 * 批量删除物理目录（供 Controller 在事务提交后调用）
@@ -259,40 +254,21 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 			}
 			File dir = new File(fullPath);
 			if (dir.exists() && dir.isDirectory()) {
-				deleteDirRecursively(dir);
+				deleteEmptyDirectory(dir);
 			}
 		}
 	}
 
 	/**
-	 * 删除物理目录（含子文件）
-	 * @param relativePath 相对 webapp 的路径
+	 * 仅删除已校验的空目录
 	 */
-	private void deletePhysicalDir(String relativePath) {
-		if (relativePath == null || relativePath.isEmpty()) return;
-		String fullPath = PathKit.getWebRootPath() + relativePath;
-		File dir = new File(fullPath);
-		if (dir.exists() && dir.isDirectory()) {
-			deleteDirRecursively(dir);
-		}
-	}
-
-	/**
-	 * 递归删除目录
-	 */
-	private void deleteDirRecursively(File dir) {
-		File[] files = dir.listFiles();
-		if (files != null) {
-			for (File f : files) {
-				if (f.isDirectory()) {
-					deleteDirRecursively(f);
-				} else {
-					f.delete();
-				}
-			}
-		}
-		dir.delete();
-	}
+    private void deleteEmptyDirectory(File dir) {
+        try {
+            java.nio.file.Path safe = checkedFolderDirectory(dir.toPath());
+            // 仅删除空目录；不递归删除模板或历史报告。
+            java.nio.file.Files.deleteIfExists(safe);
+        } catch (Exception e) { throw new IllegalStateException("版号目录清理失败：" + e.getMessage(), e); }
+    }
 
 	/**
 	 * 查询所有folder记录（按pdfver升序）
@@ -324,7 +300,9 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 		if (pdfFolder == null || isOk(pdfFolder.getId())) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		boolean success = pdfFolder.save();
+		pdfFolder.set("template_path", PdfStoragePaths.url(storage(), "templates", pdfFolder.getStr("pdfver")));
+        pdfFolder.set("export_path", PdfStoragePaths.url(exportStorage(), "reports", pdfFolder.getStr("pdfver")));
+        boolean success = pdfFolder.save();
 		if (success) {
 			clearCache();
 		}
@@ -344,7 +322,10 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 		if (dbPdfFolder == null) {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
 		}
-		boolean success = pdfFolder.update();
+		if (!java.util.Objects.equals(dbPdfFolder.getStr("pdfver"), pdfFolder.getStr("pdfver"))) return fail("已有版号不能直接改名，请新增版号");
+        pdfFolder.set("template_path", PdfStoragePaths.url(storage(), "templates", pdfFolder.getStr("pdfver")));
+        pdfFolder.set("export_path", PdfStoragePaths.url(exportStorage(), "reports", pdfFolder.getStr("pdfver")));
+        boolean success = pdfFolder.update();
 		if (success) {
 			clearCache();
 		}
@@ -357,9 +338,7 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 * @return
 	 */
 	public Ret deleteByBatchIds(String ids) {
-		Ret ret = deleteByIds(ids, true);
-		clearCache();
-		return ret;
+		return deleteByIds(ids, true);
 	}
 
 	/**
@@ -370,7 +349,6 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 */
 	@Override
 	protected String afterDelete(PdfFolder pdfFolder, Kv kv) {
-		clearCache();
 		return null;
 	}
 
@@ -382,7 +360,9 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 */
 	@Override
 	public String checkCanDelete(PdfFolder pdfFolder, Kv kv) {
-		return checkInUse(pdfFolder, kv);
+		if (Db.queryLong("SELECT COUNT(*) FROM siargo_product WHERE pdfver=?", pdfFolder.getStr("pdfver")) > 0) return "版号仍被产品引用";
+        if (Db.queryLong("SELECT COUNT(*) FROM siargo_pdf_template WHERE pdfver=?", pdfFolder.getStr("pdfver")) > 0) return "版号仍有模板规则";
+        return checkInUse(pdfFolder, kv);
 	}
 
 	/**

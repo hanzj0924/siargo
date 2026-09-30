@@ -15,7 +15,9 @@ public enum ProjectSystemLogTargetType {
 	EQUIPMENTREPAIR("设备维护记录",20003),
 	EQUIPMENTCERTIFICATE("设备证书记录",20004),
 	ApiCallLog("API调用记录",20005),
-	EQUIPMENTCOMPARISON("设备对比记录",20006)
+	EQUIPMENTCOMPARISON("设备对比记录",20006),
+	PROD_TECHNICAL_PARAM("产品技术参数",20007),
+	PROD_MODEL_DIMENSION("产品机械尺寸图",20008)
 	;
 	private String text;
 	private int value;

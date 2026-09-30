@@ -10918,6 +10918,20 @@ var LayerMsgBox={
 			});
 			return index;
 		},
+		/**
+		 * 保存成功后的警告提示，确认或关闭后继续完成表单回调。
+		 */
+		warning:function(msg,handler){
+			this.closeLoadingNow();
+			return layer.alert(msg||"操作完成，请留意提示",{
+				icon:7,
+				end:function(){
+					if(typeof handler==="function"){
+						handler();
+					}
+				}
+			});
+		},
 
 
 		/**
@@ -11117,7 +11131,7 @@ var Ajax={
 							
 						}
 					},
-					error:function(){
+					error:function(xhr){
 						var responseJSON = xhr.responseJSON;
 						var defaultMsg = "网络通讯异常";
 						var msg;

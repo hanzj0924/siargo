@@ -1,0 +1,171 @@
+#@jboltLayout()
+#define css()
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
+#end
+
+#define main()
+#set(pageId=RandomUtil.random(6))
+<div class="jbolt_page pmv-page" data-page-id="#(pageId)">
+    <div class="jbolt_page_content pmv-scroll">
+        <div class="pmv-sheet">
+            <div class="pmv-topbar">矽翔微机电系统有限公司#if(prodTypeName !=
+                "")-#(prodTypeName)#end-#(prodModel.modelSeries??)系列
+            </div>
+            <div class="pmv-hero">
+                <div class="pmv-hero-visual">
+                    <span class="pmv-hero-mosaic"
+                          aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    <span class="pmv-hero-plate"><b>#(prodModel.modelSeries??)</b><em>SERIES</em></span>
+                </div>
+                <div class="pmv-hero-copy">
+                    <p class="pmv-hero-series">#(prodModel.modelSeries??)系列</p>
+                    <h1 class="pmv-hero-title">#(displayTitle)</h1>
+                    #if(branchLabel != null && branchLabel != "")
+                    <p class="pmv-hero-branch">目录分支：#(branchLabel)</p>
+                    #end
+                    #if(prodTypeName != "" && prodTypeName != displayTitle)
+                    <p class="pmv-hero-type">#(prodTypeName)</p>
+                    #end
+                </div>
+            </div>
+
+            #if(introParagraphs != null && introParagraphs.size() > 0)
+            <div class="pmv-band">产品简介</div>
+            <div class="pmv-block">
+                #for(p : introParagraphs)
+                <p class="pmv-intro">#if(for.index == 0)<b class="pmv-intro-lead">#(introLead)</b>#end#(p)</p>
+                #end
+            </div>
+            #end
+
+            #if(features != null && features.size() > 0)
+            <div class="pmv-band">产品特点</div>
+            <div class="pmv-block">
+                <ul class="pmv-features">
+                    #for(f : features)
+                    <li><i class="fa fa-pencil" aria-hidden="true"></i><span>#(f)</span></li>
+                    #end
+                </ul>
+            </div>
+            #end
+
+            #if(dimensions != null && dimensions.size() > 0)
+            <div class="pmv-band">机械尺寸</div>
+            <div class="pmv-block">
+                #for(d : dimensions)
+                <figure class="pmv-dim">
+                    <img class="pmv-dim-img" src="#(d.imagePath)" alt="#(d.title??)"/>
+                    #if(d.title != null && d.title != "")
+                    <figcaption class="pmv-dim-cap">#(d.title)</figcaption>
+                    #end
+                </figure>
+                #end
+            </div>
+            #end
+
+            #if(technicalTable != null && technicalTable.rows.size() > 0)
+            <div class="pmv-band">技术参数</div>
+            <div class="pmv-block">
+                <div class="pmv-technical-scroll" role="region" aria-label="技术参数表格" tabindex="0">
+                    <table class="pmv-table#if(technicalTable.hasGroups) pmv-table-grouped#end#if(technicalTable.hasMultipleColumns??false) pmv-table-multi#end"
+                           aria-label="产品技术参数">
+                        <colgroup>
+                            #if(technicalTable.hasGroups)
+                            <col class="pmv-tech-col-group">
+                            #end
+                            <col class="pmv-tech-col-name">
+                            #if(technicalTable.columns != null && technicalTable.columns.size() > 0)
+                            #for(column : technicalTable.columns)
+                            <col class="pmv-tech-col-value">
+                            #end
+                            #else
+                            <col class="pmv-tech-col-value">
+                            #end
+                            <col class="pmv-tech-col-unit">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th scope="col" class="pmv-col-name" #if(technicalTable.hasGroups) colspan="2" #end>参数
+                            </th>
+                            #if(technicalTable.columns != null && technicalTable.columns.size() > 0)
+                            #for(column : technicalTable.columns)
+                            <th scope="col" class="pmv-col-value">#(column.title??)</th>
+                            #end
+                            #else
+                            <th scope="col" class="pmv-col-value">数值</th>
+                            #end
+                            <th scope="col" class="pmv-col-unit">单位</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        #for(r : technicalTable.rows)
+                        <tr
+                        #if(r.groupFirst??false) class="pmv-group-first"#end>
+                        #if(technicalTable.hasGroups && r.grouped)
+                        #if(r.groupFirst)
+                        <th scope="rowgroup" class="pmv-col-cat" rowspan="#(r.rowSpan)">#(r.category??)</th>
+                        #end
+                        <th scope="row" class="pmv-col-name">#(r.paramName??)</th>
+                        #else
+                        <th scope="row" class="pmv-col-name" #if(technicalTable.hasGroups) colspan="2" #end>
+                            #(r.paramName??)
+                        </th>
+                        #end
+                        #if(technicalTable.columns != null && technicalTable.columns.size() > 0)
+                        #for(cell : r.cells)
+                        <td class="pmv-col-value" colspan="#(cell.colSpan??1)"><span class="pmv-cell-value">#(cell.value??)</span>#if(cell.showUnit??false)<span class="pmv-cell-unit">#(cell.unit??)</span>#end#if(cell.remark != null && cell.remark != "")<small class="pmv-cell-remark">#(cell.remark)</small>#end</td>
+                        #end
+                        #else
+                        <td class="pmv-col-value"><span class="pmv-cell-value">#(r.paramValue??)</span>#if(r.remark != null && r.remark != "")<small class="pmv-cell-remark">#(r.remark)</small>#end</td>
+                        #end
+                        <td class="pmv-col-unit">#(r.unit??)</td>
+                        </tr>
+                        #end
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            #end
+
+            #if(selectionVariants != null && selectionVariants.size() > 0)
+            <div class="pmv-band pmv-band-wide">产品选型</div>
+            <div class="pmv-block">
+                #for(variant : selectionVariants)
+                <section class="pmv-selection-variant">
+                    <h3 class="pmv-format-heading">#if(variant.selections.size() == 0)固定型号#elseif(selectionVariants.size() == 1)选型规则#else规格条件 <span>#if(for.index < 9)0#end#(for.index + 1)</span>#end</h3>
+                    <!-- 型号代码示意图 -->
+                    <div class="pmv-sel-diagram">
+                        #for(token : variant.tokens)
+                        #if(token.kind == "lit")
+                        <span class="pmv-sel-series">#(token.text??)</span>
+                        #else
+                        <span class="pmv-sel-box-pos" title="#(token.typeName??)">#(token.position)</span>
+                        #end
+                        #end
+                    </div>
+                    <!-- 各段位说明表 -->
+                    #if(variant.selections.size() > 0)
+                    <table class="pmv-sel-table" aria-label="型号参数段位">
+                        <tbody>
+                        #for(s : variant.selections)
+                        <tr>
+                            <td class="pmv-sel-td-pos"><span class="pmv-sel-box-sm">#(s.position)</span></td>
+                            <th scope="row" class="pmv-sel-td-name">#(s.typeName??)</th>
+                            <td class="pmv-sel-td-values">
+                                #include("_selection_values.html", selection=s)
+                            </td>
+                        </tr>
+                        #end
+                        </tbody>
+                    </table>
+                    #end
+                </section>
+                #end
+            </div>
+            #end
+
+            <div class="pmv-footer"><span>PRODUCT CATALOG</span></div>
+        </div>
+    </div>
+</div>
+#end

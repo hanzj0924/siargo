@@ -1,5 +1,7 @@
 package cn.jbolt.admin.siargo.imi;
 
+import cn.jbolt.common.storage.SiargoStorage;
+import cn.jbolt.common.storage.SiargoUploadFiles;
 import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.permission.CheckPermission;
@@ -52,72 +54,21 @@ public class ImageAdminController extends JBoltBaseController {
 	 * @param save 是否直接保存标志（前端传参）
 	 * @return JSON 结果，包含临时文件路径列表和文件名列表
 	 */
-	public void uploadImages() {
-		boolean save = getParaToBoolean("save");
-		// 统一使用 "/" 分隔符，避免 Windows 下 File.separator 导致路径不一致
-		String tempUploadPath = JBoltUploadFolder.SIARGO_UPLOAD_IMI + "/temp/";
-		List<UploadFile> files = getFiles(tempUploadPath);
-		if (files == null || files.isEmpty()) {
-			renderJsonFail("请选择图片后上传");
-			return;
-		}
-
-		// 校验文件类型
-		StringBuilder typeErrMsg = new StringBuilder();
-		files.forEach(file -> {
-			if (notImage(file)) {
-				typeErrMsg.append(file.getOriginalFileName()).append(" 不是图片类型文件;");
-			}
-		});
-		if (typeErrMsg.length() > 0) {
-			renderJsonFail(typeErrMsg.toString());
-			return;
-		}
-
-		List<String> retFiles = new ArrayList<>();
-		//收集所有文件名，而非只保留最后一个
-		List<String> fileNames = new ArrayList<>();
-		StringBuilder errormsg = new StringBuilder();
-		String tempPathPrefix = "/upload/";
-
-		for (UploadFile uploadFile : files) {
-			try {
-				String originalFileName = uploadFile.getOriginalFileName();
-				String fileName = (originalFileName != null && !originalFileName.isEmpty())
-						? originalFileName : uploadFile.getFileName();
-
-				File currentFile = uploadFile.getFile();
-				File targetFile  = new File(currentFile.getParent(), fileName);
-
-				if (!currentFile.renameTo(targetFile)) {
-					errormsg.append("文件 ").append(uploadFile.getFileName()).append(" 重命名失败;");
-					// 重命名失败时仍使用原文件名路径，保证后续流程可继续
-					targetFile = currentFile;
-				}
-
-				retFiles.add(tempPathPrefix + tempUploadPath + targetFile.getName());
-				fileNames.add(service.getFileName(targetFile));
-			} catch (Exception e) {
-				errormsg.append("文件 ").append(uploadFile.getFileName())
-						.append(" 处理失败: ").append(e.getMessage()).append(";");
-			}
-		}
-
-		if (retFiles.isEmpty()) {
-			renderJsonFail(errormsg.toString());
-			return;
-		}
-
-		if (save) {
-			renderJsonData(retFiles, errormsg.toString());
-		} else {
-			Map<String, Object> result = new HashMap<>();
-			result.put("filesName", fileNames);   // 返回所有文件名列表
-			result.put("files",     retFiles);
-			result.put("message",   errormsg.toString());
-			renderJsonData(result);
-		}
-	}
+    public void uploadImages() {
+        SiargoStorage storage = SiargoStorage.forBusiness(SiargoStorage.Business.IMI);
+        try {
+            List<UploadFile> files = getFiles(SiargoUploadFiles.newUploadDirectory(storage));
+            if (files == null || files.isEmpty()) { renderJsonFail("请选择图片后上传"); return; }
+            for (UploadFile file : files) if (notImage(file)) { renderJsonFail("仅支持图片文件"); return; }
+            List<String> urls = new ArrayList<>(), names = new ArrayList<>();
+            for (UploadFile file : files) {
+                urls.add(SiargoUploadFiles.accept(storage, file));
+                names.add(service.getFileName(storage.resolveUrl(urls.get(urls.size() - 1)).toFile()));
+            }
+            if (Boolean.TRUE.equals(getParaToBoolean("save"))) renderJsonData(urls, "");
+            else { Map<String,Object> result = new HashMap<>(); result.put("filesName", names); result.put("files", urls); result.put("message", ""); renderJsonData(result); }
+        } catch (Exception e) { renderJsonFail("上传失败：" + e.getMessage()); }
+    }
 
 	/**
 	 * 首页
@@ -184,7 +135,6 @@ public class ImageAdminController extends JBoltBaseController {
 	 * @param image 图片更新数据
 	 * @return JSON 操作结果
 	 */
-	@Before(Tx.class)
 	public void update() {
 		renderJson(service.update(getModel(Image.class, "image")));
 	}
@@ -254,48 +204,11 @@ public class ImageAdminController extends JBoltBaseController {
 	 * @param filePath 待删除的临时文件相对路径
 	 * @return JSON 操作结果
 	 */
-	public void deleteTempFile() {
-		String filePath = getPara("filePath");
-		if (filePath == null || filePath.isEmpty()) {
-			renderJsonFail("文件路径不能为空");
-			return;
-		}
-
-		// 先统一路径分隔符，再做安全校验
-		String normalizedPath = filePath.replace("\\", "/");
-		String tempPrefix = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_IMI + "/temp/";
-
-		// 安全校验：使用 startsWith + canonicalPath 双重检查，防止路径穿越攻击
-		if (!normalizedPath.startsWith(tempPrefix)) {
-			renderJsonFail("只能删除临时目录下的文件");
-			return;
-		}
-		File file = new File(service.getWebRootPath() + normalizedPath);
-		try {
-			String canonicalBase = new File(service.getWebRootPath() + tempPrefix).getCanonicalPath();
-			String canonicalFile = file.getCanonicalPath();
-			if (!canonicalFile.startsWith(canonicalBase)) {
-				renderJsonFail("只能删除临时目录下的文件");
-				return;
-			}
-		} catch (IOException e) {
-			renderJsonFail("路径解析失败");
-			return;
-		}
-
-		if (!file.exists()) {
-			// 文件不存在，可能已被删除或路径错误，直接返回成功
-			renderJsonSuccess("文件不存在，已跳过");
-			return;
-		}
-
-		boolean deleted = file.delete();
-		if (deleted) {
-			renderJsonSuccess("临时文件已删除");
-		} else {
-			renderJsonFail("删除失败，请重试");
-		}
-	}
+    public void deleteTempFile() {
+        String url = getPara("filePath");
+        if (url == null || url.isBlank()) { renderJsonFail("文件路径不能为空"); return; }
+        renderJson(SiargoUploadFiles.delete(SiargoStorage.forBusiness(SiargoStorage.Business.IMI), java.util.List.of(url), true));
+    }
 
 	/**
 	 * 批量删除临时文件。
@@ -305,71 +218,9 @@ public class ImageAdminController extends JBoltBaseController {
 	 * @param filePaths 逗号分隔的临时文件相对路径列表
 	 * @return JSON 操作结果，包含成功/失败计数及失败文件列表
 	 */
-	public void deleteTempFiles() {
-		String filePathsJson = getPara("filePaths");
-		if (filePathsJson == null || filePathsJson.isEmpty()) {
-			renderJsonFail("文件路径不能为空");
-			return;
-		}
-
-		List<String> paths = Arrays.stream(filePathsJson.split(","))
-				.map(String::trim)
-				.filter(s -> !s.isEmpty())
-				.collect(Collectors.toList());
-
-		int successCount = 0;
-		int failCount = 0;
-		List<String> failedFiles = new ArrayList<>();
-
-		for (String filePath : paths) {
-			// 先统一路径分隔符，再做安全校验
-			String normalizedPath = filePath.replace("\\", "/");
-			String tempPrefix = "/upload/" + JBoltUploadFolder.SIARGO_UPLOAD_IMI + "/temp/";
-
-			// 安全校验：使用 startsWith + canonicalPath 双重检查，防止路径穿越攻击
-			if (!normalizedPath.startsWith(tempPrefix)) {
-				failCount++;
-				failedFiles.add(filePath);
-				continue;
-			}
-			File file = new File(service.getWebRootPath() + normalizedPath);
-			try {
-				String canonicalBase = new File(service.getWebRootPath() + tempPrefix).getCanonicalPath();
-				String canonicalFile = file.getCanonicalPath();
-				if (!canonicalFile.startsWith(canonicalBase)) {
-					failCount++;
-					failedFiles.add(filePath);
-					continue;
-				}
-			} catch (IOException e) {
-				failCount++;
-				failedFiles.add(filePath);
-				continue;
-			}
-
-			if (!file.exists()) {
-				// 文件不存在视为删除成功
-				successCount++;
-				continue;
-			}
-
-			if (file.delete()) {
-				successCount++;
-			} else {
-				failCount++;
-				failedFiles.add(filePath);
-			}
-		}
-
-		Map<String, Object> result = new HashMap<>();
-		result.put("successCount", successCount);
-		result.put("failCount", failCount);
-		result.put("failedFiles", failedFiles);
-
-		if (failCount > 0) {
-			renderJsonData(result, "部分文件删除失败");
-		} else {
-			renderJsonData(result, "所有临时文件已删除");
-		}
-	}
+    public void deleteTempFiles() {
+        String urls = getPara("filePaths");
+        renderJson(SiargoUploadFiles.delete(SiargoStorage.forBusiness(SiargoStorage.Business.IMI),
+                urls == null ? java.util.List.of() : java.util.Arrays.stream(urls.split(",")).map(String::trim).filter(v -> !v.isEmpty()).toList(), true));
+    }
 }

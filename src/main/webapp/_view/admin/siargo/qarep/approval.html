@@ -1,9 +1,7 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
-<style>
-	html, body { overflow: hidden !important; }
-</style>
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
+
 #end
 
 #define main()
@@ -36,7 +34,7 @@
 	#set(nextColor = "done")
 #end
 
-<div class="qa-appr-page" data-color="#(curColor)">
+<div class="jbolt_page qa-appr-page" data-page-id="#(pageId)" data-insp="#(insp)" data-init-handler="SiargoQarepApproval.init" data-close-handler="SiargoQarepApproval.close" data-color="#(curColor)">
 
 	<!-- ===== 头部（固定）：阶段流转示意 + 汇总 + 全选 ===== -->
 	<div class="qa-appr-head">
@@ -73,8 +71,7 @@
 		<span class="qa-appr-card-hd-left">
 			<span class="qa-appr-formnum"><i class="fa fa-file-text-o"></i> #(p.formnum??)</span>
 			<span class="qa-appr-badge">#(p.retype_name??)</span>
-			<span class="qa-appr-badge qa-appr-badge-type">#(p.type_name??)</span>
-		</span>
+			</span>
 		<span class="qa-appr-meta">订单号 <b>#(p.order_id??)</b></span>
 		<span class="qa-appr-meta">客户 <b>#(p.sc_name??)</b></span>
 	</div>
@@ -85,6 +82,8 @@
 			<span class="qa-appr-prod-info">
 				<span class="qa-appr-prod-line1">
 					<span class="qa-appr-prod-model">#(p.model??)</span>
+                    <span class="qa-appr-badge qa-appr-badge-type">#(p.type_name??)</span>
+                    <span class="qa-appr-series">#(p.model_series??)</span>
 					#-- 驳回历史角标：有记录即显示，点击弹窗查看全部驳回历史（data-dialogbtn 为 body 级委托，抽屉内可直接触发） --#
 					#if(p.reject_count != null && p.reject_count > 0)
 					<span class="qa-reject-flag" data-dialogbtn data-area="560,520" data-btn="close" data-title="驳回历史" data-url="admin/siargo/qarep/rejectHistory?productId=#(p.id)">驳</span>
@@ -125,139 +124,4 @@
 	</div>
 
 </div>
-#end
-
-#define js()
-<script type="text/javascript">
-var rejectArmed_#(pageId) = false;   // 驳回按钮是否处于「确认驳回」态
-var submitting_#(pageId) = false;    // 提交中防重复标记
-
-// 获取当前勾选的产品 id 数组
-function apprCheckedIds_#(pageId)() {
-	var ids = [];
-	$('#apprBody_#(pageId) .qa-appr-ck:checked').each(function() {
-		ids.push($(this).val());
-	});
-	return ids;
-}
-
-// 勾选状态变化 → 刷新计数、按钮可用态、全选框联动
-function apprRefreshState_#(pageId)() {
-	var n = apprCheckedIds_#(pageId)().length;
-	$('.qa-appr-cnt').text(n);
-	var disabled = (n === 0) || submitting_#(pageId);
-	$('#apprPassBtn_#(pageId)').prop('disabled', disabled);
-	$('#apprRejectBtn_#(pageId)').prop('disabled', disabled);
-	var total = $('#apprBody_#(pageId) .qa-appr-ck').length;
-	$('#apprCheckAll_#(pageId)').prop('checked', total > 0 && n === total);
-}
-
-// 取消驳回：收起原因区，按钮复原
-function cancelReject_#(pageId)() {
-	rejectArmed_#(pageId) = false;
-	$('#apprRejectBox_#(pageId)').removeClass('qa-appr-open');
-	$('#apprRejectBtn_#(pageId)').removeClass('qa-appr-arming');
-	$('#apprRejectTxt_#(pageId)').text('驳回');
-}
-
-// 驳回按钮：第一次点击展开原因区，第二次点击校验并提交
-function onRejectClick_#(pageId)() {
-	if (submitting_#(pageId)) return;
-	var ids = apprCheckedIds_#(pageId)();
-	if (ids.length === 0) {
-		LayerMsgBox.alert('请先勾选要驳回的产品', 2);
-		return;
-	}
-	if (!rejectArmed_#(pageId)) {
-		rejectArmed_#(pageId) = true;
-		$('#apprRejectBox_#(pageId)').addClass('qa-appr-open');
-		$('#apprRejectBtn_#(pageId)').addClass('qa-appr-arming');
-		$('#apprRejectTxt_#(pageId)').text('确认驳回');
-		$('#apprRejectDes_#(pageId)').focus();
-		return;
-	}
-	var reason = $.trim($('#apprRejectDes_#(pageId)').val());
-	if (!reason) {
-		LayerMsgBox.alert('请输入驳回原因', 2);
-		$('#apprRejectDes_#(pageId)').focus();
-		return;
-	}
-	apprSubmit_#(pageId)('admin/siargo/qarep/batchReject',
-		{ ids: ids.join(','), rejectDes: reason },
-		'#apprRejectBtn_#(pageId)');
-}
-
-// 通过按钮：提交 batchInspection 推进到下一阶段
-function onPassClick_#(pageId)() {
-	if (submitting_#(pageId)) return;
-	var ids = apprCheckedIds_#(pageId)();
-	if (ids.length === 0) {
-		LayerMsgBox.alert('请先勾选要审批的产品', 2);
-		return;
-	}
-	apprSubmit_#(pageId)('admin/siargo/qarep/batchInspection',
-		{ insp: #(insp), ids: ids.join(',') },
-		'#apprPassBtn_#(pageId)');
-}
-
-// 统一提交：成功 → 刷新父页表格并关闭抽屉；失败 → 恢复按钮
-function apprSubmit_#(pageId)(url, data, btnSel) {
-	submitting_#(pageId) = true;
-	var $btn = $(btnSel);
-	var oldHtml = $btn.html();
-	$('#apprPassBtn_#(pageId), #apprRejectBtn_#(pageId)').prop('disabled', true);
-	$btn.html('<i class="fa fa-spinner fa-spin"></i> 提交中...');
-	$.ajax({
-		url: url,
-		type: 'post',
-		data: data,
-		success: function(res) {
-			if (res.state == 'ok') {
-				// 跨iframe通知父页刷新（兜底：父页未注册时降级为关闭弹窗）
-				try {
-					if (parent && parent.window._qarepRefresh) { parent.window._qarepRefresh(); }
-				} catch(e) { console.warn('_qarepRefresh调用失败，将关闭弹窗', e); }
-				LayerMsgBox.success('操作成功', 600, function(){
-					if (parent && parent.JBoltLayerUtil) { parent.JBoltLayerUtil.close(true); }
-				});
-			} else {
-				submitting_#(pageId) = false;
-				$btn.html(oldHtml);
-				apprRefreshState_#(pageId)();
-				LayerMsgBox.alert(res.msg || '操作失败', 2);
-			}
-		},
-		error: function() {
-			submitting_#(pageId) = false;
-			$btn.html(oldHtml);
-			apprRefreshState_#(pageId)();
-			LayerMsgBox.error('请求失败，请重试');
-		}
-	});
-}
-
-$(function() {
-	// 头部汇总：N = 产品行数，M = 报告单卡片数（按 formnum 分组后）
-	$('#apprTotalN_#(pageId)').text($('#apprBody_#(pageId) .qa-appr-ck').length);
-	$('#apprTotalM_#(pageId)').text($('#apprBody_#(pageId) .qa-appr-card').length);
-
-	// 单个产品勾选：切换行选中态竖条
-	$('#apprBody_#(pageId)').on('change', '.qa-appr-ck', function() {
-		$(this).closest('.qa-appr-prod').toggleClass('qa-appr-prod-on', this.checked);
-		apprRefreshState_#(pageId)();
-	});
-
-	// 全选/全不选
-	$('#apprCheckAll_#(pageId)').on('change', function() {
-		var on = this.checked;
-		$('#apprBody_#(pageId) .qa-appr-ck').each(function() {
-			this.checked = on;
-			$(this).closest('.qa-appr-prod').toggleClass('qa-appr-prod-on', on);
-		});
-		apprRefreshState_#(pageId)();
-	});
-
-	apprRefreshState_#(pageId)();
-});
-</script>
 #end

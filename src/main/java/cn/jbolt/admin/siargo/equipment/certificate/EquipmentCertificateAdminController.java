@@ -1,5 +1,7 @@
 package cn.jbolt.admin.siargo.equipment.certificate;
 
+import cn.jbolt.common.storage.SiargoStorage;
+import cn.jbolt.common.storage.SiargoUploadFiles;
 import com.jfinal.aop.Inject;
 import cn.jbolt.core.controller.base.JBoltBaseController;
 import cn.jbolt.core.permission.CheckPermission;
@@ -43,49 +45,20 @@ public class EquipmentCertificateAdminController extends JBoltBaseController {
 	/**
 	 * 上传证书图片到临时目录（由记录表单调用）
 	 */
-	public void uploadImages() {
-		String tempUploadPath = JBoltUploadFolder.SIARGO_UPLOAD_EQUIPMENT_CERTIFICATE + "/temp/";
-		List<UploadFile> files = getFiles(tempUploadPath);
-		if (files == null || files.isEmpty()) {
-			renderJsonFail("请选择图片后上传");
-			return;
-		}
-		StringBuilder typeErrMsg = new StringBuilder();
-		files.forEach(file -> {
-			if (notImage(file)) {
-				typeErrMsg.append(file.getOriginalFileName()).append(" 不是图片类型文件;");
-			}
-		});
-		if (typeErrMsg.length() > 0) {
-			renderJsonFail(typeErrMsg.toString());
-			return;
-		}
-		List<String> retFiles = new ArrayList<>();
-		StringBuilder errormsg = new StringBuilder();
-		String tempPathPrefix = "/upload/";
-		for (UploadFile uploadFile : files) {
-			try {
-				String originalFileName = uploadFile.getOriginalFileName();
-				String fileName = (originalFileName != null && !originalFileName.isEmpty())
-						? originalFileName : uploadFile.getFileName();
-				File currentFile = uploadFile.getFile();
-				File targetFile = new File(currentFile.getParent(), fileName);
-				if (!currentFile.renameTo(targetFile)) {
-					errormsg.append("文件 ").append(uploadFile.getFileName()).append(" 重命名失败;");
-					targetFile = currentFile;
-				}
-				retFiles.add(tempPathPrefix + tempUploadPath + targetFile.getName());
-			} catch (Exception e) {
-				errormsg.append("文件 ").append(uploadFile.getFileName())
-						.append(" 处理失败: ").append(e.getMessage()).append(";");
-			}
-		}
-		if (retFiles.isEmpty()) {
-			renderJsonFail(errormsg.toString());
-			return;
-		}
-		renderJsonData(retFiles, errormsg.toString());
-	}
+    public void uploadImages() {
+        SiargoStorage storage = SiargoStorage.forBusiness(SiargoStorage.Business.EQCERT);
+        try {
+            List<UploadFile> files = getFiles(SiargoUploadFiles.newUploadDirectory(storage));
+            if (files == null || files.isEmpty()) { renderJsonFail("请选择图片后上传"); return; }
+            for (UploadFile file : files) if (notImage(file)) { renderJsonFail("仅支持图片文件"); return; }
+            List<String> urls = new ArrayList<>(), names = new ArrayList<>();
+            for (UploadFile file : files) {
+                urls.add(SiargoUploadFiles.accept(storage, file));
+                names.add(service.getFileName(storage.resolveUrl(urls.get(urls.size() - 1)).toFile()));
+            }
+            renderJsonData(urls, "");
+        } catch (Exception e) { renderJsonFail("上传失败：" + e.getMessage()); }
+    }
 
 	/**
 	 * 按设备ID查看证书（设备列表"查看"按钮调用）
@@ -161,29 +134,10 @@ public class EquipmentCertificateAdminController extends JBoltBaseController {
 	/**
 	 * 批量删除临时文件（取消上传或关闭弹窗时由前端调用）
 	 */
-	public void deleteTempFiles() {
-		String filePaths = get("filePaths");
-		if (filePaths == null || filePaths.trim().isEmpty()) {
-			renderJsonSuccess();
-			return;
-		}
-		String webRootPath = service.getWebRootPath();
-		String[] paths = filePaths.split(",");
-		for (String path : paths) {
-			path = path.trim();
-			if (path.isEmpty()) continue;
-			// 安全校验：只允许删除临时目录下的文件
-			try {
-				String safePath = service.normalizeTempPath(path);
-				File file = new File(webRootPath + safePath);
-				if (file.exists() && file.isFile()) {
-					file.delete();
-				}
-			} catch (IllegalArgumentException e) {
-				// 非法路径，忽略
-			}
-		}
-		renderJsonSuccess();
-	}
+    public void deleteTempFiles() {
+        String urls = getPara("filePaths");
+        renderJson(SiargoUploadFiles.delete(SiargoStorage.forBusiness(SiargoStorage.Business.EQCERT),
+                urls == null ? java.util.List.of() : java.util.Arrays.stream(urls.split(",")).map(String::trim).filter(v -> !v.isEmpty()).toList(), true));
+    }
 
 }

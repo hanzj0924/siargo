@@ -1,5 +1,5 @@
 #@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
-<link rel="stylesheet" href="assets/css/siargo.css?v=#(JBoltConfig.ASSETS_VERSION)">
+<link rel="stylesheet" href="#(ProjectAssets.url('assets/css/siargo.css'))?v=#(JBoltConfig.ASSETS_VERSION)">
 <div class="jbolt_page jb_vflex" data-key="#(pmkey)">
 
 	<div class="jbolt_page_title">
@@ -40,10 +40,10 @@
 		class="jbolt_table_delbtn"> <i class="fa fa-remove c-danger"></i>
 	</a> <a href="admin/siargo/dms/category/up/${data.id}" data-ajaxbtn
 		data-loading="执行中" tooltip data-title="上移" data-handler="moveUp"
-		class="jbolt_table_btn"> <i class="fa fa-arrow-up"></i>
+		class="jbolt_table_btn"> <i class="fa fa-arrow-up c-info"></i>
 	</a> <a href="admin/siargo/dms/category/down/${data.id}" data-ajaxbtn
 		data-loading="执行中" tooltip data-title="下移" data-handler="moveDown"
-		class="jbolt_table_btn"> <i class="fa fa-arrow-down"></i>
+		class="jbolt_table_btn"> <i class="fa fa-arrow-down c-info"></i>
 	</a> <a href="javascript:;" data-openpage="dialog" data-area="290,320"
 		tooltip data-title="移动到指定位置" data-handler="refreshJBoltTable"
 		data-url="admin/siargo/dms/category/moveTo/${data.id}"

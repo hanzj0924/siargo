@@ -15,15 +15,15 @@
 		</div>
 	</div>
 	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">模板存储路径(相对webapp,如: /_view/admin/siargo/pdf/templates/2)</label>
+		<label class="col-sm-2 col-form-label">模板目录（自动生成）</label>
 		<div class="col">
-			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入模板存储路径(相对webapp,如: /_view/admin/siargo/pdf/templates/2)" maxlength="255" name="pdfFolder.templatePath" value="#(pdfFolder.templatePath??)"/>
+			<input type="text" class="form-control" readonly value="#(pdfFolder.templatePath??)" placeholder="由配置与版号自动生成"/>
 		</div>
 	</div>
 	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">日常PDF输出路径(相对webapp,如: /export/G/2)</label>
+		<label class="col-sm-2 col-form-label">正式 PDF 目录（自动生成）</label>
 		<div class="col">
-			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入日常PDF输出路径(相对webapp,如: /export/G/2)" maxlength="255" name="pdfFolder.exportPath" value="#(pdfFolder.exportPath??)"/>
+			<input type="text" class="form-control" readonly value="#(pdfFolder.exportPath??)" placeholder="由配置与版号自动生成"/>
 		</div>
 	</div>
 	<div class="form-group row">

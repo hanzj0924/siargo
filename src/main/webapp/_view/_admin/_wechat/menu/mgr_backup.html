@@ -1,6 +1,6 @@
 #@jboltLayout()
 #define css()
-<link rel="stylesheet" type="text/css" href="assets/css/jbolt-wechat-menu.min.css"/>
+<link rel="stylesheet" type="text/css" href="#(ProjectAssets.url('assets/css/jbolt-wechat-menu.css'))"/>
 #end
  
 #define main()
@@ -37,6 +37,6 @@
 <script>
 var mpId="#(mpId??)";
 </script>
-<script src="assets/js/jbolt-wechat-menu.min.js" type="text/javascript"></script>
+<script src="#(ProjectAssets.url('assets/js/jbolt-wechat-menu.js'))" type="text/javascript"></script>
 #end
 
