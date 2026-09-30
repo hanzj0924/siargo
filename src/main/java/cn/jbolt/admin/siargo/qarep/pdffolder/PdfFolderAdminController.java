@@ -9,6 +9,7 @@ import com.jfinal.core.Path;
 import com.jfinal.kit.Ret;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.upload.UploadFile;
 import java.util.List;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.PdfFolder;
@@ -145,10 +146,12 @@ public class PdfFolderAdminController extends JBoltBaseController {
 	/** 上传模板文件 */
     public void upload() {
         try {
-            String ver = get("pdfver");
-            String directory = cn.jbolt.common.storage.SiargoStorage.forReportResources()
+            String directory = cn.jbolt.common.storage.SiargoStorage.forReportTemplates()
                     .uploadDirectory("imports", java.util.UUID.randomUUID().toString());
-            renderJson(pdfTemplateService.uploadTemplate(ver, getFile("file", directory)));
+            // 先解析 multipart 文件，JFinal 才能读取同一表单中的版号参数。
+            UploadFile file = getFile("file", directory);
+            String ver = get("pdfver");
+            renderJson(pdfTemplateService.uploadTemplate(ver, file));
         } catch (Exception e) { renderJsonFail("上传失败：" + e.getMessage()); }
     }
 

@@ -41,10 +41,17 @@ public final class SiargoStorage {
         return paths;
     }
 
-    /** 模板与 Excel 导入暂存沿用已有内部资源目录，不属于成品报告的上传业务。 */
+    /** Excel 导入暂存沿用已有内部资源目录，不属于成品报告的上传业务。 */
     public static SiargoStorage forReportResources() {
         Map<Business, String> paths = configuredPaths();
         paths.put(Business.QAREP, "upload/siargo/qarep");
+        return new SiargoStorage(Path.of(PathKit.getWebRootPath()), paths, Business.QAREP);
+    }
+
+    /** 报告模板沿用独立模板根目录，版号目录直接位于该根目录下。 */
+    public static SiargoStorage forReportTemplates() {
+        Map<Business, String> paths = configuredPaths();
+        paths.put(Business.QAREP, "upload/siargo/qarep/templates");
         return new SiargoStorage(Path.of(PathKit.getWebRootPath()), paths, Business.QAREP);
     }
 

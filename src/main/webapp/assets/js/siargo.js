@@ -2756,7 +2756,7 @@ window['pfLoadFolders_'+pageId] = function(refreshCurrent) {
 			if (list.length === 0) {
 				html = '<div class="pf-empty">暂无文件夹，请点击"新增"创建</div>';
 			} else {
-				// 按主版号分组：pdfver格式如 "G/2" → 主版号"G"，子版号"2"
+				// 按字典名称分组：pdfver 格式如 "G/2" → 主版号"G"，子版号"2"。
 				var groups = {};
 				var groupOrder = [];
 				for (var i = 0; i < list.length; i++) {
@@ -2808,7 +2808,7 @@ window['pfToggleGroup_'+pageId] = function(el) {
 window['pfSelectFolder_'+pageId] = function(el) {
 	$('#pfFolderList_'+pageId+' .pf-sub-item').removeClass('active');
 	$(el).addClass('active');
-	selectedVer = $(el).data('ver');
+	selectedVer = $(el).attr('data-ver');
 	$('#pfCurrentVer_'+pageId).html('版号：<strong>' + root.SiargoQarepCharts.escape(selectedVer) + '</strong>');
 	// 加载当前Tab数据
 	var activeTab = $('#pfTabLinks_'+pageId+' a.active').data('tab');
@@ -2866,7 +2866,7 @@ window['pfShowAddFolder_'+pageId] = function() {
 // ========== 删除文件夹 ==========
 window['pfDeleteFolder_'+pageId] = function() {
 	if (!selectedVer) { layer.msg('请先选中一个文件夹', {icon: 0}); return; }
-	layer.confirm('确定删除版号 [' + selectedVer + '] 的文件夹？<br><small class="text-danger">请先移除该版号下的模板关联及文件</small>', {
+	layer.confirm('确定删除版号 [' + root.SiargoQarepCharts.escape(selectedVer) + '] 的文件夹？<br><small class="text-danger">请先移除该版号下的模板关联及文件</small>', {
 		icon: 3, title: '确认删除'
 	}, function(idx) {
 		$.post(BASE + 'deleteFolder', {pdfver: selectedVer}, function(ret) {

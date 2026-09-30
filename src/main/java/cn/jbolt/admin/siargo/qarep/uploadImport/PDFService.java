@@ -62,7 +62,7 @@ public class PDFService {
         }
         List<String> failures = new ArrayList<>(), warnings = new ArrayList<>(), outputs = new ArrayList<>();
         List<Path> archiveInputs = new ArrayList<>();
-        SiargoStorage templateStorage = SiargoStorage.forReportResources();
+        SiargoStorage templateStorage = SiargoStorage.forReportTemplates();
         SiargoStorage storage = SiargoStorage.forBusiness(SiargoStorage.Business.QAREP);
         Path task;
         Path rar = null;

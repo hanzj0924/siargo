@@ -10,8 +10,9 @@
 	<div class="jbolt_page_content">
 		<form onsubmit="return false;" id="qareportUpdateForm_#(pageId)"
 			action="admin/siargo/qarep/update" method="post">
-			<input type="hidden" name="qareport.id" value="#(qapro.id??)" /> <input
-				type="hidden" name="product.id" value="#(qapro.proid??)" />
+			<input type="hidden" name="qareport.id" value="#(qapro.id??)" />
+			<input type="hidden" name="product.id" value="#(qapro.proid??)" />
+			<input type="hidden" name="product.insp" value="#(qapro.insp??)" />
 			<div class="fm-wrap qa-edit-layout">
 				<div class="fm-sec qa-edit-section">
 					<div class="fm-hd"><i class="fa fa-file-text-o" aria-hidden="true"></i><span>报告信息</span></div>
@@ -32,7 +33,7 @@
 								name="product.pdfver"
 								data-url="admin/dictionary/options?key=siargo_pdfver"
 								data-rule="select" data-tips="请选择版号"
-								data-value="" data-value-attr="name"
+								data-value="" data-value-attr="name" data-text-attr="name"
 								data-select="#(qapro.sp_pdfver ??)">
 							</select>
 						</div>
@@ -42,14 +43,6 @@
 								class="form-control" data-rule="pint" placeholder="=请填写="
 								maxlength="10" name="qareport.order_id"
 								value="#(qapro.order_id ??)" />
-						</div>
-						<div class="form-group">
-							<label>检验进度</label>
-							<select class="form-control" data-autoload name="product.insp"
-								data-rule="select" data-tips="请选择检验进度"
-								data-value="" data-options="精度待检:1,成品检漏待检:6,外观待检:2,包装待检:3,待批准:4,已完成:5"
-								data-select="#(qapro.insp ??)">
-							</select>
 						</div>
 						<div class="form-group qa-edit-customer-field">
 							<label>客户名称</label>

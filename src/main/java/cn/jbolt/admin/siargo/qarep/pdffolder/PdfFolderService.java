@@ -39,7 +39,7 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	private volatile long cacheTimestamp;
 	private final ReentrantLock cacheLock = new ReentrantLock();
 	private static final long CACHE_TTL = 2 * 60 * 60 * 1000L; // 2小时
-	private SiargoStorage storage() { return SiargoStorage.forReportResources(); }
+	private SiargoStorage storage() { return SiargoStorage.forReportTemplates(); }
 	private SiargoStorage exportStorage() { return SiargoStorage.forBusiness(SiargoStorage.Business.QAREP); }
 
 	// ========================== 路径查询方法 ==========================
@@ -83,7 +83,8 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 * @return 模板路径，未找到返回null
 	 */
     public String getTemplatePath(String pdfver) {
-        return getByVersion(pdfver) == null ? null : PdfStoragePaths.url(storage(), "templates", pdfver);
+        PdfFolder folder = getByVersion(pdfver);
+        return folder == null ? null : PdfStoragePaths.templateUrl(storage(), folder.getStr("pdfver"));
     }
 
 	/**
@@ -95,6 +96,12 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	}
 
 	// ========================== 字典联动方法 ==========================
+
+	private Record findVersionDictionary(Long dictId) {
+		if (notOk(dictId)) return null;
+		return Db.findFirst("SELECT name FROM jb_dictionary WHERE id = ? "
+				+ "AND type_key = 'siargo_pdfver' AND enable = '1'", dictId);
+	}
 
 	/**
 	 * 查询所有siargo_pdfver字典版号，并标记是否已创建folder
@@ -129,38 +136,38 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
 		// 1. 查询字典项
-		Record dict = Db.findFirst(
-				"SELECT sn, name FROM jb_dictionary WHERE id = ? AND type_key = 'siargo_pdfver'", dictId);
+		Record dict = findVersionDictionary(dictId);
 		if (dict == null) {
-			return fail("字典项不存在或类型不匹配");
+			return fail("版号字典项不存在或未启用");
 		}
-		String name = dict.getStr("name");
+		String pdfver = dict.getStr("name");
+		if (pdfver == null || pdfver.isBlank()) return fail("版号字典名称未配置");
 
-		// 2. 检查是否已存在（防重复）——使用 name 作为 pdfver
+		// 2. 以字典项及其名称防重复。
 		PdfFolder existing = dao.findFirst(
-				"SELECT * FROM siargo_pdf_folder WHERE pdfver = ?", name);
+				"SELECT * FROM siargo_pdf_folder WHERE dict_id = ? OR pdfver = ?", dictId, pdfver);
 		if (existing != null) {
-			return fail("版号 [" + name + "] 对应的路径配置已存在");
+			return fail("版号 [" + pdfver + "] 对应的路径配置已存在");
 		}
 
 		// 3. 派生路径
-		String templatePath = PdfStoragePaths.url(storage(), "templates", name);
-		String exportPath = PdfStoragePaths.url(exportStorage(), "reports", name);
+		String templatePath = PdfStoragePaths.templateUrl(storage(), pdfver);
+		String exportPath = PdfStoragePaths.url(exportStorage(), "reports", pdfver);
 
 		// 4. 共享存储创建目录；目录失败不能继续写入数据库。
         try {
-            storage().ensureDirectory(PdfStoragePaths.versionSegments("templates", name));
-            exportStorage().ensureDirectory(PdfStoragePaths.versionSegments("reports", name));
+            storage().ensureDirectory(PdfStoragePaths.templateSegments(pdfver));
+            exportStorage().ensureDirectory(PdfStoragePaths.versionSegments("reports", pdfver));
         } catch (Exception e) { return fail("创建版号目录失败：" + e.getMessage()); }
 
 		// 5. INSERT folder记录（主键由SNOWFLAKE自动生成）
 		PdfFolder folder = new PdfFolder();
-		folder.setPdfver(name);
-		folder.setDictId(dictId);
-		folder.setTemplatePath(templatePath);
-		folder.setExportPath(exportPath);
-		folder.setDescription(name);
-		folder.setIsActive(1);
+		folder.set("pdfver", pdfver);
+		folder.set("dict_id", dictId);
+		folder.set("template_path", templatePath);
+		folder.set("export_path", exportPath);
+		folder.set("description", pdfver);
+		folder.set("is_active", 1);
 		boolean success = folder.save();
 
 		// 6. 刷新缓存
@@ -221,7 +228,7 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 		if (folder == null) {
 			return dirs;
 		}
-		String templatePath = PdfStoragePaths.url(storage(), "templates", pdfver);
+		String templatePath = PdfStoragePaths.templateUrl(storage(), pdfver);
 		String exportPath = PdfStoragePaths.url(exportStorage(), "reports", pdfver);
 		if (templatePath != null && !templatePath.isEmpty()) {
 			dirs.add(storage().resolveUrl(templatePath).toString());
@@ -230,14 +237,16 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 			dirs.add(exportStorage().resolveUrl(exportPath).toString());
 		}
         // 保留对旧上传目录报告的检查，避免版号删除漏掉未迁移的历史文件。
-        dirs.add(PdfStoragePaths.path(storage(), "reports", pdfver).toString());
+        dirs.add(PdfStoragePaths.path(SiargoStorage.forReportResources(), "reports", pdfver).toString());
 		return dirs;
 	}
 
     private java.nio.file.Path checkedFolderDirectory(java.nio.file.Path directory) {
         SiargoStorage exports = exportStorage();
-        return directory.toAbsolutePath().normalize().startsWith(exports.root())
-                ? exports.checked(directory) : storage().checked(directory);
+        if (directory.toAbsolutePath().normalize().startsWith(exports.root())) return exports.checked(directory);
+        SiargoStorage templates = storage();
+        return directory.toAbsolutePath().normalize().startsWith(templates.root())
+                ? templates.checked(directory) : SiargoStorage.forReportResources().checked(directory);
     }
 
 	/**
@@ -297,11 +306,20 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 * @return
 	 */
 	public Ret save(PdfFolder pdfFolder) {
-		if (pdfFolder == null || isOk(pdfFolder.getId())) {
+		if (pdfFolder == null || isOk(pdfFolder.getLong("id"))) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		pdfFolder.set("template_path", PdfStoragePaths.url(storage(), "templates", pdfFolder.getStr("pdfver")));
-        pdfFolder.set("export_path", PdfStoragePaths.url(exportStorage(), "reports", pdfFolder.getStr("pdfver")));
+		Long dictId = pdfFolder.getLong("dict_id");
+		Record dict = findVersionDictionary(dictId);
+		if (dict == null) return fail("版号字典项不存在或未启用");
+		String pdfver = dict.getStr("name");
+		if (pdfver == null || pdfver.isBlank()) return fail("版号字典名称未配置");
+		if (dao.findFirst("SELECT id FROM siargo_pdf_folder WHERE dict_id = ? OR pdfver = ?", dictId, pdfver) != null) {
+			return fail("版号 [" + dict.getStr("name") + "] 对应的路径配置已存在");
+		}
+		pdfFolder.set("pdfver", pdfver);
+		pdfFolder.set("template_path", PdfStoragePaths.templateUrl(storage(), pdfver));
+        pdfFolder.set("export_path", PdfStoragePaths.url(exportStorage(), "reports", pdfver));
         boolean success = pdfFolder.save();
 		if (success) {
 			clearCache();
@@ -315,16 +333,25 @@ public class PdfFolderService extends JBoltBaseService<PdfFolder> {
 	 * @return
 	 */
 	public Ret update(PdfFolder pdfFolder) {
-		if (pdfFolder == null || notOk(pdfFolder.getId())) {
+		if (pdfFolder == null || notOk(pdfFolder.getLong("id"))) {
 			return fail(JBoltMsg.PARAM_ERROR);
 		}
-		PdfFolder dbPdfFolder = findById(pdfFolder.getId());
+		PdfFolder dbPdfFolder = findById(pdfFolder.getLong("id"));
 		if (dbPdfFolder == null) {
 			return fail(JBoltMsg.DATA_NOT_EXIST);
 		}
-		if (!java.util.Objects.equals(dbPdfFolder.getStr("pdfver"), pdfFolder.getStr("pdfver"))) return fail("已有版号不能直接改名，请新增版号");
-        pdfFolder.set("template_path", PdfStoragePaths.url(storage(), "templates", pdfFolder.getStr("pdfver")));
-        pdfFolder.set("export_path", PdfStoragePaths.url(exportStorage(), "reports", pdfFolder.getStr("pdfver")));
+		Long dictId = pdfFolder.getLong("dict_id");
+		Record dict = findVersionDictionary(dictId);
+		if (dict == null) return fail("版号字典项不存在或未启用");
+		String pdfver = dict.getStr("name");
+		if (pdfver == null || pdfver.isBlank()) return fail("版号字典名称未配置");
+		if (!java.util.Objects.equals(dbPdfFolder.getLong("dict_id"), dictId)
+				|| !java.util.Objects.equals(dbPdfFolder.getStr("pdfver"), pdfver)) {
+			return fail("已有版号不能直接改名，请新增版号");
+		}
+		pdfFolder.set("pdfver", pdfver);
+        pdfFolder.set("template_path", PdfStoragePaths.templateUrl(storage(), pdfver));
+        pdfFolder.set("export_path", PdfStoragePaths.url(exportStorage(), "reports", pdfver));
         boolean success = pdfFolder.update();
 		if (success) {
 			clearCache();

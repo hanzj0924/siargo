@@ -104,7 +104,7 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
     public static Path templatePath(SiargoStorage storage, PdfTemplate template) throws IOException {
         String file = template.getStr("template_file");
         if (file == null || file.isBlank()) throw new IOException("报告模板未配置文件名");
-        Path path = PdfStoragePaths.path(storage, "templates", template.getStr("pdfver"), SiargoStorage.safeSegment(file));
+        Path path = PdfStoragePaths.templatePath(storage, template.getStr("pdfver"), SiargoStorage.safeSegment(file));
         if (!Files.isRegularFile(path)) throw new IOException("报告模板文件不存在：" + file);
         return path;
     }
@@ -129,7 +129,7 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
         if (unique.isFail()) return unique;
         PdfTemplate selected = unique.getAs("template");
         if (!Objects.equals(expected.getLong("id"), selected.getLong("id"))) return fail("系列关联模板已变化，请重新生成");
-        try { templatePath(SiargoStorage.forReportResources(), selected); }
+        try { templatePath(SiargoStorage.forReportTemplates(), selected); }
         catch (IOException error) { return fail("报告模板文件已不可用，请重新生成"); }
         return Ret.ok();
     }
@@ -145,7 +145,7 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
                 return warnings;
             }
             PdfTemplate template = resolution.getAs("template");
-            Set<String> names = PdfRenderer.fieldNames(templatePath(SiargoStorage.forReportResources(), template));
+            Set<String> names = PdfRenderer.fieldNames(templatePath(SiargoStorage.forReportTemplates(), template));
             warnings.addAll(missingValueWarnings(names, reportFields));
         } catch (Exception error) {
             warnings.add("报告模板检查未通过：" + readable(error));
@@ -172,9 +172,8 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
 
     public List<Map<String, Object>> listTemplates(String version) {
         List<Map<String, Object>> result = new ArrayList<>();
-        String directory = pdfFolderService.getTemplatePath(version);
-        if (directory == null) return result;
-        File dir = SiargoStorage.forReportResources().resolveUrl(directory).toFile();
+        if (version == null || version.isBlank()) return result;
+        File dir = PdfStoragePaths.templatePath(SiargoStorage.forReportTemplates(), version).toFile();
         File[] files = dir.listFiles((d, name) -> name.toLowerCase(Locale.ROOT).endsWith(".pdf"));
         if (files == null) return result;
         Arrays.sort(files, Comparator.comparing(File::getName));
@@ -184,16 +183,15 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
 
     public Ret uploadTemplate(String version, UploadFile file) {
         if (file == null) return fail("请选择文件");
-        SiargoStorage storage = SiargoStorage.forReportResources();
+        SiargoStorage storage = SiargoStorage.forReportTemplates();
         try {
-            String directory = pdfFolderService.getTemplatePath(version);
-            if (directory == null) return fail("版号未配置或未启用");
             String name = SiargoStorage.safeSegment(file.getOriginalFileName());
             if (!name.toLowerCase(Locale.ROOT).endsWith(".pdf")) return fail("仅支持 PDF 文件");
             Path source = storage.checked(file.getFile().toPath());
             if (!source.startsWith(storage.path("imports"))) return fail("模板上传来源非法");
             PdfRenderer.fieldNames(source);
-            Path target = storage.checked(storage.resolveUrl(directory).resolve(name));
+            // 上传只按当前选中版号存放文件，不查询版号配置或启用状态。
+            Path target = PdfStoragePaths.templatePath(storage, version, name);
             storage.moveNew(source, target);
             return Ret.ok();
         } catch (Exception error) { return fail("模板上传失败：" + readable(error)); }
@@ -202,12 +200,10 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
     public Ret deleteTemplate(String version, String fileName) {
         TEMPLATE_FILES_LOCK.lock();
         try {
-            String directory = pdfFolderService.getTemplatePath(version);
-            if (directory == null) return fail("版号未配置或未启用");
             if (Db.queryLong("SELECT COUNT(*) FROM siargo_pdf_template WHERE pdfver=? AND template_file=?", version, fileName) > 0)
                 return fail("该文件仍被报告模板引用，请先调整模板");
-            SiargoStorage storage = SiargoStorage.forReportResources();
-            storage.deleteFile(storage.resolveUrl(directory + "/" + SiargoStorage.safeSegment(fileName)));
+            SiargoStorage storage = SiargoStorage.forReportTemplates();
+            storage.deleteFile(PdfStoragePaths.templatePath(storage, version, fileName));
             return Ret.ok();
         } catch (Exception error) { return fail("模板删除失败：" + readable(error)); }
         finally { TEMPLATE_FILES_LOCK.unlock(); }
@@ -269,7 +265,7 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
         try {
             ids = parseModelIds(selectedIds);
             version = incoming.getStr("pdfver");
-            PdfStoragePaths.versionSegments("templates", version);
+            PdfStoragePaths.templateSegments(version);
             file = SiargoStorage.safeSegment(incoming.getStr("template_file"));
             if (version.length() > 10 || file.length() > 100 || Objects.toString(incoming.get("error_hint"), "").trim().length() > 50)
                 return fail("版号、文件名或备注超出允许长度");
@@ -278,7 +274,7 @@ public class PdfTemplateService extends JBoltBaseService<PdfTemplate> {
             if (!"0".equals(String.valueOf(state)) && !"1".equals(String.valueOf(state))) return fail("模板启用状态无效");
             active = Integer.parseInt(state.toString());
             PdfTemplate check = new PdfTemplate().set("pdfver", version).set("template_file", file);
-            PdfRenderer.fieldNames(templatePath(SiargoStorage.forReportResources(), check));
+            PdfRenderer.fieldNames(templatePath(SiargoStorage.forReportTemplates(), check));
         } catch (Exception error) { return fail("模板参数校验失败：" + readable(error)); }
         final Ret[] result = {Ret.fail("模板保存失败")};
         try {

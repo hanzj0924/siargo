@@ -1,8 +1,8 @@
 {
-  "head": "023ca42",
-  "packageTime": "2026-09-30 09:21:57",
-  "headFull": "023ca42e437ed33d56758059ad7da0a46fec1a8c",
-  "version": "2.9.3",
+  "head": "a00d797",
+  "packageTime": "2026-09-30 13:18:23",
+  "headFull": "a00d797055e033e4ddcb549880319610434ccdfe",
+  "version": "2.9.4",
   "assetHashes": {
     "assets/css/jbolt-admin.css": {
       "sourceSha256": "545a8684f3580973a5645f619772145637a1b25ffccc0505512c366dd52f0206",
@@ -25,8 +25,8 @@
       "minSha256": "33eda2939dc94187f62a9f2da1f90809dc7ab1898368615c4dbce96265255e7e"
     },
     "assets/css/siargo.css": {
-      "sourceSha256": "38ef38fa36b2724fb669aec31db0bc0a03ce7e00d24980a8a48b72c825253d7b",
-      "minSha256": "47456f780506d7446bd7c5301c7c3103616ce6378a22cd8f85530e491b9c846f"
+      "sourceSha256": "bc4a663944f6e41c349b75054dc319200fc33a2db6ec743548215c11db7f7f52",
+      "minSha256": "010401fe267187543cd0c37ae778dba27e1f9ddea3efda3c67fac47ccc807edd"
     },
     "assets/js/jbolt-admin.js": {
       "sourceSha256": "a60ddf94be48ebc25284da201644935abff010581649983ab0e6f2cac2b85b40",
@@ -49,8 +49,8 @@
       "minSha256": "a7243c3b6150243358c77af78f3c2b4cc0a6dc4ee45891288cd2c9691e1391b6"
     },
     "assets/js/siargo.js": {
-      "sourceSha256": "ee87d0a74860a4d845cf4293bbdcac54ad25e2df8163b9e5c13cbcfb8463d3bd",
-      "minSha256": "d569c2f89acd4da86d02d9311bc6e100a0c6fd413923a593ec8cc5a5d021d91c"
+      "sourceSha256": "49c6e13ef466aebde27dbe29b346e43baf0db02184c41f50d4354c4ab00cb3a1",
+      "minSha256": "25a3f7535f3613a542971403c0549c59385ebd183ffa30332667970fe721eaf2"
     }
   }
 }

@@ -3,15 +3,15 @@
 <div class="row">
 	<div class="col">
 	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">版号(=jb_dictionary.name, type_key=siargo_pdfver)</label>
+		<label class="col-sm-2 col-form-label">版号</label>
 		<div class="col">
-			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"   data-rule="required" placeholder="请输入版号(如: G/2)" maxlength="10" name="pdfFolder.pdfver" value="#(pdfFolder.pdfver??)"/>
+			<input type="text" class="form-control" readonly placeholder="根据关联字典自动确定" name="pdfFolder.pdfver" value="#(pdfFolder.pdfver??)"/>
 		</div>
 	</div>
 	<div class="form-group row">
 		<label class="col-sm-2 col-form-label">关联字典ID</label>
 		<div class="col">
-			<input type="text" data-with-clearbtn="true" autocomplete="off" class="form-control" data-rule="required;pint" placeholder="请输入关联字典ID(jb_dictionary.id)" data-tips="请输入关联字典ID" maxlength="19" name="pdfFolder.dictId" value="#(pdfFolder.dictId??)"/>
+			<input type="text" data-with-clearbtn="true" autocomplete="off" class="form-control" data-rule="required;pint" placeholder="请输入关联字典ID(jb_dictionary.id)" data-tips="请输入关联字典ID" maxlength="19" name="pdfFolder.dict_id" value="#(pdfFolder.dictId??)"/>
 		</div>
 	</div>
 	<div class="form-group row">

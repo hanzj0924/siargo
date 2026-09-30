@@ -994,6 +994,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
         Ret parsed = ReportProductInput.parse(productsJson, defaults);
         if (parsed.isFail()) return parsed;
         List<Product> products = parsed.getAs("data");
+        if (!isReportVersionName(products.get(0).getStr("pdfver"))) return fail("请选择数据字典中的报告版号");
         for (int index = 0; index < products.size(); index++) {
             Product product = products.get(index);
             Integer insp = product.getInt("insp");
@@ -1037,6 +1038,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
         Ret saved = Ret.ok().set("msg", "保存成功");
         List<String> ids = products.stream().map(p -> String.valueOf(p.getLong("id"))).toList();
         return saved.set("data", Kv.by("reportId", String.valueOf(report.getLong("id"))).set("productIds", ids));
+    }
+
+    /** 报告版号按字典 name（如 G/2）校验并保存。 */
+    private boolean isReportVersionName(String version) {
+        return Db.queryLong("SELECT COUNT(*) FROM jb_dictionary WHERE type_key='siargo_pdfver' AND name=? AND enable='1'", version) > 0;
     }
 
     private String validateReportInput(Qareport report) {
@@ -1198,6 +1204,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
         if (reportError != null) return fail(reportError);
         String productError = ReportProductInput.validateBasics(product);
         if (productError != null) return fail(productError);
+        if (!isReportVersionName(product.getStr("pdfver"))) return fail("请选择数据字典中的报告版号");
         String electricalError = QarepConst.validateElectricalParams(product);
         if (electricalError != null) return fail(electricalError);
         Ret[] result = {Ret.ok()};
