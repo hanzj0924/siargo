@@ -1,7 +1,7 @@
 # siargo 项目开发规则（Codex）
 
 > 适用于所有涉及 `D:/Workspace/siargo` 的开发、审查与排查请求。由 qoder 规则（`.qoder/rules/siargo.md`、`siargo-coding-rules` 技能）移植；编码规范已整合进 `D:/Workspace/.codex/agents/siargo-*.toml` 子智能体定义。
-> 项目 Wiki：`wiki/qdoer/`；Git 历史模式：`.claude/skills/siargo-patterns/SKILL.md`；JBolt 平台源码参考库：`D:/Workspace/源码/`（只读）。
+> 项目 Wiki：`wiki/docs/README.md`；Git 历史模式：`.claude/skills/siargo-patterns/SKILL.md`；JBolt 平台源码参考库：`D:/Workspace/源码/`（只读）。
 
 ## 项目概况
 
@@ -12,11 +12,16 @@
 | 模块 | 复杂度 | 说明 |
 |------|--------|------|
 | customer / supplier | 简单 CRUD | 新模块的第一参考 |
-| dms | 中 | 主子表、文件上传、关键字搜索、软删除 |
+| dms | 中 | 技术通知单分类、全局检索、有效状态、覆盖确认与文件清理；失效列表不是回收站 |
 | equipment | 高 | 设备全生命周期、主子表、编制→审核、时间线、证书 |
 | qarep | 最高 | 多阶段审批（逻辑顺序 insp=1 精度待检→按产品属性可选 6 成品检漏待检→2 外观待检→3 包装待检→4 待批准→5 完成，各环节签 accq/lt/funq/appq/allq）、Excel 导入、PDF 生成、回收站、流程统计缓存 |
-| api / apicalllog | 中 | 对外 API + Token 签名 + 调用日志 |
-| imi / cme / changelog | 低 | 简单模块 |
+| prodmodel / prodparam | 高 | 产品系列与目录分支、型号结构、参数字典、资料、尺寸图及技术参数 |
+| qarep/pdffolder | 中 | 报告版号、PDF 模板与系列绑定，参与生成和发布校验 |
+| api / apicalllog | 中 | 订单检验查询、SHA-256 Token、traceId 与调用日志统计 |
+| imi | 中 | 供应商关联的来料图片、暂存上传、去重、文件移动及清理 |
+| cme / changelog | 低 | 学习资料目录与文件浏览、部署版本说明展示 |
+
+完整业务入口、关系与当前实现边界见 `wiki/docs/07-业务模块地图.md`；首页看板及报告统计口径见 `wiki/docs/15-首页看板与报告统计.md`。
 
 ## P0 红线（违反即 bug）
 
@@ -24,7 +29,7 @@
 2. 后台 Controller 必须配置与模块匹配的 `@CheckPermission(...)` + `@UnCheckIfSystemAdmin`；多数 siargo 模块使用 `PermissionKey.SIARGO`，已有模块专属权限（如 `PermissionKey.SIARGO_CHANGE_LOG`）必须保留。`JBoltApiBaseController` 对外 API 不适用后台权限注解。
 3. **事务写法分场景**（`@Before(Tx.class)` 是 JBolt 生成器/平台标准，尊重原生写法）：
    - 单条简单写（先校验后单条 DB、无文件/事件/多步）→ 用 `@Before(Tx.class)` 声明式事务。
-   - **多步批量写、物理文件操作、事件/WebSocket 推送 → 必须手动 `Db.tx(() -> {...})`**。原因：JFinal `@Before(Tx.class)` 只认"抛异常/返回 boolean false"为回滚信号，siargo 的 `Ret.fail`（软失败不抛异常）不会触发回滚，多步写中途失败会**部分提交**。
+   - **多步批量写、物理文件操作、事件/WebSocket 推送 → 必须手动 `Db.tx(() -> {...})`**。原因：当前 JFinal 默认 `@Before(Tx.class)` 在调用正常返回后提交，不依据返回的 `boolean false` 或 `Ret.fail` 回滚；异常路径才触发其回滚处理。`Db.tx(IAtom)` 则依据 lambda 的布尔结果提交或回滚，必须把软失败转换为 `false`，避免多步写中途失败后部分提交。
    - Service 内禁止在 `@Before(Tx.class)` 事务内做文件删除/移动或嵌套 `Db.tx()`；物理文件路径在事务内收集、事务提交后删除。
 4. **事务相关副作用和缓存失效必须对齐真正的提交边界**：`EventKit.post`、WebSocket 推送、物理文件删除必须在事务提交后执行。Controller 持有 `Db.tx()` 时，由 Controller 在 `txOk` 后清缓存；Service 完整持有内部事务时，可在内部事务成功返回后清缓存。参与外层事务的 Service 不得提前清缓存、发事件或删文件。
 5. 禁止手动修改 `siargo/model/base/Base*Model.java`（代码生成器自动维护）。
@@ -114,9 +119,9 @@ public class XxxService extends JBoltBaseService<XxxModel> {
 - GROUP_CONCAT 聚合 + 关键字过滤用 `EXISTS` 子查询，避免 WHERE 对 JOIN 列 LIKE 丢聚合行。
 - 前端模板引用的关联字段必须显式 LEFT JOIN + AS 别名（如 `c.name AS customerName`）。
 
-## Caffeine 缓存模板
+## 业务统计字段缓存模板
 
-`volatile 字段 + ReentrantLock + 双重检查锁（DCL）+ TTL 过期`；缓存失效由真正的事务所有者在提交成功后触发：Controller 持有事务则由 Controller 清理，Service 完整持有内部事务则可由 Service 在事务成功后清理。
+`volatile 字段 + ReentrantLock + 双重检查锁（DCL）+ TTL 过期`，属于 Service 自维护字段缓存，不等同于 Caffeine 缓存实例；缓存失效由真正的事务所有者在提交成功后触发：Controller 持有事务则由 Controller 清理，Service 完整持有内部事务则可由 Service 在事务成功后清理。
 
 ## 权限与角色
 
@@ -132,7 +137,7 @@ public class XxxService extends JBoltBaseService<XxxModel> {
 - 流程环节颜色一律引用 `assets/css/siargo.css` 的 `--flow-*` 变量（acc 精度 / leak 成品检漏 / vis 外观 / pack 包装 / appr 批准 / done 完成），模板 `data-color` 用语义键 `acc|leak|vis|pack|appr|done`，禁止散写十六进制。
 - `src/main/webapp/_view/admin/siargo/` 下所有业务页面的 JS 统一放在 `src/main/webapp/assets/js/siargo.js`，CSS 统一放在 `src/main/webapp/assets/css/siargo.css`，按模块分区维护；模板只保留结构、数据传递和必要的初始化调用，不新增业务 JS/CSS 片段。Enjoy 动态数据通过页面属性或初始化参数传入，静态资源不含 Enjoy 指令。
 - 日常修改后不压缩、不更新 `.min` 文件。打包前按 `siargo-package.md` 和下方资源清单增量压缩，源/min 哈希有变化、基线缺失或 min 缺失时才重压；压缩及产物同步不写入 CHANGELOG，也不并入业务条目。
-- 复杂前端任务派发子智能体 `D:/Workspace/.codex/agents/siargo-frontend.toml`，简单任务主代理直接完成；详见 `wiki/qdoer/05-前端开发指南.md`。
+- 复杂前端任务派发子智能体 `D:/Workspace/.codex/agents/siargo-frontend.toml`，简单任务主代理直接完成；详见 `wiki/docs/05-前端开发指南.md`。
 
 ### 指定 CSS/JS 的环境加载与打包
 
