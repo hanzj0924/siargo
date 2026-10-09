@@ -878,7 +878,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
 						// 字典翻译字段
 						PRODUCT_TYPE_NAME_SQL + " AS type_name","d_insp.name AS insp_name","d_retype.name AS retype_name",
 						// 驳回历史条数（>0 时前端显示「驳」角标，点击查看历史）
-						"sp.reject_count"
+						"sp.reject_count","sc.name AS sc_name"
 						)
 				.page(pageNumber, pageSize).from("siargo_product", "sp")
                 .leftJoin("siargo_prod_model", "pm", "pm.id=sp.siargo_prod_model_id")
@@ -901,7 +901,9 @@ public class QareportService extends JBoltBaseService<Qareport> {
 				.leftJoin("jb_user", "funq_user", "funq_user.id = sp.funq_uid")
 				.leftJoin("jb_user", "lt_user", "lt_user.id = sp.lt_uid")
 				.leftJoin("jb_user", "appq_user", "appq_user.id = sp.appq_uid")
-				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid").eq("sp.vd", QarepConst.VD_VALID);
+				.leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid")
+				.leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
+				.eq("sp.vd", QarepConst.VD_VALID);
 
 		// ========== 应用搜索条件 ==========
 		sql.like("sq.order_id", keywords);

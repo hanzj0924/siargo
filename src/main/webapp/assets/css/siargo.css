@@ -2544,37 +2544,43 @@ mark.dms-search-hit {
 .qa-appr-series { color: #6c757d; font-size: 12px; }
 
 /* 月份区间归档：保留原生 Dialog，布局与样式只作用于本弹窗。 */
-.layui-layer.qa-pdf-month-dialog { display: flex; flex-direction: column; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); border: 1px solid color-mix(in srgb, var(--flow-vis) 24%, #fff); border-radius: 12px; background: #fff; overflow: hidden; box-shadow: 0 20px 60px rgba(13, 37, 61, .2), 0 0 24px color-mix(in srgb, var(--flow-vis) 9%, transparent); }
-.qa-pdf-month-dialog::before { position: absolute; z-index: 1; top: 0; right: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--flow-vis), var(--flow-acc), transparent); content: ""; pointer-events: none; }
-.qa-pdf-month-dialog > .layui-layer-title { position: relative; flex: 0 0 52px; height: 52px; padding: 0 52px 0 36px; border-bottom: 1px solid #e3ebf4; background: linear-gradient(110deg, #f1f6ff, #f5fbfc 65%, #fff); color: #263c55; font-size: 15px; font-weight: 600; letter-spacing: .4px; line-height: 52px; }
-.qa-pdf-month-dialog > .layui-layer-title::before { position: absolute; top: 21px; left: 22px; width: 4px; height: 12px; border-radius: 2px; background: linear-gradient(var(--flow-vis), var(--flow-acc)); box-shadow: 0 0 8px color-mix(in srgb, var(--flow-vis) 25%, transparent); content: ""; }
-.qa-pdf-month-dialog > .layui-layer-content { flex: 1 1 auto; min-height: 0; height: auto !important; overflow: hidden; }
-.qa-pdf-month-dialog > .layui-layer-content > .p-3 { height: 100%; padding: 0 !important; }
-.qa-pdf-month-dialog > .layui-layer-setwin { top: 19px; right: 20px; }
+.layui-layer.qa-pdf-month-dialog { display: flex; flex-direction: column; box-sizing: border-box; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); border: 1px solid #e2e5e9; border-radius: 10px; background: #fff; overflow: hidden; box-shadow: 0 12px 36px rgba(0, 0, 0, .14); }
+.qa-pdf-month-dialog > .layui-layer-title { flex: 0 0 52px; height: 52px; padding: 0 52px 0 22px; border-bottom: 1px solid #e7e9ed; background: #fff; color: #30343b; font-size: 17px; font-weight: 600; letter-spacing: normal; line-height: 52px; }
+/* 原生 Dialog 的 p-3 包装层参与填充，正文缩小时不会把操作栏推到弹窗外。 */
+.qa-pdf-month-dialog > .layui-layer-content { display: flex; flex: 1 1 auto; min-width: 0; min-height: 0; height: auto !important; overflow: hidden; }
+.qa-pdf-month-dialog > .layui-layer-content > .p-3 { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; min-height: 0; padding: 0 !important; }
+.qa-pdf-month-dialog > .layui-layer-setwin { top: 18px; right: 20px; }
 .qa-pdf-month-dialog .layui-layer-min, .qa-pdf-month-dialog .layui-layer-max, .qa-pdf-month-dialog > .layui-layer-resize { display: none; }
 .qa-pdf-month-dialog .layui-layer-close::after { position: absolute; inset: -8px; content: ""; }
-.qa-pdf-month-form { display: flex; flex-direction: column; height: 100%; min-height: 0; color: #34445a; font-size: 14px; }
-.qa-pdf-month-body { flex: 1 1 auto; min-height: 0; padding: 20px 24px 18px; background: radial-gradient(ellipse at top right, color-mix(in srgb, var(--flow-acc) 5%, transparent), transparent 70%), #fff; overflow-y: auto; overflow-x: hidden; }
-.qa-pdf-month-range { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); align-items: end; gap: 10px; }
+.qa-pdf-month-form { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; min-height: 0; color: #343a43; font-size: 14px; }
+.qa-pdf-month-body { flex: 1 1 auto; min-width: 0; min-height: 0; padding: 0 22px; background: #fff; overflow-y: auto; overflow-x: hidden; }
+.qa-pdf-month-range { display: grid; grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); align-items: end; gap: 12px; margin-top: 20px; }
 .qa-pdf-month-field { display: block; min-width: 0; margin: 0; }
-.qa-pdf-month-field > span { display: block; margin-bottom: 8px; color: #526780; font-size: 13px; font-weight: 500; line-height: 20px; }
-.qa-pdf-month-field > .form-control { width: 100%; height: 44px; padding: 8px 12px; border: 1px solid #d6e2f0; border-radius: 8px; background-color: #f8fbff; color: #263c55; font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; box-shadow: inset 0 1px 2px rgba(13, 37, 61, .025); transition: border-color .18s, background-color .18s, box-shadow .18s; }
-.qa-pdf-month-field > .form-control:hover { border-color: color-mix(in srgb, var(--flow-vis) 55%, #fff); background-color: #fff; }
-.qa-pdf-month-field > .form-control:focus { border-color: var(--flow-vis); background-color: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--flow-vis) 13%, transparent), 0 3px 12px color-mix(in srgb, var(--flow-vis) 8%, transparent); }
-.qa-pdf-month-separator { display: flex; align-items: center; justify-content: center; height: 44px; color: var(--flow-acc); font-size: 16px; }
-.qa-pdf-month-hint { margin: 12px 0 0; color: #74849a; font-size: 12px; line-height: 20px; }
-.qa-pdf-month-hint > .fa { margin-right: 3px; color: var(--flow-vis); }
-.qa-pdf-month-actions { display: flex; flex: 0 0 auto; justify-content: flex-end; gap: 10px; padding: 12px 24px; border-top: 1px solid #e3ebf4; background: linear-gradient(110deg, #f8fbff, #f4f9fc); }
-.qa-pdf-month-actions > .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 80px; height: 38px; margin: 0; padding: 0 18px; border-radius: 7px; font-size: 14px; transition: border-color .18s, background-color .18s, box-shadow .18s; }
-.qa-pdf-month-actions > .btn-outline-secondary { border-color: #d9e1eb; background: #fff; color: #59697d; }
-.qa-pdf-month-actions > .btn-outline-secondary:hover { border-color: #bac7d7; background: #f1f4f8; color: #34445a; }
-.qa-pdf-month-actions > .btn-primary { border-color: transparent; background: linear-gradient(115deg, color-mix(in srgb, var(--flow-vis) 76%, #174288), color-mix(in srgb, var(--flow-acc) 72%, #174288)); color: #fff; box-shadow: 0 3px 10px color-mix(in srgb, var(--flow-vis) 22%, transparent); }
-.qa-pdf-month-actions > .btn-primary:hover { box-shadow: 0 4px 14px color-mix(in srgb, var(--flow-vis) 35%, transparent); }
-.qa-pdf-month-actions > .btn:focus-visible { outline: 2px solid var(--flow-vis); outline-offset: 3px; }
+.qa-pdf-month-field > span { display: block; margin-bottom: 8px; color: #555d69; font-size: 14px; font-weight: 500; line-height: 20px; }
+.qa-pdf-month-field > .form-control { width: 100%; height: 46px; padding: 8px 12px; border: 1px solid #d5d9df; border-radius: 8px; background-color: #fff; color: #30343b; font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; box-shadow: none; transition: border-color .15s, box-shadow .15s; }
+.qa-pdf-month-field > .form-control:hover { border-color: #a8b0bb; }
+.qa-pdf-month-field > .form-control:focus { border-color: var(--flow-vis); box-shadow: 0 0 0 3px color-mix(in srgb, var(--flow-vis) 16%, transparent); }
+.qa-pdf-month-separator { display: flex; align-items: center; justify-content: center; height: 46px; color: #8a9099; font-size: 14px; }
+.qa-pdf-month-hint { margin: 12px 0 18px; color: #7b828d; font-size: 12px; line-height: 20px; }
+.qa-pdf-month-actions { display: flex; flex: 0 0 auto; justify-content: flex-end; gap: 10px; padding: 12px 22px; border-top: 1px solid #e7e9ed; background: #fafbfc; }
+.qa-pdf-month-actions > .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 80px; height: 38px; margin: 0; padding: 0 18px; border-radius: 8px; font-size: 14px; white-space: nowrap; box-shadow: none; transition: border-color .15s, background-color .15s; }
+.qa-pdf-month-actions > .btn-outline-secondary { border-color: #d5d9df; background: #fff; color: #555d69; }
+.qa-pdf-month-actions > .btn-outline-secondary:hover { border-color: #a8b0bb; background: #f3f4f6; color: #343a43; }
+.qa-pdf-month-actions > .btn-primary { border-color: color-mix(in srgb, var(--flow-vis) 80%, #000); background: color-mix(in srgb, var(--flow-vis) 80%, #000); color: #fff; }
+.qa-pdf-month-actions > .btn-primary:hover { border-color: color-mix(in srgb, var(--flow-vis) 72%, #000); background: color-mix(in srgb, var(--flow-vis) 72%, #000); }
+.qa-pdf-month-actions > .btn:focus-visible { outline: 2px solid var(--flow-vis); outline-offset: 3px; box-shadow: none; }
 @media (max-width: 420px) {
     .qa-pdf-month-body { padding-right: 18px; padding-left: 18px; }
     .qa-pdf-month-actions { padding-right: 18px; padding-left: 18px; }
     .qa-pdf-month-range { grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr); gap: 8px; }
+}
+@media (max-height: 320px) {
+    .qa-pdf-month-dialog > .layui-layer-title { flex-basis: 44px; height: 44px; font-size: 16px; line-height: 44px; }
+    .qa-pdf-month-dialog > .layui-layer-setwin { top: 14px; }
+    .qa-pdf-month-body { padding-top: 12px; padding-bottom: 12px; }
+    .qa-pdf-month-hint { margin-top: 8px; }
+    .qa-pdf-month-actions { padding-top: 8px; padding-bottom: 8px; }
+    .qa-pdf-month-actions > .btn { height: 36px; }
 }
 
 /* ---- qarep\editdes.html：.editdes-page 前缀隔离的紧凑变体（页面根元素带 class="editdes-page"），
@@ -2590,13 +2596,11 @@ mark.dms-search-hit {
 .qa-details-page .dt-sec{margin:0 0 16px}
 .qa-details-page .dt-sec:last-child{margin-bottom:0}
 .qa-details-page .dt-report-heading,.qa-details-page .dt-hd{display:flex;align-items:center;gap:9px;margin:0 0 9px}
-.qa-details-page .dt-report-heading h1,.qa-details-page .dt-hd h2{margin:0;color:#354052;font-size:19px;font-weight:600;line-height:1.5}
+.qa-details-page .dt-report-heading h1,.qa-details-page .dt-hd h2{margin:0;color:#24272d;font-size:22px;font-weight:400;letter-spacing:normal;line-height:1.35}
 .qa-details-page .dt-report-heading{align-items:baseline;flex-wrap:wrap}
 .qa-details-page .dt-report-heading h1{flex:0 0 auto}
 .qa-details-page .dt-report-type{display:inline-flex;flex-wrap:wrap;justify-content:flex-end;gap:4px .25em;min-width:0;max-width:100%;margin-left:auto;color:#24272d;font-size:22px;font-weight:400;letter-spacing:normal;line-height:1.35;text-align:right}
 .qa-details-page .dt-report-type-option{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
-.qa-details-page .dt-report-type-mark{flex:0 0 16px;width:16px;height:16px;box-sizing:border-box;border:2px solid currentColor;background:transparent}
-.qa-details-page .dt-report-type-mark.is-selected{background:currentColor}
 .qa-details-page .dt-section-count{color:#8a94a2;font-size:17px}
 .qa-details-page .dt-data-table{width:100%;margin:0;border:1px solid #e4e8ee;border-collapse:collapse;table-layout:fixed;background:#fff}
 .qa-details-page .dt-data-table .dt-label-col{width:104px}
@@ -2620,7 +2624,7 @@ mark.dms-search-hit {
 .qa-details-page [data-color="appr"]{--dt-flow-color:var(--flow-appr)}
 .qa-details-page [data-color="done"]{--dt-flow-color:var(--flow-done)}
 .qa-details-page .dt-status{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:40%;color:#6d7888;font-size:16px;overflow-wrap:anywhere}
-.qa-details-page .dt-status::before{content:"";flex:0 0 5px;width:5px;height:5px;border-radius:50%;background:var(--dt-flow-color,#a1a8b3)}
+.qa-details-page .dt-status::before{content:"";flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:var(--dt-flow-color,#a1a8b3)}
 .qa-details-page .dt-status:empty{display:none}
 .qa-details-page .dt-product-section{min-width:0;padding:12px 13px}
 .qa-details-page .dt-data-table .dt-model{color:#304059;font-weight:500}
@@ -2648,7 +2652,6 @@ mark.dms-search-hit {
 .qa-details-page .dt-progress{min-width:0;padding:14px 13px;border-top:1px solid #e4e8ee;background:#fff}
 .qa-details-page .dt-progress>.dt-subtitle{display:flex;align-items:center;gap:9px;margin:0 0 12px;color:#46566d}
 .qa-details-page .dt-progress>.dt-subtitle::before{content:"";width:3px;height:17px;border-radius:2px;background:#899bb2}
-.qa-details-page .dt-progress>.dt-subtitle::after{content:"";flex:1;height:1px;margin-left:3px;background:#e2e8f0}
 .qa-details-page .dt-progress-body{min-width:0}
 .qa-details-page .dt-progress .dt-badge{padding:2px 10px;border-radius:12px;background:#e2e3e5;color:#383d41;font-weight:600}
 .qa-details-page .dt-progress .dt-badge::before{display:none}
@@ -2673,6 +2676,11 @@ mark.dms-search-hit {
 .insp-badge-appq{background:var(--flow-pack);color:#fff}
 .insp-badge-allq{background:var(--flow-appr);color:#fff}
 .qa-details-page .insp-flow{--insp-columns:5;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;gap:12px 26px;padding:0}
+.qa-details-page .insp-stage{display:grid;grid-template-columns:minmax(0,1fr);min-width:0}
+/* 有驳回时共用上下两行轨道，历史增高不会挤动上排时间或流程箭头。 */
+.qa-details-page .insp-flow:has(>.insp-stage>.insp-reject-flow)>.insp-stage{grid-row:span 2;grid-template-rows:subgrid}
+.qa-details-page .insp-stage>.insp-step{grid-row:1}
+.qa-details-page .insp-stage>.insp-reject-flow{grid-row:2}
 .qa-details-page .insp-step{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;max-width:100%;padding:2px 0}
 .qa-details-page .insp-step-name{display:inline-block;min-width:0;color:#637083;font-size:16px;font-weight:500;line-height:1.5;text-align:center;overflow-wrap:anywhere}
 .qa-details-page .insp-step-badge{justify-content:center;max-width:100%;padding:3px 12px;border-radius:14px;font-size:16px;font-weight:600;line-height:1.5;text-align:center;white-space:normal;overflow-wrap:anywhere}
@@ -2682,14 +2690,18 @@ mark.dms-search-hit {
 /* 箭头随后一节点定位，始终位于相邻步骤之间并垂直居中。 */
 .qa-details-page .insp-arrow+.insp-step::before{content:"\2192";position:absolute;top:50%;left:-26px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;transform:translateY(-50%);color:#a8b4c4;font-size:19px;font-weight:400;line-height:1}
 .qa-details-page .insp-arrow-rejected+.insp-step::before{color:var(--flow-appr)}
-.qa-details-page .insp-step:nth-of-type(5n+1)::before{display:none}
+.qa-details-page .insp-stage:nth-of-type(5n+1)>.insp-step::before{display:none}
+.qa-details-page .insp-recheck-flow>.insp-arrow+.insp-step::before{content:"\2190";color:var(--flow-appr)}
+.qa-details-page .insp-recheck-flow>.insp-step:nth-of-type(5n+1)::before{display:none}
 .qa-details-page .insp-step-rejected{--dt-flow-color:var(--flow-appr)}
 .qa-details-page .insp-badge-rejected{background:color-mix(in srgb,var(--flow-appr) 12%,#fff)}
 .qa-details-page .insp-step-rejected .insp-step-name,.qa-details-page .insp-badge-rejected,.qa-details-page .insp-arrow-rejected{color:var(--flow-appr)}
 @media(min-width:441px) and (max-width:700px){
   .qa-details-page .insp-flow{--insp-columns:3;grid-template-columns:repeat(3,minmax(0,1fr))}
-  .qa-details-page .insp-step:nth-of-type(5n+1)::before{display:flex}
-  .qa-details-page .insp-step:nth-of-type(3n+1)::before{display:none}
+  .qa-details-page .insp-stage:nth-of-type(5n+1)>.insp-step::before{display:flex}
+  .qa-details-page .insp-stage:nth-of-type(3n+1)>.insp-step::before{display:none}
+  .qa-details-page .insp-recheck-flow>.insp-step:nth-of-type(5n+1)::before{display:flex}
+  .qa-details-page .insp-recheck-flow>.insp-step:nth-of-type(3n+1)::before{display:none}
 }
 @media(max-width:620px){
   .qa-details-page .dt-wrap{padding:12px}
@@ -2716,15 +2728,18 @@ mark.dms-search-hit {
   .qa-details-page .dt-data-table td{border-left-width:1px}
   .qa-details-page .dt-data-table tr:last-child>:nth-last-child(-n+2){border-bottom-width:0}
   .qa-details-page .insp-flow{--insp-columns:2;grid-template-columns:repeat(2,minmax(0,1fr))}
-  .qa-details-page .insp-step:nth-of-type(5n+1)::before{display:flex}
-  .qa-details-page .insp-step:nth-of-type(2n+1)::before{display:none}
+  .qa-details-page .insp-stage:nth-of-type(5n+1)>.insp-step::before{display:flex}
+  .qa-details-page .insp-stage:nth-of-type(2n+1)>.insp-step::before{display:none}
+  .qa-details-page .insp-recheck-flow>.insp-step:nth-of-type(5n+1)::before{display:flex}
+  .qa-details-page .insp-recheck-flow>.insp-step:nth-of-type(2n+1)::before{display:none}
 }
 
-/* 全部历史按检验流程放在独立第二排，同环节按时间先后排列，较多记录可横向滚动。 */
-.qa-details-page .insp-flow.insp-reject-flow{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - (var(--insp-columns) - 1)*26px)/var(--insp-columns));margin-top:12px;padding:30px 0 4px;overflow-x:auto;overflow-y:hidden}
-.qa-details-page .insp-reject-flow .insp-step-rejected::after{content:"\2191";position:absolute;top:-30px;left:50%;display:flex;align-items:center;justify-content:center;width:26px;height:30px;transform:translateX(-50%);color:var(--flow-appr);font-size:19px;font-weight:400;line-height:1}
-.qa-details-page .insp-reject-flow .insp-badge-rejected{border:0;cursor:pointer}
-.qa-details-page .insp-reject-flow .insp-badge-rejected:focus-visible{outline:2px solid var(--flow-appr);outline-offset:3px}
+/* 驳回历史跟随回退目标所在槽位，同槽位纵向排列，窄屏一并换行。 */
+.qa-details-page .insp-reject-flow{position:relative;display:flex;flex-direction:column;align-self:start;gap:12px;min-width:0;padding:30px 0 4px}
+.qa-details-page .insp-stage>.insp-reject-flow::before{content:"\2191";position:absolute;top:0;left:50%;display:flex;align-items:center;justify-content:center;width:26px;height:30px;transform:translateX(-50%);color:var(--flow-appr);font-size:19px;font-weight:400;line-height:1}
+.qa-details-page .insp-reject-fallback{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px 26px;margin-top:12px;padding:0 0 4px}
+.qa-details-page .insp-reject-flow .insp-badge-rejected,.qa-details-page .insp-recheck-flow .insp-badge-rejected{border:0;cursor:pointer}
+.qa-details-page .insp-reject-flow .insp-badge-rejected:focus-visible,.qa-details-page .insp-recheck-flow .insp-badge-rejected:focus-visible{outline:2px solid var(--flow-appr);outline-offset:3px}
 
 /* --- 4.3 报告管理首页 --- */
 /* ---- qarep\index.html: qarep\index.html ---- */
