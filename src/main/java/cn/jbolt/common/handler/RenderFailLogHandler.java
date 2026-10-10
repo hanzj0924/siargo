@@ -13,22 +13,8 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
 
 /**
- * renderFail 增强日志 Handler
- *
- * <p>通过包装 HttpServletResponse 的输出流，在响应内容写出时检测是否包含
- * renderFail 特征（JSON 中的 "state":false），从而实现对非异常触发的
- * renderFail 调用的日志记录。</p>
- *
- * <p>本方案可覆盖以下场景：
- * <ul>
- *   <li>JBoltOnlineUserGlobalInterceptor 会话过期直接调用 renderFail 并 return</li>
- *   <li>JBoltAdminAuthInterceptor 权限校验失败直接调用 renderFail 并 return</li>
- *   <li>业务 Controller 中主动调用 renderFail 的任何情形</li>
- * </ul>
- * </p>
- *
- * @author Hanzj
- * @date 2026-04-24
+ * 检测响应中的 state:false，记录请求及失败原因，补记未抛异常的 renderFail。
+ * 覆盖会话过期、权限拒绝和业务主动失败；静态资源直接放行。
  */
 public class RenderFailLogHandler extends Handler {
     protected static final Log LOG = Log.getLog(RenderFailLogHandler.class);
@@ -64,13 +50,15 @@ public class RenderFailLogHandler extends Handler {
         }
     }
 
-    /**
-     * 判断是否为静态资源请求（CSS/JS/图片等），与 JBoltBaseHandler 逻辑保持一致
-     */
+    /** 判断是否为静态资源请求（CSS/JS/图片等），与 JBoltBaseHandler 逻辑保持一致 */
     private boolean isStaticResource(String target) {
-        if (target == null) return false;
+        if (target == null) {
+            return false;
+        }
         int index = target.lastIndexOf('.');
-        if (index == -1) return false;
+        if (index == -1) {
+            return false;
+        }
         String suffix = target.substring(index).toLowerCase();
         return suffix.equals(".js") || suffix.equals(".css") || suffix.equals(".png")
                 || suffix.equals(".jpg") || suffix.equals(".jpeg") || suffix.equals(".gif")
@@ -79,14 +67,14 @@ public class RenderFailLogHandler extends Handler {
                 || suffix.equals(".map");
     }
 
-    // -------------------------------------------------------------------------
+
     // 内部类：响应包装器
-    // -------------------------------------------------------------------------
+
 
     /**
-     * 捕获响应输出的包装器。
-     * 代理 PrintWriter 和 ServletOutputStream，在首次写入时检测 renderFail 特征。
-     * 检测完成后直接透传，不缓存全部响应体，性能开销最小。
+     * 代理响应输出并检测 renderFail 特征。
+     * Writer 逐次检查至命中，字节流检查首次缓冲片段。
+     * 输出始终透传，不缓存全部响应体。
      */
     static class CapturingResponseWrapper extends HttpServletResponseWrapper {
         private volatile boolean renderFailDetected = false;
@@ -123,11 +111,11 @@ public class RenderFailLogHandler extends Handler {
             return wrappedStream;
         }
 
-        /**
-         * 处理检测到的内容片段，解析 renderFail 特征
-         */
+        /** 处理检测到的内容片段，解析 renderFail 特征 */
         void onContentWritten(String content) {
-            if (renderFailDetected || content == null) return;
+            if (renderFailDetected || content == null) {
+                return;
+            }
             if (content.contains(RENDER_FAIL_SIGNATURE)) {
                 renderFailDetected = true;
                 // 提取 msg 字段内容
@@ -135,34 +123,46 @@ public class RenderFailLogHandler extends Handler {
             }
         }
 
-        /**
-         * 简单解析 JSON 中的 msg 字段值
-         */
+        /** 简单解析 JSON 中的 msg 字段值 */
         private static String extractMsg(String json) {
             // 匹配 "msg":"..." 或 "msg":null
             int msgIdx = json.indexOf("\"msg\":");
-            if (msgIdx == -1) msgIdx = json.indexOf("\"message\":");
-            if (msgIdx == -1) return "(msg not found)";
+            if (msgIdx == -1) {
+                msgIdx = json.indexOf("\"message\":");
+            }
+            if (msgIdx == -1) {
+                return "(msg not found)";
+            }
             int colonIdx = json.indexOf(':', msgIdx);
-            if (colonIdx == -1) return "(msg not found)";
+            if (colonIdx == -1) {
+                return "(msg not found)";
+            }
             int start = colonIdx + 1;
-            while (start < json.length() && json.charAt(start) == ' ') start++;
-            if (start >= json.length()) return "(msg not found)";
+            while (start < json.length() && json.charAt(start) == ' ') {
+                start++;
+            }
+            if (start >= json.length()) {
+                return "(msg not found)";
+            }
             if (json.charAt(start) == '"') {
                 int end = json.indexOf('"', start + 1);
-                if (end == -1) return json.substring(start);
+                if (end == -1) {
+                    return json.substring(start);
+                }
                 return json.substring(start + 1, end);
             }
             // null 或数字
             int end = start;
-            while (end < json.length() && json.charAt(end) != ',' && json.charAt(end) != '}') end++;
+            while (end < json.length() && json.charAt(end) != ',' && json.charAt(end) != '}') {
+                end++;
+            }
             return json.substring(start, end).trim();
         }
     }
 
-    // -------------------------------------------------------------------------
+
     // 代理 PrintWriter
-    // -------------------------------------------------------------------------
+
 
     static class DetectingPrintWriter extends PrintWriter {
         private final CapturingResponseWrapper wrapper;
@@ -205,9 +205,9 @@ public class RenderFailLogHandler extends Handler {
         }
     }
 
-    // -------------------------------------------------------------------------
+
     // 代理 ServletOutputStream
-    // -------------------------------------------------------------------------
+
 
     static class DetectingServletOutputStream extends ServletOutputStream {
         private final CapturingResponseWrapper wrapper;
@@ -266,7 +266,11 @@ public class RenderFailLogHandler extends Handler {
         private void flushBuffer() {
             if (!bufferFlushed && !detected) {
                 String content;
-                try { content = buffer.toString("UTF-8"); } catch (Exception ex) { content = buffer.toString(); }
+                try {
+                    content = buffer.toString("UTF-8");
+                } catch (Exception ex) {
+                    content = buffer.toString();
+                }
                 wrapper.onContentWritten(content);
                 detected = wrapper.isRenderFailDetected();
                 bufferFlushed = true;

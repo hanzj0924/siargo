@@ -19,13 +19,7 @@ import cn.jbolt.core.service.base.JBoltBaseService;
 import cn.jbolt.core.util.JBoltArrayUtil;
 import cn.jbolt.core.util.JBoltQiniuUtil;
 
-/**
- * 七牛账号管理 Service
- *
- * @ClassName: QiniuService
- * @author: JBolt-Generator
- * @date: 2021-10-13 22:44
- */
+/** 七牛账号管理 Service */
 public class QiniuService extends JBoltBaseService<Qiniu> {
     private Qiniu dao = new Qiniu().dao();
     @Inject
@@ -36,39 +30,23 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
         return dao;
     }
 
-    /**
-     * 后台管理分页查询true
-     *
-     * @param pageNumber
-     * @param pageSize
-     * @param keywords
-     * @param type
-     * @param enable
-     * @return
-     */
-    public Page<Qiniu> paginateAdminDatas(int pageNumber, int pageSize, String keywords, Integer type, Boolean isDefault, Boolean enable) {
-        return paginate(selectSql()//拿到新的默认此模块查询语句
-                .page(pageNumber, pageSize)//分页
-                .eq("type", type)//type条件查询 无需自己if判断null和0 内置自动
-                .eq("enable", enable)//enable条件查询 无需判断null 自动处理
-                .eq("is_default", isDefault)//eis_default条件查询 无需判断null 自动处理
-                .likeMulti(keywords, "name", "sn", "remark", "ak", "sk")//多列like模糊查询 自动处理null
-                .orderById(true)//按照id倒序排列
+    /** 后台管理分页查询true */
+    public Page<Qiniu> paginateAdminDatas(int pageNumber, int pageSize, String keywords, Integer type,
+                                          Boolean isDefault, Boolean enable) {
+        return paginate(selectSql()// 拿到新的默认此模块查询语句
+                .page(pageNumber, pageSize)// 分页
+                .eq("type", type)// type条件查询 无需自己if判断null和0 内置自动
+                .eq("enable", enable)// enable条件查询 无需判断null 自动处理
+                .eq("is_default", isDefault)// eis_default条件查询 无需判断null 自动处理
+                .likeMulti(keywords, "name", "sn", "remark", "ak", "sk")// 多列like模糊查询 自动处理null
+                .orderById(true)// 按照id倒序排列
         );
     }
 
 
-    /**
-     * 后台管理分页查询true
-     *
-     * @param pageNumber
-     * @param pageSize
-     * @param keywords
-     * @param type
-     * @param enable
-     * @return
-     */
-    public Page<Record> paginateAdminRecordDatas(int pageNumber, int pageSize, String keywords, Integer type, Boolean enable) {
+    /** 后台管理分页查询true */
+    public Page<Record> paginateAdminRecordDatas(int pageNumber, int pageSize, String keywords, Integer type,
+                                                 Boolean enable) {
         Sql sql = selectSql().page(pageNumber, pageSize);
         sql.eq("type", type);
         sql.eq("enable", enable);
@@ -77,14 +55,10 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
         return paginateRecord(sql);
     }
 
-    /**
-     * 保存
-     *
-     * @param qiniu
-     * @return
-     */
+    /** 保存 */
     public Ret save(Qiniu qiniu) {
-        if (qiniu == null || isOk(qiniu.getId()) || notOk(qiniu.getType()) || notOk(qiniu.getName()) || notOk(qiniu.getSn()) || notOk(qiniu.getAk()) || notOk(qiniu.getSk())) {
+        if (qiniu == null || isOk(qiniu.getId()) || notOk(qiniu.getType()) || notOk(qiniu.getName()) ||
+                notOk(qiniu.getSn()) || notOk(qiniu.getAk()) || notOk(qiniu.getSk())) {
             return fail(JBoltMsg.PARAM_ERROR);
         }
         if (exists("name", qiniu.getName())) {
@@ -108,27 +82,23 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
         qiniu.setBucketCount(0);
         boolean success = qiniu.save();
         if (success) {
-            //如果设置为default 就把其它的已经default的设置为false
+            // 如果设置为default 就把其它的已经default的设置为false
             if (qiniu.getIsDefault()) {
                 changeColumnFalseByExcludedId(IS_DEFAULT, qiniu.getId());
             }
-            //添加日志
+            // 添加日志
             addSaveSystemLog(qiniu.getId(), JBoltUserKit.getUserId(), qiniu.getName());
         }
         return ret(success);
     }
 
-    /**
-     * 更新
-     *
-     * @param qiniu
-     * @return
-     */
+    /** 更新 */
     public Ret update(Qiniu qiniu) {
-        if (qiniu == null || notOk(qiniu.getId()) || notOk(qiniu.getType()) || notOk(qiniu.getName()) || notOk(qiniu.getSn()) || notOk(qiniu.getAk()) || notOk(qiniu.getSk())) {
+        if (qiniu == null || notOk(qiniu.getId()) || notOk(qiniu.getType()) || notOk(qiniu.getName()) ||
+                notOk(qiniu.getSn()) || notOk(qiniu.getAk()) || notOk(qiniu.getSk())) {
             return fail(JBoltMsg.PARAM_ERROR);
         }
-        //更新时需要判断数据存在
+        // 更新时需要判断数据存在
         Qiniu dbQiniu = findById(qiniu.getId());
         if (dbQiniu == null) {
             return fail(JBoltMsg.DATA_NOT_EXIST);
@@ -152,22 +122,17 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
         qiniu.setUpdateUserId(JBoltUserKit.getUserId());
         boolean success = qiniu.update();
         if (success) {
-            //如果前端传了true 并且数据库里的不是true
+            // 如果前端传了true 并且数据库里的不是true
             if ((qiniu.getIsDefault() != null && qiniu.getIsDefault()) && !dbQiniu.getIsDefault()) {
                 changeColumnFalseByExcludedId(IS_DEFAULT, qiniu.getId());
             }
-            //添加日志
+            // 添加日志
             addUpdateSystemLog(qiniu.getId(), JBoltUserKit.getUserId(), qiniu.getName());
         }
         return ret(success);
     }
 
-    /**
-     * 删除
-     *
-     * @param id
-     * @return
-     */
+    /** 删除 */
     public Ret delete(Long id) {
         return deleteById(id, true);
     }
@@ -177,11 +142,10 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
      *
      * @param qiniu 要删除的model
      * @param kv    携带额外参数一般用不上
-     * @return
      */
     @Override
     protected String afterDelete(Qiniu qiniu, Kv kv) {
-        if(qiniu.getIsDefault()){
+        if (qiniu.getIsDefault()) {
             JBoltQiniuCache.me.removeDefault();
         }
         JBoltQiniuCache.me.removeDefaultBucket(qiniu.getId());
@@ -194,11 +158,10 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
      *
      * @param qiniu 要删除的model
      * @param kv    携带额外参数一般用不上
-     * @return
      */
     @Override
     public String checkCanDelete(Qiniu qiniu, Kv kv) {
-        //如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
+        // 如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
         return checkInUse(qiniu, kv);
     }
 
@@ -207,11 +170,10 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
      *
      * @param qiniu model
      * @param kv    携带额外参数一般用不上
-     * @return
      */
     @Override
     public String checkInUse(Qiniu qiniu, Kv kv) {
-        //这里用来覆盖 检测Qiniu是否被其它表引用
+        // 这里用来覆盖 检测Qiniu是否被其它表引用
         boolean hasBucket = qiniuBucketService.checkQiniuHasBucket(qiniu.getId());
         if (hasBucket) {
             return "此账号下已经存在Bucket，不能直接删除";
@@ -224,15 +186,17 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
     protected String afterToggleBoolean(Qiniu qiniu, String column, Kv kv) {
         switch (column) {
             case "enable":
-                addUpdateSystemLog(qiniu.getId(), JBoltUserKit.getUserId(), qiniu.getName(), "的启用状态:" + qiniu.getEnable());
+                addUpdateSystemLog(qiniu.getId(), JBoltUserKit.getUserId(), qiniu.getName(),
+                        "的启用状态:" + qiniu.getEnable());
                 break;
             case "is_default":
                 if (qiniu.getIsDefault()) {
                     changeColumnFalseByExcludedId(IS_DEFAULT, qiniu.getId());
                 }
-                //删除default缓存
+                // 删除default缓存
                 JBoltQiniuCache.me.removeDefault();
-                addUpdateSystemLog(qiniu.getId(), JBoltUserKit.getUserId(), qiniu.getName(), "的是否默认属性:" + qiniu.getIsDefault());
+                addUpdateSystemLog(qiniu.getId(), JBoltUserKit.getUserId(), qiniu.getName(),
+                        "的是否默认属性:" + qiniu.getIsDefault());
                 break;
 
             default:
@@ -242,40 +206,28 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
         return null;
     }
 
-    /**
-     * 执行七牛账号的bucketCount更新
-     *
-     * @param qiniuId
-     */
+    /** 执行七牛账号的bucketCount更新 */
     public void updateBucketCount(Long qiniuId) {
         if (isOk(qiniuId)) {
             Sql bucketCountSql = qiniuBucketService.selectSql().count().eq("qiniu_id", qiniuId);
-            Sql sql = updateSql().set("bucket_count", new SqlExpress("(" + bucketCountSql.toSql() + ")")).eq(ID, qiniuId);
+            Sql sql = updateSql().set("bucket_count", new SqlExpress("(" + bucketCountSql.toSql() + ")"))
+                    .eq(ID, qiniuId);
             update(sql);
         }
     }
 
-    /**
-     * 获取默认七牛账号
-     *
-     * @return
-     */
+    /** 获取默认七牛账号 */
     public Qiniu getDefault() {
         return findFirst(selectSql().eq("is_default", TRUE));
     }
 
-    /**
-     * 生成指定bucket的token & region
-     *
-     * @param bucketSn
-     * @return
-     */
+    /** 生成指定bucket的token & region */
     public Ret genUploadParas(String bucketSn) {
         Qiniu qiniu = null;
         QiniuBucket qiniuBucket = null;
-        //如果没传或者传default 就获取默认default
+        // 如果没传或者传default 就获取默认default
         if (notOk(bucketSn) || bucketSn.trim().equals("default")) {
-            //获取默认七牛账号
+            // 获取默认七牛账号
             qiniu = JBoltQiniuCache.me.getDefault();
             if (qiniu == null) {
                 return fail("未指定bucket的sn将使用默认七牛账号，但系统尚未设置默认七牛账号");
@@ -284,7 +236,8 @@ public class QiniuService extends JBoltBaseService<Qiniu> {
             if (qiniuBucket == null) {
                 return fail("未指定bucket的sn将使用默认七牛账号，但默认七牛账号里尚未设置默认Bucket");
             }
-        } else {
+        }
+        else {
             qiniuBucket = JBoltQiniuCache.me.getBucketBySn(bucketSn);
             if (qiniuBucket == null) {
                 return fail("指定的bucketSn无效");

@@ -66,7 +66,7 @@
         msgAjaxError: 'Coś poczło nie tak podczas {operation}. Spróbuj ponownie!',
         msgAjaxProgressError: '{operation} nie powiodło się',
         msgDuplicateFile: 'Plik "{name}" o identycznym rozmiarze "{size} KB" został wgrany wcześniej. Pomijanie zduplikowanego pliku.',
-        msgResumableUploadRetriesExceeded:  'Przekroczono limit <b>{max}</b> prób wgrania pliku <b>{file}</b>! Szczegóły błędu: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: 'Przekroczono limit <b>{max}</b> prób wgrania pliku <b>{file}</b>! Szczegóły błędu: <pre>{error}</pre>',
         msgPendingTime: 'Pozostało {time}',
         msgCalculatingTime: 'obliczanie pozostałego czasu',
         ajaxOperations: {
@@ -88,7 +88,7 @@
             indicatorSuccessTitle: 'Dodane',
             indicatorErrorTitle: 'Błąd',
             indicatorPausedTitle: 'Przesyłanie zatrzymane',
-            indicatorLoadingTitle:  'Przesyłanie &hellip;'
+            indicatorLoadingTitle: 'Przesyłanie &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Pokaż poprzedni plik',

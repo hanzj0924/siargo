@@ -35,10 +35,10 @@ public class PinYinUtil {
         final char[] arr = text.toCharArray();
         final int len = arr.length;
         final String[] result = new String[len];
-        //处理每个字符 放进result
+        // 处理每个字符 放进result
         // 1. null 保留的英文
         // 2. 异常或者无结果为 空字符串
-        // 3. 正常时保留第一个拼写        
+        // 3. 正常时保留第一个拼写
         for (int i = 0; i < len; i++) {
             char c = arr[i];
             if (c > 128) {
@@ -46,56 +46,62 @@ public class PinYinUtil {
                     String[] temp = PinyinHelper.toHanyuPinyinStringArray(c, defaultFormat);
                     if (temp != null && temp.length != 0) {
                         result[i] = temp[0];
-                    } else {
+                    }
+                    else {
                         result[i] = EMPATY;
                     }
                 } catch (BadHanyuPinyinOutputFormatCombination e) {
                     result[i] = EMPATY;
-                    LoggerFactory.getLogger(PinYinUtil.class).warn("Exception occur when getFullSpell at index" + i + " of " + text, e);
+                    LoggerFactory.getLogger(PinYinUtil.class)
+                            .warn("Exception occur when getFullSpell at index" + i + " of " + text, e);
                 }
-            } else {
-                if (c==' ') {
-                    arr[i] = '\0'; //NOTICE: 如果是空白符，设置成了 '\0';
+            }
+            else {
+                if (c == ' ') {
+                    arr[i] = '\0'; // NOTICE: 如果是空白符，设置成了 '\0';
                 }
                 result[i] = null;
             }
         }
 
-        //开始拼结果
+        // 开始拼结果
         final StringBuilder sb = new StringBuilder(maxLength + 6);
-        //处理首字母， 假定不考虑限制的长度
+        // 处理首字母， 假定不考虑限制的长度
         for (int i = 0; i < len; i++) {
             String string = result[i];
             if (string == null) {
                 char c = arr[i];
-                //忽略空白符
+                // 忽略空白符
                 if (c != '\0') {
                     sb.append(c);
                 }
-            } else if (string.length() != 0) {
+            }
+            else if (string.length() != 0) {
                 sb.append(string.charAt(0));
             }
         }
-        //插入分割
+        // 插入分割
         sb.append(SPLIT);
-        //
+
         for (int i = 0; i < len && sb.length() < maxLength; i++) {
             String string = result[i];
             if (string == null) {
                 char c = arr[i];
-                //忽略空白符
+                // 忽略空白符
                 if (c != '\0') {
                     sb.append(c);
                 }
-            } else if (string.length() != 0) {
+            }
+            else if (string.length() != 0) {
                 sb.append(string);
             }
         }
 
-        //导出
+        // 导出
         if (sb.length() <= maxLength) {
             return sb.toString();
-        } else {
+        }
+        else {
             return sb.substring(0, maxLength);
         }
     }
@@ -118,9 +124,11 @@ public class PinYinUtil {
                     }
                 } catch (BadHanyuPinyinOutputFormatCombination e) {
                     //e.printStackTrace();
-                    LoggerFactory.getLogger(PinYinUtil.class).warn("Exception occur when getFirstSpell of " + chinese, e);
+                    LoggerFactory.getLogger(PinYinUtil.class)
+                            .warn("Exception occur when getFirstSpell of " + chinese, e);
                 }
-            } else {
+            }
+            else {
                 pybf.append(arr[i]);
             }
         }
@@ -148,15 +156,17 @@ public class PinYinUtil {
                         pybf.append(temp[0]);
                     }
                 } catch (BadHanyuPinyinOutputFormatCombination e) {
-                    LoggerFactory.getLogger(PinYinUtil.class).warn("Exception occur when getFullSpell of " + chinese, e);
+                    LoggerFactory.getLogger(PinYinUtil.class)
+                            .warn("Exception occur when getFullSpell of " + chinese, e);
                 }
-            } else {
+            }
+            else {
                 pybf.append(arr[i]);
             }
         }
         return pybf.toString();
     }
-    
+
     public static void main(String[] args) {
         System.out.println(getFirstSpell("中国"));
         System.out.println(getFullSpell("中国"));

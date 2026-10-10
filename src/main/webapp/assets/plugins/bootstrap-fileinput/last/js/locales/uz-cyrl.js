@@ -75,7 +75,7 @@
         msgAjaxError: '{operation} амалиётида хатолик юз берди. Илтимос кейинроқ қайта уриниб кўринг!',
         msgAjaxProgressError: '{operation} бажарилмади',
         msgDuplicateFile: '"{name}" номли "{size} KB" ҳажмдаги файл олдин танланган. Бошқа файлни танлашга уриниб кўринг.',
-        msgResumableUploadRetriesExceeded:  '<b>{file}</b> файлини юклаш учун <b>{max}</b> марта уриниш бекор қилинди! Хато тафсилотлари: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: '<b>{file}</b> файлини юклаш учун <b>{max}</b> марта уриниш бекор қилинди! Хато тафсилотлари: <pre>{error}</pre>',
         msgPendingTime: '{time} қолган',
         msgCalculatingTime: 'қолган вақтни ҳисоблаш',
         ajaxOperations: {
@@ -97,7 +97,7 @@
             indicatorSuccessTitle: 'Юкланди',
             indicatorErrorTitle: 'Юклашда хатолик',
             indicatorPausedTitle: 'Юклаш тўхтатилди',
-            indicatorLoadingTitle:  'Юкланмоқда &hellip;'
+            indicatorLoadingTitle: 'Юкланмоқда &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Олдинги файлни кўриш',

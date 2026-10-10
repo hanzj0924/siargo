@@ -7,17 +7,13 @@ import cn.jbolt.core.api.httpmethod.JBoltHttpGet;
 import cn.jbolt.core.crossorigin.CrossOrigin;
 import com.jfinal.core.Path;
 
-/**
- * JBolt内置公用 api jwt刷新专用接口
- * @author 山东小木
- * @date 2022年6月16日 19:48:56
- */
+/** JBolt内置公用 api jwt刷新专用接口 */
 @CrossOrigin
 @Path("/api/jwt/refresh")
 public class JBoltRefreshJwtApiController extends JBoltApiBaseController {
     @JBoltApplyJWT
     @JBoltHttpGet
-    public void index(){
+    public void index() {
         renderJBoltApiRet(JBoltApiJwtManger.me().refreshJwt(this));
     }
 }

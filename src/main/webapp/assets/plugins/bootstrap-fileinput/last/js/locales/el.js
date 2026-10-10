@@ -76,7 +76,7 @@
         msgAjaxError: 'Συνέβη κάποιο σφάλμα με την διαδικασία {operation}. Παρακαλώ δοκιμάστε ξανά αργότερα!',
         msgAjaxProgressError: 'Αποτυχία {operation}',
         msgDuplicateFile: 'Το αρχείο "{name}" ίδιου μεγέθους "{size} KB" έχει ήδη επιλεγεί προηγουμένως. Παράλειψη της διπλότυπης επιλογής.',
-        msgResumableUploadRetriesExceeded:  'Η φόρτωση ακυρώθηκε μετά από <b>{max}</b> δοκιμές για το αρχείο <b>{file}</b>! Λεπτομέρειες σφάλματος: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: 'Η φόρτωση ακυρώθηκε μετά από <b>{max}</b> δοκιμές για το αρχείο <b>{file}</b>! Λεπτομέρειες σφάλματος: <pre>{error}</pre>',
         msgPendingTime: 'Απομένει {time}',
         msgCalculatingTime: 'υπολογισμός χρόνου που απομένει',
         ajaxOperations: {

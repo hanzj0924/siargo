@@ -26,13 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 用户Service
- *
- * @ClassName: UserService
- * @author: JFinal学院-小木 QQ：909854136
- * @date: 2020年5月2日
- */
+/** 用户Service */
 public class UserService extends JBoltUserService {
     @Inject
     private DeptService deptService;
@@ -43,12 +37,7 @@ public class UserService extends JBoltUserService {
     @Inject
     ExtendUserOfModuleLinkService extendUserOfModuleLinkService;
 
-    /**
-     * 保存
-     *
-     * @param user
-     * @return
-     */
+    /** 保存 */
     public Ret save(User user, UserExtend extend) {
         if (user == null || isOk(user.getId()) || notOk(user.getName())
                 || notOk(user.getUsername())) {
@@ -62,7 +51,7 @@ public class UserService extends JBoltUserService {
         if (ret.isFail()) {
             return ret;
         }
-        //添加完user后处理extend
+        // 添加完user后处理extend
         if (userExtendEnable && extend != null) {
             extend.setId(user.getId());
             ret = userExtendService.saveByUser(extend);
@@ -74,19 +63,16 @@ public class UserService extends JBoltUserService {
     }
 
 
-    /**
-     * 处理用户的所属模块信息
-     *
-     * @param user
-     */
+    /** 处理用户的所属模块信息 */
     protected void processUserOfModule(User user) {
         if (notOk(user.getOfModule()) || user.getOfModule().intValue() == 1) {
-            //如果没设置就save 那得设置上 从当前线程获取 看看有没有 如果有就用了
+            // 如果没设置就save 那得设置上 从当前线程获取 看看有没有 如果有就用了
             Integer jboltOfModule = JBoltCurrentOfModuleKit.getJboltOfModule();
             ExtendProjectOfModule type = null;
             if (notOk(jboltOfModule)) {
                 type = ExtendProjectOfModule.PLATFORM_INNER_ADMIN;
-            } else {
+            }
+            else {
                 type = JBoltEnum.getEnumObjectByValue(ExtendProjectOfModule.class, jboltOfModule.intValue());
 
             }
@@ -101,27 +87,19 @@ public class UserService extends JBoltUserService {
     private void processOfModuleLinkByType(User user, ExtendProjectOfModule type) {
         if (type == ExtendProjectOfModule.PLATFORM_INNER_ADMIN) {
             processOfModuleLinkIsInnerApplication(user);
-        } else {
+        }
+        else {
             user.setOfModuleLink(extendUserOfModuleLinkService.processOfModuleLinkByType(type));
         }
     }
 
-    /**
-     * 设置 内置模块link为内置app
-     *
-     * @param user
-     */
+    /** 设置 内置模块link为内置app */
     private void processOfModuleLinkIsInnerApplication(User user) {
         Application application = JBoltApplicationCache.me.getPcInnerPlatformApplication();
         user.setOfModuleLink(application.getId().toString());
     }
 
-    /**
-     * 更新
-     *
-     * @param user
-     * @return
-     */
+    /** 更新 */
     public Ret update(User user, UserExtend extend) {
         if (user == null || notOk(user.getId()) || notOk(user.getName())
                 || notOk(user.getUsername())) {
@@ -140,7 +118,7 @@ public class UserService extends JBoltUserService {
         if (ret.isFail()) {
             return ret;
         }
-        //添加完user后处理extend
+        // 添加完user后处理extend
         if (userExtendEnable && extend != null) {
             extend.setId(user.getId());
             ret = userExtendService.updateByUser(extend);
@@ -151,18 +129,13 @@ public class UserService extends JBoltUserService {
         return SUCCESS;
     }
 
-    /**
-     * saveOrUpdate
-     *
-     * @param user
-     * @return
-     */
+    /** saveOrUpdate */
     private Ret saveOrUpdate(User user) {
         if (user == null || notOk(user.getName())
                 || notOk(user.getUsername())) {
             return fail(JBoltMsg.PARAM_ERROR);
         }
-        if(user.getUsername().length()>40){
+        if (user.getUsername().length() > 40) {
             return fail("用户名不能超过40个字符");
         }
         boolean update = isOk(user.getId());
@@ -178,12 +151,12 @@ public class UserService extends JBoltUserService {
                 return fail(JBoltMsg.DATA_NOT_EXIST);
             }
             dbUser.deleteKeyCache();
-            //清理角色变更缓存
+            // 清理角色变更缓存
             if ((isOk(dbUser.getRoles()) && !dbUser.getRoles().equals(user.getRoles()))
                     ||
                     (isOk(user.getRoles()) && !user.getRoles().equals(dbUser.getRoles()))
             ) {
-                //存在其他跟自己相同角色的就不清理缓存 不存在说明自己独占 就清理
+                // 存在其他跟自己相同角色的就不清理缓存 不存在说明自己独占 就清理
                 boolean existSameRoles = existsSameRoles(dbUser.getRoles(), dbUser.getId());
                 if (!existSameRoles) {
                     JBoltPermissionCache.me.removeRolesPermissionKeySet(dbUser.getRoles());
@@ -191,11 +164,12 @@ public class UserService extends JBoltUserService {
                     JBoltPermissionCache.me.removeRolesMenusWithSystemAdminDefault(dbUser.getRoles());
                 }
             }
-        } else {
+        }
+        else {
             if (notOk(user.getPassword())) {
                 return fail("请输入用户密码");
             }
-            if(user.getPassword().length()>40){
+            if (user.getPassword().length() > 40) {
                 return fail("密码不能超过40个字符");
             }
 //			if (existsName(user.getName())) {
@@ -209,7 +183,8 @@ public class UserService extends JBoltUserService {
         if (notOk(user.getAvatar())) {
             if (isOk(user.getSex())) {
                 user.setAvatar("assets/img/" + (user.getSex() == User.SEX_MALE ? "nan.png" : "nv.png"));
-            } else {
+            }
+            else {
                 user.setAvatar("assets/img/nan.png");
             }
         }
@@ -230,7 +205,7 @@ public class UserService extends JBoltUserService {
                 user.setIsSystemAdmin(false);
             }
         }
-        //处理用户的deptPath
+        // 处理用户的deptPath
         if (isOk(user.getDeptId()) && notOk(user.getDeptPath())) {
             Dept dept = deptService.findById(user.getDeptId());
             if (dept == null) {
@@ -245,35 +220,25 @@ public class UserService extends JBoltUserService {
         if (!update) {
             processUserOfModule(user);
         }
-        //保存或者更新
+        // 保存或者更新
         boolean success = update ? user.update() : user.save();
         if (success) {
             if (update) {
                 addUpdateSystemLog(user.getId(), JBoltUserKit.getUserId(), user.getName());
-            } else {
+            }
+            else {
                 addSaveSystemLog(user.getId(), JBoltUserKit.getUserId(), user.getName());
             }
         }
         return ret(success);
     }
 
-    /**
-     * 查询是否存在相同角色组用户 排除自身
-     *
-     * @param roles
-     * @param userId
-     * @return
-     */
+    /** 查询是否存在相同角色组用户 排除自身 */
     private boolean existsSameRoles(String roles, Long userId) {
         return exists("roles", roles, userId);
     }
 
-    /**
-     * 删除
-     *
-     * @param id
-     * @return
-     */
+    /** 删除 */
     public Ret delete(Long id) {
         Long userId = JBoltUserKit.getUserId();
         if (isOk(id) && userId.intValue() == id.intValue()) {
@@ -292,7 +257,7 @@ public class UserService extends JBoltUserService {
             addDeleteSystemLog(user.getId(), userId, user.getName());
             boolean userExtendEnable = JBoltGlobalConfigCache.me.userExtendEnable();
             if (userExtendEnable) {
-                //同步删除扩展信息
+                // 同步删除扩展信息
                 Ret ret = userExtendService.deleteById(user.getId());
                 if (ret.isFail()) {
                     return ret;
@@ -302,27 +267,14 @@ public class UserService extends JBoltUserService {
         return ret(success);
     }
 
-    /**
-     * 后台管理查询
-     *
-     * @param pageNumber
-     * @param pageSize
-     * @param keywords
-     * @param ofModule
-     * @param sex
-     * @param assignDept
-     * @param deptId
-     * @param postId
-     * @param roleId
-     * @param enable
-     * @return
-     */
-    public Page<User> paginateAdminList(int pageNumber, int pageSize, String keywords, Integer ofModule, Integer sex, Boolean assignDept, Long deptId, Long postId, Long roleId, Boolean enable) {
+    /** 后台管理查询 */
+    public Page<User> paginateAdminList(int pageNumber, int pageSize, String keywords, Integer ofModule, Integer sex,
+                                        Boolean assignDept, Long deptId, Long postId, Long roleId, Boolean enable) {
         String[] columns = getTableSelectColumnsWithout("password");
         Sql sql = selectSql().page(pageNumber, pageSize);
         sql.select(columns);
         sql.eqIfOk(User.OF_MODULE, ofModule);
-        //如果不是超管 就只能查询不是超管的用户
+        // 如果不是超管 就只能查询不是超管的用户
         if (!JBoltUserKit.isSystemAdmin()) {
             sql.eq("is_system_admin", FALSE);
         }
@@ -340,11 +292,12 @@ public class UserService extends JBoltUserService {
 			}
 		}*/
         if (assignDept != null && assignDept) {
-            //按照部门搜索
+            // 按照部门搜索
             if (isOk(deptId)) {
                 sql.findInSet(deptId, "dept_path", true);
             }
-        } else {
+        }
+        else {
             sql.isNull("dept_id");
         }
 
@@ -365,26 +318,14 @@ public class UserService extends JBoltUserService {
         return userPageData;
     }
 
-    /**
-     * 系统通知选择用户数据源
-     *
-     * @param pageNumber
-     * @param pageSize
-     * @param keywords
-     * @param sex
-     * @param assignDept
-     * @param deptId
-     * @param postId
-     * @param roleId
-     * @return
-     */
-    public Page<User> paginateSysNoticeList(int pageNumber, int pageSize, String keywords, Integer sex, Boolean assignDept, Long deptId, Long postId, Long roleId) {
-        return paginateAdminList(pageNumber, pageSize, keywords, ExtendProjectOfModule.PLATFORM_INNER_ADMIN.getValue(), sex, assignDept, deptId, postId, roleId, true);
+    /** 系统通知选择用户数据源 */
+    public Page<User> paginateSysNoticeList(int pageNumber, int pageSize, String keywords, Integer sex,
+                                            Boolean assignDept, Long deptId, Long postId, Long roleId) {
+        return paginateAdminList(pageNumber, pageSize, keywords, ExtendProjectOfModule.PLATFORM_INNER_ADMIN.getValue(),
+                sex, assignDept, deptId, postId, roleId, true);
     }
 
-    /**
-     * 处理所有用户的deptPath
-     */
+    /** 处理所有用户的deptPath */
     public void processAllDeptPath() {
         List<User> users = new ArrayList<>();
         dao().each(user -> {

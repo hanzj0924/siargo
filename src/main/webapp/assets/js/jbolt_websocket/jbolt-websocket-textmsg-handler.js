@@ -1,5 +1,4 @@
-/**
- * JBolt websocket 文本消息handler处理
+/** JBolt websocket 文本消息handler处理
  */
 export default {
 	/**

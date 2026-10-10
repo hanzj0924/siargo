@@ -1,6 +1,6 @@
 var jbolt_admin_js_version="5.9.5";
-//拿到window doc和body
-var jboltJsDevMode=false;//当前模式 true是开发调试模式 影响加载插件和jboltlog
+// 拿到window doc和body
+var jboltJsDevMode=false;// 当前模式 true是开发调试模式 影响加载插件和jboltlog
 var jboltWindow=$(window);
 var jboltDocument=$(document);
 var jboltBody=$("body");
@@ -16,46 +16,43 @@ var JBOLT_AUTO_LOCK_SCREEN_SECONDS = 0;
 var JBoltBaseTagHref=$("base").attr("href");
 var msgCenterRedDot = $("#msgCenterRedDot");
 var JBoltBaseTagHrefNoSchema=JBoltBaseTagHref.replace("http://","").replace("https://","").replace("www","");
-//定义引入界面是否启用pjax
+// 定义引入界面是否启用pjax
 var mainPjaxContainerId='#jbolt-container';
 var mainPjaxContainer=$(mainPjaxContainerId);
-//summernote组件默认上传地址 JBOlt内封装
+// summernote组件默认上传地址 JBOlt内封装
 var summernote_img_uploadurl="admin/summernote/upload/image/";
-//是否引入启用Select2
+// 是否引入启用Select2
 var hasImportSelect2=false;
-//全局维护的一个上传文件组件
+// 全局维护的一个上传文件组件
 var multipleUploadFiles=new Array();
-//jbolt 静态资源版本
+// jbolt 静态资源版本
 var JBOLT_ASSETS_VERSION=$.trim($("#JBOLT_ASSETS_VERSION").text());
 if(!JBOLT_ASSETS_VERSION){
 	JBOLT_ASSETS_VERSION=randomId();
 }
-//上传路径pre
+// 上传路径pre
 var JBOLT_BASE_UPLOAD_PATH_PRE=$.trim($("#JBOLT_BASE_UPLOAD_PATH_PRE").text());
-//cityPicker组件数据
+// cityPicker组件数据
 var JBoltCityPickerDatas=null;
-//是否开启刷新从sessionStorag
+// 是否开启刷新从sessionStorag
 var JBoltTabKeepAfterReload=("true"==$.trim($("#JBOLT_TAB_KEEP_AFTER_RELOAD").text()));
-//是否包含pjax
+// 是否包含pjax
 var hasPjax=isHasPjax();
-/**
- * Jbolt封装 tabs选项卡组件
+/** Jbolt封装 tabs选项卡组件
  */
 var jbolt_tabbar=$("#jbolt_tabbar");
 var jbolt_tabs_container=$("#jbolt_tabs");
 var jbolt_tabs_array=[];
-//JBoltTable中所有表格 
+// JBoltTable中所有表格
 var JBoltTableInts={};
 
-/**
- * 根据ID获取ele
+/** 根据ID获取ele
  */
 var g = function (id) {
     return "string" == typeof id ? document.getElementById(id) : id;
 };
 
-/**
- * 获得鼠标选中内容
+/** 获得鼠标选中内容
  */
 function getSelectText(){
 	var text;
@@ -74,17 +71,13 @@ function getSelectText(){
 	return text;
 }
 
-/**
- * 处理大数据量加载
- * @param data
- * @param pageSize
- * @param callback
+/** 处理大数据量加载
  */
 function jboltHandleBigData(data, pageSize,callback) {
 	pageSize = pageSize || 15;
 	var totalCount = data.length; // 共多少条
 	var currentPageNumber = 1; // 当前页数
-	var totalPageNumer = Math.ceil(totalCount / pageSize); //可分多少页,就是分割为多少个小数组
+	var totalPageNumer = Math.ceil(totalCount / pageSize); // 可分多少页,就是分割为多少个小数组
 
 	var handler = function() {
 		var start = (currentPageNumber - 1) * pageSize;
@@ -99,7 +92,7 @@ function jboltHandleBigData(data, pageSize,callback) {
 			});
 		}
 		// console.log(
-		//   `共${totalCount}条,共${totalPageNumer}页,当前第${currentPageNumber}条`
+		// `共${totalCount}条,共${totalPageNumer}页,当前第${currentPageNumber}条`
 		// );
 		if (currentPageNumber < totalPageNumer) {
 			window.requestAnimationFrame(handler);
@@ -109,15 +102,12 @@ function jboltHandleBigData(data, pageSize,callback) {
 	handler();
 }
 
-/**
- * textarea 高度根据内容自适应
- * @param {Object} ele
- * @param {Object} minHeight
+/** textarea 高度根据内容自适应
  */
 function textareaAutoHeight(ele, minHeight) {
 	ele.style.height = 'auto';
 	ele.style.minHeight = (minHeight||34)+"px";
-	ele.scrollTop = 0;//防抖动
+	ele.scrollTop = 0;// 防抖动
 	if(ele.scrollHeight>minHeight) {
 		if (ele.hasAttribute("data-show-count")) {
 			var showCount = $(ele).data("show-count");
@@ -133,8 +123,7 @@ function textareaAutoHeight(ele, minHeight) {
 
 }
 
-/**
- * textarea
+/** textarea
  */
 var TextareaUtil={
 	initEvent:function(parentEle){
@@ -235,8 +224,7 @@ var TextareaUtil={
 }
 
 
-/**
- * replaceAll 处理
+/** replaceAll 处理
  */
 if(!String.prototype.replaceAll){
 	RegExp.quote = function (str) {
@@ -246,16 +234,14 @@ if(!String.prototype.replaceAll){
 		return this.replace(new RegExp(RegExp.quote(s1), "gm"), s2);
 	}
 }
-/**
- * trim处理
+/** trim处理
  */
 if(!String.prototype.trim){
 	String.prototype.trim=function(){return this.replace(/(^\s*)|(\s*$)/g, "");}
 }
 
 if(!String.prototype.startWith||!String.prototype.endWith){
-	/**
-	 * 构造startWith方法
+	/** 构造startWith方法
 	 */
 	String.prototype.startWith = function(s) {
 		if (s == null || s == "" || this.length == 0 || s.length > this.length)
@@ -267,8 +253,7 @@ if(!String.prototype.startWith||!String.prototype.endWith){
 		return true;
 	};
 	
-	/**
-	 * 构造endWith方法
+	/** 构造endWith方法
 	 */
 	String.prototype.endWith = function(s) {
 		if (s == null || s == "" || this.length == 0 || s.length > this.length)
@@ -285,9 +270,9 @@ if(!String.prototype.startWith||!String.prototype.endWith){
 if(JBoltBaseTagHrefNoSchema.startWith("://")){
 	JBoltBaseTagHrefNoSchema=JBoltBaseTagHrefNoSchema.substring(3);
 }
-//已经加载的插件列表
+// 已经加载的插件列表
 var loadedPlugins={};
-//第三方可动态加载的插件定义
+// 第三方可动态加载的插件定义
 var jboltPlugins={
 		"morris":{"js":['assets/plugins/morris/morris.min.js','assets/plugins/morris/raphael.min.js'],"css":['assets/plugins/morris/morris.css']},
 		"webcam":{"js":['assets/plugins/webcam/jquery.webcam.min.js']},
@@ -295,7 +280,7 @@ var jboltPlugins={
 		"summernote":{"js":['assets/plugins/summernote/summernote-bs4.min.js','assets/plugins/summernote/lang/summernote-zh-CN.min.js'],"css":['assets/plugins/summernote/summernote-bs4.css']},
 		"tamemoji":{"js":['assets/plugins/summernote/tam-emoji/js/config.js','assets/plugins/summernote/tam-emoji/js/tam-emoji.min.js'],"css":['assets/plugins/summernote/tam-emoji/css/emoji.css']},
 		"neditor":{"js":['assets/plugins/neditor/neditor.config.js','assets/plugins/neditor/neditor.all.min.js','assets/plugins/neditor/neditor.service.js']},
-//		"fileinput":{"js":['assets/plugins/bootstrap-fileinput/js/plugins/canvas-to-blob.min.js','assets/plugins/bootstrap-fileinput/js/plugins/sortable.min.js','assets/plugins/bootstrap-fileinput/js/plugins/piexif.min.js','assets/plugins/bootstrap-fileinput/js/plugins/purify.min.js','assets/plugins/bootstrap-fileinput/js/fileinput.min.js','assets/plugins/bootstrap-fileinput/themes/fa/theme.min.js','assets/plugins/bootstrap-fileinput/themes/explorer-fa/theme.min.js','assets/plugins/bootstrap-fileinput/js/locales/zh.js'],"css":['assets/plugins/bootstrap-fileinput/css/fileinput.min.css','assets/plugins/bootstrap-fileinput/themes/explorer-fa/theme.min.css']},
+// "fileinput":{"js":['assets/plugins/bootstrap-fileinput/js/plugins/canvas-to-blob.min.js','assets/plugins/bootstrap-fileinput/js/plugins/sortable.min.js','assets/plugins/bootstrap-fileinput/js/plugins/piexif.min.js','assets/plugins/bootstrap-fileinput/js/plugins/purify.min.js','assets/plugins/bootstrap-fileinput/js/fileinput.min.js','assets/plugins/bootstrap-fileinput/themes/fa/theme.min.js','assets/plugins/bootstrap-fileinput/themes/explorer-fa/theme.min.js','assets/plugins/bootstrap-fileinput/js/locales/zh.js'],"css":['assets/plugins/bootstrap-fileinput/css/fileinput.min.css','assets/plugins/bootstrap-fileinput/themes/explorer-fa/theme.min.css']},
 		"fileinput":{"js":['assets/plugins/bootstrap-fileinput/last/js/plugins/sortable.min.js','assets/plugins/bootstrap-fileinput/last/js/plugins/piexif.min.js','assets/plugins/bootstrap-fileinput/last/js/fileinput.min.js','assets/plugins/bootstrap-fileinput/last/themes/fa/theme.min.js','assets/plugins/bootstrap-fileinput/last/themes/explorer-fa/theme.min.js','assets/plugins/bootstrap-fileinput/last/js/locales/zh.js'],"css":['assets/plugins/bootstrap-fileinput/last/css/fileinput.min.css','assets/plugins/bootstrap-fileinput/last/themes/explorer-fa/theme.min.css']},
 		"imgviewer":{"js":['assets/plugins/viewer/js/viewer.min.js','assets/plugins/viewer/js/jquery-viewer.min.js'],"css":['assets/plugins/viewer/css/viewer.min.css']},
 		"jbolttable":{"js":['assets/plugins/jbolt-table/jbolt-table'+(jboltJsDevMode?'':'.min')+'.js?v='+(jboltJsDevMode?(randomId()):JBOLT_ASSETS_VERSION)],'css':['assets/plugins/jbolt-table/jbolt-table'+(jboltJsDevMode?'':'.min')+'.css?v='+(jboltJsDevMode?(randomId()):JBOLT_ASSETS_VERSION)]},
@@ -387,8 +372,7 @@ var JsonEditorUtil = {
 		}
 	}
 }
-/**
- * 网页剪贴板封装
+/** 网页剪贴板封装
  */
 var JBoltClipboardUtil={
 	init:function(){
@@ -405,8 +389,7 @@ var JBoltClipboardUtil={
 		});
 	}
 }
-/**
- * 百度地图封装
+/** 百度地图封装
  */
 var JBoltBaiduMapUtil={
 	init:function(apiVersion,ak,callback){
@@ -422,21 +405,14 @@ var JBoltBaiduMapUtil={
 	}
 }
 
-/**
- * 加入插件集合
- * @param myPlugin
- * @returns
+/** 加入插件集合
  */
 function addPluginsToJBoltPluginMgr(myPlugin){
 	if(isOk(myPlugin)&&jsonObjectValueIsOk(myPlugin)){
 		Object.assign(jboltPlugins,myPlugin);
 	}
 }
-/**
- * 指定元素全屏
- * 
- * @param element
- * @returns
+/** 指定元素全屏
  */
 function launchFullscreen(element) {
 	if(!element){
@@ -457,11 +433,7 @@ function launchFullscreen(element) {
     element.isFullscreen=true;
   }
 }
-/**
- * 取消全屏
- * 
- * @param element
- * @returns
+/** 取消全屏
  */
 function exitFullscreen(element) {
 	if(!element){
@@ -479,10 +451,7 @@ function exitFullscreen(element) {
   }
 }
 
-/**
- * 动态切换元素的全屏状态
- * @param element
- * @returns
+/** 动态切换元素的全屏状态
  */
 function toggleFullScreen(element){
 	if(!element){
@@ -501,22 +470,18 @@ function toggleFullScreen(element){
  * @param oldnode 要插入的节点前的节点对象
  */
 function insertNodeAfter(newnode,oldnode){
-	//判断oldnode后面还有没有同类别的标记
+	// 判断oldnode后面还有没有同类别的标记
 	var nextnode = oldnode.nextSibling;
-	if(nextnode){ //如果没有则为null,则为false,有的话就为true
+	if(nextnode){ // 如果没有则为null,则为false,有的话就为true
 		oldnode.parentNode.insertBefore(newnode,nextnode);
 	}else{
 		oldnode.parentNode.appendChild(newnode);
 	}
 }
-/**
- * 过滤并高亮子节点
- * @param node
- * @param keywords
- * @returns
+/** 过滤并高亮子节点
  */
 function filterAndHighlightChildNodes(node,keywords){
-	//直接是文字的 直接替换
+	// 直接是文字的 直接替换
 	if(node.nodeName=="#text"){
 		var nodeValue=node.nodeValue;
 		var startValue,endValue,centerNode,endNode,index,length;
@@ -546,11 +511,7 @@ function filterAndHighlightChildNodes(node,keywords){
 		}
 	}
 }
-/**
- * 关键词过滤并高亮
- * @param ele
- * @param keywords
- * @returns
+/** 关键词过滤并高亮
  */
 function filterAndHighlight(ele,keywords){
 	if(keywords){
@@ -563,8 +524,7 @@ function filterAndHighlight(ele,keywords){
 		}
 	}
 }
-/**
- * 判断json对象是否所有属性里面至少一个属性有值
+/** 判断json对象是否所有属性里面至少一个属性有值
  */
 var jsonObjectValueIsOk=function(obj){
 	if(obj==null || typeof(obj)=="undefined"){
@@ -592,14 +552,12 @@ var jsonObjectValueIsOk=function(obj){
 	}
 	return false;
 }
-/**
- * 判断数据不是有值的数据
+/** 判断数据不是有值的数据
  */
 var notOk=function(obj){
 	return !isOk(obj);
 }
-/**
- * 判断数据是否是正确有值的数据
+/** 判断数据是否是正确有值的数据
  */
 var isOk=function(obj){
 	if(!obj){return false;}
@@ -640,8 +598,7 @@ var isOk=function(obj){
 	return result;
 }
 
-/**
- * 输入控制台信息
+/** 输入控制台信息
  */
 var jboltlog=function(msg){
 	if(jboltJsDevMode){
@@ -652,8 +609,7 @@ var jboltlog=function(msg){
 		console.log("                        ");
 	}
 }
-/**
- * 全屏按钮
+/** 全屏按钮
  */
 var FullScreenBtnUtil={
 	init:function(){
@@ -690,10 +646,7 @@ var FullScreenBtnUtil={
 	}
 }
 
-/**
- * 取消tooltip
- * @param ele
- * @returns
+/** 取消tooltip
  */
 function disposeTooltip(ele){
 	if(ele[0].hasAttribute("tooltip")||ele[0].hasAttribute("data-tooltip")){
@@ -702,8 +655,7 @@ function disposeTooltip(ele){
 	}
 }
 
-/**
- * input带计算器
+/** input带计算器
  */
 var JBoltInputWithCalculatorUtil={
 		init:function(parentEle){
@@ -764,8 +716,7 @@ var JBoltInputWithCalculatorUtil={
 			}
 		}
 }
-/**
- * input带清空按钮的处理
+/** input带清空按钮的处理
  */
 var JBoltInputWithClearBtnUtil={
 		init:function(parentEle){
@@ -846,11 +797,7 @@ var JBoltInputWithClearBtnUtil={
 			}
 		}
 }
-/**
- * jstree组件在JBoltInput组件中设置选中的数据给JBoltInput组件 handler
- * @param tree
- * @param treeNode
- * @returns
+/** jstree组件在JBoltInput组件中设置选中的数据给JBoltInput组件 handler
  */
 function jstreeSetJBoltInputValueHandler(tree,treeNode){
 	var hasCheckbox = tree.data("checkbox");
@@ -876,7 +823,7 @@ function jstreeSetJBoltInputValueHandler(tree,treeNode){
 				return;
 			}
 			if(valueAttr.indexOf(",")==-1){
-				//就指定了一个attr
+				// 就指定了一个attr
 				var values = (valueAttr ==="text" )?treeNode.text:(treeNode.data[valueAttr]||"");
 				JBoltInputUtil.setValue(tree,treeNode.text,(textasvalue?treeNode.text:values));
 			}else{
@@ -898,17 +845,12 @@ function jstreeSetJBoltInputValueHandler(tree,treeNode){
 		}
 	}
 }
-/**
- * 任何组件都能调用的设置JBoltInput值和隐藏域值的处理函数
- * @param ele
- * @param text
- * @param value
- * @returns
+/** 任何组件都能调用的设置JBoltInput值和隐藏域值的处理函数
  */
 function jboltInputSetValueHandler(ele,text,value){
 	JBoltInputUtil.setValue(ele,text,value);
 }
-//input 点击出现下拉portal 组件
+// input 点击出现下拉portal 组件
 var JBoltInputUtil={
 		init:function(parentEle){
 			 var parent=getRealParentJqueryObject(parentEle);
@@ -1044,7 +986,7 @@ var JBoltInputUtil={
 					that.processJBoltTableHandler(input);
 					return false;
 				});
-				//能输入并且有filterHandler
+				// 能输入并且有filterHandler
 				that.processInputFilterHandler(input,canInput,filterHandler,clearBtnBox);
 			}
 			var plancehoder=input.attr("placeholder");
@@ -1108,7 +1050,7 @@ var JBoltInputUtil={
 				}
 			}
 		},
-		//设置值和绑定隐藏域
+		// 设置值和绑定隐藏域
 		setValue:function(ele,text,value,jsonData){
 			var theElement=getRealJqueryObject(ele);
 			var jboltInputLayer=theElement.closest(".jbolt_input_layer");
@@ -1263,7 +1205,7 @@ var JBoltInputUtil={
 						that.setValue(tr,text,value,jsonData);
 					});
 				}else if(loadType=="jstree"){
-					//var inputId=input.attr("id");
+					// var inputId=input.attr("id");
 					var treeBox;
 					var openLevel=input.data("open-level");
 					openLevel=openLevel?("data-open-level=\""+openLevel+"\""):'';
@@ -1409,7 +1351,7 @@ var JBoltInputUtil={
 			return true;
 		}
 }
-//rangeSlider组件
+// rangeSlider组件
 var RangeSliderUtil={
 		reset:function(rangeSliderEle){
 			var obj = getRealJqueryObject(rangeSliderEle);
@@ -1504,10 +1446,7 @@ var RangeSliderUtil={
 			
 }
 
-/**
- * json对象转URL 参数
- * @param json
- * @returns
+/** json对象转URL 参数
  */
 function jsonToUrlParams(json) {
 	var tempArr = [];
@@ -1520,7 +1459,7 @@ function jsonToUrlParams(json) {
 	return urlParamsStr;
 }
 
-//城市选择
+// 城市选择
 var CityPickerUtil={
 	loadJsonPromise:function(){
         return new Promise(function(resolve){
@@ -1688,7 +1627,7 @@ var CityPickerUtil={
 			len = setValueArr[i].length;
 			hiddeninputId=setValueArr[i][0];
 			if(len==3){
-				//如果设置了name就创建隐藏域
+				// 如果设置了name就创建隐藏域
 				hiddeninputName=(len==2)?null:setValueArr[i][1];
 				hiddenInput = jboltBody.find("input[id='"+hiddeninputId+"'][name='"+hiddeninputName+"']");
 			}else{
@@ -1735,7 +1674,7 @@ var CityPickerUtil={
 	   			 inputValue=name[name.length-1];
 	   		 }
 			if(len == 3){
-				//如果设置了name就创建隐藏域
+				// 如果设置了name就创建隐藏域
 				hiddenInput = jboltBody.find("input[id='"+hiddeninputId+"'][name='"+hiddeninputName+"']");
 			}else{
 				hiddenInput = jboltBody.find("input[id='"+hiddeninputId+"']");
@@ -1758,12 +1697,6 @@ var CityPickerUtil={
 
 /**
  * ajax异步下载文件解析
- * @param xhr
- * @param url
- * @param status
- * @param ele
- * @param handler
- * @param fileName
  * @returns {boolean}
  */
 function ajaxParseFile(xhr,url,status,ele,handler,fileName){
@@ -1861,13 +1794,7 @@ function ajaxParseFile(xhr,url,status,ele,handler,fileName){
 	}
 }
 
-/**
- * 处理中间态 confirm
- * @param ele
- * @param ret
- * @param newUrl
- * @param type
- * @param orDoThing
+/** 处理中间态 confirm
  */
 function processAjaxResultNeedConfirmOr(ele,ret,orDoThing){
 	if(ret.needConfirm && ret.optUrl && ret.reqType){
@@ -1935,8 +1862,7 @@ function processAjaxResultNeedConfirmOr(ele,ret,orDoThing){
 
 /**
  * 自动处理refreshJstree
- *  handler
- * @param jstreeId
+ * handler
  */
 function refreshJstreeHandler(jstreeId){
 		if(jstreeId){
@@ -1956,7 +1882,7 @@ function refreshJstreeHandler(jstreeId){
 
 }
 
-//下载封装
+// 下载封装
 var DownloadUtil={
 		downloadByEle:function(ele){
 			var that=this,btn=getRealJqueryObject(ele),url=btn.data("url")||btn.attr("href"),downloading=btn.data("downloading");
@@ -1966,7 +1892,7 @@ var DownloadUtil={
 			 }
 			
 			var checkHandler =btn.data("check-handler");
-			//检测是否需要检查主表选择数据
+			// 检测是否需要检查主表选择数据
 			var needCheckMaster = (btn.data("check-master")||false) || (checkHandler && checkHandler=="checkMasterTableId");
 			if(needCheckMaster){
 				var masterId = btn.data("master-id");
@@ -1987,16 +1913,16 @@ var DownloadUtil={
 			
 			
 			 var formId=btn.data("form"),usecheckedids=btn.data("usecheckedids"),fileName=btn.data('filename'),loading=btn.data("loading"),params,handler=btn.data("handler"),portalId=btn.data("portalid")||btn.data("portal");
-			//如果设置了启用导出勾选数据的话
+			// 如果设置了启用导出勾选数据的话
 			 if(usecheckedids){
 				 var checkedIds=jboltTableGetCheckedIds(btn);
-				 //判断如果勾选了 就只导出勾选数据
+				 // 判断如果勾选了 就只导出勾选数据
 				 if(!isOk(checkedIds)){
 					 return false;
 				 }
 				 params={"ids":checkedIds};
 			 }else{
-				 //如果没设置导出勾选的 就按照form条件
+				 // 如果没设置导出勾选的 就按照form条件
 				 if(formId){
 					 params=$("#"+formId).serializeJSON();
 				 }
@@ -2094,8 +2020,7 @@ var DownloadUtil={
 				  
 			  }
 		},
-		/**
-		 * 下载 options包含url,fileName,params
+		/** 下载 options包含url,fileName,params
 		 */
 		download:function(options){
 			var xhr=null;
@@ -2259,7 +2184,7 @@ var DownloadUtil={
 }
 
 
-//jstree封装
+// jstree封装
 var JSTreeUtil={
 		delNodeId:0,
 		init:function(parentEle){
@@ -2425,7 +2350,7 @@ var JSTreeUtil={
 			var that=this;
 			 var pid=obj.id;
 			 var url="";
-			 //根据类型拼接url
+			 // 根据类型拼接url
 			 switch (type) {
 			 case 'add':
 				 var addUrl = tree.data("add-url");
@@ -2465,7 +2390,7 @@ var JSTreeUtil={
 				 url=tree.data("toggle-enable-url")+pid;
 				 break;
 			}
-			 //根据target类型 处理具体事件
+			 // 根据target类型 处理具体事件
 			 switch (target) {
 				 case "dialog":
 					 that.processCurdDialog(tree,url,type,inst,obj);
@@ -2534,7 +2459,7 @@ var JSTreeUtil={
 			}
 			var curd=tree.data("curd");
 			if(curd==undefined||curd=="undefined"){
-				//如果没有开启curd模式 默认就是false 就是只有查询和change处理
+				// 如果没有开启curd模式 默认就是false 就是只有查询和change处理
 				curd=false;
 			}
 			
@@ -3063,45 +2988,13 @@ var JSTreeUtil={
 	}
 }
 
-/**
- * 异步加载css 与 js 文件
- * 
+/** 异步加载css 与 js 文件
  */
 AssetsLazyLoad = (function (doc) {
-    /**
-     * 如何使用:
-     *
-     * CSS:
-     *
-       var cssFile = [           
-            '/css/backstage/1.css',
-            '/css/backstage/2.css', 
-            '/css/backstage/3.css',
-            '/css/backstage/4.css',    
-            '/css/backstage/5.css',
-            '/css/backstage/6.css'          
-        ];
-        //可以使用数组的形式,加载多个css文件. 也可以传入一个字符串,加载一个css
-        AssetsLazyLoad.css(cssFile, function () {
-            console.log("css加载完成...");
-        });
-     *
-     *JS:
-         var jsFile = [
-            '/js/backstage/jquery/1.js',     
-            '/js/backstage/jquery/2.js', 
-            '/js/backstage/jquery/3.js', 
-            '/js/backstage/jquery/4.js', 
-            '/js/backstage/jquery/5.js', 
-            '/js/backstage/jquery/6.js'             
-        ];
-        //可以使用数组的形式,加载多个js文件. 也可以传入一个字符串,加载一个js
-        AssetsLazyLoad.js(jsFile, function () {
-            console.log("js加载完成...");
-        });
-       */
+    /** AssetsLazyLoad.css(urls, callback) / js(urls, callback) 支持单地址或地址数组。
+     */
  
-    // Private Property --------------------------------------------------------
+    // Private Property
  
     var env,
         head,
@@ -3112,16 +3005,16 @@ AssetsLazyLoad = (function (doc) {
         startTime,
         endTime;
  
-    // Private Methods --------------------------------------------------------
+    // Private Methods
  
     /**
-      创建并返回具有指定名称和属性的HTML元素。
-    @method createNode
-    @param {String} name 元素名
-    @param {Object} attrs 元素属性的 名称/值 映射
-    @return {HTMLElement}
-    @private
-    */
+     * 创建并返回具有指定名称和属性的HTML元素。
+     * @method createNode
+     * @param {String} name 元素名
+     * @param {Object} attrs 元素属性的 名称/值 映射
+     * @return {HTMLElement}
+     * @private
+     */
     function createNode(name, attrs) {
         var node = doc.createElement(name), attr;
  
@@ -3135,11 +3028,11 @@ AssetsLazyLoad = (function (doc) {
     }
  
     /**
-       当指定类型的当前挂起资源完成时调用装载。执行关联的回调(如果有)并加载下一个回调队列中的资源。
-    @method finish
-    @param {String} type 资源类型 ('css' or 'js')
-    @private
-    */
+     * 当指定类型的当前挂起资源完成时调用装载。执行关联的回调(如果有)并加载下一个回调队列中的资源。
+     * @method finish
+     * @param {String} type 资源类型 ('css' or 'js')
+     * @private
+     */
     function finish(type) {
         var p = pending[type], callback, urls;
  
@@ -3161,16 +3054,16 @@ AssetsLazyLoad = (function (doc) {
     }
  
     /**
-    填充 <code>env</code> 变量带有用户代理和特性测试信息。
-    @method getEnv
-    @private
-    */
+     * 填充 <code>env</code> 变量带有用户代理和特性测试信息。
+     * @method getEnv
+     * @private
+     */
     function getEnv() {
         var ua = navigator.userAgent;
  
         env = {
-            //如果此浏览器支持动态禁用异步模式，则为True
-            //创建脚本节点
+            // 如果此浏览器支持动态禁用异步模式，则为True
+            // 创建脚本节点
             async: doc.createElement('script').async === true
         };
  
@@ -3182,25 +3075,16 @@ AssetsLazyLoad = (function (doc) {
     }
  
     /**
-        加载指定的资源或指定类型的下一个资源
-        如果没有指定资源，则在队列中。如果指定的资源
-        类型已加载，新请求将排队，直到
-        第一个请求已经完成。
-        当指定资源url数组时，将加载这些url
-        如果可能的话，在保持执行顺序的同时并行执行。所有
-        浏览器支持CSS的并行加载，但只支持Firefox和Opera
-        支持脚本的并行加载。在其他浏览器中，脚本将是
-        排队并一次加载一个，以确保正确的执行顺序。
-    @method load
-    @param {String} type 资源类型 ('css' or 'js')
-    @param {String|Array} urls (optional) 要加载的URL或URL数组
-    @param {Function} callback (optional) 回调函数
-    @param {Object} obj (optional) 对象传递给回调函数
-    @param {Object} context (optional) 如果提供，则回调函数将在这个对象的上下文中执行
-    @private
-    */
+     * 按类型调度加载队列；CSS 并行，JS 根据浏览器能力保留执行顺序。
+     * @param type css 或 js
+     * @param urls 地址或地址数组；为空时加载队列中的下一项
+     * @param callback 全部加载完成后的回调
+     * @param obj 传给回调的数据
+     * @param context 回调的 this
+     * @private
+     */
     function load(type, urls, callback, obj, context) {
-   		//开始计时
+   		// 开始计时
         startTime = new Date().getTime();
         
         var _finish = function () { finish(type); },
@@ -3211,20 +3095,20 @@ AssetsLazyLoad = (function (doc) {
         env || getEnv();
  
         if (urls) {
-            //如果url是字符串，则将其包装在数组中。否则假设它是
-            //数组并创建它的副本，这样就不会对其进行修改
+            // 如果url是字符串，则将其包装在数组中。否则假设它是
+            // 数组并创建它的副本，这样就不会对其进行修改
             urls = typeof urls === 'string' ? [urls] : urls.concat();
  
             // 为每个URL创建一个请求对象。如果指定了多个url，
             // 回调只会在加载所有url之后执行。
-            //
-            //遗憾的是，Firefox和Opera是唯一能够加载的浏览器
-            //脚本并行，同时保持执行顺序。在所有其他
-            //浏览器，脚本必须顺序加载。
-            //
-            //所有浏览器都根据链接的顺序尊重CSS的特性
+
+            // 遗憾的是，Firefox和Opera是唯一能够加载的浏览器
+            // 脚本并行，同时保持执行顺序。在所有其他
+            // 浏览器，脚本必须顺序加载。
+
+            // 所有浏览器都根据链接的顺序尊重CSS的特性
             // DOM中的元素，而不考虑样式表的顺序
-            //实际上是下载的。
+            // 实际上是下载的。
             if (isCSS || env.async || env.gecko || env.opera) {
                 // 并行加载
                 queue[type].push({
@@ -3246,18 +3130,18 @@ AssetsLazyLoad = (function (doc) {
             }
         }
  
-        //如果之前的这种类型的加载请求正在进行中，那么我们将
-        //轮到我们了。否则，获取队列中的下一项。
+        // 如果之前的这种类型的加载请求正在进行中，那么我们将
+        // 轮到我们了。否则，获取队列中的下一项。
         if (pending[type] || !(p = pending[type] = queue[type].shift())) {
             return;
         }
-		//获取head标签
+		// 获取head标签
         head || (head = doc.head || doc.getElementsByTagName('head')[0]);
         pendingUrls = p.urls.concat();
  
         for (i = 0, len = pendingUrls.length; i < len; ++i) {
             url = pendingUrls[i];
-            //开始拼接 标签
+            // 开始拼接 标签
             if (isCSS) {
             	if(typeof(url)=="string"){
             		node = env.gecko ? createNode('style') : createNode('link', {
@@ -3298,13 +3182,13 @@ AssetsLazyLoad = (function (doc) {
             } else if (isCSS && (env.gecko || env.webkit)) {
                 // Gecko和WebKit不支持链接节点上的onload事件。
                 if (env.webkit) {
-                    //在WebKit中，我们可以轮询对文档的更改。样式表
-                    //确定样式表何时加载。
-                    p.urls[i] = node.href; //解析相对url(或轮询不起作用)
+                    // 在WebKit中，我们可以轮询对文档的更改。样式表
+                    // 确定样式表何时加载。
+                    p.urls[i] = node.href; // 解析相对url(或轮询不起作用)
                     pollWebKit();
                 } else {
-                    //在Gecko中，我们可以将请求的URL导入到<style>节点中
-                    //轮询node.sheet.cssRules是否存在。
+                    // 在Gecko中，我们可以将请求的URL导入到<style>节点中
+                    // 轮询node.sheet.cssRules是否存在。
                     node.innerHTML = '@import "' + url + '";';
                     pollGecko(node);
                 }
@@ -3317,8 +3201,8 @@ AssetsLazyLoad = (function (doc) {
  
         for (i = 0, len = nodes.length; i < len; ++i) {
             head.appendChild(nodes[i]);
-			//控制台日志部分(不需要可以删除)
-			//start
+			// 控制台日志部分(不需要可以删除)
+			// start
             var url = pendingUrls[i];
             if (/.js/.exec(url)) {
                 jboltlog((i + 1) + "--> js成功:  " + url);
@@ -3327,31 +3211,31 @@ AssetsLazyLoad = (function (doc) {
             } else {
                 console.log("error:  " + url);
             }
-            //end
+            // end
         }
         
-		//结束计时
+		// 结束计时
         endTime = new Date().getTime();
-		//控制台日志部分(不需要可以删除)
-		//(startTime (在此方法开头),endTime(在此行代码上方) 都可以删除 )
+		// 控制台日志部分(不需要可以删除)
+		// (startTime (在此方法开头),endTime(在此行代码上方) 都可以删除 )
         jboltlog("执行时间: " + (endTime - startTime) + " ms  -------  end时间戳:" + endTime);
     }
  
     /**
-        开始轮询，以确定指定的样式表何时完成加载
-        轮询在加载所有挂起的样式表或加载10个样式表之后停止
-        秒(防止停顿)。
-    @method pollGecko
-    @param {HTMLElement} node 样式节点。
-    @private
-    */
+     * 开始轮询，以确定指定的样式表何时完成加载
+     * 轮询在加载所有挂起的样式表或加载10个样式表之后停止
+     * 秒(防止停顿)。
+     * @method pollGecko
+     * @param {HTMLElement} node 样式节点。
+     * @private
+     */
     function pollGecko(node) {
         var hasRules;
  
         try {
-            //我们不需要存储这个值，也不需要再次引用它，但是
-            //如果我们不存储它，闭包编译器会认为代码是无用的
-            //删除它。
+            // 我们不需要存储这个值，也不需要再次引用它，但是
+            // 如果我们不存储它，闭包编译器会认为代码是无用的
+            // 删除它。
             hasRules = !!node.sheet.cssRules;
         } catch (ex) {
             // 异常意味着样式表仍在加载。
@@ -3360,8 +3244,8 @@ AssetsLazyLoad = (function (doc) {
             if (pollCount < 200) {
                 setTimeout(function () { pollGecko(node); }, 50);
             } else {
-                //我们已经轮询了10秒钟，什么都没有发生。
-                //停止轮询并完成挂起的请求，以避免进一步阻塞请求。
+                // 我们已经轮询了10秒钟，什么都没有发生。
+                // 停止轮询并完成挂起的请求，以避免进一步阻塞请求。
                 hasRules && finish('css');
             }
  
@@ -3373,12 +3257,12 @@ AssetsLazyLoad = (function (doc) {
     }
  
     /**
-        开始轮询，以确定挂起的样式表何时完成加载
-        在WebKit。轮询在加载所有挂起的样式表或加载10个样式表之后停止
-        秒(防止停顿)。
-    @method pollWebKit
-    @private
-    */
+     * 开始轮询，以确定挂起的样式表何时完成加载
+     * 在WebKit。轮询在加载所有挂起的样式表或加载10个样式表之后停止
+     * 秒(防止停顿)。
+     * @method pollWebKit
+     * @private
+     */
     function pollWebKit() {
         var css = pending.css, i;
  
@@ -3399,57 +3283,32 @@ AssetsLazyLoad = (function (doc) {
                 if (pollCount < 200) {
                     setTimeout(pollWebKit, 50);
                 } else {
-                    //我们已经轮询了10秒钟，什么都没有发生
-                    //表示样式表已从文档中删除
-                    //在它有机会装载之前。停止轮询并完成挂起
-                    //请求以防止阻止进一步的请求。
+                    // 我们已经轮询了10秒钟，什么都没有发生
+                    // 表示样式表已从文档中删除
+                    // 在它有机会装载之前。停止轮询并完成挂起
+                    // 请求以防止阻止进一步的请求。
                     finish('css');
                 }
             }
         }
     }
  
-    // Public Methods --------------------------------------------------------
+    // Public Methods
     return {
-        /**
-            请求指定的CSS URL或URL并执行指定的
-            当它们完成加载时回调(如果有的话)。如果一个url数组是
-            指定后，样式表将与回调并行加载
-            将在所有样式表加载完成后执行。
-        @method css
-        @param {String|Array} urls CSS URL或要加载的CSS URL数组
-        @param {Function} callback (optional) 回调函数
-        @param {Object} obj (optional) 对象传递给回调函数
-        @param {Object} context (optional) 如果提供，回调函数将在这个对象的上下文中执行吗
-        @static
-        */
+        /** 加载一个或多个样式表，全部完成后回调；obj 为回调数据，context 指定 this。
+         */
         css: function (urls, callback, obj, context) {
             load('css', urls, callback, obj, context);
         },
  
-        /**
-            请求指定的JavaScript URL并执行指定的
-            当它们完成加载时回调(如果有的话)。如果一个url数组是
-            指定并得到浏览器的支持后，脚本将被加载进来
-            并将在所有脚本完成后执行回调
-            完成加载。
-            目前，只有Firefox和Opera支持同时并行加载脚本
-            保存执行顺序。在其他浏览器中，脚本将是
-            排队并一次加载一个，以确保正确的执行顺序
-        @method js
-        @param {String|Array} urls JS URL或要加载的JS URL数组
-        @param {Function} callback (optional) 回调函数
-        @param {Object} obj (optional) 对象传递给回调函数
-        @param {Object} context (optional) 如果提供，回调函数将在这个对象的上下文中执行吗
-        @static
-        */
+        /** 加载一个或多个脚本并保留执行顺序，全部完成后回调；obj 为数据，context 指定 this。
+         */
         js: function (urls, callback, obj, context) {
             load('js', urls, callback, obj, context);
         }
     };
 })(this.document);
-/**
- * 图片查看器
+/** 图片查看器
  */
 var ImageViewerUtil={
 		initViewers:function(viewers){
@@ -3495,7 +3354,7 @@ var ImageViewerUtil={
 		    this.initLinkViewerClick(viewer);
 				
 		},
-		//初始化超链接相册
+		// 初始化超链接相册
 		albumLinkViewerClick:function(viewer,album,albumLinks){
 			LayerMsgBox.loading("加载中...",5000);
 			var imgId=viewer.data("imgid");
@@ -3537,7 +3396,7 @@ var ImageViewerUtil={
 			}
 			LayerMsgBox.closeLoadingNow();
 		},
-		//初始化一个链接点击
+		// 初始化一个链接点击
 		initLinkViewerClick:function(viewer){
 			var that=this;
 			viewer.off("click").on("click",function(e){
@@ -3591,10 +3450,7 @@ var ImageViewerUtil={
 			
 		}
 }
-/**
- * 处理autocomplate组件的items
- * @param column_attr
- * @returns
+/** 处理autocomplate组件的items
  */
 function processAutocompleteItem(data,column_attr,align){
 	if(typeof(align)=="undefined"){align="center";}
@@ -3660,11 +3516,6 @@ function processAutocompleteItem(data,column_attr,align){
 /**
  * 处理一个组件绑定了另外组件作为param的URL
  * dialog autocomplate组件通用
- * @param ele
- * @param url
- * @param bindChange
- * @param bindChangeEvent
- * @returns
  */
 function processEleUrlByLinkOtherParamEle(ele,url,bindChange,bindChangeEvent){
 	  var params=ele.data("link-para-ele"),paras=null,paramArr,peles,oldParams,eleSelector,isRequired=false;
@@ -3751,11 +3602,7 @@ function processEleUrlByLinkOtherParamEle(ele,url,bindChange,bindChangeEvent){
 	  return url;
 }
 
-/**
- * 表格中管理列值
- * @param ele
- * @param url
- * @returns
+/** 表格中管理列值
  */
 function processJBoltTableEleUrlByLinkColumn(ele,url){
 	 if(!isOk(ele)){return url;}
@@ -3828,19 +3675,13 @@ function processJBoltTableEleUrlByLinkColumn(ele,url){
 		 }
 	  return url;
 }
-/**
- * 刷新指定的Autocomplete组件 cache
- * @param inputEle
- * @returns
+/** 刷新指定的Autocomplete组件 cache
  */
 function flushAutocompleteCache(inputEle){
 	AutocompleteUtil.flushCache(inputEle);
 }
 
-/**
- * 刷新按钮指定的Autocomplete组件cache数据
- * @param btnEle
- * @returns
+/** 刷新按钮指定的Autocomplete组件cache数据
  */
 function flushTheAutocompleteCache(btnEle){
 	var btn=getRealJqueryObject(btnEle);
@@ -3851,8 +3692,7 @@ function flushTheAutocompleteCache(btnEle){
 		LayerMsgBox.alert("按钮上需要data-input-id属性指定哪个Autocomplete组件",2);
 	}
 }
-/**
- *自动关键词查询检索 完成组件封装
+/** 自动关键词查询检索 完成组件封装
  */
 var AutocompleteUtil={
 		get:function(ele){
@@ -4017,7 +3857,7 @@ var AutocompleteUtil={
 						}
 //						jbolttableHandler(jboltTable,td,input,data,jsonData);
 						jbolttableHandler(jboltTable,td,input.data("text"),value,jsonData,data);
-						//处理焦点跳转辅助录入
+						// 处理焦点跳转辅助录入
 						setTimeout(function(){
 							var success=jboltTable.me.processFocusChangeToExtraForm(jboltTable,td);
 							if(success){
@@ -4055,7 +3895,7 @@ var AutocompleteUtil={
 			return false;
 		}
 		var hiddenInputId=input.data("sync-ele")||input.data("hidden-input")||input.data("hiddeninput")||input.data("sync-input")||input.data("syncinput");
-//		var synceditor_id=input.data("sync-editor-id");
+// var synceditor_id=input.data("sync-editor-id");
 		/*if(!hiddenInputId&&!synceditor_id){
 			LayerMsgBox.alert("autocomplete组件未设置data-hiddeninput或data-sync-editor-id属性,需关联指定的隐藏域或者editor",2);
 			return false;
@@ -4151,7 +3991,7 @@ var AutocompleteUtil={
 		}
 		var align = input.data("text-align")||"center";
 		var header = input.data("header");
-		//开始绑定
+		// 开始绑定
 		var ac=input.autocomplete(url,{
 		    minChars:0,
 		    width:width,
@@ -4177,9 +4017,9 @@ var AutocompleteUtil={
 		    	text=processOptionTextByFormatHandler(textFormatHandler,optionItem,text_attr,delimiter);
 				value=processOptionValue(optionItem,value_attr);
 		        rows[rows.length] = {
-		          data:optionItem,       //下拉框显示数据格式
-		          value:value,   //选定后实际数据格式
-		          result:text//选定后输入框显示数据格式
+		          data:optionItem,       // 下拉框显示数据格式
+		          value:value,   // 选定后实际数据格式
+		          result:text// 选定后输入框显示数据格式
 		        };
 		      }
 		      return rows;
@@ -4201,7 +4041,7 @@ var AutocompleteUtil={
 			  that.processJBoltTableHandler(input,data,value);
 			  
 		  }).bind("unmatch", function(){
-			  //取消选择的时候 清空hidden
+			  // 取消选择的时候 清空hidden
 			  input.val("").change();
 			  that.clearHiddenInputsValue(hiddenInput);
 			  if(handler){
@@ -4308,10 +4148,7 @@ var AutocompleteUtil={
 
 
 
-/**
- * 关闭JBoltLayer组件
- * @param dontShowConfirm
- * @returns
+/** 关闭JBoltLayer组件
  */
 function closeJBoltLayer(dontShowConfirm){
 	JBoltLayerUtil.close(dontShowConfirm);
@@ -4485,7 +4322,7 @@ var JBoltLayerUtil={
 				}
 			}
 			
-			//处理URL
+			// 处理URL
 			url=actionUrl(url);
 			url=processEleUrlByLinkOtherParamEle(trigger,url);
 			if(!url){
@@ -4634,7 +4471,7 @@ var JBoltLayerUtil={
 			
 			if(isOk(resizePortal)&&isOk(resizeBar)){
 				resizeBar.on("mousedown",function(e){
-					//如果有弹出的layer就关掉
+					// 如果有弹出的layer就关掉
 					FormDate.hide(layer);
 					JBoltInputUtil.hideJBoltInputLayer();
 					e.preventDefault();
@@ -4731,7 +4568,7 @@ var JBoltLayerUtil={
 				var triggerid=existLayer.data("triggerid");
 				var jboltlayertrigger=$("#"+triggerid);
 				if(from&&(from=="jbolt_layer"||from=="body")&&jboltlayertrigger.data("only-active-close")){
-					//关掉需要关闭的特殊控件
+					// 关掉需要关闭的特殊控件
 					FormDate.hide(existLayer);
 					JBoltInputUtil.hideJBoltInputLayer();
 					JBoltTabUtil.hideJboltContextMenu();
@@ -4755,7 +4592,7 @@ var JBoltLayerUtil={
 				}
 				
 			}
-			//关掉需要关闭的特殊控件
+			// 关掉需要关闭的特殊控件
 			FormDate.hide(existLayer);
 			JBoltInputUtil.hideJBoltInputLayer();
 			JBoltTabUtil.hideJboltContextMenu();
@@ -4894,7 +4731,7 @@ var JBoltLayerUtil={
 					dir="right";
 				}
 				
-				//处理遮罩
+				// 处理遮罩
 				if(existLayer.hasClass("nomask")){
 					existLayer.addClass(dir);
 				}
@@ -4958,11 +4795,9 @@ function getMousePos(event) {
 
 
 
-/**
- * Jbolt封装 tabs选项卡组件
+/** Jbolt封装 tabs选项卡组件
  */
-/**
- * tab组件的右键菜单配置
+/** tab组件的右键菜单配置
  */
 /*var JBoltTabContextifyOptions = {
 		dividerClass:"divider",
@@ -4989,10 +4824,7 @@ function getMousePos(event) {
 		  }},
 		]};*/
 
-/**
- * 左侧导航点击使用IFrame加载
- * @param url
- * @returns
+/** 左侧导航点击使用IFrame加载
  */
 function pjaxAdminLeftNavWithIframe(url,openOptions){
 	LayerMsgBox.load(3);
@@ -5010,15 +4842,10 @@ function pjaxAdminLeftNavWithIframe(url,openOptions){
 		LayerMsgBox.closeLoadNow();
 	});
 }
-/**
- * 左侧导航点击弹出Dialog
- * @param title
- * @param url
- * @param openOptions
- * @returns
+/** 左侧导航点击弹出Dialog
  */
 function adminLeftNavshowInDialog(title,url,openOptions){
-	//在dialog中加载
+	// 在dialog中加载
 	var w="80%",h="80%", btn="no";
 	if(openOptions.width){
 		w=openOptions.width;
@@ -5047,11 +4874,7 @@ function adminLeftNavshowInDialog(title,url,openOptions){
 	      });
 	
 }
-/**
- * 当前页面跳转到指定URL
- * @param url
- * @param newTabTitle
- * @returns
+/** 当前页面跳转到指定URL
  */
 function currentPageGo(url,newTabTitle){
 	if(jboltWithTabs){
@@ -5063,10 +4886,7 @@ function currentPageGo(url,newTabTitle){
 		JBoltPjaxUtil.sendPjax(url,mainPjaxContainerId);
 	}
 }
-/**
- * 页面返回
- * @param url
- * @returns
+/** 页面返回
  */
 function pageBack(url){
 	if(jboltWithTabs){
@@ -5076,8 +4896,7 @@ function pageBack(url){
 	 }
 }
 
-/**
- * 选项卡组件
+/** 选项卡组件
  */
 var JBoltTabUtil={
 		changeCurrentTabTitle:function(title){
@@ -5137,19 +4956,19 @@ var JBoltTabUtil={
 						  if(currentTab){
 							  var triggerKey=currentTab.data("key");
 							  switch (openType) {
-							  case 1://系统默认
+							  case 1:// 系统默认
 								  that.addJboltTab(key,url,text,triggerKey,true,openType,openOptions);
 								  break;
-							  case 2://iframe
+							  case 2:// iframe
 								  that.addJboltTabWithIFrame(key,url,text,triggerKey,true,openType,openOptions);
 								  break;
 							  }
 						  }else{
 							  switch (openType) {
-							  case 1://系统默认
+							  case 1:// 系统默认
 								  that.addJboltTab(key,url,text,null,true,openType,openOptions);
 								  break;
-							  case 2://iframe
+							  case 2:// iframe
 								  that.addJboltTabWithIFrame(key,url,text,null,true,openType,openOptions);
 								  break;
 							  }
@@ -5220,38 +5039,38 @@ var JBoltTabUtil={
 		openTabWithOptions:function(key,url,text,triggerKey,active,openType,openOptions){
 			 if(typeof(openType)=="number"){
 				  switch (openType) {
-					  case 1://系统默认
+					  case 1:// 系统默认
 						  this.addJboltTab(key,url,text,triggerKey,active,openType,openOptions);
 						  break;
-					  case 2://iframe
+					  case 2:// iframe
 						  this.addJboltTabWithIFrame(key,url,text,triggerKey,active,openType,openOptions);
 						  break;
-					  case 3://Dialog
+					  case 3:// Dialog
 						  activeLeftNavByKey(key);
 						  adminLeftNavshowInDialog(text,url,openOptions);
 						  break;
-					  case 4://jboltLayer
+					  case 4:// jboltLayer
 						  activeLeftNavByKey(key);
 						  JBoltLayerUtil.openByNav(url,openOptions);
 						  break;
-					default://默认
+					default:// 默认
 						this.addJboltTab(key,url,text,triggerKey,active,openType,openOptions);
 						break;
 				  }
 			  }else if(typeof(openType)=="string"){
 				  switch (openType) {
-				  case "iframe"://iframe
+				  case "iframe":// iframe
 					  this.addJboltTabWithIFrame(key,url,text,triggerKey,active,openType,openOptions);
 					  break;
-				  case "dialog"://Dialog
+				  case "dialog":// Dialog
 					  activeLeftNavByKey(key);
 					  adminLeftNavshowInDialog(text,url,openOptions);
 					  break;
-				  case "jboltlayer"://jboltLayer
+				  case "jboltlayer":// jboltLayer
 					  activeLeftNavByKey(key);
 					  JBoltLayerUtil.openByNav(url,openOptions);
 					  break;
-				  default://默认
+				  default:// 默认
 					  this.addJboltTab(key,url,text,triggerKey,active,openType,openOptions);
 					  break;
 			  }
@@ -5260,7 +5079,7 @@ var JBoltTabUtil={
 			this.showJboltTab(key,false,refreshPjaxContainer);
 		},initTabsEvent:function(){
 			var that=this;
-			//点击标签页 切换显示
+			// 点击标签页 切换显示
 			jboltBody.on("click","ul.jbolt_tabs>li",function(e){
 				var key=$(this).data("key");
 				that.showJboltTab(key,true);
@@ -5377,8 +5196,7 @@ var JBoltTabUtil={
 			}
 			jboltTabContextMenu.show();
 		},
-		/**
-		 * 得到当前显示的tab
+		/** 得到当前显示的tab
 		 */
 		getCurrentTab:function(){
 			var tab=jbolt_tabs_container.find("li.active");
@@ -5387,8 +5205,7 @@ var JBoltTabUtil={
 			}
 			return null;
 		},
-		/**
-		 * 得到当前显示的tabcontent部分
+		/** 得到当前显示的tabcontent部分
 		 */
 		getCurrentTabContent:function(){
 			var tabContent=mainPjaxContainer.find("div.jbolt_tabcontent.active");
@@ -5397,10 +5214,7 @@ var JBoltTabUtil={
 			}
 			return null;
 		},
-		/**
-		 * 判断是否已经存在
-		 * @param key
-		 * @returns
+		/** 判断是否已经存在
 		 */
 		isJboltTabExist:function(key){
 			var existLi=jbolt_tabs_container.find("li[data-key='"+key+"']");
@@ -5412,8 +5226,7 @@ var JBoltTabUtil={
 		getTabContent:function(key){
 			return mainPjaxContainer.find("div.jbolt_tabcontent[data-key='"+key+"']");
 		},
-		/**
-		 * 添加一个不带创建content的tab 用于特殊情况初始化页面tab
+		/** 添加一个不带创建content的tab 用于特殊情况初始化页面tab
 		 */
 		addJboltTabWithoutContentUrl:function(){
 			var that=this;
@@ -5435,7 +5248,7 @@ var JBoltTabUtil={
 					var openOptions=nav.data("open-option");
 					that.addJboltTabWithoutContent(key,url,text,openType,openOptions);
 				}else{
-					//如果没有按照key找到nav 就找本身设置的text 作为tab的text
+					// 如果没有按照key找到nav 就找本身设置的text 作为tab的text
 					var tabTitle=jboltPage.data("text")||jboltPage.data("title");
 					if(!tabTitle){
 						var h1=jboltPage.find(".jbolt_page_title h1");
@@ -5448,7 +5261,7 @@ var JBoltTabUtil={
 					if(!tabTitle){
 						var dontchangeleftnav=jboltPage.data("dontchangeleftnav");
 						if(dontchangeleftnav){
-							//如果没有规定不能改变 就改一下
+							// 如果没有规定不能改变 就改一下
 							var likeNavs=jboltAdminLeftNavs.find("a[href]");
 							if(isOk(likeNavs)){
 								var cunav,cuhref,cutext,maxlen,maxtext;
@@ -5482,17 +5295,16 @@ var JBoltTabUtil={
 			}
 			
 		},
-		/**
-		 * 底层方法 
+		/** 底层方法
 		 */
 		addJboltTabWithoutContent:function(key,url,text,openType,openOptions){
 			this.openTabWithOptions(key,url,text,null,true,openType,openOptions);
-//			var that=this;
-//			var exist=that.isJboltTabExist(key);
+// var that=this;
+// var exist=that.isJboltTabExist(key);
 //			if(!exist){
 //				jbolt_tabs_container.append('<li id="tab_'+key+'" data-key="'+key+'" data-url="'+url+'"><span>'+text+'</span><i class="close">&times;</i></li>');
 //				pushJBoltTabToArray(key,url,text,null,openType,openOptions);
-//				var tabContent=mainPjaxContainer.find("div.jbolt_tabcontent");
+// var tabContent=mainPjaxContainer.find("div.jbolt_tabcontent");
 //				if(tabContent&&tabContent.length==1){
 //					tabContent.data("key",key);
 //					tabContent.data("url",url);
@@ -5501,14 +5313,12 @@ var JBoltTabUtil={
 //			}
 //			that.showJboltTab(key);
 		},
-		/**
-		 * 初始化
+		/** 初始化
 		 */
 		initTabContextMenuEvent:function(){
 //			$('#tab_'+key).tabContextMenu(JBoltTabContextifyOptions);
 		},
-		/**
-		 * 添加一个选项卡 使用IFrame加载内容
+		/** 添加一个选项卡 使用IFrame加载内容
 		 */
 		addJboltTabWithIFrame:function(key,url,text,triggerTabKey,active,openType,openOptions){
 			var that=this;
@@ -5546,13 +5356,7 @@ var JBoltTabUtil={
 		},
 		/**
 		 * 添加一个tab选项卡
-		 * @param key
-		 * @param url
-		 * @param text
 		 * @param triggerTabKey 是从另一个tab过来的就要带着这个
-		 * @param active
-		 * @param openType
-		 * @param openOptions
 		 */
 		addJboltTab:function(key,url,text,triggerTabKey,active,openType,openOptions){
 			if(typeof(active)=="undefined"){
@@ -5585,7 +5389,7 @@ var JBoltTabUtil={
 			
 			
 		},changeTabTitleByPortalPageSet:function(contentPortal,key){
-			//根据加载的portal里的设置 重新设置tab的title
+			// 根据加载的portal里的设置 重新设置tab的title
 			var portalPage=contentPortal.find(".jbolt_page[data-title]");
 			if(isOk(portalPage)){
 				var pageTitle=portalPage.data("title")||portalPage.data("text");
@@ -5598,8 +5402,7 @@ var JBoltTabUtil={
 			jbolt_tabs_container.find("li.active").removeClass("active");
 			mainPjaxContainer.find("div.jbolt_tabcontent.active").removeClass("active");
 		},
-		/**
-		 * 在内页跳转后 将tab的url跟随content的替换掉
+		/** 在内页跳转后 将tab的url跟随content的替换掉
 		 */
 		changeUrlByContentPortal:function(){
 			var currentTab=this.getCurrentTab();
@@ -5634,17 +5437,12 @@ var JBoltTabUtil={
 				currentTab.attr("data-url",url);
 				currentTabContent.ajaxPortal(true,url,true);
 			}
-//			else{
+// else{
 //				currentTab.data("backurl",'');
 //				currentTab.removeAttr("data-backurl");
 //			}
 		},
-		/**
-		 * 切换显示一个tab选项卡
-		 * @param key
-		 * @param processChange
-		 * @param callback
-		 * @returns
+		/** 切换显示一个tab选项卡
 		 */
 		showJboltTab:function(key,processChange,callback){
 			JBoltInputUtil.hideJBoltInputLayer();
@@ -5654,18 +5452,18 @@ var JBoltTabUtil={
 			var li=jbolt_tabs_container.find("li#tab_"+key);
 			if(li&&li.length==1){
 				var isCurrent=li.hasClass("active");
-				//如果当前正好active 就不用管了
+				// 如果当前正好active 就不用管了
 				if(!isCurrent){
-					//隐藏当前tab
+					// 隐藏当前tab
 					that.hideAllJboltTab();
-					//激活需要显示的
+					// 激活需要显示的
 					li.addClass("active");
 					var mainTabContent=mainPjaxContainer.find("div#tab_content_"+key);
 					mainTabContent.addClass("active");
 					activeLeftNavByKey(key);
 					processAutoRefreshTabContent(mainTabContent);
 				}
-				//是否处理更改tab的加载地址
+				// 是否处理更改tab的加载地址
 				if(processChange){
 					that.changeTabLocation();
 				}
@@ -5677,8 +5475,7 @@ var JBoltTabUtil={
 			}
 			
 		},
-		/**
-		 * 将左侧导航的第一个弹出选项卡
+		/** 将左侧导航的第一个弹出选项卡
 		 */
 		showFirstLeftNavTab:function(){
 			var firstNav=jboltAdminLeftNavs.find("a[data-hasurl]").first();
@@ -5704,15 +5501,12 @@ var JBoltTabUtil={
 			}
 			return 0;
 		},
-		/**
-		 * 关闭指定tab
-		 * @param tab
+		/** 关闭指定tab
 		 */
 		close:function(tab){
 			this.closeJboltTab(tab.data("key"));
 		},
-		/**
-		 * 关闭当前tab
+		/** 关闭当前tab
 		 */
 		closeCurrentTab:function(){
 			var tab = this.getCurrentTab();
@@ -5720,10 +5514,7 @@ var JBoltTabUtil={
 				this.close(tab);
 			}
 		},
-		/**
-		 * 指定的Tab选项卡 返回操作
-		 * @param key
-		 * @returns
+		/** 指定的Tab选项卡 返回操作
 		 */
 		back:function(key){
 			var that=this;
@@ -5748,10 +5539,7 @@ var JBoltTabUtil={
 				
 			}
 		},
-		/**
-		 * 关闭一个指定的Tab选项卡
-		 * @param key
-		 * @returns
+		/** 关闭一个指定的Tab选项卡
 		 */
 		closeJboltTab:function(key){
 			var that=this;
@@ -5778,8 +5566,7 @@ var JBoltTabUtil={
 				}
 			}
 		},
-		/**
-		 * 关闭其它
+		/** 关闭其它
 		 */
 		closeOtherJboltTab:function(key){
 			var that=this;
@@ -5800,8 +5587,7 @@ var JBoltTabUtil={
 				});
 			}
 		},
-		/**
-		 * 关闭所有
+		/** 关闭所有
 		 */
 		closeAllJboltTab:function(){
 			jbolt_tabs_container.empty();
@@ -5818,15 +5604,14 @@ var JBoltTabUtil={
 			jbolt_tabs_array=[];
 			this.showFirstLeftNavTab();
 		},
-		/**
-		 * 关闭左侧所有
+		/** 关闭左侧所有
 		 */
 		closeAllLeftJboltTab:function(key){
 			var that=this;
 			var self=jbolt_tabs_container.find("li#tab_"+key);
 			var lis=self.prevAll("li");
 			var selfIsActive=self.hasClass("active");
-			//判断删除的里面有没有active的
+			// 判断删除的里面有没有active的
 			var hasActive=false;
 			if(lis&&lis.length>0){
 				var li,li_key,thetabContent;
@@ -5851,15 +5636,14 @@ var JBoltTabUtil={
 			}
 		
 		},
-		/**
-		 * 关闭右侧所有
+		/** 关闭右侧所有
 		 */
 		closeAllRightJboltTab:function(key){
 			var that=this;
 			var self=jbolt_tabs_container.find("li#tab_"+key);
 			var lis=self.nextAll("li");
 			var selfIsActive=self.hasClass("active");
-			//判断删除的里面有没有active的
+			// 判断删除的里面有没有active的
 			var hasActive=false;
 			if(lis&&lis.length>0){
 				var li,li_key,thetabContent;
@@ -5884,8 +5668,7 @@ var JBoltTabUtil={
 			}
 		
 		},
-		/**
-		 * 切换到兄弟节点
+		/** 切换到兄弟节点
 		 */
 		changeToBrotherTab:function(li){
 			var that=this;
@@ -5905,11 +5688,11 @@ var JBoltTabUtil={
 			var jbolt_tabbar_width=jbolt_tabbar.width();
 			var boxWidth=jbolt_tabs_container.outerWidth();
 			if(boxWidth>jbolt_tabbar_width){
-				//标签总长度大于容器长度 说明满足先决条件了 再去判断 显示长度
+				// 标签总长度大于容器长度 说明满足先决条件了 再去判断 显示长度
 				var marginleft=Math.abs(parseInt(jbolt_tabs_container.css("margin-left")));
 				var lwidth=Math.abs(parseInt(jbolt_tabbar_width-boxWidth));
 				if(marginleft<lwidth){
-					//如果左移距离小于差距 就可以左移
+					// 如果左移距离小于差距 就可以左移
 					return true;
 				}
 			}
@@ -5919,16 +5702,12 @@ var JBoltTabUtil={
 			var marginleft=Math.abs(parseInt(jbolt_tabs_container.css("margin-left")));
 			return marginleft!=0;
 		},
-		/**
-		 * 显示最左侧
-		 * @returns
+		/** 显示最左侧
 		 */
 		jboltTabToLeft:function(){
 			jbolt_tabs_container.css("margin-left","0px");
 		},
-		/**
-		 * 显示最右侧
-		 * @returns
+		/** 显示最右侧
 		 */
 		jboltTabToRight:function(){
 			var jbolt_tabbar_width=jbolt_tabbar.width();
@@ -5952,7 +5731,7 @@ var JBoltTabUtil={
 			var jbolt_tabbar_width=jbolt_tabbar.width();
 			var boxWidth=jbolt_tabs_container.outerWidth();
 			if(boxWidth>jbolt_tabbar_width){
-				//如果超长 才会动弹 拿到激活的tab 让它居中
+				// 如果超长 才会动弹 拿到激活的tab 让它居中
 				var tab=that.getCurrentTab();
 				var marginleft=Math.abs(parseInt(jbolt_tabs_container.css("margin-left")));
 				var len=0;
@@ -5967,7 +5746,7 @@ var JBoltTabUtil={
 					}
 				});
 				if(marginleft==0){
-					//说明没动弹 那就判断到激活的距离是不是在显示区域内
+					// 说明没动弹 那就判断到激活的距离是不是在显示区域内
 					if(len<=jbolt_tabbar_width){
 						
 					}else{
@@ -5993,15 +5772,7 @@ var JBoltTabUtil={
 			}
 		}
 }
-/**
- * 新tab注册
- * @param key
- * @param url
- * @param text
- * @param triggerTabKey
- * @param openType
- * @param openOptions
- * @returns
+/** 新tab注册
  */
 function pushJBoltTabToArray(key,url,text,triggerTabKey,openType,openOptions){
 	if(jboltWithTabs){
@@ -6012,12 +5783,9 @@ function pushJBoltTabToArray(key,url,text,triggerTabKey,openType,openOptions){
 		sessionStorage.setItem('jbolt_tabs_array', JSON.stringify(jbolt_tabs_array));
 	}
 }
-/**
- * 按照key激活tab 改变json里的active属性值
- * @param key
- * @returns
+/** 按照key激活tab 改变json里的active属性值
  */
-//function activeJBoltTabFromArray(key){
+// function activeJBoltTabFromArray(key){
 //	if(jboltWithTabs && key){
 //		window.location.hash=key;
 //	}
@@ -6029,10 +5797,7 @@ function activeJBoltTabFromArray(key){
 		sessionStorage.setItem('jbolt_tabs_array',  JSON.stringify(jbolt_tabs_array));
 	}
 }
-/**
- * 关闭的时候删掉
- * @param key
- * @returns
+/** 关闭的时候删掉
  */
 function removeJBoltTabFromArray(key){
 	if(jboltWithTabs && isOk(jbolt_tabs_array)){
@@ -6040,9 +5805,7 @@ function removeJBoltTabFromArray(key){
 		sessionStorage.setItem('jbolt_tabs_array',  JSON.stringify(jbolt_tabs_array));
 	}
 }
-/**
- * 清空tabs数组
- * @returns
+/** 清空tabs数组
  */
 function clearJBoltTabFromArray(){
 	if(jboltWithTabs && isOk(jbolt_tabs_array)){
@@ -6050,9 +5813,7 @@ function clearJBoltTabFromArray(){
 		sessionStorage.removeItem('jbolt_tabs_array');
 	}
 }
-/**
- * 初始化页面的时候执行从sessionStorage 初始化需要打开的tabs
- * @returns
+/** 初始化页面的时候执行从sessionStorage 初始化需要打开的tabs
  */
 function initJBoltTabsFromSessionStorage(){
 	if(jboltWithTabs && JBoltTabKeepAfterReload){
@@ -6077,10 +5838,7 @@ function initJBoltTabsFromSessionStorage(){
 		}
 	}
 }
-/**
- * form转JSON
- * @param formEle
- * @returns
+/** form转JSON
  */
 function formToJson(formEle){
 	 var form=getRealJqueryObject(formEle);
@@ -6167,7 +5925,7 @@ function formToJson(formEle){
         			removeFormEleAllStyle(eleObj);
         			key=ele.name||eleObj.data("column")||eleObj.data("name");
         			if(key){
-        				//有设置key的话就可以赋值
+        				// 有设置key的话就可以赋值
         				if(jsonData.hasOwnProperty(key)){
         					val=jsonData[key];
         				}
@@ -6178,9 +5936,9 @@ function formToJson(formEle){
     						val='';
     					}
         				if(isFormEle(tagName)){
-        					//如果是表单元素就赋值
+        					// 如果是表单元素就赋值
         					if(tagName=="INPUT"&&(ele.type=="checkbox"||ele.type=="radio")){
-        						//如果是checkbox和radio 需要点击一下
+        						// 如果是checkbox和radio 需要点击一下
         						if(ele.value==val){
         							eleObj.trigger("click");
         						}
@@ -6206,10 +5964,7 @@ function formToJson(formEle){
 
 })(jQuery);
 
-/**
- * 切换表单元素的Disabled属性
- * @param formEle
- * @returns
+/** 切换表单元素的Disabled属性
  */
 function formToggleDisabled(formEle){
 	 var form=getRealJqueryObject(formEle);
@@ -6218,10 +5973,7 @@ function formToggleDisabled(formEle){
 	 }
 }
 
-/**
- * 表单元素转Disabled
- * @param formEle
- * @returns
+/** 表单元素转Disabled
  */
 function formDisabled(formEle){
 	 var form=getRealJqueryObject(formEle);
@@ -6230,10 +5982,7 @@ function formDisabled(formEle){
 	 }
 }
 
-/**
- * 表单元素转Enable
- * @param formEle
- * @returns
+/** 表单元素转Enable
  */
 function formEnable(formEle){
 	var form=getRealJqueryObject(formEle);
@@ -6242,12 +5991,7 @@ function formEnable(formEle){
 	}
 }
 
-/**
- * 表单通过JSON对象赋值
- * @param formEle
- * @param jsonData
- * @param valueHandler
- * @returns
+/** 表单通过JSON对象赋值
  */
 function formSetJsonVal(formEle,jsonData,valueHandler){
 	 var form=getRealJqueryObject(formEle);
@@ -6256,8 +6000,7 @@ function formSetJsonVal(formEle,jsonData,valueHandler){
 	 }
 }
 
-/**
- * 生成随机ID
+/** 生成随机ID
  */
 function randomId(len){
 	if(!len){len=8;}
@@ -6274,13 +6017,12 @@ function isFormEle(tagName){
 	return $.inArray(tagName,formEleArray)>=0;
 }
 
-/**
- * switchBtn enableBtn
+/** switchBtn enableBtn
  */
 var SwitchBtnUtil={
 		initBtn:function(_btn){
-			//var that=this;
-				  //如果没设置src就是动态设置的 根据data-value
+			// var that=this;
+				  // 如果没设置src就是动态设置的 根据data-value
 				  var value=_btn.data("value");
 				  if(!value||value=="null"||value=="undefined"){
 					  value=false;
@@ -6360,7 +6102,7 @@ var SwitchBtnUtil={
 			 }
 			this.setByCss(css,value,parentEle,nochange);
 		},
-		//初始化点击事件 全局只初始化一次
+		// 初始化点击事件 全局只初始化一次
 		initEvent:function(){
 			var that=this;
 			jboltBody.on("click","img[data-switchbtn]",function(e){
@@ -6437,7 +6179,7 @@ var SwitchBtnUtil={
 				$.ajax({
 					type:"post",
 					url:url,
-					timeout : 10000, //超时时间设置，单位毫秒
+					timeout : 10000, // 超时时间设置，单位毫秒
 					dataType:"json",
 					success:function(data){
 						if(data.state=="ok"){
@@ -6462,9 +6204,9 @@ var SwitchBtnUtil={
 				});
 			  },
 			  processJBoltTableFixedColumnSameSwitchBtn:function(_btn){
-				  //判断是不是在jboltTable的fixedColumnBox中
+				  // 判断是不是在jboltTable的fixedColumnBox中
 				  var jboltTable=_btn.closest("table.jbolt_table");
-				  //判断是在JBoltTable中
+				  // 判断是在JBoltTable中
 				  if(!isOk(jboltTable)){return false;}
 				  var table_view=jboltTable.closest(".jbolt_table_view");
 				  if(!isOk(table_view)){return false;}
@@ -6478,7 +6220,7 @@ var SwitchBtnUtil={
 				  var colIndex=td.data("col-index");
 				  var sameTds;
 				  if(inFixedColumnTable){
-					//已经在fixedColumn中 就需要去更新mainTable中的
+					// 已经在fixedColumn中 就需要去更新mainTable中的
 					  var mainTable=table_view.find(".jbolt_table_box>.jbolt_table_body:first>table");
 					  if(!isOk(mainTable)){return false;}
 					  sameTds=mainTable.find("tbody>tr:eq("+trIndex+")>td[data-col-index='"+colIndex+"']");
@@ -6494,7 +6236,7 @@ var SwitchBtnUtil={
 			  switchMainJBoltTableEditableTd:function(){
 				  
 			  },
-			  //内置可编辑表格里的处理
+			  // 内置可编辑表格里的处理
 			  switchEditableTd:function(_btn,result){
 				var editingTd=_btn.closest("td");
 				if(!isOk(editingTd)){
@@ -6528,7 +6270,7 @@ var SwitchBtnUtil={
 				}else{
 					if(typeof(onOrOff)=="boolean"){
 						if(onOrOff){
-							//true
+							// true
 							if(src.indexOf("off")!=-1){
 								src=src.replace("off","on");
 							}
@@ -6611,7 +6353,7 @@ var SwitchBtnUtil={
 						});
 					}
 				}
-				//处理一下同步
+				// 处理一下同步
 				this.processJBoltTableFixedColumnSameSwitchBtn(_btn);
 				LayerMsgBox.closeLoadingNow();
 				if(handler && !_btn.data("nochange")){
@@ -6702,8 +6444,7 @@ var DragScrollUtil={
 } */
  
 
-/**
- * checkbox工具类封装
+/** checkbox工具类封装
  */
 var CheckboxUtil={
 		processHiddenInput:function(inputName,hiddenInputId,ck){
@@ -6773,7 +6514,7 @@ var CheckboxUtil={
 				  var ckcb=function(){
 					  var hasInline=ck.find(".checkbox-inline");
 					  if(hasInline){
-						  //处理样式
+						  // 处理样式
 						  that.processCheckboxAlignAndWidth(ck);
 					  }
 					  that.initCheckBoxEvent(ck,name,hiddenInputId,handler);
@@ -6880,7 +6621,7 @@ var CheckboxUtil={
   						html+="</div>";
   						ck.html(html);
   						if(isInline){
-							//处理样式
+							// 处理样式
 							that.processCheckboxAlignAndWidth(ck);
 						}
   					}else{
@@ -6892,7 +6633,7 @@ var CheckboxUtil={
 						callback();
 					}
 	      		}
-	      		//如果是静态options
+	      		// 如果是静态options
 	      		if(withOptions){
 	      			if(url){
 	      				var optionsDatas;
@@ -6932,7 +6673,7 @@ var CheckboxUtil={
 	      					optionsDatas=url;
 	      				}
 	      				
-	      				//调用赋值渲染
+	      				// 调用赋值渲染
 	      				processOptions(optionsDatas);
 	      				
 	      			}
@@ -6962,7 +6703,7 @@ var CheckboxUtil={
 		  checkByArray:function(parentEle,name,values){
 			  var that=this;
 			  if(!isOk(values)){
-				  //如果没有任何数据 就清空选择
+				  // 如果没有任何数据 就清空选择
 				  that.uncheckAll(name,parentEle);
 				  return false;
 			  }
@@ -6973,10 +6714,10 @@ var CheckboxUtil={
 			  if(!isArray(values)){
 				  values=values.toString();
 				  if(values.indexOf(",")!=-1){
-					  //如果字符串有逗号 就分割为数组
+					  // 如果字符串有逗号 就分割为数组
 					  values=values.split(",");
 					  if(!isOk(values)){
-						  //如果没有任何数据 就清空选择
+						  // 如果没有任何数据 就清空选择
 						  that.uncheckAll(name,parentEle);
 						  return false;
 					  }
@@ -7065,7 +6806,7 @@ var CheckboxUtil={
 				 }
 				return ids;
 			},
-			//得到选中的值 转为字符分割string字符串
+			// 得到选中的值 转为字符分割string字符串
 			getCheckedValueToString:function(name,split,parentEle,withoutDisabled){
 				var that=this,result;
 				var ids=that.getCheckedValue(name,parentEle,withoutDisabled);
@@ -7105,8 +6846,7 @@ var CheckboxUtil={
   
 
  
-/**
- * 富文本编辑器组件初始化
+/** 富文本编辑器组件初始化
  */
 var HtmlEditorUtil={
 		ing:false,
@@ -7163,7 +6903,7 @@ var HtmlEditorUtil={
 				// alert("请设置编辑器的id属性");
 				// return false;
 			}
-//			var umjs=$("script[src*='neditor']");
+// var umjs=$("script[src*='neditor']");
 //			if(!umjs||umjs.length==0){
 //				LayerMsgBox.alert("未引入NEditor的js");
 //				return false;
@@ -7183,147 +6923,147 @@ var HtmlEditorUtil={
 			var toolbarOptions;
 			if(toolbarTheme=="normal"){
 				toolbarOptions = [
-					[   'source',//源码
-						'undo', //撤销
-						'redo', //重做
-						'bold', //加粗
-						'italic', //斜体
-						'underline', //下划线
-						'strikethrough', //删除线
-						'fontborder', //字符边框
-						'indent', //首行缩进
-						'superscript', //上标
-						'subscript', //下标
-						'justifyleft', //居左对齐
-						'justifyright', //居右对齐
-						'justifycenter', //居中对齐
-						'justifyjustify', //两端对齐
-						'forecolor', //字体颜色
-						'backcolor', //背景色
-						'removeformat', //清除格式
-						'formatmatch', //格式刷
-						'autotypeset', //自动排版
-						'touppercase', //字母大写
-						'tolowercase', //字母小写
-						'fontfamily', //字体
-						'fontsize', //字号
-						'paragraph', //段落格式
-						'customstyle', //自定义标题
-						'searchreplace', //查询替换
-						'blockquote', //引用
-						'pasteplain', //纯文本粘贴模式
-						'selectall', //全选
-						'cleardoc', //清空文档
+					[   'source',// 源码
+						'undo', // 撤销
+						'redo', // 重做
+						'bold', // 加粗
+						'italic', // 斜体
+						'underline', // 下划线
+						'strikethrough', // 删除线
+						'fontborder', // 字符边框
+						'indent', // 首行缩进
+						'superscript', // 上标
+						'subscript', // 下标
+						'justifyleft', // 居左对齐
+						'justifyright', // 居右对齐
+						'justifycenter', // 居中对齐
+						'justifyjustify', // 两端对齐
+						'forecolor', // 字体颜色
+						'backcolor', // 背景色
+						'removeformat', // 清除格式
+						'formatmatch', // 格式刷
+						'autotypeset', // 自动排版
+						'touppercase', // 字母大写
+						'tolowercase', // 字母小写
+						'fontfamily', // 字体
+						'fontsize', // 字号
+						'paragraph', // 段落格式
+						'customstyle', // 自定义标题
+						'searchreplace', // 查询替换
+						'blockquote', // 引用
+						'pasteplain', // 纯文本粘贴模式
+						'selectall', // 全选
+						'cleardoc', // 清空文档
 
-						'link', //超链接
-						'unlink', //取消链接
-						'emotion', //表情
-						'spechars', //特殊字符
-						'insertorderedlist', //有序列表
-						'insertunorderedlist', //无序列表
-						'horizontal', //分隔线
-						'date', //日期
-						'time', //时间
-//				        'simpleupload', //单图上传
-						'insertimage', //多图上传
+						'link', // 超链接
+						'unlink', // 取消链接
+						'emotion', // 表情
+						'spechars', // 特殊字符
+						'insertorderedlist', // 有序列表
+						'insertunorderedlist', // 无序列表
+						'horizontal', // 分隔线
+						'date', // 日期
+						'time', // 时间
+// 'simpleupload', //单图上传
+						'insertimage', // 多图上传
 						'wordimage',
-						'imagenone', //默认
-						'imageleft', //左浮动
-						'imageright', //右浮动
-						'imagecenter', //居中
-						'lineheight', //行间距
-						'map', //Baidu地图
-						'insertvideo', //视频
-						'insertcode', //代码语言
-						'inserttable', //插入表格
-						'edittable', //表格属性
-						'edittd', //单元格属性
-						'insertrow', //前插入行
-						'insertcol', //前插入列
-						'mergeright', //右合并单元格
-						'mergedown', //下合并单元格
-						'deleterow', //删除行
-						'deletecol', //删除列
-						'splittorows', //拆分成行
-						'splittocols', //拆分成列
-						'splittocells', //完全拆分单元格
-						'deletecaption', //删除表格标题
-						'inserttitle', //插入标题
-						'mergecells', //合并多个单元格
-						'deletetable', //删除表格
-						'insertparagraphbeforetable', //"表格前插入行"
+						'imagenone', // 默认
+						'imageleft', // 左浮动
+						'imageright', // 右浮动
+						'imagecenter', // 居中
+						'lineheight', // 行间距
+						'map', // Baidu地图
+						'insertvideo', // 视频
+						'insertcode', // 代码语言
+						'inserttable', // 插入表格
+						'edittable', // 表格属性
+						'edittd', // 单元格属性
+						'insertrow', // 前插入行
+						'insertcol', // 前插入列
+						'mergeright', // 右合并单元格
+						'mergedown', // 下合并单元格
+						'deleterow', // 删除行
+						'deletecol', // 删除列
+						'splittorows', // 拆分成行
+						'splittocols', // 拆分成列
+						'splittocells', // 完全拆分单元格
+						'deletecaption', // 删除表格标题
+						'inserttitle', // 插入标题
+						'mergecells', // 合并多个单元格
+						'deletetable', // 删除表格
+						'insertparagraphbeforetable', // "表格前插入行"
 
 
-						'directionalityltr', //从左向右输入
-						'directionalityrtl', //从右向左输入
-						'rowspacingtop', //段前距
-						'rowspacingbottom', //段后距
-						'background', //背景
-						'template', //模板
-						'scrawl', //涂鸦
+						'directionalityltr', // 从左向右输入
+						'directionalityrtl', // 从右向左输入
+						'rowspacingtop', // 段前距
+						'rowspacingbottom', // 段后距
+						'background', // 背景
+						'template', // 模板
+						'scrawl', // 涂鸦
 						'drafts', // 从草稿箱加载
 						'print',
-						'preview', //预览
-						'help', //帮助
-						'fullscreen', //全屏
+						'preview', // 预览
+						'help', // 帮助
+						'fullscreen', // 全屏
 					]
 				];
 			}else if(toolbarTheme == "simple"){
 				toolbarOptions = [
 					[
-						'undo', //撤销
-						'redo', //重做
-						'bold', //加粗
-						'italic', //斜体
-						'underline', //下划线
-						'strikethrough', //删除线
-						'fontborder', //字符边框
-						'indent', //首行缩进
-						'superscript', //上标
-						'subscript', //下标
-						'justifyleft', //居左对齐
-						'justifyright', //居右对齐
-						'justifycenter', //居中对齐
-						'justifyjustify', //两端对齐
-						'forecolor', //字体颜色
-						'backcolor', //背景色
-						'removeformat', //清除格式
-						'formatmatch', //格式刷
-						'autotypeset', //自动排版
-						'touppercase', //字母大写
-						'tolowercase', //字母小写
-						'fontfamily', //字体
-						'fontsize', //字号
-						'paragraph', //段落格式
-						'customstyle', //自定义标题
-						'searchreplace', //查询替换
-						'blockquote', //引用
-						'pasteplain', //纯文本粘贴模式
-						'selectall', //全选
-						'cleardoc', //清空文档
+						'undo', // 撤销
+						'redo', // 重做
+						'bold', // 加粗
+						'italic', // 斜体
+						'underline', // 下划线
+						'strikethrough', // 删除线
+						'fontborder', // 字符边框
+						'indent', // 首行缩进
+						'superscript', // 上标
+						'subscript', // 下标
+						'justifyleft', // 居左对齐
+						'justifyright', // 居右对齐
+						'justifycenter', // 居中对齐
+						'justifyjustify', // 两端对齐
+						'forecolor', // 字体颜色
+						'backcolor', // 背景色
+						'removeformat', // 清除格式
+						'formatmatch', // 格式刷
+						'autotypeset', // 自动排版
+						'touppercase', // 字母大写
+						'tolowercase', // 字母小写
+						'fontfamily', // 字体
+						'fontsize', // 字号
+						'paragraph', // 段落格式
+						'customstyle', // 自定义标题
+						'searchreplace', // 查询替换
+						'blockquote', // 引用
+						'pasteplain', // 纯文本粘贴模式
+						'selectall', // 全选
+						'cleardoc', // 清空文档
 
-						'link', //超链接
-						'unlink', //取消链接
-						'emotion', //表情
-						'spechars', //特殊字符
-						'insertorderedlist', //有序列表
-						'insertunorderedlist', //无序列表
-						'horizontal', //分隔线
-						'date', //日期
-						'time', //时间
-						'insertimage', //多图上传
-						'imagenone', //默认
-						'imageleft', //左浮动
-						'imageright', //右浮动
-						'imagecenter', //居中
-						'lineheight', //行间距
-						'insertvideo', //视频
-						'directionalityltr', //从左向右输入
-						'directionalityrtl', //从右向左输入
-						'rowspacingtop', //段前距
-						'rowspacingbottom', //段后距
-						'background', //背景
-						'fullscreen', //全屏
+						'link', // 超链接
+						'unlink', // 取消链接
+						'emotion', // 表情
+						'spechars', // 特殊字符
+						'insertorderedlist', // 有序列表
+						'insertunorderedlist', // 无序列表
+						'horizontal', // 分隔线
+						'date', // 日期
+						'time', // 时间
+						'insertimage', // 多图上传
+						'imagenone', // 默认
+						'imageleft', // 左浮动
+						'imageright', // 右浮动
+						'imagecenter', // 居中
+						'lineheight', // 行间距
+						'insertvideo', // 视频
+						'directionalityltr', // 从左向右输入
+						'directionalityrtl', // 从右向左输入
+						'rowspacingtop', // 段前距
+						'rowspacingbottom', // 段后距
+						'background', // 背景
+						'fullscreen', // 全屏
 					]
 				];
 			}else if(toolbarTheme == "none"){
@@ -7332,12 +7072,12 @@ var HtmlEditorUtil={
 		var neditorOptions={
 				  imageMaxSize:imgmaxsize,
 				  videoMaxSize:videomaxsize,
-			    //关闭字数统计
+			    // 关闭字数统计
 			      wordCount:wordCount,
 			      maximumWords:maximumWords,
 			      autoHeightEnabled:autoHeightEnabled,
 			      catchRemoteImageEnable:catchRemoteImageEnable,
-			      //关闭elementPath
+			      // 关闭elementPath
 			      elementPathEnabled:elementPathEnabled,
 			      toolbars: toolbarOptions,
 				allowDivTransToP:false
@@ -7621,7 +7361,7 @@ var HtmlEditorUtil={
       		that.ing=false;
       		 
 //			for(var i =0;i<flen;i++){
-//				var file=files[i];
+// var file=files[i];
 //				if(that.ing==false||!(file.type.match(/^image/))){
 //					return false;
 //				}
@@ -7630,7 +7370,7 @@ var HtmlEditorUtil={
 //		    		LayerMsgBox.alert("剪贴板中图片文件不能大于"+maxsize+"k",2);
 //		    		return false;
 //				}
-//				
+
 //				that.sendSummernoteFile(editor,file);
 //			}
 			
@@ -7680,7 +7420,7 @@ var HtmlEditorUtil={
 			        type:"post",
 			        url: imgUploadUrl,
 			        data: fd,
-			        timeout : timeout, //超时时间设置，单位毫秒
+			        timeout : timeout, // 超时时间设置，单位毫秒
 			        cache:false, 
 			        async:true, 
 			        processData: false,
@@ -7720,8 +7460,7 @@ var HtmlEditorUtil={
 			
 		}
 }
-/**
- * radio工具类封装
+/** radio工具类封装
  */
 var RadioUtil={
 		initRadioEvent:function(r,name,handler){
@@ -7764,7 +7503,7 @@ var RadioUtil={
 			  }else{
 				  var hasInline=r.find(".radio-inline");
 				  if(hasInline){
-					  //处理样式
+					  // 处理样式
 					  that.processRadioAlignAndWidth(r);
 				  }
 				  that.initRadioEvent(r,name,handler);
@@ -7913,7 +7652,7 @@ var RadioUtil={
   						html+="</div>";
   						r.append(html);
   						if(isInline){
-  							//处理样式
+  							// 处理样式
   							that.processRadioAlignAndWidth(r);
   						}
   						if(callback){
@@ -8003,7 +7742,7 @@ var RadioUtil={
 }
 
 
-//弹出tips
+// 弹出tips
 var LayerTipsUtil={
 		initTip:function(tip){
 			 var trigger=tip.data("trigger");
@@ -8060,8 +7799,7 @@ var LayerTipsUtil={
 		  }
 }
 
-/**
- * layerPhoto弹出层组件工具类
+/** layerPhoto弹出层组件工具类
  */
 var LayerPhotoUtil={
 		init:function(){
@@ -8087,21 +7825,21 @@ var LayerPhotoUtil={
 							datas=that.getalbum(album,url);
 							if(!datas){
 								datas=[{
-						    	      "src":url, //原图地址
+						    	      "src":url, // 原图地址
 					    	    }];
 							}
 						}else{
 							datas=[{
-					    	      "src":url, //原图地址
+					    	      "src":url, // 原图地址
 				    	    }];
 						}
 						var layerPhotoptions={
 							    photos: {
 							    	  "title": "JBolt图片查看器", 
-							    	  "start": 0, //初始显示的图片序号，默认0
+							    	  "start": 0, // 初始显示的图片序号，默认0
 							    	  "data": datas
 							    	}
-							    ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+							    ,anim: 5 // 0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
 							  };
 						if(target&&target=="parent"){
 							parent.layer.photos(layerPhotoptions);
@@ -8140,8 +7878,7 @@ var LayerPhotoUtil={
 			 return psUrls;
 		}
 }
-/**
- * 自动Ajax加载内容的Portal
+/** 自动Ajax加载内容的Portal
  */
 ;(function($){
 		$.extend($.fn, {
@@ -8279,10 +8016,7 @@ var LayerPhotoUtil={
 			}
 		});
 	})(jQuery);
-/**
- * ajaxPortal后执行的初始化
- * @param portalId
- * @returns
+/** ajaxPortal后执行的初始化
  */
 function afterAjaxPortal(portal){
 	portalLoadRequirePluginAndInit(portal);
@@ -8317,15 +8051,15 @@ function afterAjaxPortal(portal){
 	TextareaUtil.initUI(portal);
 	JsonEditorUtil.init(portal);
 	LayerMsgBox.closeLoadNow();
-	//处理自动刷新
+	// 处理自动刷新
 	processAutoRefreshTabContent(portal);
 	findRequiredAndStarIt(portal);
 }
 
 
-//处理自动刷新设置
+// 处理自动刷新设置
 function processAutoRefreshTabContent(portal){
-//	var withTabs=isWithtabs();
+// var withTabs=isWithtabs();
 	if(!jboltWithTabs){
 		return false;
 	}
@@ -8344,19 +8078,14 @@ function processAutoRefreshTabContent(portal){
 		}, autoRefresh);
 	}
 }
-/**
- * 判断是文件File数据
- * @param obj
- * @returns
+/** 判断是文件File数据
  */
 function isFileData(obj){
 	return obj&&obj.constructor==File;
 }
 /**
  * 检测文件大小
- * @param file 
  * @param maxSize kb单位
- * @returns
  */
 function validateFileMaxSize(file,maxSize){
 	var fileSize=0;
@@ -8386,7 +8115,7 @@ function validateFileMaxSize(file,maxSize){
     return gt;
 }
 
-//限制上传文件的类型和大小
+// 限制上传文件的类型和大小
 function validateExcel(file,maxSize,dontShowMsg){
 	  // 返回 KB，保留小数点后两位
 	  var fileName;
@@ -8406,7 +8135,7 @@ function validateExcel(file,maxSize,dontShowMsg){
 	  }
 	  return true;
 }
-//限制上传文件的类型和大小
+// 限制上传文件的类型和大小
 function validateNormal(file,maxSize,dontShowMsg){
 	// 返回 KB，保留小数点后两位
 	var fileName;
@@ -8427,7 +8156,7 @@ function validateNormal(file,maxSize,dontShowMsg){
 	return true;
 }
 
-//限制上传文件的类型和大小
+// 限制上传文件的类型和大小
 function validateAudio(file,maxSize,dontShowMsg){
 	// 返回 KB，保留小数点后两位
 	var fileName;
@@ -8447,7 +8176,7 @@ function validateAudio(file,maxSize,dontShowMsg){
 	}
 	return true;
 }
-//限制上传文件的类型和大小
+// 限制上传文件的类型和大小
 function validateVideo(file,maxSize,dontShowMsg){
 	// 返回 KB，保留小数点后两位
 	var fileName;
@@ -8467,7 +8196,7 @@ function validateVideo(file,maxSize,dontShowMsg){
 	}
 	return true;
 }
-//限制上传文件的类型和大小
+// 限制上传文件的类型和大小
 function validateSelfFileAccept(file,maxSize,accept,dontShowMsg){
 	  // 返回 KB，保留小数点后两位
 	var fileName;
@@ -8488,20 +8217,18 @@ function validateSelfFileAccept(file,maxSize,accept,dontShowMsg){
 	  }
 	  return true;
 }
-/**
- * 判断是不是img
+/** 判断是不是img
  */
 function isImg(fileName){
 	return (/.(jpg|jpeg|png|gif|bmp|webp)$/.test(fileName.toLowerCase()));
 }
 
-/**
- * 判断是不是pdf
+/** 判断是不是pdf
  */
 function isPdf(fileName){
 	return (/.(pdf)$/.test(fileName.toLowerCase()));
 }
-//限制上传文件的类型和大小
+// 限制上传文件的类型和大小
 function validateImg(file,maxSize,dontShowMsg){
     // 返回 KB，保留小数点后两位
 	var fileName;
@@ -8646,12 +8373,7 @@ function getRealAcceptSplit(accept){
 	return rets.join(",");
 
 }
-/**
- * 批量 验证files
- * @param files
- * @param accept
- * @param maxSize
- * @returns
+/** 批量 验证files
  */
 function validateFileDatas(fileDatas,accept,maxSize){
 	if(!fileDatas||fileDatas.length==0){
@@ -8669,12 +8391,7 @@ function validateFileDatas(fileDatas,accept,maxSize){
 	return passValidate;
 	
 }
-/**
- * 验证file
- * @param file
- * @param accept
- * @param maxSize
- * @returns
+/** 验证file
  */
 function validateFile(file,accept,maxSize){
 	  	  var ele;
@@ -8683,7 +8400,7 @@ function validateFile(file,accept,maxSize){
 			}else{
 				ele = file[0].files[0];
 		  }
-		//默认10M
+		// 默认10M
 		if(maxSize){
 			maxSize = maxSize * 1024;
 		}else{
@@ -8692,7 +8409,7 @@ function validateFile(file,accept,maxSize){
 	  	var passValidate=true;
 	  	if(accept){
 			  if(accept.indexOf(",")==-1){
-				  //就一个
+				  // 就一个
 				  switch (accept) {
 					  case "img":
 						  passValidate=validateImg(ele,maxSize);
@@ -8758,7 +8475,7 @@ function validateFile(file,accept,maxSize){
 
 
 
-//建立一個可存取到該file的url
+// 建立一個可存取到該file的url
 function getObjectURL(ele) {
 	return getObjectURLByFileData(ele.files[0]) ;
 }
@@ -8774,7 +8491,7 @@ function getObjectURLByFileData(fileData) {
 	  return url ;
 }
 
-//专门图片上传组件
+// 专门图片上传组件
 var ImgUploadUtil={
 		  tpl:'<p class="j_img_uploder_msg"><span class="j_file_name"></span><i class="fa fa-remove j_text_danger j_remove_file"></i></p>',
 		  input_tpl:'<div class="j_upload_img_input"><input id="${inputId}" data-boxid="${boxId}" type="file" {@if multi}multiple="multiple"{@/if} accept="image/*"  {@if rule}data-rule="${rule}"{@/if}  {@if tips}data-tips="${tips}"{@/if} ></div>',
@@ -9141,7 +8858,7 @@ var ImgUploadUtil={
 							uploder.find("span.j_file_name").text(fileName).attr("title",fileName);
 							uploder.find("p.j_img_uploder_msg").show();
 							
-							//出预览图
+							// 出预览图
 							var imgDataUrl=getObjectURLByFileData(fileData);
 							if(imgDataUrl){
 								uploder.css({
@@ -9225,7 +8942,7 @@ var ImgUploadUtil={
 					}
 					var loading=uploder.data("loading");
 					
-					//如果是本地上传 执行uploadFile
+					// 如果是本地上传 执行uploadFile
 					if(handler=="uploadFile"){
 						uploadFile("img",url,fileName,fileData,hiddeninput,null,null,false,imgbox,loading,function(type,res){
 							if(ucallback){
@@ -9248,7 +8965,7 @@ var ImgUploadUtil={
 						});
 					}else if(handler == 'uploadFileToQiniu'){
 						loadJBoltPlugin(['qiniu'], function(){
-							//如果是上传到七牛 执行uploadFileToQiniu
+							// 如果是上传到七牛 执行uploadFileToQiniu
 							uploadFileToQiniu(uploder,"img",fileData,hiddeninput,null,null,false,imgbox,loading,function(type,res){
 								if(ucallback){
 									var execa_handler=eval(ucallback);
@@ -9517,14 +9234,7 @@ function imgGotoRight(i){
 function isFileList(fileDatas){
 	return fileDatas&&fileDatas.constructor==FileList;
 }
-/**
- * 处理图片上传回到
- * @param res
- * @param hiddeninput
- * @param isMultiple
- * @param imgbox
- * @param isLocal
- * @returns
+/** 处理图片上传回到
  */
 function processImgUploadCallback(res,hiddeninput,isMultiple,imgbox,isLocal){
 	var datas=res.data;
@@ -9637,30 +9347,17 @@ function processImgUploadCallback(res,hiddeninput,isMultiple,imgbox,isLocal){
 	hinput.val(hvalue);
 }
 
-/**
- * 得到文件名
- * @param o
- * @returns
+/** 得到文件名
  */
 function getFileName(o){
 	return o.substring(o.lastIndexOf("/")+1);  
 }
-/**
- * 得到后缀
- * @param o
- * @returns
+/** 得到后缀
  */
 function getFileExtension(o){
     return o.substring(o.lastIndexOf(".")+1);  
 }
-/**
- * 处理上传回调
- * @param res
- * @param hiddeninput
- * @param filenameInput
- * @param isMultiple
- * @param filebox
- * @returns
+/** 处理上传回调
  */
 function processFileUploadCallback(res,hiddeninput,filenameInput,isMultiple,fileboxId){
 	if(!isMultiple){
@@ -9978,23 +9675,12 @@ function processFileUploadCallback(res,hiddeninput,filenameInput,isMultiple,file
 }
 /**
  * 上传到七牛服务器
- * @param uploader
  * @param type img or file
- * @param fileDatas
- * @param hiddeninput
- * @param filenameInput
- * @param sizeinput
- * @param isMultiple
- * @param imgbox
- * @param loading
- * @param successCallback
- * @param failCallback
- * @returns
  */
 function uploadFileToQiniu(uploader,type,fileDatas,hiddeninput,filenameInput,sizeinput,isMultiple,imgbox,loading,successCallback,failCallback){
 	if(isMultiple&&fileDatas.length==0){return false;}
 	if(!isMultiple&&!fileDatas.size){return false;}
-	var sn = uploader.data("bucket-sn")||"default";//未指定就用默认配置的七牛账号
+	var sn = uploader.data("bucket-sn")||"default";// 未指定就用默认配置的七牛账号
 	Ajax.get("admin/qiniu/uploadParas?sn="+sn,function(res){
 		if(res.data){
 			uploader.completeCount = 0;
@@ -10084,7 +9770,7 @@ function __uploadFileToQiniu(uploader,index,fileData,fileKey,qiniuUploadPara,typ
 	var fileSize=parseInt((fileData.size/1024).toFixed(0));
 	var observable = qiniu.upload(fileData, upkey, qiniuUploadPara.token, putExtra, config);
 	var subscr = observable.subscribe(function(res){
-    	//var percent = parseInt(res.total.percent);
+    	// var percent = parseInt(res.total.percent);
     },function(res){
     	alert("上传七牛出现异常:"+JSON.stringify(res));
     },function(res){
@@ -10134,21 +9820,7 @@ function getQiniuRegion(region){
 	return ret;
 }
 
-/**
- * 上传到本地服务器
- * @param type
- * @param url
- * @param name
- * @param fileDatas
- * @param hiddeninput
- * @param filenameInput
- * @param sizeinput
- * @param isMultiple
- * @param imgbox
- * @param loading
- * @param successCallback
- * @param failCallback
- * @returns
+/** 上传到本地服务器
  */
 function uploadFile(type,url,name,fileDatas,hiddeninput,filenameInput,sizeinput,isMultiple,imgbox,loading,successCallback,failCallback){
 	if(!fileDatas){return false;}
@@ -10174,7 +9846,7 @@ function uploadFile(type,url,name,fileDatas,hiddeninput,filenameInput,sizeinput,
 	        type:"POST",
 	        url: url,
 	        data: fd,
-	        timeout : timeout, //超时时间设置，单位毫秒
+	        timeout : timeout, // 超时时间设置，单位毫秒
 	        cache:false, 
 	        async:true, 
 	        processData: false,
@@ -10235,8 +9907,7 @@ function dataURItoBlob(dataURI) {
     }
     return new Blob([ab], {type: mimeString });
 }
-/**
- * 上传组件封装
+/** 上传组件封装
  */
 var FileUploadUtil={
 		tpl:'<button id="${buttonId}" data-inputid="${inputId}" type="button" class="j_upload_file ${btnClass}" style="{@if width}width:${width}px;{@/if}{@if height}height:${height}px;{@/if}{@if fontSize}font-size:${fontSize}px;{@/if}"><div class="placeholder"><i class="fa fa-upload {@if placeholder}mr-2{@/if}"></i>${placeholder}</div></button><div class="j_upload_file_box_msg"><span class="j_file_name"></span><i class="fa fa-remove text-danger j_remove_file"></i></div>',
@@ -10301,7 +9972,7 @@ var FileUploadUtil={
 				}
 			}
 		},
-		//初始化已存在的数据
+		// 初始化已存在的数据
 		initExistFileLi:function(filebox,fileboxId,hiddeninputId){
 			var fileObjs = filebox.find(".file");
 			if(isOk(fileObjs)){
@@ -10321,7 +9992,7 @@ var FileUploadUtil={
 				return;
 			}
 			var hiddeninputId = box.data("hidden-input")||box.data("hiddeninput");
-			//初始化已存在的数据
+			// 初始化已存在的数据
 			this.initExistFileLi(filebox,fileboxId,hiddeninputId);
 			var filesJsonStr = filebox.data("files");
 			if(!filesJsonStr){
@@ -10451,7 +10122,7 @@ var FileUploadUtil={
 			}
 			
 		},
-		//处理单个
+		// 处理单个
 		oneFileBoxProcess:function(box,file){
 			var fileInput = file;
 			var that=this;
@@ -10467,7 +10138,7 @@ var FileUploadUtil={
 			//box.find(".j_upload_file").addClass("j_reupload");
 			box.closest(".form-group").removeClass("has-error");
 			var imgpreview=box.data("imgpreview");
-			//如果是图片 而且设置了要出预览 就出预览图
+			// 如果是图片 而且设置了要出预览 就出预览图
 			if(imgpreview){
 				if(isImg(fileName)){
 					var imgpreviewBox=$(imgpreview);
@@ -10718,7 +10389,7 @@ var FileUploadUtil={
 				return false;
 			}
 			var that=this,fbox,fbtn;
-			//box的点击效果
+			// box的点击效果
 			fileBoxs.each(function(){
 				fbox=$(this);
 				fbtn=fbox.find("button");
@@ -10779,17 +10450,17 @@ var FileUploadUtil={
 			var parent=getRealParentJqueryObject(parentEle);
 			if(!isOk(parent)){return false;}
 			
-			//得到符合条件的组件 进行初始化
+			// 得到符合条件的组件 进行初始化
 			var fileBoxs=parent.find(".j_upload_file_box,[data-fileuploader]");
 			if(isOk(fileBoxs)){
-				//初始化UI
+				// 初始化UI
 				that.initFileBoxUI(fileBoxs);
-				//初始化事件
+				// 初始化事件
 				that.initFileBoxEvent(fileBoxs);
 			}	
 			
 		},
-		//清空选择文件
+		// 清空选择文件
 		clearIt:function(uploder){
 			var rf=function(){
 				var inputId=uploder.find("button").data("inputid");
@@ -10869,7 +10540,7 @@ var FileUploadUtil={
 
 
 
-//layer msg模块封装
+// layer msg模块封装
 var LayerMsgBox={
 		alert:function(msg,icon,handler){
 			if(icon){
@@ -10902,11 +10573,7 @@ var LayerMsgBox={
 				layer.close(index);
 			});
 		},
-		/**
-		 * 弹出成功信息,并执行回调方法
-		 * @param msg
-		 * @param time
-		 * @param handler
+		/** 弹出成功信息,并执行回调方法
 		 */
 		success:function(msg,time,handler){
 			if(!msg){msg="操作成功";}
@@ -10918,8 +10585,7 @@ var LayerMsgBox={
 			});
 			return index;
 		},
-		/**
-		 * 保存成功后的警告提示，确认或关闭后继续完成表单回调。
+		/** 保存成功后的警告提示，确认或关闭后继续完成表单回调。
 		 */
 		warning:function(msg,handler){
 			this.closeLoadingNow();
@@ -10934,10 +10600,7 @@ var LayerMsgBox={
 		},
 
 
-		/**
-		 * 弹出Error,并执行回调方法
-		 * @param msg
-		 * @param time
+		/** 弹出Error,并执行回调方法
 		 */
 		error:function(msg,time,handler){
 			if(!msg){msg="错误";}
@@ -10960,10 +10623,7 @@ var LayerMsgBox={
 			});
 			return i;
 		},
-		/**
-		 * 弹出进度
-		 * @param msg
-		 * @param time
+		/** 弹出进度
 		 */
 		loading:function(msg,time,handler){
 			if(!msg){msg="执行中...";}
@@ -10992,11 +10652,11 @@ var LayerMsgBox={
 		},
 		closeLoading:function(){
 			setTimeout(function(){
-				layer.closeAll('dialog'); //关闭加载层
+				layer.closeAll('dialog'); // 关闭加载层
 			}, 500);
 		},
 		closeLoadingNow:function(){
-				layer.closeAll('dialog'); //关闭加载层
+				layer.closeAll('dialog'); // 关闭加载层
 		},
 		load:function(type,time){
 			var index=null;
@@ -11009,17 +10669,16 @@ var LayerMsgBox={
 		},
 		closeLoad:function(){
 			setTimeout(function(){
-				layer.closeAll('loading'); //关闭加载层
+				layer.closeAll('loading'); // 关闭加载层
 			}, 200);
 		},
 		closeLoadNow:function(){
-				layer.closeAll('loading'); //关闭加载层
+				layer.closeAll('loading'); // 关闭加载层
 		}
 
 }
 
-/**
- * ajax封装
+/** ajax封装
  */
 var jboltAjaxTimeout=60000;
 var Ajax={
@@ -11041,7 +10700,7 @@ var Ajax={
 				type:"post",
 				processData: false,
                 contentType: false,
-				timeout : timeout?timeout:jboltAjaxTimeout, //超时时间设置，单位毫秒
+				timeout : timeout?timeout:jboltAjaxTimeout, // 超时时间设置，单位毫秒
 				async:async,
 				data:formData,
 				success:function(data){
@@ -11102,7 +10761,7 @@ var Ajax={
 					type:"post",
 					contentType:contentType,
 					dataType:dateType?dateType:"json",
-					timeout : timeout?timeout:jboltAjaxTimeout, //超时时间设置，单位毫秒
+					timeout : timeout?timeout:jboltAjaxTimeout, // 超时时间设置，单位毫秒
 					async:async,
 					data:data,
 					success:function(data){
@@ -11167,7 +10826,7 @@ var Ajax={
 					url:url,
 					type:"get",
 					dataType:dateType?dateType:"json",
-					timeout : timeout?timeout:jboltAjaxTimeout, //超时时间设置，单位毫秒
+					timeout : timeout?timeout:jboltAjaxTimeout, // 超时时间设置，单位毫秒
 					async:async,
 					success:function(data){
 						if(data.state=="ok"){
@@ -11213,11 +10872,7 @@ var Ajax={
 				jboltAjaxTimeout=60000;
 			}
 }
-/**
- * 处理option value取值
- * @param data
- * @param value_attr
- * @returns
+/** 处理option value取值
  */
 function processOptionValue(data,value_attr){
 	var value=data[value_attr];
@@ -11234,13 +10889,7 @@ function processOptionValue(data,value_attr){
 	}
 	return value;
 }
-/**
- * options数据 格式化处理
- * @param handler
- * @param data
- * @param text_attr
- * @param delimiter
- * @returns
+/** options数据 格式化处理
  */
 function processOptionTextByFormatHandler(handler,data,text_attr,delimiter){
 	if(!handler){return processOptionText(data,text_attr,delimiter);}
@@ -11250,11 +10899,7 @@ function processOptionTextByFormatHandler(handler,data,text_attr,delimiter){
 	}
 	return processOptionText(data,text_attr,delimiter);
 }
-/**
- * 处理option text取值
- * @param data
- * @param text_attr
- * @returns
+/** 处理option text取值
  */
 function processOptionText(data,text_attr,delimiter){
 	var text="";
@@ -11293,10 +10938,7 @@ function processOptionText(data,text_attr,delimiter){
 	}
 	return text;
 }
-/**
- * 检测是否是可以输入赋值的控件
- * @param ele
- * @returns
+/** 检测是否是可以输入赋值的控件
  */
 var formInputValueControls=["input","textarea","select"];
 function isFormInputValueControl(ele){
@@ -11322,11 +10964,10 @@ function syncOtherInput(value,inputEle){
 		});
 	}
 }
-/**
-   * select工具类
-   */
+/** select工具类
+ */
   var SelectUtil={
-		   //执行选中数据后额外将值赋值给指定的元素
+		   // 执行选中数据后额外将值赋值给指定的元素
 		  setValueToOther:function(select){
 			  var setvaluetoId=select.data("setvalueto");
 			  if(setvaluetoId){
@@ -11456,7 +11097,7 @@ function syncOtherInput(value,inputEle){
 			  
 		  
 		  },
-		  //同步属性到其他组件
+		  // 同步属性到其他组件
 		  syncAttrToOther:function(select){
 			 var syncInputs=select.data("sync-ele")||select.data("sync-input")||select.data("syncele")||select.data("syncinput");
 			 if(!isOk(syncInputs)){return;}
@@ -11466,7 +11107,7 @@ function syncOtherInput(value,inputEle){
 				syncmust=true;
 			}
 			 if(!isOk(optionsDatas)){
-				//如果选择不是数据 就清空
+				// 如果选择不是数据 就清空
 				$(syncInputs).each(function(){
 					if(isFormEle(this.tagName)){
 						if(this.value){
@@ -11494,7 +11135,7 @@ function syncOtherInput(value,inputEle){
 		
 			if(selectedIndex<=0){
 				if(firstText||selectedIndex<0){
-					//如果选择不是数据 就清空
+					// 如果选择不是数据 就清空
 					$(syncInputs).each(function(){
 						if(isFormEle(this.tagName)){
 							if(this.value){
@@ -11631,12 +11272,12 @@ function syncOtherInput(value,inputEle){
 					return true;
 				}
 
-				//处理额外设置的setvalueto settextto	
+				// 处理额外设置的setvalueto settextto
 				that.processSetValueOrTextToOther(_thisSelect);
 				setting.handler(_thisSelect);
 				return true;
 			}
-			//如果没有setting handler 就指定 data-handler
+			// 如果没有setting handler 就指定 data-handler
 			var handler=_thisSelect.data("handler");
 			if(handler){
 				if(handler=="setValueToOther"){
@@ -11662,7 +11303,7 @@ function syncOtherInput(value,inputEle){
 					return true;
 				}
 
-				//处理额外设置的setvalueto settextto
+				// 处理额外设置的setvalueto settextto
 				that.processSetValueOrTextToOther(_thisSelect);
 				that.syncAttrToOther(_thisSelect);
 				try{
@@ -11675,7 +11316,7 @@ function syncOtherInput(value,inputEle){
 				}
 				
 			}else{
-				//处理额外设置的setvalueto settextto	
+				// 处理额外设置的setvalueto settextto
 				that.processSetValueOrTextToOther(_thisSelect);
 				that.syncAttrToOther(_thisSelect);
 				
@@ -11759,7 +11400,7 @@ function syncOtherInput(value,inputEle){
 			      			type:"GET",
 			      			url:url,
 			      			dataType:"json",
-			      			timeout : 10000, //超时时间设置，单位毫秒
+			      			timeout : 10000, // 超时时间设置，单位毫秒
 			      			context:_thisSelect,
 			      			success:function(result){
 			      				if(refreshing){
@@ -11931,8 +11572,7 @@ function syncOtherInput(value,inputEle){
 				}
 	    		that.processRefresh(_thisSelect,setting);
 		},
-		/**
-		 * 处理刷新
+		/** 处理刷新
 		 */
 		processRefresh:function(_thisSelect,setting){
 			var that=this;
@@ -11979,8 +11619,7 @@ function syncOtherInput(value,inputEle){
 	    			});
 	    		}
 		},
-		/**
-		 * 查找
+		/** 查找
 		 */
 		findSelect:function(setting){
 			var select=null;
@@ -12038,7 +11677,7 @@ function syncOtherInput(value,inputEle){
 			   var that=this;
 		       var selects=that.findSelect(setting);
 		       if(selects&&selects.length>0){
-		    	   //循环处理 这样写性能高一点
+		    	   // 循环处理 这样写性能高一点
 		    	   var len=selects.length;
 		    	   for(var i=0;i<len;i++){
 		    		   that.processOneSelect(selects.eq(i),setting);
@@ -12048,16 +11687,15 @@ function syncOtherInput(value,inputEle){
 		    initSelect:function(select){
 		    	this.processOneSelect(select)
 		    },
-		    /**
-		     * 处理单个select
+		    /** 处理单个select
 		     */
 		    processOneSelect:function(_thisSelect,setting){
 	      		var that=this;
-	      		//处理二级联动事件绑定
+	      		// 处理二级联动事件绑定
 	      		that.processLinkAge(_thisSelect,setting);
-	      		//
+
 	      		if((_thisSelect.data("url")||(setting&&setting.url))){
-	      			//读取并渲染数据
+	      			// 读取并渲染数据
 	  	    		that.readAndInsertItems(_thisSelect,setting,false);
 	      		}else if(_thisSelect.data("options")){
 	      			that.processOneSelectByOptions(_thisSelect,setting);
@@ -12068,8 +11706,7 @@ function syncOtherInput(value,inputEle){
 	      			}
 	      		}
 		    },
-		    /**
-		     * 处理联动
+		    /** 处理联动
 		     */
 		    processLinkAge:function(_thisSelect,setting){
 		    	var that=this;
@@ -12085,7 +11722,7 @@ function syncOtherInput(value,inputEle){
 							exe(_thisSelect);
 						}
 					}
-	      			//change事件
+	      			// change事件
 	      			that.processChangeEventHandler(_thisSelect,setting);
 	      			
 	      			var sonIds=_thisSelect.data("sonid"),sonId,sonSelect,sonIdArr,srcUrl,url,sonLen,linkage_attr,linkageValue=_thisSelect.val();
@@ -12094,7 +11731,7 @@ function syncOtherInput(value,inputEle){
 	      				sonLen=sonIdArr.length;
 	      				linkage_attr=_thisSelect.data("linkage-attr");
 	      				if(linkage_attr){
-	      					//如果设置了linkage-attr 需要得到对应的值
+	      					// 如果设置了linkage-attr 需要得到对应的值
 	      					var selectIndex=_thisSelect[0].options.selectedIndex;
 	      					var optionDatas=_thisSelect.data("option-datas");
 	      					if(optionDatas&&optionDatas.length>0){
@@ -12134,10 +11771,7 @@ function syncOtherInput(value,inputEle){
 	      			_thisSelect.trigger("linkChange");
 	      		});
 		    },
-  /**
-   * 设置select选中值
-   * @param id
-   * @param value
+  /** 设置select选中值
    */
    setValue:function(id,value,defaultValue){
 	   if(value!=undefined&&value!="undefined"&&value!=''){
@@ -12171,11 +11805,7 @@ function syncOtherInput(value,inputEle){
   }
   }
  
-/**
- * 删除tr
- * @param tr
- * @param table
- * @returns
+/** 删除tr
  */
 function removeTableRow(tr,table){
 	var index=tr.index();
@@ -12188,20 +11818,20 @@ function removeTableRow(tr,table){
 	}
 	var isJBoltTable=table[0].hasAttribute("data-jbolttable");
 	var isTreeTable=table[0].hasAttribute("data-jbolttreetable");
-	//如果是JBoltTable组件单独处理
-	if(isJBoltTable&&!isTreeTable){//只是JBoltTable
-		//处理JBoltTable
+	// 如果是JBoltTable组件单独处理
+	if(isJBoltTable&&!isTreeTable){// 只是JBoltTable
+		// 处理JBoltTable
 		var jboltTable=table.jboltTable("inst");
 		if(jboltTable){
 			jboltTable.me.removeRow(jboltTable,index);
 		}
-	}else if(isJBoltTable&&isTreeTable){//即是JBoltTable 也是JBoltTreeTable
-		//处理JBoltTable
+	}else if(isJBoltTable&&isTreeTable){// 即是JBoltTable 也是JBoltTreeTable
+		// 处理JBoltTable
 		var jboltTable=table.jboltTable("inst");
 		if(jboltTable){
 			jboltTable.me.deleteTreeTableRow(jboltTable,index);
 		}
-	}else if(isTreeTable&&!isJBoltTable){//只是JBoltTreeTable
+	}else if(isTreeTable&&!isJBoltTable){// 只是JBoltTreeTable
 		deleteTreeTableRow(table,tr);
 	}else{
 		tr.remove();
@@ -12209,8 +11839,7 @@ function removeTableRow(tr,table){
 
 }
   
-/**
- * 删除一行tr
+/** 删除一行tr
  */
 function removeTr(obj){
 	var tr=$(obj).closest("tr");
@@ -12221,10 +11850,7 @@ function removeTr(obj){
 	}
 }
 
-/**
- * 
- *	刷新当前JBoltLayer
- * @returns
+/** 刷新当前JBoltLayer
  */
 function refreshJBoltLayer(){
 	var jboltLayer=$(".jbolt_layer");
@@ -12233,17 +11859,14 @@ function refreshJBoltLayer(){
 	}
 }
 
-/**
- * 删除一行tr
+/** 删除一行tr
  */
 function removeByKey(obj){
 	var removeKey=$(obj).data("removekey");
 	$("[data-removekey='"+removeKey+"']").remove();
 }
 
-/**
- * 删除一行并且带着级联下级
- * @returns
+/** 删除一行并且带着级联下级
  */
 function removeTrCascade(ele){
 	var tr=ele.closest("tr");
@@ -12269,7 +11892,7 @@ function trChangeToUp(currentTr,prevTr,jboltTable){
 		var showArr=new Array();
 		for(var i=0;i<size;i++){
 			tplTr=currentTr[i];
-			tplTr.insertBefore(prevTr); //插入到当前<tr>前一个元素前
+			tplTr.insertBefore(prevTr); // 插入到当前<tr>前一个元素前
 			if(!tplTr.is(":hidden")){
 				tplTr.addClass("sortActive");
 				showArr.push(tplTr);
@@ -12290,7 +11913,7 @@ function trChangeToUp(currentTr,prevTr,jboltTable){
 		
 	}else{
 		if (currentTr.index() >0) { 
-			currentTr.insertBefore(prevTr); //插入到当前<tr>前一个元素前
+			currentTr.insertBefore(prevTr); // 插入到当前<tr>前一个元素前
 			currentTr.addClass("sortActive");
 			setTimeout(function(){
 				currentTr.removeClass("sortActive");
@@ -12334,7 +11957,7 @@ function processToChangeUpByPrevPage(currentTr){
 		mainPagination=jboltBody.find(".pages>.mainPagination");
 	}
 	if(mainPagination){
-		//找到分页组件 去判断有没有页码 有的时候判断不是第一页的就可以跳转上一页了
+		// 找到分页组件 去判断有没有页码 有的时候判断不是第一页的就可以跳转上一页了
 		var current=mainPagination.find(".pagination>a.current:not(.prev):not(.next)");
 		if(isOk(current)){
 			var text=parseInt(current.text());
@@ -12358,7 +11981,7 @@ function processToChangeDownByNextPage(currentTr){
 		mainPagination=jboltBody.find(".pages>.mainPagination");
 	}
 	if(mainPagination){
-		//找到分页组件 去判断有没有页码 有的时候判断不是第一页的就可以跳转上一页了
+		// 找到分页组件 去判断有没有页码 有的时候判断不是第一页的就可以跳转上一页了
 		var current=mainPagination.find(".pagination>a.current:not(.prev):not(.next)");
 		var last=mainPagination.find(".pagination>a:not(.prev):not(.next):last");
 		if(isOk(current)&&isOk(last)){
@@ -12373,7 +11996,7 @@ function processToChangeDownByNextPage(currentTr){
 		}
 	}
 }
-//上移 
+// 上移
 function trMoveUp(currentTr) { 
 	var table=currentTr.closest("table");
 	var tableFixed=table.closest(".jbolt_table_fixed");
@@ -12388,20 +12011,20 @@ function trMoveUp(currentTr) {
 	}
 	var isJBoltTable=table[0].hasAttribute("data-jbolttable")&&table.hasClass("jbolt_table");
 	var isTreeTable=table[0].hasAttribute("data-jbolttreetable");
-	//如果是JBoltTable组件单独处理
-	if(isJBoltTable&&!isTreeTable){//只是JBoltTable
-		//处理JBoltTable
+	// 如果是JBoltTable组件单独处理
+	if(isJBoltTable&&!isTreeTable){// 只是JBoltTable
+		// 处理JBoltTable
 		var jboltTable=table.jboltTable("inst");
 		if(jboltTable){
 			jboltTable.me.moveUpRow(jboltTable,currentTr);
 		}
 //	}else if(isJBoltTable&&isTreeTable){//即是JBoltTable 也是JBoltTreeTable
-//		//处理JBoltTable
-//		var jboltTable=table.jboltTable("inst");
+// //处理JBoltTable
+// var jboltTable=table.jboltTable("inst");
 //		if(jboltTable){
 //			jboltTable.me.moveUpTreeTableRow(jboltTable,index);
 //		}
-	}else if(isTreeTable&&!isJBoltTable){//只是JBoltTreeTable
+	}else if(isTreeTable&&!isJBoltTable){// 只是JBoltTreeTable
 		moveUpTreeTableRow(table,currentTr);
 	}else{
 		trChangeToUp(currentTr,currentTr.prev());
@@ -12417,7 +12040,7 @@ function trChangeToDown(currentTr,nextTr,jboltTable){
 		var lastIndex=size-1;
 		for(var i=lastIndex;i>=0;i--){
 			tplTr=currentTr[i];
-			tplTr.insertAfter(nextTr); //插入到当前<tr>前一个元素前
+			tplTr.insertAfter(nextTr); // 插入到当前<tr>前一个元素前
 			if(!tplTr.is(":hidden")){
 				tplTr.addClass("sortActive");
 				showArr.push(tplTr);
@@ -12434,7 +12057,7 @@ function trChangeToDown(currentTr,nextTr,jboltTable){
 		
 	}else{
 		if(currentTr.index()>=0) {
-			currentTr.insertAfter(nextTr); //插入到当前<tr>前一个元素前
+			currentTr.insertAfter(nextTr); // 插入到当前<tr>前一个元素前
 			currentTr.addClass("sortActive");
 			setTimeout(function(){
 				currentTr.removeClass("sortActive");
@@ -12451,7 +12074,7 @@ function trChangeToDown(currentTr,nextTr,jboltTable){
 	
 
 }
-// 下移 
+// 下移
 function trMoveDown(currentTr) { 
 	var table=currentTr.closest("table");
 	var tableFixed=table.closest(".jbolt_table_fixed");
@@ -12467,29 +12090,27 @@ function trMoveDown(currentTr) {
 	}
 	var isJBoltTable=table[0].hasAttribute("data-jbolttable")&&table.hasClass("jbolt_table");
 	var isTreeTable=table[0].hasAttribute("data-jbolttreetable");
-	//如果是JBoltTable组件单独处理
-	if(isJBoltTable&&!isTreeTable){//只是JBoltTable
-		//处理JBoltTable
+	// 如果是JBoltTable组件单独处理
+	if(isJBoltTable&&!isTreeTable){// 只是JBoltTable
+		// 处理JBoltTable
 		var jboltTable=table.jboltTable("inst");
 		if(jboltTable){
 			jboltTable.me.moveDownRow(jboltTable,currentTr);
 		}
 //	}else if(isJBoltTable&&isTreeTable){//即是JBoltTable 也是JBoltTreeTable
-//		//处理JBoltTable
-//		var jboltTable=table.jboltTable("inst");
+// //处理JBoltTable
+// var jboltTable=table.jboltTable("inst");
 //		if(jboltTable){
 //			jboltTable.me.moveDownTreeTableRow(jboltTable,index);
 //		}
-	}else if(isTreeTable&&!isJBoltTable){//只是JBoltTreeTable
+	}else if(isTreeTable&&!isJBoltTable){// 只是JBoltTreeTable
 		moveDownTreeTableRow(table,currentTr);
 	}else{
 		trChangeToDown(currentTr,currentTr.next());
 	}
 }
 
-/**
- * 处理刷新ajaxPortal的handler
- * @param ele
+/** 处理刷新ajaxPortal的handler
  */
 function processRefreshAjaxPortalHandler(ele){
 	var portalId=ele.data("portal")||ele.data("portalid");
@@ -12507,8 +12128,7 @@ function processRefreshAjaxPortalHandler(ele){
 	}
 }
 
-/**
- * ajaxbtn处理Util封装
+/** ajaxbtn处理Util封装
  */
 var AjaxBtnUtil ={
 		init:function(parentEle){
@@ -12552,7 +12172,7 @@ var AjaxBtnUtil ={
 							}
 						}
 				  }
-				  //处理URL 和关联的参数元素值
+				  // 处理URL 和关联的参数元素值
 				  url=actionUrl(url);
 				  url=processEleUrlByLinkOtherParamEle(action,url);
 				  
@@ -12581,7 +12201,7 @@ var AjaxBtnUtil ={
 			  var failDo=function(data){
 					that.exeTheHandler(failhandler,action,data);
 			  }
-			  //开始执行ajax
+			  // 开始执行ajax
 			  Ajax.get(url,function(data){
 				  LayerMsgBox.closeLoadingNow();
 				  if(nomsg){
@@ -12649,8 +12269,7 @@ var AjaxBtnUtil ={
 
 
 
-/**
- * OpenPageBtn处理Util封装
+/** OpenPageBtn处理Util封装
  */
 var OpenPageBtnUtil ={
 		init:function(parentEle){
@@ -12803,16 +12422,11 @@ var OpenPageBtnUtil ={
 			 }
 		  }
 }
-/**
- * 处理url上的请求类型
- * @param url
- * @param type
- * @param mustWithType
- * @returns
+/** 处理url上的请求类型
  */
 function processUrlRqType(url,type,mustWithType){
 	if(url){
-		//全地址需要判断是否是本站地址
+		// 全地址需要判断是否是本站地址
 		if(url.startWith("http://")||url.startWith("https://")||url.startWith("://")){
 			var newUrl=url.replace("http://","").replace("https://","").replace("www","");
 			if(newUrl.startWith("://")){
@@ -12851,7 +12465,7 @@ function processUrlRqType(url,type,mustWithType){
 }
 
 
-//PageOpt初始化工具
+// PageOpt初始化工具
 var PageOptUtil={
 		  init:function(){
 			  var self=this;
@@ -12861,19 +12475,19 @@ var PageOptUtil={
 		  }
 }
 
-//table初始化工具
+// table初始化工具
 var TableUtil={
 		  init:function(){
-			  //初始化删除按钮
+			  // 初始化删除按钮
 			  AjaxBtnUtil.initBy(".jbolt_table_delbtn");
-			  //初始化修改按钮
+			  // 初始化修改按钮
 			  DialogUtil.initBy(".jbolt_table_editbtn");
-			  //初始化新增按钮
+			  // 初始化新增按钮
 			  DialogUtil.initBy(".jbolt_table_addbtn");
 		  }
 }
 
-//表单中的时间选择组件
+// 表单中的时间选择组件
 var FormDate={
 		destory:function(ele){
 			laydate.destory(ele);
@@ -12947,7 +12561,7 @@ var FormDate={
 			 
 			 var dateOptions={
 					 elem:"#"+id,
-					 type:dateType, //日期格式
+					 type:dateType, // 日期格式
 					 format:datefmt,
 					 trigger:triggerType,
 					 theme:theme,
@@ -12958,9 +12572,9 @@ var FormDate={
 							 layDate.addClass("small");
 						 }
 						 if(datefmt.indexOf("ss")==-1&&dateType!="month"&&dateType!="year"){
-							 //没有秒就去掉
+							 // 没有秒就去掉
 							 layDate.addClass("noseconds");
-							 layDate.find(".laydate-time-list>li:eq(2)").remove();  //清空秒
+							 layDate.find(".laydate-time-list>li:eq(2)").remove();  // 清空秒
 						 }
 						 if(minutes){
 
@@ -13070,7 +12684,7 @@ function jsonObjectToUrlParam(data) {
   }
 
 
-//弹出dialog类库
+// 弹出dialog类库
 var DialogUtil={
 		initBy:function(cssSelector,parentEle){
 			var parent=getRealParentJqueryObject(parentEle);
@@ -13229,7 +12843,7 @@ var DialogUtil={
 			  if(fs&&(fs=="true"||fs==true)){
 				  dialog_scroll="yes";
 			  }
-			  //close dialog and refresh parent
+			  // close dialog and refresh parent
 			  var cdrfp=action.data("cdrfp");
 			  if(cdrfp==undefined||cdrfp=="undefined"||cdrfp==""){
 				  cdrfp=false;
@@ -13392,8 +13006,8 @@ var DialogUtil={
 					  btnAlign:btnAlign,
 					  success:function(obj,index){
 //						  if(type==2){
-//							  var iframeWin = window[$(".layui-layer-iframe").find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
-////							  iframeWin.focus();
+// var iframeWin = window[$(".layui-layer-iframe").find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+// //							  iframeWin.focus();
 //						  }
 						  if(type==2 && options.ele){
 							  var dialogKey=options.ele.data("dialog-key");
@@ -13411,9 +13025,9 @@ var DialogUtil={
 						  }
 					  },
 					  yes:function(index,layero){
-						  //点击确定按钮处理
+						  // 点击确定按钮处理
 						  if(type==2){
-//							  var iframeWin = window[$(".layui-layer-iframe").find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+// var iframeWin = window[$(".layui-layer-iframe").find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
 							  var iframeWin = window[layero.find('iframe')[0]['name']]; 
 							  iframeWin.submitThisForm(function(){
 								  LayerMsgBox.close(index);
@@ -13484,7 +13098,7 @@ var DialogUtil={
 			  var layerDialog=this.getCurrent();
 			  if(isOk(layerDialog)){
 				  return layerDialog.data("trigger-action");
-//				 var triggerId = layerDialog.data("trigger-actionid");
+// var triggerId = layerDialog.data("trigger-actionid");
 //				 if(triggerId){
 //					 return jboltBody.find("#"+triggerId);
 //				 }
@@ -13551,9 +13165,6 @@ var DialogUtil={
 /**
  * dialog里提交form 让parent中的jbolttable按照表单去查询数据
  * 使用json conditions出发表格重新查询加载数据
- * @param formId
- * @param tableId
- * @returns
  */
 function jboltTableLoadByDialogForm(formId,tableId){
 	if(!tableId){
@@ -13577,8 +13188,7 @@ function jboltTableLoadByDialogForm(formId,tableId){
 	var conditions=form.serializeJSON();
 	return parent.jboltTableReadByConditions(tableId,conditions);
 }
-/**
- * 时间日期格式化
+/** 时间日期格式化
  */
 Date.prototype.Format = function (fmt) { 
 	var o = {
@@ -13601,12 +13211,10 @@ Date.prototype.Format = function (fmt) {
 	return fmt;
 }
 
-/********************************************************************
- ************************表单验证 开始******************************
- ********************************************************************/  
+/** 表单验证 开始
+ */
   /**
    * 判断对象是否为array
-   * @param obj
    * @returns {Boolean}
    */
   function isArray(obj){ 
@@ -13693,8 +13301,8 @@ Date.prototype.Format = function (fmt) {
 	  target.tooltip("dispose");
 	}
 
-//摇摆摇摆摇摆起来
-  jQuery.fn.shake = function(intShakes /*Amount of shakes*/, intDistance /*Shake distance*/, intDuration /*Time duration*/,callback) {
+// 摇摆摇摆摇摆起来
+  jQuery.fn.shake = function(intShakes /* Amount of shakes */, intDistance /* Shake distance */, intDuration /* Time duration */,callback) {
 	  this.each(function() {
           var jqNode = $(this);
           if(jqNode.data("noshake")){
@@ -13729,7 +13337,7 @@ Date.prototype.Format = function (fmt) {
 	  	if(input.is("input")&&input.attr("type")=="hidden"){return;}
     	removeFormEleErrorStyle(input);
 	  }
-//调用正则表达式验证
+// 调用正则表达式验证
   function TestRgexp(re, s) {
       return re.test(s);
   }
@@ -13742,10 +13350,10 @@ Date.prototype.Format = function (fmt) {
          };
   
 var IdCardNoCheckUtil={
-		//检查号码是否符合规范，包括长度，类型
+		// 检查号码是否符合规范，包括长度，类型
 		isCardNo : function(card)
 		{
-		    //身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X
+		    // 身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X
 		    var reg = /(^\d{15}$)|(^\d{17}(\d|X)$)/;
 		    if(!reg.test(card))
 		    {
@@ -13755,7 +13363,7 @@ var IdCardNoCheckUtil={
 		    return true;
 		},
 
-		//取身份证前两位,校验省份
+		// 取身份证前两位,校验省份
 		checkProvince  : function(card)
 		{
 		    var province = card.substr(0,2);
@@ -13766,11 +13374,11 @@ var IdCardNoCheckUtil={
 		    return true;
 		},
 
-		//检查生日是否正确
+		// 检查生日是否正确
 		checkBirthday  : function(card)
 		{
 		    var len = card.length;
-		    //身份证15位时，次序为省（3位）市（3位）年（2位）月（2位）日（2位）校验位（3位），皆为数字
+		    // 身份证15位时，次序为省（3位）市（3位）年（2位）月（2位）日（2位）校验位（3位），皆为数字
 		    if(len == '15')
 		    {
 		        var re_fifteen = /^(\d{6})(\d{2})(\d{2})(\d{2})(\d{3})$/;
@@ -13781,7 +13389,7 @@ var IdCardNoCheckUtil={
 		        var birthday = new Date('19'+year+'/'+month+'/'+day);
 		        return this.verifyBirthday('19'+year,month,day,birthday);
 		    }
-		    //身份证18位时，次序为省（3位）市（3位）年（4位）月（2位）日（2位）校验位（4位），校验位末尾可能为X
+		    // 身份证18位时，次序为省（3位）市（3位）年（4位）月（2位）日（2位）校验位（4位），校验位末尾可能为X
 		    if(len == '18')
 		    {
 		        var re_eighteen = /^(\d{6})(\d{4})(\d{2})(\d{2})(\d{3})([0-9]|X)$/;
@@ -13795,15 +13403,15 @@ var IdCardNoCheckUtil={
 		    return false;
 		},
 
-		//校验日期
+		// 校验日期
 		verifyBirthday  : function(year,month,day,birthday)
 		{
 		    var now = new Date();
 		    var now_year = now.getFullYear();
-		    //年月日是否合理
+		    // 年月日是否合理
 		    if(birthday.getFullYear() == year && (birthday.getMonth() + 1) == month && birthday.getDate() == day)
 		    {
-		        //判断年份的范围（3岁到100岁之间)
+		        // 判断年份的范围（3岁到100岁之间)
 		        var time = now_year - year;
 		        if(time >= 3 && time <= 100)
 		        {
@@ -13814,10 +13422,10 @@ var IdCardNoCheckUtil={
 		    return false;
 		},
 
-		//校验位的检测
+		// 校验位的检测
 		checkParity  : function(card)
 		{
-		    //15位转18位
+		    // 15位转18位
 		    card = this.changeFivteenToEighteen(card);
 		    var len = card.length;
 		    if(len == '18')
@@ -13839,7 +13447,7 @@ var IdCardNoCheckUtil={
 		    return false;
 		},
 
-		//15位转18位身份证号
+		// 15位转18位身份证号
 		changeFivteenToEighteen  : function(card)
 		{
 		    if(card.length == '15')
@@ -13860,70 +13468,69 @@ var IdCardNoCheckUtil={
 		  
 }
 
-/**
- * 校验身份证号
+/** 校验身份证号
  */
 function checkIdCardNo(card){
-	    //是否为空
+	    // 是否为空
 	    if(card === '')
 	    {
 	        return '身份证号不能为空';
 	    }
-	    //校验长度，类型
+	    // 校验长度，类型
 	    if(IdCardNoCheckUtil.isCardNo(card) === false)
 	    {
 	        return '身份证号码不正确';
 	    }
-	    //检查省份
+	    // 检查省份
 	    if(IdCardNoCheckUtil.checkProvince(card) === false)
 	    {
 	        return '身份证号码不正确';
 	    }
-	    //校验生日
+	    // 校验生日
 	    if(IdCardNoCheckUtil.checkBirthday(card) === false)
 	    {
 	        return '身份证号码生日不正确';
 	    }
-	    //检验位的检测
+	    // 检验位的检测
 	    if(IdCardNoCheckUtil.checkParity(card) === false)
 	    {
 	        return '身份证号码校验位不正确';
 	    }
 	    return null;
   }
-//验证规则map
+// 验证规则map
   var jboltFormCheckRuleMap=[
-      {type:"number",method:function(value){return (!isNaN(value));}},//数字校验
-      {type:"pznumber",method:function(value){return (!isNaN(value)&&value*1>=0);}},//验证正数和0
-      {type:"pzint",method:function(value){return ((TestRgexp(/^-?[0-9]\d*$/, value))&&(value*1>=0));}},//验证正数和0
-      {type:"pnumber",method:function(value){return (!isNaN(value)&&value*1>0);}},//验证正数
-      {type:"int",method:function(value){return TestRgexp(/^-?[0-9]\d*$/, value);}},//整数校验
-      {type:"pint",method:function(value){return TestRgexp(/^[0-9]*[1-9][0-9]*$/, value);}},//正整数校验
-      {type:"email",method:function(value){return TestRgexp(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/, value);}},//Email校验
-      {type:"filepath",method:function(value){return TestRgexp(/^([a-zA-Z]){1}:(\\[^\/\\:\*\?\"<>]+)*(\\)?$/, value);}},//URL校验
-      {type:"url",method:function(value){return TestRgexp(/^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$/, value);}},//URL校验
-      {type:"url_nohttp",method:function(value){return TestRgexp(/^((https|http|ftp|rtsp|mms){0,1}(:\/\/){0,1})(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$/, value);}},//URL校验
-      {type:"date",method:function(value){return TestRgexp(/^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/,value);}},//日期验证 2019-01-01
-      {type:"time",method:function(value){return TestRgexp(/^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/,value);}},//时间验证 12:59:59
-      {type:"time_hm",method:function(value){return TestRgexp(/^(20|21|22|23|[0-1]\d):[0-5]\d$/,value);}},//时间验证 12:59
-      {type:"datetime",method:function(value){return TestRgexp(/^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/,value);}},//完整日期时间验证 2019-01-01 12:22:23
-      {type:"datetime_hm",method:function(value){return TestRgexp(/^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d$/,value);}},//日期时间验证 2019-01-01 12:22
-      {type:"money",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)/,value);}},//金额 保留2位小数
-      {type:"money_4",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,4})?$)|(^0(\.\d{1,4})?$)/,value);}},//金额 保留4位 小数
+      {type:"number",method:function(value){return (!isNaN(value));}},// 数字校验
+      {type:"pznumber",method:function(value){return (!isNaN(value)&&value*1>=0);}},// 验证正数和0
+      {type:"pzint",method:function(value){return ((TestRgexp(/^-?[0-9]\d*$/, value))&&(value*1>=0));}},// 非负整数
+      {type:"pnumber",method:function(value){return (!isNaN(value)&&value*1>0);}},// 验证正数
+      {type:"int",method:function(value){return TestRgexp(/^-?[0-9]\d*$/, value);}},// 整数校验
+      {type:"pint",method:function(value){return TestRgexp(/^[0-9]*[1-9][0-9]*$/, value);}},// 正整数校验
+      {type:"email",method:function(value){return TestRgexp(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/, value);}},// Email校验
+      {type:"filepath",method:function(value){return TestRgexp(/^([a-zA-Z]){1}:(\\[^\/\\:\*\?\"<>]+)*(\\)?$/, value);}},// Windows路径校验
+      {type:"url",method:function(value){return TestRgexp(/^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$/, value);}},// URL校验
+      {type:"url_nohttp",method:function(value){return TestRgexp(/^((https|http|ftp|rtsp|mms){0,1}(:\/\/){0,1})(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$/, value);}},// URL校验
+      {type:"date",method:function(value){return TestRgexp(/^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/,value);}},// 日期验证 2019-01-01
+      {type:"time",method:function(value){return TestRgexp(/^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/,value);}},// 时间验证 12:59:59
+      {type:"time_hm",method:function(value){return TestRgexp(/^(20|21|22|23|[0-1]\d):[0-5]\d$/,value);}},// 时间验证 12:59
+      {type:"datetime",method:function(value){return TestRgexp(/^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/,value);}},// 完整日期时间验证 2019-01-01 12:22:23
+      {type:"datetime_hm",method:function(value){return TestRgexp(/^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d$/,value);}},// 日期时间验证 2019-01-01 12:22
+      {type:"money",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)/,value);}},// 金额 保留2位小数
+      {type:"money_4",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,4})?$)|(^0(\.\d{1,4})?$)/,value);}},// 金额 保留4位 小数
 	  {type:"siargo_tofixed_2",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)/,value);}},// 保留2位 小数
 	  {type:"siargo_tofixed_3",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,3})?$)|(^0(\.\d{1,3})?$)/,value);}},// 保留3位 小数
-	  {type:"siargo_tofixed_4",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,4})?$)|(^0(\.\d{1,4})?$)/,value);}},// 保留3位 小数
+	  {type:"siargo_tofixed_4",method:function(value){return TestRgexp(/(^[1-9]\d*(\.\d{1,4})?$)|(^0(\.\d{1,4})?$)/,value);}},// 最多4位小数
 	  	  
-	  //terser jbolt-admin.js --compress --mangle --output jbolt-admin.min.js
-	  {type:"phone",method:function(value){return TestRgexp(/^1(3|4|5|6|7|8|9)\d{9}$/,value);}},//手机
-      {type:"tel",method:function(value){return TestRgexp(/^(\(\d{3,4}\)|\d{3,4}-|\s)?\d{7,14}$/,value);}},//座机电话
-      {type:"zh_cn",method:function(value){return TestRgexp(/[\u4e00-\u9fa5]/,value);}},//中文
-      {type:"ip",method:function(value){return TestRgexp(/(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)/,value);}},//ip地址
-      {type:"postalcode",method:function(value){return TestRgexp(/\d{6}/,value);}},//邮政编码
-      {type:"idcardno",method:function(input,value){return checkIdCardNo(input,value);}},//15or18位身份证
-      {type:"letter_num",method:function(value){return TestRgexp(/^\w+$/,value);}},//字母、数字、下划线
-      {type:"letter",method:function(value){return TestRgexp(/^[A-Za-z]+$/,value);}},//字母
-      {type:"proportion",method:function(value){return TestRgexp(/^[1-9]\d*:[1-9]\d*$/,value);}},//字母
+	  // terser jbolt-admin.js --compress --mangle --output jbolt-admin.min.js
+	  {type:"phone",method:function(value){return TestRgexp(/^1(3|4|5|6|7|8|9)\d{9}$/,value);}},// 手机
+      {type:"tel",method:function(value){return TestRgexp(/^(\(\d{3,4}\)|\d{3,4}-|\s)?\d{7,14}$/,value);}},// 座机电话
+      {type:"zh_cn",method:function(value){return TestRgexp(/[\u4e00-\u9fa5]/,value);}},// 中文
+      {type:"ip",method:function(value){return TestRgexp(/(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)/,value);}},// ip地址
+      {type:"postalcode",method:function(value){return TestRgexp(/\d{6}/,value);}},// 邮政编码
+      {type:"idcardno",method:function(input,value){return checkIdCardNo(input,value);}},// 15or18位身份证
+      {type:"letter_num",method:function(value){return TestRgexp(/^\w+$/,value);}},// 字母、数字、下划线
+      {type:"letter",method:function(value){return TestRgexp(/^[A-Za-z]+$/,value);}},// 字母
+      {type:"proportion",method:function(value){return TestRgexp(/^[1-9]\d*:[1-9]\d*$/,value);}},// 正整数比例
       {type:"proportion_multi",method:function(value){
     	  if(!value){return false;}
     	  if(value.indexOf(":")==-1){
@@ -13961,20 +13568,14 @@ function checkIdCardNo(card){
 	  }
 	  return isdom;
   }
-  /**
-   * 将自定义rule添加到jbolt rulemap中
-   * @param rules
-   * @returns
+  /** 将自定义rule添加到jbolt rulemap中
    */
   function addRuleToJBoltRuleMap(mineRuleMap){
 	  if(isArray(mineRuleMap)&&isOk(mineRuleMap)){
 		  jboltFormCheckRuleMap.push.apply(jboltFormCheckRuleMap,mineRuleMap);
 	  }
   }
-  /**
-   * 表单元素设置为disabled
-   * @param eleObj
-   * @returns
+  /** 表单元素设置为disabled
    */
   function changeFormControlDisabled(eleObj){
 	  var formControl = getRealJqueryObject(eleObj);
@@ -13984,10 +13585,7 @@ function checkIdCardNo(card){
 	  formControl.attr("disabled","disabled").attr("readonly","readonly");
 	  removeFormEleAllStyle(formControl);
   }
-  /**
-   * 表单元素设置为enable
-   * @param eleObj
-   * @returns
+  /** 表单元素设置为enable
    */
   function changeFormControlEnable(eleObj){
 	  var formControl = getRealJqueryObject(eleObj);
@@ -13997,26 +13595,17 @@ function checkIdCardNo(card){
 	  formControl.removeAttr("disabled").removeAttr("readonly");
 	  removeFormEleAllStyle(formControl);
   }
-  /**
-   * 表单元素设置为必填
-   * @param eleObj
-   * @returns
+  /** 表单元素设置为必填
    */
   function changeFormControlRequired(eleObj){
 	  changeFormControlRequiredState(eleObj,true);
   }
-  /**
-   * 表单元素设置为非必填
-   * @param eleObj
-   * @returns
+  /** 表单元素设置为非必填
    */
   function changeFormControlNotRequired(eleObj){
 	  changeFormControlRequiredState(eleObj,false);
   }
-  /**
-   * 表单元素必填状态变更
-   * @param eleObj
-   * @returns
+  /** 表单元素必填状态变更
    */
   function changeFormControlRequiredState(eleObj,isRequired){
 	  var formControl = getRealJqueryObject(eleObj);
@@ -14033,8 +13622,7 @@ function checkIdCardNo(card){
 	  removeFormEleAllStyle(formControl);
   }
   
-  /**
-   * 表单验证器
+  /** 表单验证器
    */
   var FormChecker={
 		  init:function(){
@@ -14122,7 +13710,7 @@ function checkIdCardNo(card){
 		  checkEle:function(checkObj){
 			  return this.checkIt(checkObj,true,true);
 		  },
-  //检查form表单中的input textarea select
+  // 检查form表单中的input textarea select
 		   checkIt:function(checkObj,focusItIfError,ifEmptyAlwaysShowError){
 			   var self=this;
 			   var input=getRealJqueryObject(checkObj);
@@ -14131,7 +13719,7 @@ function checkIdCardNo(card){
 		        	  return true;
 		          }
 		          if(!ifEmptyAlwaysShowError){
-			          //增加检测优化
+			          // 增加检测优化
 			          if(!input.val()){
 			        	  removeFormEleAllStyle(input);
 			        	  return true;
@@ -14139,8 +13727,8 @@ function checkIdCardNo(card){
 		          }
 		          if(input.data("rule")){
 		              var flag = self.checktype(input);
-//		              var next=input.next().hasClass("input-group-append");
-//		              var prev=input.prev().hasClass("input-group-prepend");
+// var next=input.next().hasClass("input-group-append");
+// var prev=input.prev().hasClass("input-group-prepend");
 		              var ta=input.is("textarea");
 		              if (!flag) {
 		              	error=false;
@@ -14182,10 +13770,10 @@ function checkIdCardNo(card){
               var flag = self.checktype(input);
               if (!flag) {
               	error=false;
-//              	
+
 //              	if(input.is("input")&&input.attr("type")=="hidden"){return;}
 //              	input.parents(".form-group").removeClass("bdc-success").addClass("bdc-danger");
-//              	
+
 //              	processCheckTab(input);
 //                  input.shake(2,10,400);
 //                  input.focus();
@@ -14194,7 +13782,7 @@ function checkIdCardNo(card){
               }else{
               	error=true;
 //              	if(input.is("input")&&input.attr("type")=="hidden"){return;}
-//              	
+
 //              	input.parents(".form-group").removeClass("bdc-danger").addClass("bdc-success");
 //              	if(input.is("input")&&input.attr("type")=="file"){return;}
               }
@@ -14261,7 +13849,7 @@ function checkIdCardNo(card){
 	 	self.showMyTipsIfNeed(input,tips,show);
 	 	return false;
   },
-  //检查给定一个input textarea select的值
+  // 检查给定一个input textarea select的值
   checktype:function(input) {
 	  var self=this;
       var type=input.data("rule");
@@ -14297,12 +13885,12 @@ function checkIdCardNo(card){
       if (show != null) {
           g(show).innerHTML = "";
       }
-      //检测是否为空
+      // 检测是否为空
   	if(typeof value=="string"){
   		value=value.trim();
   	}
           if (!value) {
-              //检查配置是否需要进行非空检测
+              // 检查配置是否需要进行非空检测
               if(notNull==null||(typeof(notNull)=="boolean" && notNull==true)||notNull=="true"){
                       if(!mytips){
                     	  if(input.attr("type")=="file"){
@@ -14332,10 +13920,10 @@ function checkIdCardNo(card){
       return self.checkTypes(input,type,value,mytips,show,notNull);
 
   },
-  //检测数据类型
+  // 检测数据类型
   checkTypes:function(input,type,value,mytips,show,notNull){
 	  var self=this;
-      //验证多个的时候
+      // 验证多个的时候
       var types=type.split(";");
       var checkFlag=true;
       var error=1;
@@ -14345,7 +13933,7 @@ function checkIdCardNo(card){
       for(var i=0;i<tsize;i++){
           var type=types[i];
           var checkResult=self.checkSelf(input,type,value,mytips,show,notNull);
-          if(checkResult!=canNotCheck){//判断能否处理 如果处理了 成功了继续下一个type 失败了则直接整个结束
+          if(checkResult!=canNotCheck){// 判断能否处理 如果处理了 成功了继续下一个type 失败了则直接整个结束
               if(checkResult==success){
                   continue;
               }else{
@@ -14354,9 +13942,9 @@ function checkIdCardNo(card){
               }
           }
           
-          //如果上面不能处理 则进入比较处理
+          // 如果上面不能处理 则进入比较处理
           checkResult=self.checkCompare(input,type,value,mytips,show,notNull);
-          if(checkResult!=canNotCheck){//判断能否处理 如果处理了 成功了继续下一个type 失败了则直接整个结束
+          if(checkResult!=canNotCheck){// 判断能否处理 如果处理了 成功了继续下一个type 失败了则直接整个结束
               if(checkResult==success){
                   continue;
               }else{
@@ -14373,7 +13961,7 @@ function checkIdCardNo(card){
       return checkFlag;
   },
 
-  //检测比较
+  // 检测比较
    checkCompare:function(input,type,value,mytips,show,notNull){
 	   var self=this;
       var error=1;
@@ -14410,7 +13998,7 @@ function checkIdCardNo(card){
           return error;
       }else  if(type.indexOf("fix=")!=-1){
     	  var xxarr=value.split(".");
-    	  //如果没有小数位 并且设置的就是=0 直接true
+    	  // 如果没有小数位 并且设置的就是=0 直接true
     	  if(xxarr.length==1&&compareValue==0){return success;}
     	  if(xxarr.length==2&&xxarr[1].length==compareValue){
     		  return success;
@@ -14422,7 +14010,7 @@ function checkIdCardNo(card){
           return error;
       }else if(type.indexOf("fix>=")!=-1){
     	  var xxarr=value.split(".");
-    	  //如果没有小数位 并且设置的就是>=0 直接true
+    	  // 如果没有小数位 并且设置的就是>=0 直接true
     	  if(xxarr.length==1&&compareValue==0){return success;}
     	  if(xxarr.length==2&&xxarr[1].length>=compareValue){
     		  return success;
@@ -14434,7 +14022,7 @@ function checkIdCardNo(card){
           return error;
       }else if(type.indexOf("fix>")!=-1){
     	  var xxarr=value.split(".");
-    	  //如果没有小数位 并且设置的就是>0 直接true
+    	  // 如果没有小数位 并且设置的就是>0 直接true
     	  if(xxarr.length==2&&xxarr[1].length>compareValue){
     		  return success;
     	  }
@@ -14617,14 +14205,14 @@ function checkIdCardNo(card){
 
       return canNotCheck;
   },
-  //得到正确类型的值
+  // 得到正确类型的值
   getRealTypeValue:function(value){
       if(!isNaN(value)){
           return Number(value);
       }
       return value;
   },
-  //得到需要比较的值
+  // 得到需要比较的值
   getCompareValue:function(type){
 	  var self=this;
       if(type.indexOf("#")!=-1){
@@ -14647,7 +14235,7 @@ function checkIdCardNo(card){
 	      }
       }
   },
-  //显示提示信息
+  // 显示提示信息
    showMyTipsIfNeed:function(input,mytips,show){
       if(mytips!=null){
     	  showFormEleErrorStyle(input,mytips);
@@ -14668,7 +14256,7 @@ function checkIdCardNo(card){
   },
   
 
-  //检测自身
+  // 检测自身
    checkSelf:function(input,type,value,mytips,show,notNull){
 	   var self=this;
       var error=1;
@@ -14798,13 +14386,9 @@ function checkIdCardNo(card){
   
   
   }
-  /********************************************************************
-   ************************表单验证 结束******************************
-   ********************************************************************/  
-/**
- * 处理点击一个左侧导航的JBoltMenuGroup
- * @param menuGroup
- * @returns
+  /** 表单验证 结束
+   */
+/** 处理点击一个左侧导航的JBoltMenuGroup
  */
 function clickOneJBoltMenuGroup(menuGroup){
 		var nav=menuGroup.closest("nav");
@@ -14816,7 +14400,7 @@ function clickOneJBoltMenuGroup(menuGroup){
 		}
 		if(!menuGroup.hasClass("l1link")){
 //			if(jboltAdminLeftNavs.hasClass("allexpansion")){return false;}
-			//已经存在展开的 就判断是不是自己 如果不是自己的就关掉
+			// 已经存在展开的 就判断是不是自己 如果不是自己的就关掉
 			if(isOk(expansion)){
 				var expa,pkey,hpkey;
 				expansion.each(function(){
@@ -14855,8 +14439,7 @@ function clickOneJBoltMenuGroup(menuGroup){
 		
 	
   }
-/**
- * 初始化左侧导航菜单
+/** 初始化左侧导航菜单
  */
 function initAdminLeftNav(){
 /*	var value=localStorage.getItem('allexpansion');
@@ -14913,7 +14496,7 @@ function initAdminLeftNav(){
 			}, 400);
 		return false;
 	});
-	//点击左侧导航中的菜单分组
+	// 点击左侧导航中的菜单分组
 	jboltBody.on("click",".jbolt_admin_left_navs>a[data-hasurl][data-open-type='1']",function(e){
 		var expansion=jboltAdminLeftNavs.find(".jbolt_admin_nav.expansion");
 		if(isOk(expansion)){
@@ -14921,7 +14504,7 @@ function initAdminLeftNav(){
 			expansion.find(".jbolt_menu_group i.jbicon.jb-arrowdown").removeClass("haschanged");
 		}
 	});
-	//点击左侧导航中的菜单分组
+	// 点击左侧导航中的菜单分组
 	jboltBody.on("click",".jbolt_admin_left_navs .jbolt_menu_group",function(e){
 		clickOneJBoltMenuGroup($(this));
 	});
@@ -14934,7 +14517,7 @@ function initAdminLeftNav(){
 		left=nav.width();
 		var maxHeight=menusHeight;
 		if(menusHeight-10>jboltWindowHeight-top){
-			//如果自身高度超过了
+			// 如果自身高度超过了
 			top=jboltWindowHeight-menusHeight;
 			if(top<120){
 				top=120;
@@ -14994,11 +14577,7 @@ function pjaxErrorProcess(errorCode) {
 	JBoltPjaxUtil.sendPjax("admin/pjaxerror",mainPjaxContainerId,{errorCode:errorCode});
 }
 
-/**
- * URL 追加Form里的参数
- * @param url
- * @param formObj
- * @returns
+/** URL 追加Form里的参数
  */
 function urlWithFormData(url,formObj){
 	var datas=formObj.serialize();
@@ -15011,11 +14590,7 @@ function urlWithFormData(url,formObj){
 	return url;
 }
 
-/**
- * url后追加jsonobj
- * @param url
- * @param paras
- * @returns
+/** url后追加jsonobj
  */
 function urlWithJsonData(url,paras){
 	var purl=jsonObjectToUrlParam(paras);
@@ -15029,10 +14604,7 @@ function urlWithJsonData(url,paras){
 	return url;
 }
 
-/**
- * Pjax提交表单
- * @param formEle
- * @returns
+/** Pjax提交表单
  */
 function pjaxSubmitForm(formEle){
 	var form=getRealJqueryObject(formEle);
@@ -15057,8 +14629,7 @@ var pjaxErrorTpl='<div class="jbolt_page" data-dontchangeleftnav="true">'+
 '<div class="jbolt_page_content"><div style="margin: 20px auto;max-width: 500px">'+
 '<div class="alert alert-danger">404,您访问的资源不存在!</div></div></div></div>';
 
-/**
- * PJAX工具类
+/** PJAX工具类
  */
 var JBoltPjaxUtil={
 		openByType:function(nav){
@@ -15081,51 +14652,46 @@ var JBoltPjaxUtil={
 				}
 			  if(typeof(openType)=="number"){
 				  switch (openType) {
-					  case 1://系统默认
+					  case 1:// 系统默认
 						  JBoltPjaxUtil.sendPjax(url,mainPjaxContainerId);
 						  break;
-					  case 2://iframe
+					  case 2:// iframe
 						  activeLeftNavByKey(key);
 						  pjaxAdminLeftNavWithIframe(url,openOptions);
 						  break;
-					  case 3://Dialog
+					  case 3:// Dialog
 						  activeLeftNavByKey(key);
 						  adminLeftNavshowInDialog(text,url,openOptions);
 						  break;
-					  case 4://jboltLayer
+					  case 4:// jboltLayer
 						  activeLeftNavByKey(key);
 						  JBoltLayerUtil.openByNav(url,openOptions);
 						  break;
-					default://默认
+					default:// 默认
 						 JBoltPjaxUtil.sendPjax(url,mainPjaxContainerId);
 						break;
 				  }
 			  }else if(typeof(openType)=="string"){
 				  switch (openType) {
-				  case "iframe"://iframe
+				  case "iframe":// iframe
 					  activeLeftNavByKey(key);
 					  pjaxAdminLeftNavWithIframe(url,openOptions);
 					  break;
-				  case "dialog"://Dialog
+				  case "dialog":// Dialog
 					  activeLeftNavByKey(key);
 					  adminLeftNavshowInDialog(text,url,openOptions);
 					  break;
-				  case "jboltlayer"://jboltLayer
+				  case "jboltlayer":// jboltLayer
 					  activeLeftNavByKey(key);
 					  JBoltLayerUtil.openByNav(url,openOptions);
 					  break;
-				  default://默认
+				  default:// 默认
 					  JBoltPjaxUtil.sendPjax(url,mainPjaxContainerId);
 					  break;
 			  }
 		  }
 		},
-		/**
-		 * 主动发起pjax请求
-		 * @param url
-		 * @param container
-		 * @param extData
-		 * @returns
+		/** 主动发起pjax请求
 		 */
 		sendPjax:function(url, container, extData) {
 		  url=actionUrl(url);
@@ -15135,8 +14701,7 @@ var JBoltPjaxUtil={
 			  , extData: extData
 		  });
 	    },
-	    /**
-	     * 执行pjax前 先把上一个jboltpage closehandler执行
+	    /** 执行pjax前 先把上一个jboltpage closehandler执行
 	     */
 	    triggerPjaxJBoltPageCloseHandler:function(jboltPage){
 	    	var jboltPage =  jboltPage?jboltPage:(mainPjaxContainer.find(".jbolt_page[data-close-handler]"));
@@ -15181,7 +14746,7 @@ var JBoltPjaxUtil={
 		}).on('pjax:timeout', function(event) {
 			LayerMsgBox.closeAll();
 			event.preventDefault();
-		}).on("pjax:popstate",function(pjax){//特殊处理浏览器后退事件
+		}).on("pjax:popstate",function(pjax){// 特殊处理浏览器后退事件
 			if(pjax.direction=="back"){
 				var isPjax=jboltBody.data("ispjax");
 				if(!isPjax){
@@ -15191,7 +14756,7 @@ var JBoltPjaxUtil={
 		});
 
 
-		//支持表单提交事件无刷新
+		// 支持表单提交事件无刷新
 		jboltBody.on('submit', 'form[data-pjaxsubmit]', function (event) {
 			var needcheck=$(this).data("needcheck");
 			if(needcheck){
@@ -15205,7 +14770,7 @@ var JBoltPjaxUtil={
 		});
 
 
-		//定义pjax链接点击事件
+		// 定义pjax链接点击事件
 //				jboltBody.pjax('a[data-pjax]:not([target]),[data-pjax] a[data-open-type="1"]:not([target])', mainPjaxContainerId);
 		jboltBody.on("click",'a[data-pjax]:not([target]),.jbolt_admin_left_navs a[data-open-type="1"]:not([target])',function(e){
 			e.preventDefault();
@@ -15273,25 +14838,21 @@ var JBoltPjaxUtil={
 			return false;
 		});
 	},
-		/**
-		 * 初始化 后台管理的Pjax
-		 * @returns
+		/** 初始化 后台管理的Pjax
 		 */
 		initAdminPjax:function (){
 			this.initPjaxEvent();
-			//pjax需要处理的
+			// pjax需要处理的
 			var currentPageLoadByPjax=jboltBody.data("ispjax");
 			if(!currentPageLoadByPjax){
 				JBoltPjaxUtil.afterPjax();
 			}
 		},
-		/**
-		 * pajx end执行后 调用 初始化pjax内容里的一些组件
-		 * @returns
+		/** pajx end执行后 调用 初始化pjax内容里的一些组件
 		 */
 		afterPjax:function(){
 			pjaxLoadRequirePluginAndInit();
-			//加载界面后需要选中打开左侧选项卡
+			// 加载界面后需要选中打开左侧选项卡
 			$('.tooltip.show').remove();
 			initOpenLeftNav();
 			SelectUtil.initAutoSetValue(mainPjaxContainer);
@@ -15334,9 +14895,7 @@ var JBoltPjaxUtil={
 }
 
 
-/**
- * 刷新当前显示的选项卡内容区域
- * @returns
+/** 刷新当前显示的选项卡内容区域
  */
 function refreshCurrentTabContent(){
 	var tabContent=JBoltTabUtil.getCurrentTabContent();
@@ -15352,19 +14911,12 @@ function refreshCurrentTabContent(){
 		}
 	}
 }
-/**
- * 修改当前tab选项卡标题
- * @param title
- * @returns
+/** 修改当前tab选项卡标题
  */
 function changeCurrentTabTitle(title){
 	JBoltTabUtil.changeCurrentTabTitle(title);
 }
-/**
- * 修改指定tab选项卡标题
- * @param tab
- * @param title
- * @returns
+/** 修改指定tab选项卡标题
  */
 function changeTabTitle(tab,title){
 	JBoltTabUtil.changeTabTitle(tab,title);
@@ -15387,15 +14939,13 @@ function refreshTheTabContent(tabContent){
 
 
 
-function isIE() { //ie?
+function isIE() { // ie?
 	 if (!!window.ActiveXObject || "ActiveXObject" in window)
 	  return true;
 	  else
 	  return false;
 }
-/**
- * 刷新主区域
- * @returns
+/** 刷新主区域
  */
 function refreshPjaxContainer(ele){
 	if(ele){
@@ -15407,7 +14957,7 @@ function refreshPjaxContainer(ele){
 	if(window.self!=window.top){
 		reloadCurrentPage();
 	}else{
-//		var withTabs=isWithtabs();
+// var withTabs=isWithtabs();
 		if(jboltWithTabs){
 			refreshCurrentTabContent();
 		}else{
@@ -15427,12 +14977,10 @@ function refreshPjaxContainer(ele){
 	
 
 }
-/**
- * 检测打开的pjax页面 打开打开指定的nav
- * @returns
+/** 检测打开的pjax页面 打开打开指定的nav
  */
 function initOpenLeftNav(){
-//	var withTabs=isWithtabs();
+// var withTabs=isWithtabs();
 	var jbolt_page=null;
 	if(jboltWithTabs){
 		var tabContent=JBoltTabUtil.getCurrentTabContent();
@@ -15451,10 +14999,7 @@ function initOpenLeftNav(){
 	}
 	
 }
-/**
- * 通过data-key绑定 设置做到导航active状态
- * @param key
- * @returns
+/** 通过data-key绑定 设置做到导航active状态
  */
 function activeLeftNavByKey(key){
 	var activeItem=jboltAdminLeftNavs.find("nav.jbolt_admin_nav a.active");
@@ -15503,13 +15048,13 @@ function activeLeftNavByKey(key){
 			nav.find(".jbolt_menu_group i.jbicon.jb-arrowdown:not(.haschanged)").addClass("haschanged");
 			var li=item.closest("li");
 			processParentUlAndHasItemsLiExp(li,nav);
-//			var jboltWithTabs=isWithtabs();
+// var jboltWithTabs=isWithtabs();
 			if(jboltWithTabs){
 				var topnavId=nav.data("topnavid");
-				//判断有没有顶部菜单
+				// 判断有没有顶部菜单
 				var the_topnav=$(".jbolt_admin_main_top>ul.jbolt_admin_topnavs>li[data-id='"+topnavId+"']");
 				if(isOk(the_topnav)){
-					//如果有顶部菜单了就需要切换选中nav所在
+					// 如果有顶部菜单了就需要切换选中nav所在
 					activeTopnav(the_topnav);
 				}
 			}
@@ -15524,10 +15069,7 @@ function activeLeftNavByKey(key){
 	}
 	
 }
-/**
- * 去掉前缀第一个字符/
- * @param url
- * @returns
+/** 去掉前缀第一个字符/
  */
 function actionUrl(url){
 	if(url&&url.charAt(0)=='/'&&url.charAt(1)!='/') {
@@ -15538,10 +15080,7 @@ function actionUrl(url){
 	}
 	return url;
 }
-/**
- * 打开指定URL的左侧nav
- * @param URL
- * @returns
+/** 打开指定URL的左侧nav
  */
 function openLeftNav(url){
 	url=actionUrl(url);
@@ -15578,10 +15117,10 @@ function openLeftNav(url){
 			var li=item.closest("li");
 			processParentUlAndHasItemsLiExp(li,nav);
 			var topnavId=nav.data("topnavid");
-			//判断有没有顶部菜单
+			// 判断有没有顶部菜单
 			var the_topnav=$(".jbolt_admin_main_top>ul.jbolt_admin_topnavs>li[data-id='"+topnavId+"']");
 			if(isOk(the_topnav)){
-				//如果有顶部菜单了就需要切换选中nav所在
+				// 如果有顶部菜单了就需要切换选中nav所在
 				activeTopnav(the_topnav);
 			}
 			
@@ -15605,9 +15144,7 @@ function processParentUlAndHasItemsLiExp(li,nav){
 	}
 }
 
-/**
- * pjax前执行
- * @returns
+/** pjax前执行
  */
 function pjaxJBoltPageCloseHandler(){
 	var jboltPage=mainPjaxContainer.find(".jbolt_page[data-close-handler]");
@@ -15616,9 +15153,7 @@ function pjaxJBoltPageCloseHandler(){
 	}
 }
 
-/**
- * pjax后执行导入依赖插件
- * @returns
+/** pjax后执行导入依赖插件
  */
 function pjaxLoadRequirePluginAndInit(){
 	var jboltPage=mainPjaxContainer.find(".jbolt_page[data-require-plugin],.jbolt_page[data-init-handler]");
@@ -15626,9 +15161,7 @@ function pjaxLoadRequirePluginAndInit(){
 		jboltPageLoadRequirePluginAndInit(jboltPage);
 	}
 }
-/**
- * 非pjax加载后后执行导入依赖插件
- * @returns
+/** 非pjax加载后后执行导入依赖插件
  */
 function pageLoadRequirePluginAndInit(){
 	var jboltPage=jboltBody.find(".jbolt_page[data-require-plugin],.jbolt_page[data-init-handler]");
@@ -15637,10 +15170,7 @@ function pageLoadRequirePluginAndInit(){
 	}
 }
 
-/**
- * 处理掉已经加载的插件
- * @param plugins
- * @returns
+/** 处理掉已经加载的插件
  */
 function processLoadedPlugins(plugins){
 	var newPlugins=new Array();
@@ -15651,11 +15181,7 @@ function processLoadedPlugins(plugins){
 	}
 	return newPlugins;
 }
-/**
- * 加载第三方插件
- * @param plugins
- * @param callback
- * @returns
+/** 加载第三方插件
  */
 function loadJBoltPlugin(plugins,callback){
 	if(plugins&&plugins.length>0){
@@ -15669,7 +15195,7 @@ function loadJBoltPlugin(plugins,callback){
 		if(plugins && isArray(plugins) && plugins.length>=2){
 			plugins=JBoltArrayUtil.unique(plugins);
 		}
-		//去看看已加载列表中是否存在了 如果存在了直接过
+		// 去看看已加载列表中是否存在了 如果存在了直接过
 		plugins=processLoadedPlugins(plugins);
 		if(!plugins||plugins.length==0){
 			if(callback){
@@ -15683,7 +15209,7 @@ function loadJBoltPlugin(plugins,callback){
 		var plugin,pluginName;
 		var cssArr,jsArr,plen=plugins.length;
 		var exeCallback=function(docallback){
-			//执行callback
+			// 执行callback
 			var exe_handler=eval(docallback);
 			if(exe_handler&&typeof(exe_handler)=="function"){
 				exe_handler();
@@ -15700,12 +15226,12 @@ function loadJBoltPlugin(plugins,callback){
 						if(isOk(jsArr)){
 							AssetsLazyLoad.js(jsArr,function(){
 								count++;
-								//加载后 push进去
+								// 加载后 push进去
 								loadedPlugins[pluginName]=lplugin;
 							});
 						}else{
 							count++;
-							//加载后 push进去
+							// 加载后 push进去
 							loadedPlugins[pluginName]=lplugin;
 						}
 					});
@@ -15713,7 +15239,7 @@ function loadJBoltPlugin(plugins,callback){
 					if(isOk(jsArr)){
 						AssetsLazyLoad.js(jsArr,function(){
 							count++;
-							//加载后 push进去
+							// 加载后 push进去
 							loadedPlugins[pluginName]=lplugin;
 						});
 					}
@@ -15751,10 +15277,7 @@ function jboltPageLoadRequirePluginAndInit(jboltPage){
 	
 
 }
-/**
- * ajaxPortal加载后执行引入第三方插件
- * @param parent
- * @returns
+/** ajaxPortal加载后执行引入第三方插件
  */
 function portalLoadRequirePluginAndInit(parentEle){
 	var parent=getRealParentJqueryObject(parentEle);
@@ -15768,8 +15291,7 @@ function portalLoadRequirePluginAndInit(parentEle){
 
 
 
-/**
- * 分页提交form
+/** 分页提交form
  */
 function jboltPageSubmitForm(pbox,pager,form,page){
 	var pages=pager.closest(".pages");
@@ -15798,20 +15320,14 @@ function jboltPageSubmitForm(pbox,pager,form,page){
 			}
 		}
 	  }
-//	  var action=baseUrl+"?page="+page;
+// var action=baseUrl+"?page="+page;
 //	  form.attr("action",action);
 	  form.submit();
 }
-/**
- * 分页组件初始化
- * @param id
- * @param totalPage
- * @param pageNumber
- * @param formId
- * @returns
+/** 分页组件初始化
  */
 function initPage(id,totalPage,pageNumber,formId){
-//	var withTabs=isWithtabs();
+// var withTabs=isWithtabs();
 	var pbox=null;
 	var pager=$("#"+id);
 	var pagerParent=pager.closest(".pages");
@@ -15865,10 +15381,7 @@ function initPage(id,totalPage,pageNumber,formId){
 	});
 	
 }
-/**
- * topnav切换active状态
- * @param topnav
- * @returns
+/** topnav切换active状态
  */
 function activeTopnav(topnav){
 	var activeLi=topnav.parent().find("li.active");
@@ -15898,13 +15411,11 @@ function activeTopnavFirstLeftMenusNotSingleLink(topnavId){
 		}
 	}
 }
-/**
- * 顶部导航判断如果没有选中就默认选中第一个
- * @returns
+/** 顶部导航判断如果没有选中就默认选中第一个
  */
 function jboltAdminLayoutInitTopNavFirst(){
 	if(JBolt_Enable_Topnav){
-		//说明是有topnav 那就看看有没有选中
+		// 说明是有topnav 那就看看有没有选中
 		var activetopnavs=$(".jbolt_admin_main_top>ul.jbolt_admin_topnavs>li.active");
 		if(!isOk(activetopnavs)){
 			var firstTopnav=$(".jbolt_admin_main_top>ul.jbolt_admin_topnavs>li:first");
@@ -15915,9 +15426,7 @@ function jboltAdminLayoutInitTopNavFirst(){
 	}
 	
 }
-/**
- * 使用sessionStorage 去处理active tab
- * @returns
+/** 使用sessionStorage 去处理active tab
  */
 function useSessionStorageToActiveTab(){
 	var tab,hasActive=false;
@@ -15930,12 +15439,10 @@ function useSessionStorageToActiveTab(){
 	}
 	return hasActive; 
 }
-/**
- * 后台首页index加载后执行判断是否有topnav 有的话就找第一个里的第一个 没有就找全局第一个
- * @returns
+/** 后台首页index加载后执行判断是否有topnav 有的话就找第一个里的第一个 没有就找全局第一个
  */
 function jboltAdminIndexInitFirstLeftNav(){
-//	var ok = useHashToActiveTab();
+// var ok = useHashToActiveTab();
 //	if(ok){
 //		return;
 //	}
@@ -15975,15 +15482,13 @@ function jboltAdminIndexInitFirstLeftNav(){
 		}
 	}
 }
-/**
- * 顶部topnav点击切换左侧menu事件处理
- * @returns
+/** 顶部topnav点击切换左侧menu事件处理
  */
 function toggleLeftMenuEventByTopnav(){
 	jboltBody.on("click",".jbolt_admin_main_top>ul.jbolt_admin_topnavs>li",function(){
 		activeTopnav($(this));
 	});
-	//处理是否存在没有分配顶部分模块的菜单
+	// 处理是否存在没有分配顶部分模块的菜单
 	var othertopnav=$(".jbolt_admin_main_top>ul.jbolt_admin_topnavs>li[data-id='0']");
 	if(isOk(othertopnav)){
 		var notassignmenus=jboltAdminLeftNavs.find("nav[data-topnavid='0']");
@@ -15992,9 +15497,7 @@ function toggleLeftMenuEventByTopnav(){
 		}
 	}
 }
-/**
- * 切换左侧导航菜单
- * @returns
+/** 切换左侧导航菜单
  */
 function toggleMenuEvent(){
 	jboltBody.on("click",".jbolt_toggle_Left_nav_btn",function(){
@@ -16050,9 +15553,7 @@ function hideLeftAndFullMainConainer(){
 	localStorage.setItem('jbolt_hideMenu', true);
 }
 
-/**
- * 自动触发window的resize
- * @returns
+/** 自动触发window的resize
  */
 /*function windowResize(){
 	 if(document.createEvent) {
@@ -16063,16 +15564,12 @@ function hideLeftAndFullMainConainer(){
          window.fireEvent("onresize");
      }
 }*/
-/**
- * 返回上一页
- * @returns
+/** 返回上一页
  */
 function goback(){
 	history.go(-1);
 }
-/**
- * 刷新当前页
- * @returns
+/** 刷新当前页
  */
 function reloadCurrentPage(){
 	var url=self.location.href;
@@ -16082,9 +15579,7 @@ function reloadCurrentPage(){
 		history.go(0);
 //	}
 }
-/**
- *退出
- * @returns
+/** 退出
  */
 function userLogout(){
 	LayerMsgBox.confirm("确认注销并退出系统吗？",function(){
@@ -16093,9 +15588,7 @@ function userLogout(){
 	return false;
 }
 
-/**
- * 隐藏dialog按钮
- * @returns
+/** 隐藏dialog按钮
  */
 function hideParentLayerDialogBtn(index){
 	if(index==0||index==1){
@@ -16107,9 +15600,7 @@ function hideParentLayerDialogBtn(index){
 		hideAllParentLayerDialogBtn();
 	}
 }
-/**
- * 隐藏Layer上的所有按钮
- * @returns
+/** 隐藏Layer上的所有按钮
  */
 function hideAllParentLayerDialogBtn(){
 	var btns = parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn");
@@ -16117,10 +15608,7 @@ function hideAllParentLayerDialogBtn(){
 		btns.hide();
 	}
 }
-/**
- * 绑定一个按钮给dialog的OK btn
- * @param keycode
- * @returns
+/** 绑定一个按钮给dialog的OK btn
  */
 function bindKeycodeForDialogOkBtn(keycode){
 	if(window.self!=window.top){
@@ -16142,18 +15630,12 @@ function bindKeycodeForDialogOkBtn(keycode){
 		}
 	});
 }
-/**
- * 绑定回车键 给dialog okBtn
- * @param keycode
- * @returns
+/** 绑定回车键 给dialog okBtn
  */
 function bindEnterForDialogOkBtn(keycode){
 	bindKeycodeForDialogOkBtn(13);
 }
-/**
- * 绑定按键给dialog的close btn
- * @param keycode
- * @returns
+/** 绑定按键给dialog的close btn
  */
 function bindKeycodeForDialogCloseBtn(keycode){
 	if(window.self!=window.top){
@@ -16176,17 +15658,12 @@ function bindKeycodeForDialogCloseBtn(keycode){
 		}
 	});
 }
-/**
- * 绑定esc给dialog的close btn
- * @returns
+/** 绑定esc给dialog的close btn
  */
 function bindEscForDialogCloseBtn(){
 	bindKeycodeForDialogCloseBtn(27);
 }
-/**
- * 绑定dialog上的按钮和
- * @param btns
- * @returns
+/** 绑定dialog上的按钮和
  */
 function bindKeycodeForDialogBtnByBtnId(btns){
 	var len=btns.length;
@@ -16213,10 +15690,7 @@ function bindKeycodeForDialogBtnByBtnId(btns){
 		}
 	});
 }
-/**
- * 点击layer上的按钮 根据ID
- * @param btnId
- * @returns
+/** 点击layer上的按钮 根据ID
  */
 function clickLayerBtnById(btnId){
 	var btn = parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn").find("a#"+btnId);
@@ -16224,9 +15698,7 @@ function clickLayerBtnById(btnId){
 		btn.click();
 	}
 }
-/**
- * 点击Layer ok按钮
- * @returns
+/** 点击Layer ok按钮
  */
 function clickLayerOkBtn(){
 	var btn = parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn .layui-layer-btn0");
@@ -16234,9 +15706,7 @@ function clickLayerOkBtn(){
 		btn.click();
 	}
 }
-/**
- * 点击Layer close按钮
- * @returns
+/** 点击Layer close按钮
  */
 function clickLayerCloseBtn(){
 	var btn = parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn .layui-layer-btn1");
@@ -16244,9 +15714,7 @@ function clickLayerCloseBtn(){
 		btn.click();
 	}
 }
-/**
- * 修改按钮标题
- * @returns
+/** 修改按钮标题
  */
 function changeParentLayerDialogBtnTitle(index,btnTitle){
 	var btn = parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn .layui-layer-btn"+index);
@@ -16254,38 +15722,27 @@ function changeParentLayerDialogBtnTitle(index,btnTitle){
 		btn.text(btnTitle);
 	}
 }
-/**
- * 修改Dialog上OK按钮标题
- * @returns
+/** 修改Dialog上OK按钮标题
  */
 function changeParentLayerDialogOkBtnTitle(btnTitle){
 	changeParentLayerDialogBtnTitle(0,btnTitle);
 }
-/**
- * 修改Dialog上Cancel按钮标题
- * @returns
+/** 修改Dialog上Cancel按钮标题
  */
 function changeParentLayerDialogCancelBtnTitle(btnTitle){
 	changeParentLayerDialogBtnTitle(1,btnTitle);
 }
-/**
- * 得到按钮
- * @param index
- * @returns
+/** 得到按钮
  */
 function getParentLayerDialogBtn(index){
 	return parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn .layui-layer-btn"+index);
 }
-/**
- * 得到所有按钮 
- * @returns
+/** 得到所有按钮
  */
 function getParentLayerDialogBtns(){
 	  return parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn>a");
 }
-/**
- * 改变dialog 默认ok按钮的样式为正在提交
- * @returns
+/** 改变dialog 默认ok按钮的样式为正在提交
  */
 function changeParentLayerDialogOkBtnStateToSubmiting(){
 	if(self!=top){
@@ -16293,9 +15750,7 @@ function changeParentLayerDialogOkBtnStateToSubmiting(){
 		changeBtnStateToSubmiting(btn);
 	}
 }
-/**
- * 改变dialog 所有按钮的样式为disabled
- * @returns
+/** 改变dialog 所有按钮的样式为disabled
  */
 function changeParentLayerAllDialogBtnStateToDisabled(){
 	if(self!=top){
@@ -16322,9 +15777,7 @@ function cancelParentLayerDialogOkBtnStateToDisabled(){
 		}
 	}
 }
-/**
- * 改变dialog 所有按钮的样式去掉disabled
- * @returns
+/** 改变dialog 所有按钮的样式去掉disabled
  */
 function cancelParentLayerAllDialogBtnStateToDisabled(){
 	if(self!=top){
@@ -16334,9 +15787,7 @@ function cancelParentLayerAllDialogBtnStateToDisabled(){
 		}
 	}
 }
-/**
- * 恢复所有按钮样式
- * @returns
+/** 恢复所有按钮样式
  */
 function cancelParentLayerDialogAllBtnStateToSubmiting(){
 	if(self!=top){
@@ -16349,26 +15800,20 @@ function cancelParentLayerDialogAllBtnStateToSubmiting(){
 	}
 }
 
-/**
- * 改变dialog按钮的样式为正在提交
- * @returns
+/** 改变dialog按钮的样式为正在提交
  */
 function changeLayerDialogBtnStateToSubmiting(btn){
 	changeBtnStateToSubmiting(btn);
 	changeParentLayerAllDialogBtnStateToDisabled();
 }
-/**
- * 恢复dialog按钮的样式
- * @returns
+/** 恢复dialog按钮的样式
  */
 function cancelLayerDialogBtnStateToSubmiting(btn){
 	cancelBtnStateToSubmiting(btn);
 	cancelParentLayerAllDialogBtnStateToDisabled();
 }
 
-/**
- * 改变按钮的样式为正在提交
- * @returns
+/** 改变按钮的样式为正在提交
  */
 function changeBtnStateToSubmiting(btn){
 	if(isOk(btn)){
@@ -16382,9 +15827,7 @@ function changeBtnStateToSubmiting(btn){
 	}
 }
 
-/**
- * 取消并恢复 dialog的OK按钮
- * @returns
+/** 取消并恢复 dialog的OK按钮
  */
 function cancelBtnStateToSubmiting(btn){
 	if(isOk(btn)){
@@ -16395,9 +15838,7 @@ function cancelBtnStateToSubmiting(btn){
 		}
 	}
 }
-/**
- * 取消并恢复 dialog的OK按钮
- * @returns
+/** 取消并恢复 dialog的OK按钮
  */
 function cancelParentLayerDialogOkBtnStateToSubmiting(){
 	if(self!=top){
@@ -16405,9 +15846,7 @@ function cancelParentLayerDialogOkBtnStateToSubmiting(){
 		cancelBtnStateToSubmiting(btn);
 	}
 }
-/**
- * 显示dialog按钮
- * @returns
+/** 显示dialog按钮
  */
 function showParentLayerDialogBtn(index){
 	  if(index){
@@ -16417,20 +15856,12 @@ function showParentLayerDialogBtn(index){
 	  }
 	  
 }
-/**
- * 检测是否存在相同按钮
- * @param btnId
- * @returns
+/** 检测是否存在相同按钮
  */
 function checkExistLayerDialogBtnById(btnId){
 	return parent.$(".layui-layer.layui-layer-iframe:last .layui-layer-btn").find("a#"+btnId);
 }
-/**
- * 检测是否存在相同按钮
- * @param btnBox
- * @param title
- * @param cssClass
- * @returns
+/** 检测是否存在相同按钮
  */
 function checkExistLayerDialogBtn(btnBox,title,cssClass){
 	 var sameClassBtns=btnBox.find("a."+cssClass.replace(" ","."));
@@ -16446,12 +15877,7 @@ function checkExistLayerDialogBtn(btnBox,title,cssClass){
 	 }
 	 return existBtn;
 }
-/**
- * 添加按钮
- * @param title
- * @param cssClass
- * @param clickFunc
- * @returns
+/** 添加按钮
  */
 function addParentLayerDialogBtn(title,cssClass,clickFunc){
 	var btnBox = parent.$(".layui-layer:last .layui-layer-btn");
@@ -16507,12 +15933,7 @@ function cancelLayerDialogFormsSubmiting(forms){
 		forms.data("submiting",false).removeAttr("data-submiting");
 	}
 }
-/**
- * 通过ajax提交form
- * @param formEle
- * @param successCallback
- * @param failCallback
- * @returns
+/** 通过ajax提交form
  */
 function ajaxSubmitForm(formEle,successCallback,failCallback){
 	var form=getRealJqueryObject(formEle);
@@ -16548,10 +15969,7 @@ function ajaxSubmitForm(formEle,successCallback,failCallback){
 	return false;
 
 }
-/**
- * 得到真实的jquery object
- * @param ele
- * @returns
+/** 得到真实的jquery object
  */
 function getRealJqueryObject(ele){
 	if(!ele){
@@ -16576,10 +15994,7 @@ function getRealJqueryObject(ele){
 	return eleObj;
 }
 
-/**
- * 获取一个指定ele的父元素jquery对象
- * @param parentEle
- * @returns
+/** 获取一个指定ele的父元素jquery对象
  */
 function getRealParentJqueryObject(parentEle){
 	 var parent=getRealJqueryObject(parentEle);
@@ -16592,13 +16007,12 @@ function getRealParentJqueryObject(parentEle){
  * @param params  参数 没有就填写null
  * @param tabInnerBack 如果是多选项卡模式的话 是否当前选项卡内部跳转而不是关闭
  * @param newTitleIfInner 如果是多选项卡模式的话 选择内部跳转的话 可以设置新标题
- * @returns
  */
 function ajaxSubmitFormAndGoBack(formEle,url,params,tabInnerBack,newTitleIfInner){
-	//ajax提交表单
+	// ajax提交表单
 	ajaxSubmitForm(formEle,function(){
-//		var withTabMode=isWithtabs();
-		//判断选项卡就关闭表单刷新列表tab
+// var withTabMode=isWithtabs();
+		// 判断选项卡就关闭表单刷新列表tab
 		if(jboltWithTabs){
 			if(tabInnerBack){
 				JBoltTabUtil.currentTabGo(url,params);
@@ -16609,15 +16023,13 @@ function ajaxSubmitFormAndGoBack(formEle,url,params,tabInnerBack,newTitleIfInner
 				closeCurrentAndReloadTiggerTab();
 			}
 		}else{
-			//发送pjax请求 重新进入列表页面
+			// 发送pjax请求 重新进入列表页面
 			JBoltPjaxUtil.sendPjax(url,mainPjaxContainerId,params);
 		}
 	});
 }
 
-/**
- * 关闭当前tab
- * @returns
+/** 关闭当前tab
  */
 function closeCurrentTab(){
 	if(jboltWithTabs){
@@ -16626,12 +16038,7 @@ function closeCurrentTab(){
 }
 
 
-/**
- * 关闭当前tab 并且 刷新指定Tab
- * @param refreshTabKey
- * @param onlyRefreshTable
- * @param tableEle
- * @returns
+/** 关闭当前tab 并且 刷新指定Tab
  */
 function closeCurrentAndReloadTiggerTab(refreshTabKey,onlyRefreshTable,tableEle){
 	if(jboltWithTabs){
@@ -16680,10 +16087,7 @@ function closeCurrentAndReloadTiggerTab(refreshTabKey,onlyRefreshTable,tableEle)
 	}
 	
 }
-/**
- * form直接跳转提交 带CHECKER
- * @param formEle
- * @returns
+/** form直接跳转提交 带CHECKER
  */
 function pageFormSubmit(formEle){
 	var form=getRealJqueryObject(formEle);
@@ -16692,10 +16096,7 @@ function pageFormSubmit(formEle){
 		form.submit();
 	}
 }
-/**
- * form提交
- * @param formEle
- * @returns
+/** form提交
  */
 function formSubmit(formEle){
 	var form=getRealJqueryObject(formEle);
@@ -16704,10 +16105,7 @@ function formSubmit(formEle){
 	}
 }
 
-/**
- * form提交 带checker
- * @param formEle
- * @returns
+/** form提交 带checker
  */
 function formSubmitWithChecker(formEle){
 	var form=getRealJqueryObject(formEle);
@@ -16717,13 +16115,10 @@ function formSubmitWithChecker(formEle){
 }
 
 
-/**
- * 提交form,切换刷新当前Tab
- * @param formEle
- * @returns
+/** 提交form,切换刷新当前Tab
  */
 function submitFormInCurrentTab(formEle,successCallback,failCallback){
-//			var withTabMode=isWithtabs();
+// var withTabMode=isWithtabs();
 			if(jboltWithTabs){
 				var form=getRealJqueryObject(formEle);
 				if(isOk(form)){
@@ -16755,27 +16150,20 @@ function submitFormInCurrentTab(formEle,successCallback,failCallback){
 			ajaxSubmitForm(form,successCallback,failCallback);
 		}
 }
-/**
- * 初始化admin后台的top部分里 关于style切换的东西
- * @returns
+/** 初始化admin后台的top部分里 关于style切换的东西
  */
 function initJboltAdminTopStyleChange(){
 	var jbolt_admin_main_top=$(".jbolt_admin_main_top");
 	initToolTip(jbolt_admin_main_top);
 	
 }
-/**
- * 判断是否是tabs多选项卡模式
- * @returns
+/** 判断是否是tabs多选项卡模式
  */
 function isWithtabs(){
 	var withTabs=$(".jbolt_admin.withtabs");
 	return withTabs&&withTabs.length==1;
 }
-/**
- * 表单提交按照多选项卡模式下 ajaxPortal模式提交
- * @param form
- * @returns
+/** 表单提交按照多选项卡模式下 ajaxPortal模式提交
  */
 function tabContentFormSubmitWithAjaxPortal(form){
 	var tabContent=JBoltTabUtil.getCurrentTabContent();
@@ -16785,9 +16173,7 @@ function tabContentFormSubmitWithAjaxPortal(form){
 }
 /**
  * 表单提交ajaxPortal模式提交
- * @param formEle
  * @param portal 多个可以传portal对象数组 也可以portalid数组或者逗号隔开的一个字符串
- * @returns
  */
 function formSubmitToAjaxPortal(formEle,portal){
 	var form=getRealJqueryObject(formEle);
@@ -16839,10 +16225,7 @@ function formSubmitToAjaxPortal(formEle,portal){
 	 }
 	return false;
 }
-/**
- * 触发器 触发当前tab切换URL
- * @param url
- * @returns
+/** 触发器 触发当前tab切换URL
  */
 function  currentTabContentRedirectWithAjaxPortal(url){
 	var currentTab = JBoltTabUtil.getCurrentTab();
@@ -16861,9 +16244,7 @@ function  currentTabContentRedirectWithAjaxPortal(url){
 
 	}
 }
-/**
- * 在多选项卡模式下 初始化 tabcontent查询中的主要form提交事件
- * @returns
+/** 在多选项卡模式下 初始化 tabcontent查询中的主要form提交事件
  */
 function initAdminAjaxPortalFormSubmitEvent(){
 	   jboltBody.on('submit', '.jbolt_page_title form:not([data-ajaxportal-form]),form[data-submittabportal]:not([data-ajaxportal-form])', function (e) {
@@ -16884,14 +16265,11 @@ function initAdminAjaxPortalFormSubmitEvent(){
 		   return false;
 	    });
 }
-/**
- * 切换一个隐藏域
- * @param ids
- * @returns
+/** 切换一个隐藏域
  */
 function toggleInputHidden(ids){
 	if(ids.indexOf(",")!=-1){
-		//多个
+		// 多个
 		var idsArr=ids.split(",");
 		for(var i in idsArr){
 			toggleOneInputHidden(idsArr[i]);
@@ -16909,8 +16287,7 @@ function toggleOneInputHidden(id){
 	}
 }
 
-/**
- * 内置多选项卡View工具类
+/** 内置多选项卡View工具类
  */
 var JBoltTabViewUtil={
 		initUI:function(parentEle){
@@ -16932,7 +16309,7 @@ var JBoltTabViewUtil={
 					tv.children(".jbolt_tab_contens").attr("data-view-id",viewId).children(".jbolt_tab_conten").attr("data-view-id",viewId);
 					tva = tv.find(".jbolt_tab_links[data-view-id='"+viewId+"']>.jbolt_tab_link.active");
 					if(!isOk(tva)){
-						//没有active的就得判断data-active-index=""
+						// 没有active的就得判断data-active-index=""
 						activeIndex=tv.data("active-index");
 						if(typeof(activeIndex)=="undefined" || activeIndex<=0){
 							activeIndex=0;
@@ -16957,7 +16334,7 @@ var JBoltTabViewUtil={
 				var handler=tabView.data("handler");
 				var exe_handler=handler?(eval(handler)):null;
 				if(isOk(activeLink)){
-					//如果是同一个 就不操作任何事情
+					// 如果是同一个 就不操作任何事情
 					var activeTabContentId=activeLink.attr("href");
 					if(activeTabContentId==tabContentId){
 						if(exe_handler && typeof(exe_handler)=="function"){
@@ -16965,7 +16342,7 @@ var JBoltTabViewUtil={
 						}
 						return false;
 					}
-					//如果不是 就把active的关掉
+					// 如果不是 就把active的关掉
 					activeLink.removeClass("active");
 					tabView.find(activeTabContentId).removeClass("active");
 				}
@@ -16983,8 +16360,7 @@ var JBoltTabViewUtil={
 		}
 }
  
-/**
- * 主从表模块
+/** 主从表模块
  */
 var MasterSlaveUtil={
 		initJBoltTable:function(parentEle){
@@ -17127,15 +16503,13 @@ var MasterSlaveUtil={
 				var height=jboltPage.outerHeight()-2-parseInt(jboltPage.css("padding-bottom"))*2;
 				var pageTitle=jboltPage.find(".jbolt_page_title");
 				if(isOk(pageTitle)){
-					height=height-parseInt(pageTitle.outerHeight())-parseInt(pageTitle.css("margin-bottom"));//10是margin-bottom
+					height=height-parseInt(pageTitle.outerHeight())-parseInt(pageTitle.css("margin-bottom"));// 10是margin-bottom
 				}
 				box.height(height);
 			}
 		}
 	}
-/**
- * 处理窗口resize时候jbolt_layer调整
- * @returns
+/** 处理窗口resize时候jbolt_layer调整
  */
 function resizeJBoltLayer(){
 	JBoltLayerUtil.processLayerByWindowResize();
@@ -17185,7 +16559,7 @@ function resizeJboltTableWidth(){
 		resizingJboltTableWidth=false;
 	}*/
 }
-//窗口resize的时候 处理jboltTable 当height设置为fill的时候 调用resize
+// 窗口resize的时候 处理jboltTable 当height设置为fill的时候 调用resize
 function resizeFillHeightJboltTable(){
 	var jboltTables=jboltBody.find(".jbolt_table_view table.jbolt_table.jbolt_main_table[data-height='fill']");
 	if(isOk(jboltTables)){
@@ -17210,8 +16584,8 @@ function resizeFillBoxHeightJboltTable(){
 		});
 	}
 }
-//var resizeTimer = null;
-//窗口resize
+// var resizeTimer = null;
+// 窗口resize
 function onwindowReisze(){
 	jboltWindow.bind("resize",function(){
 		jboltWindowWidth=jboltWindow.width();
@@ -17231,11 +16605,7 @@ function onwindowReisze(){
 }
 
 
-/**
- * 切换元素的可见属性
- * @param cssSelector
- * @param full
- * @returns
+/** 切换元素的可见属性
  */
 function toggleVisiable(cssSelector,ele){
 	var target,box;
@@ -17256,7 +16626,7 @@ function toggleVisiable(cssSelector,ele){
 			target=$(cssSelector);
 		}
 	}else{
-//		var withTabs=isWithtabs();
+// var withTabs=isWithtabs();
 		if(jboltWithTabs){
 			var currentTabContent=JBoltTabUtil.getCurrentTabContent();
 			if(isOk(currentTabContent)){
@@ -17292,7 +16662,7 @@ function checkLockSystem(){
 	if(!lockSystemTimer){return false;}
 	var j_locksystem=$("#j_locksystem");
 	if(isOk(j_locksystem)){
-		//如果已经有了 判断hidden
+		// 如果已经有了 判断hidden
 		j_locksystem.removeClass("__web-inspector-hide-shortcut__");
 		j_locksystem.show();
 		if(j_locksystem[0].style.visibility!="visible"){
@@ -17303,9 +16673,7 @@ function checkLockSystem(){
 	}
 	
 }
-/**
- * 显示锁屏界面
- * @returns
+/** 显示锁屏界面
  */
 function showJboltLockSystem(){
 	if(window.self!=window.top){
@@ -17318,9 +16686,7 @@ function showJboltLockSystem(){
 	}
 
 }
-/**
- * 显示锁屏组件
- * @returns
+/** 显示锁屏组件
  */
 function showJBoltLockSystemEle(){
 	var j_locksystem=$("#j_locksystem");
@@ -17336,7 +16702,6 @@ function showJBoltLockSystemEle(){
 
 /**
  * md5加密
- * @param string
  * @returns {string}
  */
 function md5(string){
@@ -17523,9 +16888,7 @@ function md5(string){
 	return (md5_WordToHex(a)+md5_WordToHex(b)+md5_WordToHex(c)+md5_WordToHex(d)).toLowerCase();
 }
 
-/**
- * 解锁
- * @returns
+/** 解锁
  */
 function unlockSystem(event){
 	var keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
@@ -17556,9 +16919,7 @@ function unlockSystem(event){
 		}
 	}
 }
-/**
- * 关闭锁屏界面
- * @returns
+/** 关闭锁屏界面
  */
 function closeJboltLockSystem(){
 	if(window.self!=window.top){
@@ -17567,7 +16928,7 @@ function closeJboltLockSystem(){
 		clearInterval(lockSystemTimer);
 		lockSystemTimer=null;
 		if(isOk(jboltAdmin)){
-			//说明是在系统内部
+			// 说明是在系统内部
 			$("#unlockpwd").val("");
 			$("#j_locksystem").hide();
 		}else{
@@ -17576,18 +16937,13 @@ function closeJboltLockSystem(){
 		
 	}
 }
-/**
- * 屏蔽右键
- * @returns
+/** 屏蔽右键
  */
 function doNothing(){
 	window.event.returnValue=false;
 	return false;
 }
-/**
- * 处理内部组件初始化
- * @param parentEle
- * @returns
+/** 处理内部组件初始化
  */
 function processInnerElesInit(parentEle){
 	var parent=getRealParentJqueryObject(parentEle);
@@ -17610,10 +16966,7 @@ function processInnerElesInit(parentEle){
 	FileUploadUtil.init(parent);
 	ImgUploadUtil.init(parent);
 }
-/**
- * 初始化tooltip
- * @param parentEle
- * @returns
+/** 初始化tooltip
  */
 function initToolTip(parentEle){
 	var tips;
@@ -17629,10 +16982,7 @@ function initToolTip(parentEle){
 		tips.tooltip({ boundary: 'window',container:"body"});
 	}
 }
-/**
- * 初始化Popover
- * @param parentEle
- * @returns
+/** 初始化Popover
  */
 function initPopover(parentEle){
 	var pops;
@@ -17648,10 +16998,7 @@ function initPopover(parentEle){
 		pops.popover({ boundary: 'window',container:"body"});
 	}
 }
-/**
- * 销毁tooltip
- * @param parentEle
- * @returns
+/** 销毁tooltip
  */
 function destroyToolTip(parentEle){
 	if(parentEle){
@@ -17664,19 +17011,13 @@ function destroyToolTip(parentEle){
 	}
 	 
 }
-/**
- * 重置tooltip 先销毁 再初始化
- * @param parentEle
- * @returns
+/** 重置tooltip 先销毁 再初始化
  */
 function resetToolTip(parentEle){
 	destroyToolTip(parentEle);
 	initToolTip(parentEle);
 }
-/**
- * 动态设置全局后台UI样式
- * @param styleName
- * @returns
+/** 动态设置全局后台UI样式
  */
 function changeUserJboltStyle(styleName){
 	var jbolt_user_config_style_box=$("#jbolt_user_config_style_box");
@@ -17693,12 +17034,11 @@ function changeUserJboltStyle(styleName){
 		}
 	}
 	jboltAdmin[0].className=newClassName+styleName;
-	//改变scroll
+	// 改变scroll
 	changeLeftNavScroll();
 }
 
-/**
- * Select 2 组件
+/** Select 2 组件
  */
 var Select2Util={
 		init:function(parentEle){
@@ -17751,9 +17091,7 @@ var Select2Util={
 		}
 }
 
-/**
- * 处理无用的tooltip
- * @returns
+/** 处理无用的tooltip
  */
 function processNoMasterTooltip(){
 	jboltBody.find(".tooltip.show").each(function(){
@@ -17767,25 +17105,19 @@ function processNoMasterTooltip(){
 		}
 	});
 }
-/**
- * 检测引入了select2的js
- * @returns
+/** 检测引入了select2的js
  */
 function checkImportSelect2(){
 	var hasjs=$("script[id='select2_js']");
 	return (hasjs&&hasjs.length==1);
 }
-/**
- * 检测引入了bootstrap-select的js
- * @returns
+/** 检测引入了bootstrap-select的js
  */
 function checkImportBootstrapSelect(){
 	var hasjs=$("script[id='bootstrap_select_js']");
 	return (hasjs&&hasjs.length==1);
 }
-/**
- * 全局处理select2 宽度等问题
- * @returns
+/** 全局处理select2 宽度等问题
  */
 function processGlobalSelect2(){
 	hasImportSelect2=checkImportSelect2();
@@ -17795,9 +17127,7 @@ function processGlobalSelect2(){
 		$.fn.select2.defaults.set("theme", "bootstrap");
 	}
 }
-/**
- * 全局处理bootstrap-select
- * @returns
+/** 全局处理bootstrap-select
  */
 function processGlobalBootstrapSelect(){
 	hasImportBootstrapSelect=checkImportBootstrapSelect();
@@ -17806,10 +17136,7 @@ function processGlobalBootstrapSelect(){
 		$.fn.selectpicker.Constructor.DEFAULTS.style="btn-outline-secondary";
 	}
 }
-/**
- * form提交让ajaxPortal提交
- * @param formEle
- * @returns
+/** form提交让ajaxPortal提交
  */
 function ajaxPortalSubmitWithForm(formEle){
 	var form=getRealJqueryObject(formEle);
@@ -17855,8 +17182,7 @@ var jboltPortalPageTpl_mini='<div class="jbolt_portal_pages noselect">'+
 '</div>'+
 '<div class="clearfix"></div>'+
 '</div>';
-/**
- * ajaxPortal
+/** ajaxPortal
  */
 var AjaxPortalUtil={
 		load:function(portalEle){
@@ -17931,7 +17257,7 @@ var AjaxPortalUtil={
 					that.readByPage(portal);
 				});
 			}
-			//设置page初始化成功标识
+			// 设置page初始化成功标识
 			portal.data("page-ok",true);
 		},
 		readByPage:function(portalEle,page){
@@ -18149,9 +17475,7 @@ var AjaxPortalUtil={
 		}
 }
 
-/**
- * 初始化imageviewer组件的事件绑定 点击关闭
- * @returns
+/** 初始化imageviewer组件的事件绑定 点击关闭
  */
 function processImgviewerEvent(){
 	jboltBody.on("click",'.viewer-canvas',function(e){
@@ -18161,7 +17485,7 @@ function processImgviewerEvent(){
 	});
 }
 
-//定义
+// 定义
 $.getMultiScripts = function(arr, path) {
     var _arr = $.map(arr, function(scr) {
         return $.ajax({async:false,dataType:"script",url:((path||"") + scr )});
@@ -18173,59 +17497,57 @@ $.getMultiScripts = function(arr, path) {
 
     return $.when.apply($, _arr);
 }
-/**
- * 初始化首次进入JBolt-Admin后台 全局类的初始化
- * @returns
+/** 初始化首次进入JBolt-Admin后台 全局类的初始化
  */
 function initJboltAdmin(){
-	//初始化左侧导航菜单
+	// 初始化左侧导航菜单
 	initAdminLeftNav();
-	//全局处理select2组件
+	// 全局处理select2组件
 	processGlobalSelect2();
-	//全局处理bootstrap-select组件
+	// 全局处理bootstrap-select组件
 	processGlobalBootstrapSelect();
-	//TableUtil init 初始化table列表里的edit del按钮
+	// TableUtil init 初始化table列表里的edit del按钮
 	TableUtil.init();
 	PageOptUtil.init();
-	//切换左侧menu显示和隐藏
+	// 切换左侧menu显示和隐藏
 	toggleMenuEvent();
-	//切换左侧topnav关联的menus
+	// 切换左侧topnav关联的menus
 	toggleLeftMenuEventByTopnav();
-	//JBoltLayer组件
+	// JBoltLayer组件
 	JBoltLayerUtil.init();
 	
-	//初始化主从表结构事件
+	// 初始化主从表结构事件
 	MasterSlaveUtil.initMasterTableEvent();
-	//处理imgviewer组件事件
+	// 处理imgviewer组件事件
 	processImgviewerEvent();
-	//后台顶部的样式
+	// 后台顶部的样式
 	initJboltAdminTopStyleChange();
-	//看图器
+	// 看图器
 	LayerPhotoUtil.init();
-	//初始化bootstrap默认的tab
+	// 初始化bootstrap默认的tab
 	initBootstrapTab();
-	//初始化juicer模板引擎
+	// 初始化juicer模板引擎
 	initJuicer();
-	//处理监听全局img onerror
+	// 处理监听全局img onerror
 	initImgError();
-	//body点击事件处理一些额外
+	// body点击事件处理一些额外
 	initJboltBodyClick();
-	//初始化为ajaxPortal添加右键菜单
+	// 初始化为ajaxPortal添加右键菜单
 	initAjaxPortalContextMenu();
-	//初始化formChecker 可能需要加载用户的二开扩展ruleMap
+	// 初始化formChecker 可能需要加载用户的二开扩展ruleMap
 	FormChecker.init();
-	//异步下载按钮封装
+	// 异步下载按钮封装
 	DownloadUtil.init();
-	//全局jbolttablink处理event
+	// 全局jbolttablink处理event
 	JBoltTabViewUtil.initTabLinkEvent();
 	OpenPageBtnUtil.init();
-	//全屏切换按钮初始化
+	// 全屏切换按钮初始化
 	FullScreenBtnUtil.init();
-	//初始化switchBtn的组件全局事件监听
+	// 初始化switchBtn的组件全局事件监听
 	SwitchBtnUtil.initEvent();
-	//textarea处理
+	// textarea处理
 	TextareaUtil.initEvent();
-	//初始化tabs 从本地缓存
+	// 初始化tabs 从本地缓存
 	initJBoltTabsFromSessionStorage();
 //	if(jboltWithTabs){
 //		window.onpopstate = function(e) {
@@ -18248,10 +17570,7 @@ function useHashToActiveTab(){
 	return false;
 }
 
-/**
- * 执行锁屏
- * @param callback
- * @returns
+/** 执行锁屏
  */
 function exeLock(callback){
 	var j_locksystem=$("#j_locksystem");
@@ -18264,9 +17583,7 @@ function exeLock(callback){
 		});
 	}
 }
-/**
- * 处理自动锁屏
- * @returns
+/** 处理自动锁屏
  */
 function processAutoLockScreen(){
 	if(window.self!=window.top){return true;}
@@ -18276,9 +17593,7 @@ function processAutoLockScreen(){
 	}
 	return true;
 }
-/**
- *开始执行ifvisible插件
- * @returns
+/** 开始执行ifvisible插件
  */
 function startIfVisible(){
 	var span=$("#JBOLT_AUTO_LOCK_SCREEN_SECONDS");
@@ -18294,9 +17609,7 @@ function startIfVisible(){
 	}
 }
 
-/**
- * 初始化ajaxPortal里的右键菜单
- * @returns
+/** 初始化ajaxPortal里的右键菜单
  */
 function initAjaxPortalContextMenu(){
 	jboltBody.on("contextmenu","[data-ajaxportal][data-refresh]",function(e){
@@ -18328,7 +17641,7 @@ function initAjaxPortalContextMenu(){
 function hideAjaxPortalContextMenu(){
 	$("div[data-ajaxportal]>.jbolt_ajaxportal_menu").hide();
 }
-//body点击事件处理一些额外
+// body点击事件处理一些额外
 function initJboltBodyClick(){
 	jboltBody.on("click",function(){
 		JBoltInputUtil.hideJBoltInputLayer();
@@ -18338,54 +17651,45 @@ function initJboltBodyClick(){
 	});
 	
 }
-/**
- * 处理监听全局img onerror
- * @returns
+/** 处理监听全局img onerror
  */
 function initImgError(){
-	//暂不实现
+	// 暂不实现
 }
-/**
- * 时间格式化为 yyyy-MM-dd HH:mm格式
+/** 时间格式化为 yyyy-MM-dd HH:mm格式
  */
 var date_ymdhm=function(s,defaultValue){
 	return date(s,"yyyy-MM-dd HH:mm",defaultValue);
 }
-/**
- * 时间格式化为 yyyy-MM-dd HH:mm格式
+/** 时间格式化为 yyyy-MM-dd HH:mm格式
  */
 var date_ymdhms=function(s,defaultValue){
 	return date(s,"yyyy-MM-dd HH:mm:ss",defaultValue);
 }
 
-/**
- * 时间格式化为 yyyy-MM-dd格式
+/** 时间格式化为 yyyy-MM-dd格式
  */
 var date_ymd=function(s,defaultValue){
 	return date(s,"yyyy-MM-dd",defaultValue);
 }
 
-/**
- * 时间格式化为 yyyy-MM格式
+/** 时间格式化为 yyyy-MM格式
  */
 var date_ym=function(s,defaultValue){
 	return date(s,"yyyy-MM",defaultValue);
 }
-/**
- * 时间格式化为 HH:mm格式
+/** 时间格式化为 HH:mm格式
  */
 var date_hm=function(s,defaultValue){
 	return date(s,"HH:mm",defaultValue);
 }
-/**
- * 时间格式化为 HH:mm:ss格式
+/** 时间格式化为 HH:mm:ss格式
  */
 var date_hms=function(s,defaultValue){
 	return date(s,"HH:mm:ss",defaultValue);
 }
 
-/**
- * 性别
+/** 性别
  */
 var sex=function(s,defaultValue){
 	if(!s){
@@ -18394,8 +17698,7 @@ var sex=function(s,defaultValue){
 	return s==1?"男":(s==2?"女":"-");
 }
 
-/**
- * 时间格式化为 HH:mm格式
+/** 时间格式化为 HH:mm格式
  */
 var time_hm=function(s,defaultValue){
 	if(!s&&!defaultValue){return "";}
@@ -18420,8 +17723,7 @@ var time_hm=function(s,defaultValue){
 	}
 	return s;
 }
-/**
- * 时间格式化为 HH:mm:ss格式
+/** 时间格式化为 HH:mm:ss格式
  */
 var time_hms=function(s,defaultValue){
 	if(!s&&!defaultValue){return "";}
@@ -18447,8 +17749,7 @@ var time_hms=function(s,defaultValue){
 	return s;
 }
 
-/**
- * 时间格式化
+/** 时间格式化
  */
 var date=function(s,fmt,defaultValue){
 	if(!s&&!defaultValue){return "";}
@@ -18469,12 +17770,10 @@ var date=function(s,fmt,defaultValue){
 	return s.Format(fmt);
 }
 
-/**
- * jbolt默认图片定义
+/** jbolt默认图片定义
  */
 var jbolt_default_img_url="assets/img/uploadimg.png";
-/**
- * juicer模板中使用计算获取真实URL地址
+/** juicer模板中使用计算获取真实URL地址
  */
 var real_image=function(url){
 	if(!url){
@@ -18489,7 +17788,6 @@ var real_image=function(url){
 
 /**
  * 金额 保留1位
- * @param number
  * @returns {string|string}
  */
 function money_1(number) {
@@ -18498,7 +17796,6 @@ function money_1(number) {
 }
 /**
  * 金额 保留2位
- * @param number
  * @returns {string|string}
  */
 function money_2(number) {
@@ -18507,7 +17804,6 @@ function money_2(number) {
 }
 /**
  * 金额 保留3位
- * @param number
  * @returns {string|string}
  */
 function money_3(number) {
@@ -18516,7 +17812,6 @@ function money_3(number) {
 }
 /**
  * 金额 保留4位
- * @param number
  * @returns {string|string}
  */
 function money_4(number) {
@@ -18525,43 +17820,26 @@ function money_4(number) {
 }
 
 /*
- * 数字格式化 清除掉小数点后的无用的0
- * 参数说明：
- * number：要格式化的数字
- * decimals：保留几位小数
- * dec_point：小数点符号
- * thousands_sep：千分位符号
- * roundtag:舍入参数，默认 "ceil" 向上取,"floor"向下取,"round" 四舍五入
- * */
+ * 数字格式化后去掉小数末尾零，参数同 numberFormat。
+ */
 function numberFormat2(number, decimals, dec_point, thousands_sep,roundtag) {
 	var value= numberFormat(number, decimals, dec_point, thousands_sep,roundtag);
 	return removeNumberEndZero(value,false);
 }
 /*
- * 数字格式化 清除掉小数点后的无用的0 如果最后是0 转为空白不显示
- * 参数说明：
- * number：要格式化的数字
- * decimals：保留几位小数
- * dec_point：小数点符号
- * thousands_sep：千分位符号
- * roundtag:舍入参数，默认 "ceil" 向上取,"floor"向下取,"round" 四舍五入
- * */
+ * 数字格式化后去掉小数末尾零；结果为0时返回空字符串，参数同 numberFormat。
+ */
 function numberFormat3(number, decimals, dec_point, thousands_sep,roundtag) {
 	var value= numberFormat2(number, decimals, dec_point, thousands_sep,roundtag);
 	return value.toString()==="0"?"":value;
 }
 /*
- * 数字格式化
- * 参数说明：
- * number：要格式化的数字
- * decimals：保留几位小数
- * dec_point：小数点符号
- * thousands_sep：千分位符号
- * roundtag:舍入参数，默认 "ceil" 向上取,"floor"向下取,"round" 四舍五入
- * */
+ * 数字格式化：decimals 为小数位，dec_point 为小数点，thousands_sep 为千分位。
+ * roundtag 默认 round，可选 ceil/floor/round；零小数位固定四舍五入。
+ */
 function numberFormat(number, decimals, dec_point, thousands_sep,roundtag) {
     number = (number + '').replace(/[^0-9+-Ee.]/g, '');
-    roundtag = roundtag || "round"; //"ceil","floor","round"
+    roundtag = roundtag || "round"; // "ceil","floor","round"
     var n = !isFinite(+number) ? 0 : +number,
         prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
         sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
@@ -18586,14 +17864,11 @@ function numberFormat(number, decimals, dec_point, thousands_sep,roundtag) {
 }
 
 
-/**
- * 返回距离当前的时间差
- * @param tmpTime
- * @returns
+/** 返回距离当前的时间差
  */
 function prettyTime(tmpTime) {
 	if(!tmpTime){return "刚刚";}
-	var nowTime = new Date().getTime();//获取当前时间戳
+	var nowTime = new Date().getTime();// 获取当前时间戳
 	var timeType=typeof(tmpTime);
 	var tmpTimeStamp;
 	if(timeType=="object"){
@@ -18601,24 +17876,24 @@ function prettyTime(tmpTime) {
 	}else if(timeType=="string"){
 		tmpTimeStamp=Date.parse(tmpTime.replace(/-/gi, "/"));
 	}
-    var mm=1000;//1000毫秒 代表1秒
+    var mm=1000;// 1000毫秒 代表1秒
     var minute = mm * 60;
     var hour = minute * 60;
     var day = hour * 24;
     var month = day * 30;
-    var ansTimeDifference=0;//记录时间差
-    var tmpTimeDifference = nowTime - tmpTimeStamp;//计算当前与需要计算的时间的时间戳的差值
-    if (tmpTimeDifference < 0) {                //时间超出，不能计算
+    var ansTimeDifference=0;// 记录时间差
+    var tmpTimeDifference = nowTime - tmpTimeStamp;// 计算当前与需要计算的时间的时间戳的差值
+    if (tmpTimeDifference < 0) {                // 时间超出，不能计算
         return tmpTime;
     }
-    //通过最开始强调的各个时间段用毫秒表示的数值，进行时间上的取整，为0的话，则没有到达
-    var DifferebceMonth = tmpTimeDifference / month;    //进行月份取整
-    var DifferebceWeek = tmpTimeDifference / (7 * day);//进行周取整
-    var DifferebceDay = tmpTimeDifference / day;//进行天取整
-    var DifferebceHour = tmpTimeDifference / hour;//进行小时取整
-    var DifferebceMinute = tmpTimeDifference / minute;//进行分钟取整
+    // 通过最开始强调的各个时间段用毫秒表示的数值，进行时间上的取整，为0的话，则没有到达
+    var DifferebceMonth = tmpTimeDifference / month;    // 进行月份取整
+    var DifferebceWeek = tmpTimeDifference / (7 * day);// 进行周取整
+    var DifferebceDay = tmpTimeDifference / day;// 进行天取整
+    var DifferebceHour = tmpTimeDifference / hour;// 进行小时取整
+    var DifferebceMinute = tmpTimeDifference / minute;// 进行分钟取整
     if (DifferebceMonth >= 1) {
-        return tmpTime;                 //大于一个月 直接返回时间
+        return tmpTime;                 // 大于一个月 直接返回时间
     } else if (DifferebceWeek >= 1) {
         ansTimeDifference= parseInt(DifferebceWeek) + "个星期前";
     } else if (DifferebceDay >= 1) {
@@ -18632,12 +17907,7 @@ function prettyTime(tmpTime) {
     }
     return ansTimeDifference;
 }
-/**
- * 计算当前页面编号
- * @param pageNumber
- * @param pageSize
- * @param index
- * @returns
+/** 计算当前页面编号
  */
 function rownum(pageNumber,pageSize,index){
 	if(!pageNumber){pageNumber=1;}
@@ -18647,7 +17917,6 @@ function rownum(pageNumber,pageSize,index){
 
 /**
  * 小数点1个
- * @param number
  * @returns {number|*|string|string}
  */
 function tofixed_1(number){
@@ -18655,7 +17924,6 @@ function tofixed_1(number){
 }
 /**
  * 小数点2个
- * @param number
  * @returns {number|*|string|string}
  */
 function tofixed_2(number){
@@ -18663,7 +17931,6 @@ function tofixed_2(number){
 }
 /**
  * 小数点3个
- * @param number
  * @returns {number|*|string|string}
  */
 function tofixed_3(number){
@@ -18671,14 +17938,12 @@ function tofixed_3(number){
 }
 /**
  * 小数点4个
- * @param number
  * @returns {number|*|string|string}
  */
 function tofixed_4(number){
 	return tofixed(number,4,false,true);
 }
-/**
- * tofixed
+/** tofixed
  */
 function tofixed(number,count,removeAllZero,toZeroIfBlank){
 	number=number?Number(number):0;
@@ -18773,12 +18038,7 @@ function removeFixedNumberAllZero(value,toFixedCount,toZeroIfBlank){
 	return value;
 }
 
-/**
- * 字符串替换 函数
- * @param str
- * @param substr
- * @param replacement
- * @returns
+/** 字符串替换 函数
  */
 function replaceStr(str,substr,replacement){
 	return str.replace(substr,replacement);
@@ -18855,9 +18115,7 @@ function colorClassByPriorityLevel(level){
 	return colorClass_priorityLevel[level-1];
 }
 
-/**
- * 初始化juicer模板引擎
- * @returns
+/** 初始化juicer模板引擎
  */
 function initJuicer(){
 	juicer.register("date",date);
@@ -18945,7 +18203,7 @@ function toJsonString(obj,needAttrs,fileUrlAttr){
 	}
 	return JSON.stringify(obj);
 }
-//初始化Bootstrap自带的tab组件JS
+// 初始化Bootstrap自带的tab组件JS
 function initBootstrapTab(){
 	jboltBody.on("click",".nav-tabs a.nav-link",function (e) {
 		 e.preventDefault();
@@ -18954,16 +18212,13 @@ function initBootstrapTab(){
 		  return false;
 	});
 }
-/**
- * 判断是否引入pjax
- * @returns
+/** 判断是否引入pjax
  */
 function isHasPjax(){
 	var pjaxScript=$("#pjaxScript");
 	return pjaxScript&&pjaxScript.length==1;
 }
-/**
- * 多文件上传
+/** 多文件上传
  */
 var MultipleFileInputUtil={
 		init:function(parentEle){
@@ -19004,7 +18259,7 @@ var MultipleFileInputUtil={
 				return findarr;
 			}
 			
-//			var arr=new Array();
+// var arr=new Array();
 			var obj={"key":inputId,"value":values};
 			multipleUploadFiles.push(obj);
 			return obj["value"];
@@ -19074,7 +18329,7 @@ var MultipleFileInputUtil={
 			if(!setvalueto){
 				return false;
 			}
-			//删除一条
+			// 删除一条
 			var inputId=input.attr("id");
 			var sync=input.data("sync");
 			var multipleFiles=that.findInputFiles(inputId);
@@ -19133,7 +18388,7 @@ var MultipleFileInputUtil={
 					});
 				}
 			}
-			//上传文件移除后
+			// 上传文件移除后
 			input.on("filesuccessremove",function(e,id){
 				if(handler&&handler=="setValueTo"){
 					that.processRemoveSetValueTo(input,id);
@@ -19143,7 +18398,7 @@ var MultipleFileInputUtil={
 					that.processHandler(input,filesuccessremove,id);
 				}
 			});
-			//文件移除后
+			// 文件移除后
 			input.on("fileremoved",function(e,id){
 				if(handler&&handler=="setValueTo"){
 					that.processRemoveSetValueTo(input,id);
@@ -19153,7 +18408,7 @@ var MultipleFileInputUtil={
 					that.processHandler(input,filesuccessremove,id);
 				}
 			});
-			//文件清空后
+			// 文件清空后
 			input.on("filecleared",function(e){
 				if(handler&&handler=="setValueTo"){
 					that.processFileclearedSetValueTo(input);
@@ -19263,8 +18518,7 @@ var MultipleFileInputUtil={
 			
 		}
 }
-/**
- * JBolt-treeTable封装调用
+/** JBolt-treeTable封装调用
  */
 var JBoltTreeTableUtil={
 		init:function(parentEle){
@@ -19298,8 +18552,7 @@ var JBoltTreeTableUtil={
 			table.jboltTreeTable();
 		}
 }
-/**
- * JBolt-Table封装调用
+/** JBolt-Table封装调用
  */
 var JBoltTableUtil={
 		init:function(parentEle){
@@ -19345,17 +18598,14 @@ var JBoltTableUtil={
 			return getJBoltTableInst(tableEle);
 		}
 }
-/**
- * 深拷贝
- * @param obj
- * @returns
+/** 深拷贝
  */
 function deepClone(obj) {
-	//通过原型对象获取对象类型
+	// 通过原型对象获取对象类型
 	var type = Object.prototype.toString.call(obj); 
 	var newObj;
 	if(type ==='[object Array]'){
-	//数组
+	// 数组
 	newObj =[];
 		if(obj.length >0){
 			for(var x=0;x<obj.length;x++){
@@ -19363,19 +18613,19 @@ function deepClone(obj) {
 			}
 		}
 	}else if(type==='[object Object]'){
-		//对象
+		// 对象
 		newObj = {};
 	for(var x in obj) {
 		newObj[x] = deepClone(obj[x]);
 	}
 	}else{
-		//基本类型和方法可以直接赋值
+		// 基本类型和方法可以直接赋值
 		newObj = obj;
 	}
 	return newObj;
 }
 
-//封装的lobibox 取名JBoltNotifyBox
+// 封装的lobibox 取名JBoltNotifyBox
 var JBoltNotifyBox={
 		notify:function(type,options){
 			var defaultOptions={width:260,size:'mini',delay:false,title:false,msg:"消息",position:"top right",img:false};
@@ -19404,9 +18654,9 @@ var JBoltNotifyBox={
 			this.notify("info",options);
 		}
 }
-//数组工具类
+// 数组工具类
 var JBoltArrayUtil={
-		//删除指定值元素
+		// 删除指定值元素
 		remove:function(array,value){
 			if(isOk(array)&&typeof(value)!=undefined&&typeof(value)!="undefined"){
 				$.each(array,function(index,item){
@@ -19417,11 +18667,11 @@ var JBoltArrayUtil={
 				});
 			}
 		},
-		//按照坐标替换数据
+		// 按照坐标替换数据
 		replace:function(array,index,data){
 			array.splice(index,1,data);
 		},
-		//按下标合并数据
+		// 按下标合并数据
 		merge:function(array,index,data){
 			if(typeof(data)=="undefined" || index<0 || index >= array.length){return;}
 			var oldData=array[index];
@@ -19430,7 +18680,7 @@ var JBoltArrayUtil={
 				oldData[keys[i]]=data[keys[i]];
 			}
 		},
-		//首插数据
+		// 首插数据
 		prepend:function(array,prependDatas){
 			if(prependDatas){
 				var datas=deepClone(prependDatas);
@@ -19446,7 +18696,7 @@ var JBoltArrayUtil={
 			}
 			
 		},
-		//尾插数据
+		// 尾插数据
 		append:function(array,appendDatas){
 			if(appendDatas){
 				var datas=deepClone(appendDatas);
@@ -19460,18 +18710,18 @@ var JBoltArrayUtil={
 				}
 			}
 		},
-		//按下标删除
+		// 按下标删除
 		removeByIndex:function(array,index,count){
 			array.splice(index,count?count:1);
 		},
-		//插入数据
+		// 插入数据
 		insert:function(array,index,insertDatas){
 			if(array&&insertDatas){
 				var datas=deepClone(insertDatas);
 				if(array.length==0){
 					this.append(array,datas);
 				}else{
-					if(index<0){//如果下标小于0 就首前插
+					if(index<0){// 如果下标小于0 就首前插
 						this.prepend(array,datas);
 					}else if(index>=array.length){
 						this.append(array,datas);
@@ -19488,7 +18738,7 @@ var JBoltArrayUtil={
 				}
 			}
 		},
-		//根据数据里对象的某一属性值相等判断 删除
+		// 根据数据里对象的某一属性值相等判断 删除
 		removeObjectByAttr:function(array,attr,attrValue){
 			var that=this;
 			if(isOk(array)&&attr){
@@ -19501,7 +18751,7 @@ var JBoltArrayUtil={
 				});
 			}
 		},
-		//改变数组里指定下标数据的指定属性值
+		// 改变数组里指定下标数据的指定属性值
 		changeOneItemAttrValue:function(array,index,attr,attrValue){
 			if(isOk(array)&&index>=0&&attr){
 				var size=array.length;
@@ -19510,7 +18760,7 @@ var JBoltArrayUtil={
 				}
 			}
 		},
-		//改变数组里指定属性值数据的指定属性值
+		// 改变数组里指定属性值数据的指定属性值
 		changeOneItemOtherAttrValueByAttr:function(array,attr,attrValue,otherAttr,otherAttrValue){
 			if(isOk(array)){
 				var theIndex=-1;
@@ -19524,7 +18774,7 @@ var JBoltArrayUtil={
 				this.changeOneItemAttrValue(array,theIndex,otherAttr,otherAttrValue);
 			}
 		},
-		//改变数组中所有对象的指定属性值
+		// 改变数组中所有对象的指定属性值
 		changeItemsAttrValue:function(array,attr,attrValue){
 			if(isOk(array)&&attr){
 				$.each(array,function(index,item){
@@ -19532,7 +18782,7 @@ var JBoltArrayUtil={
 				});
 			}
 		},unique:function(arr){
-			//如果新数组的当前元素的索引值 == 该元素在原始数组中的第一个索引，则返回当前元素
+			// 如果新数组的当前元素的索引值 == 该元素在原始数组中的第一个索引，则返回当前元素
 			return arr.filter(function(item,index){
 				return arr.indexOf(item,0) === index;
 				});
@@ -19544,7 +18794,7 @@ var JBoltArrayUtil={
 			return this.move(arr,moveIndexArr,toIndex,false);
 		},
 		move:function(arr, moveIndexArr, toIndex,isBeforAfter){
-			var start,arr2,arr3,arr4,firstIndex=moveIndexArr[0],len=arr.length,lastIndex=moveIndexArr[moveIndexArr.length-1];//1,2, 3 ,4,5, 6,7 ,8
+			var start,arr2,arr3,arr4,firstIndex=moveIndexArr[0],len=arr.length,lastIndex=moveIndexArr[moveIndexArr.length-1];// 1,2, 3 ,4,5, 6,7 ,8
 			if(isBeforAfter){
 				start= arr.slice(0,toIndex);
 				arr2 = arr.slice(moveIndexArr[0],moveIndexArr[moveIndexArr.length-1]+1);
@@ -19561,7 +18811,7 @@ var JBoltArrayUtil={
 }
 
 var StrUtil={
-    //把字串连接起来，例如：StrUtil.join('a','b','c','d',';') => a;b;c;d
+    // 把字串连接起来，例如：StrUtil.join('a','b','c','d',';') => a;b;c;d
     join : function(){
         if(arguments.length<=2){ return arguments[0];}
         var datas = [];
@@ -19574,8 +18824,8 @@ var StrUtil={
         }
         return datas.join(delimter);
     },
-    //转为下划线：StrUtil.underline('userRole',true) => USER_ROLE
-    //转为下划线：StrUtil.underline('userRole',false) => user_role
+    // 转为下划线：StrUtil.underline('userRole',true) => USER_ROLE
+    // 转为下划线：StrUtil.underline('userRole',false) => user_role
     underline : function(str,upper) {
         var ret = str.replace(/([A-Z])/g,"_$1");
         if(upper){
@@ -19584,8 +18834,8 @@ var StrUtil={
             return ret.toLowerCase();
         }
     },
-    //转驼峰表示：StrUtil.camel('USER_ROLE',true) => UserRole
-    //转驼峰表示：StrUtil.camel('USER_ROLE',false) => userRole
+    // 转驼峰表示：StrUtil.camel('USER_ROLE',true) => UserRole
+    // 转驼峰表示：StrUtil.camel('USER_ROLE',false) => userRole
     camel : function(str,firstUpper) {
     	var ret;
     	if(str.indexOf("_")!=-1){
@@ -19606,47 +18856,45 @@ var StrUtil={
 }
 
 
-/**
- * 初始化
- * @returns
+/** 初始化
  */
 $(function(){
-	//处理自动锁屏
+	// 处理自动锁屏
 	var success = processAutoLockScreen();
 	if(!success){
 		return false;
 	}
 
-//	var withtabs=isWithtabs();
-	//全局初始化
+// var withtabs=isWithtabs();
+	// 全局初始化
 	initJboltAdmin();
-	//如果是需要pjax并且引入了pjax是单页加载模式
+	// 如果是需要pjax并且引入了pjax是单页加载模式
 	if(needPjax&&hasPjax){
 		if(jboltWithTabs){
-			//pjax+多选项卡模式下
+			// pjax+多选项卡模式下
 			JBoltTabUtil.init();
 			JBoltTabUtil.addJboltTabWithoutContentUrl();
-			//找到当前的一个选项卡内容区域 执行加载完成后的js
+			// 找到当前的一个选项卡内容区域 执行加载完成后的js
 			var currentTabContent=JBoltTabUtil.getCurrentTabContent();
 			if(currentTabContent&&currentTabContent.length==1){
 				afterAjaxPortal(currentTabContent);
 			}
-			//多选项卡模式下的form提交会提交选项卡内容区域
+			// 多选项卡模式下的form提交会提交选项卡内容区域
 			initAdminAjaxPortalFormSubmitEvent();
 		}else{
-			//初始化全局pjax
+			// 初始化全局pjax
 			JBoltPjaxUtil.initAdminPjax();
 		}
 	}else{
 		pageLoadRequirePluginAndInit();
-		//非pjax模式下 一般是在直接打开内页地址或者dialog中
+		// 非pjax模式下 一般是在直接打开内页地址或者dialog中
 		if(jboltWithTabs){
 			JBoltTabUtil.init();
 			initAdminAjaxPortalFormSubmitEvent();
 		}else{
 			JBoltPjaxUtil.initPjaxEvent();
 		}
-		//上来直接进入界面 需要各种组件的初始化
+		// 上来直接进入界面 需要各种组件的初始化
 		SelectUtil.initAutoSetValue();
 		FileUploadUtil.init();
 		ImgUploadUtil.init();
@@ -19677,7 +18925,7 @@ $(function(){
 		JsonEditorUtil.init();
 		findRequiredAndStarIt();
 	}
-		//window resize处理
+		// window resize处理
 		onwindowReisze();
 		mainScrollEvent();
 		JBoltClipboardUtil.init();
@@ -19691,10 +18939,7 @@ function mainScrollEvent(){
 	});
 }
 
-/**
- * 寻找表单 required项 并自动添加星标
- * @param parentEle
- * @returns
+/** 寻找表单 required项 并自动添加星标
  */
 function findRequiredAndStarIt(parentEle){
 	if(!autoShowRequiredLabelStar){return false;}
@@ -19708,10 +18953,7 @@ function findRequiredAndStarIt(parentEle){
 		 })
 	 }
 }
-/**
- * 单个Input设置为isRequired
- * @param input
- * @returns
+/** 单个Input设置为isRequired
  */
 function requiredAndStarIt(input){
 	var pgroup,mlabels,mlabel,inputp,prevL;
@@ -19776,10 +19018,7 @@ function requiredAndStarIt(input){
 		}
 	}
 }
-/**
- * 单个Input 去掉isRequired
- * @param input
- * @returns
+/** 单个Input 去掉isRequired
  */
 function removeRequiredAndStar(input){
 	var pgroup,mlabels,mlabel,inputp,prevL;
@@ -19845,10 +19084,7 @@ function removeRequiredAndStar(input){
 	 }
 }
 
-/**
- * 刷新当前ele所在的ajaxPortal
- * @param ele
- * @returns
+/** 刷新当前ele所在的ajaxPortal
  */
 function refreshCurrentAjaxPortal(ele){
 	var eleObj=getRealJqueryObject(ele);
@@ -19876,11 +19112,7 @@ function showReloginDialog(showMsg,handler){
 		}
 	}
 }
-/**
- * 表单重置
- * @param formEle
- * @param confirm
- * @returns
+/** 表单重置
  */
 function formReset(formEle,confirm){
 	var exe=function(){
@@ -19901,7 +19133,7 @@ function formReset(formEle,confirm){
 	
 }
 
-//dom resize
+// dom resize
 ;(function($, h, c) {
 	var a = $([]), e = $.resize = $.extend($.resize, {}), i, k = "setTimeout", j = "resize", d = j
 			+ "-special-event", b = "delay", f = "throttleWindow";
@@ -19977,9 +19209,7 @@ function hideMsgCenterRedDot(){
 		msgCenterRedDot.hide();
 	}
 }
-/**
- * 读取是否存在未读消息中心数据 包含sysNotice todo privateMessage
- * @returns
+/** 读取是否存在未读消息中心数据 包含sysNotice todo privateMessage
  */
 function readUserMsgCenterUnreadInfo(callback){
 	Ajax.get("admin/msgcenter/unreadInfo",function(res){
@@ -19993,13 +19223,11 @@ function readUserMsgCenterUnreadInfo(callback){
 		}
 	});
 }
-/**
- * 初始化执行 用户消息中心读取
- * @returns
+/** 初始化执行 用户消息中心读取
  */
 function initReadUserMsgCenterUnreadInfo(){
 	if(isOk(msgCenterRedDot)){
-		//有这个组件才执行
+		// 有这个组件才执行
 		readUserMsgCenterUnreadInfo(function(){
 			setInterval(readUserMsgCenterUnreadInfo,30000);
 		});
@@ -20025,7 +19253,7 @@ function jboltTableGetHiprintUrl(btnEle,dataUrl,isSingleLine){
 			url=url+checkResult;
 		}
 	}
-	//处理URL 和关联的参数元素值
+	// 处理URL 和关联的参数元素值
 	url=actionUrl(url);
 	url=processEleUrlByLinkOtherParamEle(btn,url);
 	return url;
@@ -20037,7 +19265,6 @@ function jboltTableGetHiprintUrl(btnEle,dataUrl,isSingleLine){
  * @param dataUrl           json数据的url接口地址
  * @param isSingleLine      限制是否只能表格单条选择打印 默认支持多条
  * @param fileName          导出PDF文件名
- * @returns
  */
 function jboltTableHiprintToPdf(btnEle,tplSn,dataUrl,isSingleLine,fileName){
 	var url = jboltTableGetHiprintUrl(btnEle,dataUrl,isSingleLine);
@@ -20048,12 +19275,11 @@ function jboltTableHiprintToPdf(btnEle,tplSn,dataUrl,isSingleLine,fileName){
 	}
 }
 /**
- * JBoltTable表格打印选中的数据 
+ * JBoltTable表格打印选中的数据
  * @param btnEle            点击的按钮
  * @param tplSn             hiprint 模板sn编号
  * @param dataUrl           json数据的url接口地址
  * @param isSingleLine      限制是否只能表格单条选择打印 默认支持多条
- * @returns
  */
 function jboltTableHiprintWebPrint(btnEle,tplSn,dataUrl,isSingleLine){
 	var url = jboltTableGetHiprintUrl(btnEle,dataUrl,isSingleLine);
@@ -20065,18 +19291,16 @@ function jboltTableHiprintWebPrint(btnEle,tplSn,dataUrl,isSingleLine){
 }
 /**
  * 执行web预览打印
- * @param tplSn
  * @param type 类型 url or json
  * @param printData 可以是一个URL接口地址 也可以是json
  * @param directPrint 直接打印 不显示预览
- * @returns
  */
 function jboltHiprintWebPrint(tplSn,type,printData,directPrint){
 	if(!tplSn){
 		LayerMsgBox.alert("请指定正确的模板SN编号",2);
 		return;
 	}
-	//如果没设置printData 或者json空 报错
+	// 如果没设置printData 或者json空 报错
 	if(!printData){
 		LayerMsgBox.alert("请填写JSON数据",2);
 		return;
@@ -20119,13 +19343,7 @@ function jboltHiprintWebPrint(tplSn,type,printData,directPrint){
 	});
 }
 
-/**
- * 执行web页面显示渲染
- * @param ele
- * @param tplSn
- * @param type
- * @param printData
- * @returns
+/** 执行web页面显示渲染
  */
 function jboltHiprintWebRender(ele,tplSn,type,printData){
 	var renderBox=getRealJqueryObject(ele);
@@ -20137,7 +19355,7 @@ function jboltHiprintWebRender(ele,tplSn,type,printData){
 		LayerMsgBox.alert("请指定正确的模板SN编号",2);
 		return;
 	}
-	//如果没设置printData 或者json空 报错
+	// 如果没设置printData 或者json空 报错
 	if(!printData){
 		LayerMsgBox.alert("请填写JSON数据",2);
 		return;
@@ -20185,9 +19403,7 @@ function jboltHiprintWebRender(ele,tplSn,type,printData){
 
 /**
  * 使用渲染区域html打印
- * @param ele
  * @param directPrint 是否直接打印 不显示预览
- * @returns
  */
 function jboltHiprintWebPrintByHtml(ele,directPrint){
 	var renderBox=getRealJqueryObject(ele);
@@ -20214,11 +19430,7 @@ function jboltHiprintWebPrintByHtml(ele,directPrint){
 	}
 	
 }
-/**
- * 使用渲染区域html导出pdf
- * @param ele
- * @param fileName
- * @returns
+/** 使用渲染区域html导出pdf
  */
 function jboltHiprintToPdfByHtml(ele,fileName){
 	var renderBox=getRealJqueryObject(ele);
@@ -20242,20 +19454,14 @@ function jboltHiprintToPdfByHtml(ele,fileName){
 	}
 	
 }
-/**
- * 执行导出PDF
- * @param tplSn
- * @param type
- * @param printData
- * @param fileName
- * @returns
+/** 执行导出PDF
  */
 function jboltHiprintToPdf(tplSn,type,printData,fileName){
 	if(!tplSn){
 		LayerMsgBox.alert("请指定正确的模板SN编号",2);
 		return;
 	}
-	//如果没设置printData 或者json空 报错
+	// 如果没设置printData 或者json空 报错
 	if(!printData){
 		LayerMsgBox.alert("请填写JSON数据",2);
 		return;
@@ -20291,12 +19497,7 @@ function jboltHiprintToPdf(tplSn,type,printData,fileName){
 	});
 	 
 }
-/**
- * 自由拖动
- * @param trigger
- * @param box
- * @param parent
- * @returns
+/** 自由拖动
  */
 function freelyDragging(trigger,box,parent){
 	trigger.on("mousedown",function(e){

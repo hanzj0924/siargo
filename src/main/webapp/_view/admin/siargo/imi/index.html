@@ -1,8 +1,8 @@
 #@jboltLayout() #define main() #set(pageId=RandomUtil.random(6))
 <div class="jbolt_page" data-key="#(pmkey)">
-	<div class="jbolt_page_content">
-		<!-- JBoltTable的数据模板定义-->
-		<textarea class="jb_tpl_box" id="imageRowtpl_#(pageId)">
+    <div class="jbolt_page_content">
+
+        <textarea class="jb_tpl_box" id="imageRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
@@ -18,104 +18,104 @@
 </tr>
 {@/each}
 </textarea>
-		<!-- 工具条 toolbar -->
-		<div class="jbolt_table_toolbar" id="image_toolbar_#(pageId)">
+        <!-- 工具条 toolbar -->
+        <div class="jbolt_table_toolbar" id="image_toolbar_#(pageId)">
 
-			<div class="row">
-				<div class="col-sm-4 text-left">
-					<div class="btn-group" role="group" aria-label="btn-group">
-						<button data-openpage="dialog" data-area="1100,560"
-							data-handler="jboltTablePageToFirst" data-title="上传到货单"
-							data-url="admin/siargo/imi/add"
-							class="btn btn-outline-primary btn-sm">
-							<i class="fa fa-plus"></i> 新增
-						</button>
-						<button data-openpage="dialog" data-area="1100,900"
-							data-handler="refreshJBoltTable" data-title="修改到货单信息"
-							data-check-handler="jboltTableGetCheckedId"
-							data-url="admin/siargo/imi/edit/"
-							class="btn btn-outline-info btn-sm">
-							<i class="fa fa-edit"></i> 修改
-						</button>
-						<button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
-							data-check-handler="jboltTableGetCheckedIds"
-							data-url="admin/siargo/imi/deleteByIds?ids="
-							data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm">
-							<i class="fa fa-trash"></i> 删除
-						</button>
-						<a href="admin/siargo/supplier" data-openpage
-							class="btn btn-outline-success btn-sm"> <i class="fa fa-cog"></i>
-							管理供应商
-						</a>
-						<button onclick="jboltTableRefresh(this)"
-							class="btn btn-outline-secondary btn-sm">
-							<i class="fa fa-refresh"></i> 刷新
-						</button>
-					</div>
-				</div>
-				<div class="col-sm-8 text-center">
-					<form class="form-inline" id="imageForm_#(pageId)"
-						onsubmit="return false;" method="post">
-						<input type="text" data-with-clearbtn="true" class="form-control"
-							data-date data-type="month" placeholder="选择年月" data-width="100px"
-							name="yearMonth" data-max="0" value="#(yearMonth??)"> <input
-							type="text" autocomplete="off" class="form-control"
-							data-with-clearbtn="true" placeholder="输入到单据号搜索" name="keywords"
-							value="" /> <select class="form-control" data-autoload
-							data-url="admin/siargo/supplier/getSupplierName"
-							data-refresh="true" name="supplierId" data-value-attr="id"
-							data-text="=请选择搜索=" data-with-clearbtn="true" data-width="400px"
-							data-select-type="select2">
-						</select>
+            <div class="row">
+                <div class="col-sm-4 text-left">
+                    <div class="btn-group" role="group" aria-label="btn-group">
+                        <button data-openpage="dialog" data-area="1100,560"
+                                data-handler="jboltTablePageToFirst" data-title="上传到货单"
+                                data-url="admin/siargo/imi/add"
+                                class="btn btn-outline-primary btn-sm">
+                            <i class="fa fa-plus"></i> 新增
+                        </button>
+                        <button data-openpage="dialog" data-area="1100,900"
+                                data-handler="refreshJBoltTable" data-title="修改到货单信息"
+                                data-check-handler="jboltTableGetCheckedId"
+                                data-url="admin/siargo/imi/edit/"
+                                class="btn btn-outline-info btn-sm">
+                            <i class="fa fa-edit"></i> 修改
+                        </button>
+                        <button data-ajaxbtn data-handler="removeJBoltTableCheckedTr"
+                                data-check-handler="jboltTableGetCheckedIds"
+                                data-url="admin/siargo/imi/deleteByIds?ids="
+                                data-confirm="确定删除选中数据？" class="btn btn-outline-danger btn-sm">
+                            <i class="fa fa-trash"></i> 删除
+                        </button>
+                        <a href="admin/siargo/supplier" data-openpage
+                           class="btn btn-outline-success btn-sm"> <i class="fa fa-cog"></i>
+                            管理供应商
+                        </a>
+                        <button onclick="jboltTableRefresh(this)"
+                                class="btn btn-outline-secondary btn-sm">
+                            <i class="fa fa-refresh"></i> 刷新
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm-8 text-center">
+                    <form class="form-inline" id="imageForm_#(pageId)"
+                          onsubmit="return false;" method="post">
+                        <input type="text" data-with-clearbtn="true" class="form-control"
+                               data-date data-type="month" placeholder="选择年月" data-width="100px"
+                               name="yearMonth" data-max="0" value="#(yearMonth??)"> <input
+                            type="text" autocomplete="off" class="form-control"
+                            data-with-clearbtn="true" placeholder="输入到单据号搜索" name="keywords"
+                            value=""/> <select class="form-control" data-autoload
+                                               data-url="admin/siargo/supplier/getSupplierName"
+                                               data-refresh="true" name="supplierId" data-value-attr="id"
+                                               data-text="=请选择搜索=" data-with-clearbtn="true" data-width="400px"
+                                               data-select-type="select2">
+                    </select>
 
-						<button type="submit" class="btn btn-outline-secondary">
-							<i class="fa fa-search"></i> 查询
-						</button>
-					</form>
-				</div>
-			</div>
-			<div class="btn-group" role="group" aria-label="btn-group"></div>
-		</div>
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="fa fa-search"></i> 查询
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="btn-group" role="group" aria-label="btn-group"></div>
+        </div>
 
-		<table class="jbolt_table jbolt_main_table table-center"
-			data-jbolttable data-height="fill" data-ajax="true"
-			data-url="admin/siargo/imi/datas" data-column-resize="true"
-			data-column-prepend="1:checkbox" data-pagesize="10" 
-			data-conditions-form="imageForm_#(pageId)"
-			data-rowtpl="imageRowtpl_#(pageId)" data-page="imagePage_#(pageId)"
-			data-toolbar="image_toolbar_#(pageId)" data-fixed-columns-left="1,2">
-			<thead class="fw-normal">
-				<tr>
-					<th data-width="60">序号</th>
-					<th data-width="150" data-column="storage_name">到货单号</th>
-					<th data-min-width="150" data-column="supplier_id">供应商</th>
-					<th data-width="150" data-column="file_path">图片</th>
-					<th data-width="250" data-column="description">描述</th>
-					<th data-width="150" data-column="uploader_id">上传</th>
-					<th data-width="150" data-column="update_id">更新</th>
-				</tr>
-			</thead>
-			<tbody>
-			</tbody>
-		</table>
-	</div>
+        <table class="jbolt_table jbolt_main_table table-center"
+               data-jbolttable data-height="fill" data-ajax="true"
+               data-url="admin/siargo/imi/datas" data-column-resize="true"
+               data-column-prepend="1:checkbox" data-pagesize="10"
+               data-conditions-form="imageForm_#(pageId)"
+               data-rowtpl="imageRowtpl_#(pageId)" data-page="imagePage_#(pageId)"
+               data-toolbar="image_toolbar_#(pageId)" data-fixed-columns-left="1,2">
+            <thead class="fw-normal">
+            <tr>
+                <th data-width="60">序号</th>
+                <th data-width="150" data-column="storage_name">到货单号</th>
+                <th data-min-width="150" data-column="supplier_id">供应商</th>
+                <th data-width="150" data-column="file_path">图片</th>
+                <th data-width="250" data-column="description">描述</th>
+                <th data-width="150" data-column="uploader_id">上传</th>
+                <th data-width="150" data-column="update_id">更新</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 </div>
 #end #define js()
 <script type="text/javascript">
-	function afterAJaxCallback(res) {
-		AjaxPortalUtil.refresh(portal);
-	}
+    function afterAJaxCallback(res) {
+        AjaxPortalUtil.refresh(portal);
+    }
 
-	//将原本的href属性替换为带有时间戳的URL，以避免缓存
-	function loadfile(element, originalPdfUrl) {
-		// 阻止默认行为（如果链接已有默认行为）
-		event.preventDefault ? event.preventDefault()
-				: (event.returnValue = false);
+    // 将原本的href属性替换为带有时间戳的URL，以避免缓存
+    function loadfile(element, originalPdfUrl) {
+        // 阻止默认行为（如果链接已有默认行为）
+        event.preventDefault ? event.preventDefault()
+            : (event.returnValue = false);
 
-		const timestamp = new Date().getTime();
-		const fileUrl = originalPdfUrl + '?t=' + timestamp;
+        const timestamp = new Date().getTime();
+        const fileUrl = originalPdfUrl + '?t=' + timestamp;
 
-		element.href = fileUrl;
-	}
+        element.href = fileUrl;
+    }
 </script>
 #end

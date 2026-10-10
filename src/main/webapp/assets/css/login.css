@@ -1,4 +1,4 @@
-/*************version 1.0.3**************/
+/** version 1.0.3 */
 @CHARSET "UTF-8";
 body,
 html {
@@ -397,7 +397,7 @@ min-width: 100%;
 min-height: 100%;
 height: auto;
 width: auto;
-/*加滤镜*/
+/* 加滤镜 */
 -webkit-filter: grayscale(20%);
 filter:grayscale(20%);
 z-index: -100;

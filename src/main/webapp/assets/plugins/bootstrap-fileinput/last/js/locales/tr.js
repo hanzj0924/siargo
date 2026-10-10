@@ -76,7 +76,7 @@
         msgAjaxError: '{operation} işlemi ile ilgili bir şeyler ters gitti. Lütfen daha sonra tekrar deneyiniz!',
         msgAjaxProgressError: '{operation} işlemi başarısız oldu.',
         msgDuplicateFile: 'Aynı "{size} KB" boyutundaki "{name}" dosyası daha önce seçilmiş. Yinelenen seçim atlanıyor.',
-        msgResumableUploadRetriesExceeded:  '<b>{max}</b> deneme sonrasında <b>{file}</b> dosyasının yükleme işlemi iptal edildi! Hata Detayları: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: '<b>{max}</b> deneme sonrasında <b>{file}</b> dosyasının yükleme işlemi iptal edildi! Hata Detayları: <pre>{error}</pre>',
         msgPendingTime: '{time} kaldı',
         msgCalculatingTime: 'kalan süre hesaplanıyor',
         ajaxOperations: {
@@ -97,7 +97,7 @@
             indicatorSuccessTitle: 'Yüklendi',
             indicatorErrorTitle: 'Yükleme Hatası',
             indicatorPausedTitle: 'Upload Paused',
-            indicatorLoadingTitle:  'Yükleniyor &hellip;'
+            indicatorLoadingTitle: 'Yükleniyor &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Önceki dosyayı göster',

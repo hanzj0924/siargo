@@ -15,17 +15,19 @@ import com.jfinal.kit.StrKit;
  */
 @UnProcessBoolean("form_default_value")
 @SuppressWarnings("serial")
-@TableBind(dataSource = "main" , table = "jb_code_gen_model_attr" , primaryKey = "id" , idGenMode = JBoltIDGenMode.SNOWFLAKE)
+@TableBind(dataSource = "main", table = "jb_code_gen_model_attr", primaryKey = "id", idGenMode =
+        JBoltIDGenMode.SNOWFLAKE)
 public class CodeGenModelAttr extends BaseCodeGenModelAttr<CodeGenModelAttr> {
     public String getJavaTypeName() {
         return JBoltConst.JAVA_TYPE_MAP.get(getJavaType());
     }
+
     public String getJavaTypeNameForGetPara() {
         String name = getJavaTypeName();
-        if("Integer".equals(name)){
+        if ("Integer".equals(name)) {
             return "Int";
         }
-        if("String".equals(name)){
+        if ("String".equals(name)) {
             return "";
         }
         return name;
@@ -34,46 +36,56 @@ public class CodeGenModelAttr extends BaseCodeGenModelAttr<CodeGenModelAttr> {
     public String getFormUITypeName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_form_ui_type", getFormUiType());
     }
+
     public String getFuzzyQueryTypeName() {
         String type = getFuzzyQueryType();
-        if(StrKit.isBlank(type)){
+        if (StrKit.isBlank(type)) {
             type = "default";
         }
         return JBoltDictionaryCache.me.getNameBySn("code_gen_condition_fuzzy_query_type", type);
     }
+
     public String getTranslateTypeName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_translate_type", getTranslateType());
     }
+
     public String getTranslateUseValueName() {
         String type = getTranslateType();
-        if(StrKit.notBlank(type)){
-            if("sys_dic_id".equals(type) || "sys_dic_sn".equals(type)){
+        if (StrKit.notBlank(type)) {
+            if ("sys_dic_id".equals(type) || "sys_dic_sn".equals(type)) {
                 return JBoltDictionaryTypeCache.me.getNameByKey(getTranslateUseValue());
             }
         }
         return getTranslateUseValue();
     }
+
     public String getSearchUITypeName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_condition_ui_type", getSearchUiType());
     }
+
     public String getTableUITypeName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_table_ui_type", getTableUiType());
     }
+
     public String getDataRuleName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_form_data_rule", getDataRule());
     }
+
     public String getDataRuleForSearchName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_form_data_rule", getDataRuleForSearch());
     }
+
     public String getFormDataTypeName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_data_type", getFormDataType());
     }
+
     public String getColFormatName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_table_col_format", getColFormat());
     }
+
     public String getFormDataValueName() {
         String dataType = getFormDataType();
-        if("sys_dictionary".equals(dataType)) {
+        if ("sys_dictionary".equals(dataType)) {
             return JBoltDictionaryTypeCache.me.getNameByKey(getFormDataValue());
         }
         return getFormDataValue();
@@ -82,9 +94,9 @@ public class CodeGenModelAttr extends BaseCodeGenModelAttr<CodeGenModelAttr> {
     public String getFormDefaultValueName() {
         String dataType = getFormDataType();
         String defaultValue = getFormDefaultValue();
-        if("sys_dictionary".equals(dataType) && StrKit.notBlank(defaultValue)) {
+        if ("sys_dictionary".equals(dataType) && StrKit.notBlank(defaultValue)) {
             String typeKey = getFormDataValue();
-            if(StrKit.isBlank(typeKey)){
+            if (StrKit.isBlank(typeKey)) {
                 return defaultValue;
             }
             return JBoltDictionaryCache.me.getNameBySn(typeKey, defaultValue);
@@ -96,9 +108,10 @@ public class CodeGenModelAttr extends BaseCodeGenModelAttr<CodeGenModelAttr> {
     public String getSearchDataTypeName() {
         return JBoltDictionaryCache.me.getNameBySn("code_gen_data_type", getSearchDataType());
     }
+
     public String getSearchDataValueName() {
         String dataType = getSearchDataType();
-        if("sys_dictionary".equals(dataType)) {
+        if ("sys_dictionary".equals(dataType)) {
             return JBoltDictionaryTypeCache.me.getNameByKey(getSearchDataValue());
         }
         return getSearchDataValue();
@@ -107,66 +120,70 @@ public class CodeGenModelAttr extends BaseCodeGenModelAttr<CodeGenModelAttr> {
     public String getSearchDefaultValueName() {
         String dataType = getSearchDataType();
         String defaultValue = getSearchDefaultValue();
-        if("sys_dictionary".equals(dataType) && StrKit.notBlank(defaultValue)) {
+        if ("sys_dictionary".equals(dataType) && StrKit.notBlank(defaultValue)) {
             return JBoltDictionaryCache.me.getNameBySn(getSearchDataValue(), defaultValue);
         }
         return defaultValue;
     }
 
-    public String getSearchUIDateRangeType(){
-        String type =  getSearchUiType();
-        if(StrKit.notBlank(type)){
-            return "JBoltDateRange.TYPE_"+type.substring(type.lastIndexOf("_")+1).toUpperCase();
+    public String getSearchUIDateRangeType() {
+        String type = getSearchUiType();
+        if (StrKit.notBlank(type)) {
+            return "JBoltDateRange.TYPE_" + type.substring(type.lastIndexOf("_") + 1).toUpperCase();
         }
         return "JBoltDateRange.TYPE_DATE";
     }
 
     /**
      * 获取翻译字段翻译后的属性名
+     *
      * @return
      */
-    public String getTranslateAttrName(){
+    public String getTranslateAttrName() {
         String translateColName = getTranslateColName();
-        if(StrKit.isBlank(translateColName)){return null;}
-        if(translateColName.contains("_")){
-            return StrKit.toCamelCase(translateColName,true);
+        if (StrKit.isBlank(translateColName)) {
+            return null;
+        }
+        if (translateColName.contains("_")) {
+            return StrKit.toCamelCase(translateColName, true);
         }
         return translateColName;
     }
 
-    public String getTranslateCacheMethod(){
+    public String getTranslateCacheMethod() {
         String type = getTranslateType();
-        if(StrKit.isBlank(type) || !type.equals("cache")){
+        if (StrKit.isBlank(type) || !type.equals("cache")) {
             return null;
         }
         String uv = getTranslateUseValue();
-        if(StrKit.isBlank(uv)){
+        if (StrKit.isBlank(uv)) {
             return null;
         }
-        if(uv.contains(":")){
+        if (uv.contains(":")) {
             String[] arr = uv.split(":");
-            if(arr[0].endsWith(".me")){
-                uv = arr[0]+"."+arr[1];
-            }else{
-                uv = arr[0]+".me."+arr[1];
+            if (arr[0].endsWith(".me")) {
+                uv = arr[0] + "." + arr[1];
+            }
+            else {
+                uv = arr[0] + ".me." + arr[1];
             }
         }
-        if(StrKit.notBlank(uv) && uv.startsWith("cn.jbolt.core.cache.")){
-            uv = uv.replace("cn.jbolt.core.cache.","");
+        if (StrKit.notBlank(uv) && uv.startsWith("cn.jbolt.core.cache.")) {
+            uv = uv.replace("cn.jbolt.core.cache.", "");
         }
         return uv;
     }
 
-    public String getTranslateMethod(){
+    public String getTranslateMethod() {
         String type = getTranslateType();
-        if(StrKit.isBlank(type) || (!type.equals("static_method") && !type.equals("service_method"))){
+        if (StrKit.isBlank(type) || (!type.equals("static_method") && !type.equals("service_method"))) {
             return null;
         }
         String uv = getTranslateUseValue();
-        if(StrKit.isBlank(uv)){
+        if (StrKit.isBlank(uv)) {
             return null;
         }
-        uv = uv.replace(":",".");
+        uv = uv.replace(":", ".");
         return uv;
     }
 

@@ -37,13 +37,7 @@ import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.Product;
 import cn.jbolt.siargo.model.Qareport;
 
-/**
- * 检验报告单管理 Controller
- *
- * @ClassName: QareportAdminController
- * @author: hanzj
- * @date: 2025-12-02 14:14
- */
+/** 检验报告单管理 Controller */
 @CheckPermission(PermissionKey.SIARGO)
 @UnCheckIfSystemAdmin
 @Path(value = "/admin/siargo/qarep", viewPath = "/_view/admin/siargo/qarep")
@@ -52,41 +46,27 @@ public class QareportAdminController extends JBoltBaseController {
 
     private static final Log LOG = Log.getLog(QareportAdminController.class);
 
-    /**
-     * 检验报告单服务
-     */
+    /** 检验报告单服务 */
     @Inject
     private QareportService service;
-    /**
-     * PDF生成服务
-     */
+    /** PDF生成服务 */
     @Inject
     private PDFService pdfservice;
-    /**
-     * Excel解析服务
-     */
+    /** Excel解析服务 */
     @Inject
     private ExcelService excelservice;
-    /**
-     * 产品服务
-     */
+
     @Inject
     private ProductService proservice;
-    /**
-     * 客户服务
-     */
+
     @Inject
     private CustomerService custservice;
     @Inject
     private QarepFlowRangeService flowRangeService;
-    /**
-     * 角色服务
-     */
+
     @Inject
     private RoleService roleService;
-    /**
-     * 产品驳回历史服务
-     */
+    /** 产品驳回历史服务 */
     @Inject
     private ProductRejectLogService productRejectLogService;
 
@@ -97,7 +77,9 @@ public class QareportAdminController extends JBoltBaseController {
      * @return 去重后的正整数ID列表；空值、空项或格式非法时返回null
      */
     private List<Long> parseIds(String idsJson) {
-        if (StrKit.isBlank(idsJson)) return null;
+        if (StrKit.isBlank(idsJson)) {
+            return null;
+        }
         try {
             List<Long> ids = Arrays.stream(idsJson.split(",", -1)).map(String::trim)
                     .map(Long::parseLong).distinct().collect(Collectors.toList());
@@ -107,9 +89,7 @@ public class QareportAdminController extends JBoltBaseController {
         }
     }
 
-    /**
-     * 首页
-     */
+    /** 首页 */
     public void index() {
         Long userId = JBoltUserKit.getUserId();
 
@@ -137,22 +117,12 @@ public class QareportAdminController extends JBoltBaseController {
         renderJsonData(service.getFlowCounts());
     }
 
-    /**
-     * 处理Excel导入
-     * URL: /admin/siargo/qarep/importExcel
-     * <p>Excel导入流程：</p>
-     * <ol>
-     *   <li>接收上传的Excel文件</li>
-     *   <li>验证文件格式为xls或xlsx</li>
-     *   <li>读取Excel内容并解析为数据列表</li>
-     *   <li>提取订单号、型号、编号等关键信息</li>
-     *   <li>返回处理结果供前端表单使用</li>
-     * </ol>
-     */
+    /** 解析 xls/xlsx，返回报告单预填数据及独立产品卡片，不写库。 */
     public void importExcel() {
         try {
             // 获取上传的文件
-            UploadFile uploadFile = getFile("file", cn.jbolt.common.storage.SiargoStorage.forReportResources().uploadDirectory("imports", java.util.UUID.randomUUID().toString()));
+            UploadFile uploadFile = getFile("file", cn.jbolt.common.storage.SiargoStorage.forReportResources()
+                    .uploadDirectory("imports", java.util.UUID.randomUUID().toString()));
             if (uploadFile == null) {
                 renderJsonFail("请上传excel文件");
                 return;
@@ -230,7 +200,7 @@ public class QareportAdminController extends JBoltBaseController {
         Date startTime = null;
         Date endTime = null;
 
-        // ========== 解析日期范围参数 ==========
+        // 解析日期范围参数
         if (isOk(getPara("dateRange"))) {
             // 日期范围格式：开始日期~结束日期
             String[] dates = getPara("dateRange").split("~");
@@ -251,14 +221,15 @@ public class QareportAdminController extends JBoltBaseController {
         int prodType = getInt("prodType") == null ? 0 : getInt("prodType");
         int insp = getInt("insp") == null ? 0 : getInt("insp");
 
-        renderJsonData(service.paginateAdminDatas(getPageNumber(), getPageSize(), getKeywords(), prodType, insp, startTime, endTime));
+        renderJsonData(
+                service.paginateAdminDatas(getPageNumber(), getPageSize(), getKeywords(), prodType, insp, startTime,
+                        endTime));
 
     }
 
-    /**
-     * 新增
-     */
+    /** 新增 */
     public void add() {
+        set("largeMeterSeriesIds", String.join(",", service.findLargeMeterSeriesIds()));
         render("add.html");
     }
 
@@ -273,9 +244,7 @@ public class QareportAdminController extends JBoltBaseController {
         renderJson(flowRangeService.saveFlowRange(getPara("name"), getPara("sn")));
     }
 
-    /**
-     * 编辑
-     */
+    /** 编辑 */
     public void edit() {
         Qareport qareport = service.qareportFindByProId(getLong(0));
         if (qareport == null) {
@@ -331,19 +300,7 @@ public class QareportAdminController extends JBoltBaseController {
         render("details.html");
     }
 
-    /**
-     * 批量检验批准操作
-     * URL: /admin/siargo/qarep/batchInspection
-     * <p>根据检验进度更新不同级别的批准信息：</p>
-     * <ul>
-     *   <li>insp=2：精度检验批准</li>
-     *   <li>insp=6：成品检漏检验批准</li>
-     *   <li>insp=3：外观检验批准</li>
-     *   <li>insp=4：包装检验批准</li>
-     *   <li>insp=5：批准放行</li>
-     * </ul>
-     * <p>服务端会按目标环节校验当前用户角色（211~215，超管豁免），并使用条件更新防并发</p>
-     */
+    /** 按审批操作码（2~6）批准产品；主事务成功后清缓存、清理旧 PDF 并通知下一环节。 */
     public void batchInspection() {
         Integer insp = getParaToInt("insp");
         String idsJson = getPara("ids");
@@ -368,7 +325,7 @@ public class QareportAdminController extends JBoltBaseController {
             renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "操作失败");
             return;
         }
-        // === afterCommit: 缓存清理 + 异步通知 ===
+        // 事务提交后清缓存、清理旧 PDF 并同步通知下一环节
         service.clearFlowCountsCache();
         service.cleanupInvalidatedPdfs(retHolder[0]);
         service.notifyNextStageUsers(insp);
@@ -376,29 +333,20 @@ public class QareportAdminController extends JBoltBaseController {
         if (StrKit.notBlank(msg)) {
             // 部分成功：把未成功的单号信息反馈给前端
             renderJsonSuccess(msg);
-        } else {
+        }
+        else {
             renderJsonSuccess();
         }
     }
 
-    /**
-     * 审批工作台页面（JBoltLayer抽屉iframe加载）
-     * URL: /admin/siargo/qarep/approval
-     * <p>根据目标检验阶段和选中产品ID列表加载待审批产品数据：</p>
-     * <ul>
-     *   <li>insp=2：精度检验批准</li>
-     *   <li>insp=6：成品检漏检验批准</li>
-     *   <li>insp=3：外观检验批准</li>
-     *   <li>insp=4：包装检验批准</li>
-     *   <li>insp=5：批准放行</li>
-     * </ul>
-     */
+    /** 按审批操作码（2~6）和选中产品加载审批工作台。 */
     public void approval() {
         Integer insp = getParaToInt("insp");
         String idsJson = getPara("ids");
 
-        // 参数校验：目标阶段必须在2~5范围内，且产品ID列表不能为空
-        if (insp == null || insp < QarepConst.INSP_APPROVE_MIN || insp > QarepConst.INSP_APPROVE_MAX || StrKit.isBlank(idsJson)) {
+        // 参数校验：审批操作码必须在2~6范围内，且产品ID列表不能为空
+        if (insp == null || insp < QarepConst.INSP_APPROVE_MIN || insp > QarepConst.INSP_APPROVE_MAX ||
+                StrKit.isBlank(idsJson)) {
             renderFail("参数错误");
             return;
         }
@@ -420,7 +368,8 @@ public class QareportAdminController extends JBoltBaseController {
                 boolean hasLt = ltStatus != null && ltStatus == QarepConst.LT_STATUS_YES;
                 if (hasLt) {
                     anyLt = true;
-                } else {
+                }
+                else {
                     allLt = false;
                 }
             }
@@ -469,13 +418,14 @@ public class QareportAdminController extends JBoltBaseController {
             renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "操作失败");
             return;
         }
-        // === afterCommit: 缓存清理 ===
+        // afterCommit: 缓存清理
         service.clearFlowCountsCache();
         service.cleanupInvalidatedPdfs(retHolder[0]);
         String msg = retHolder[0].getStr("msg");
         if (StrKit.notBlank(msg)) {
             renderJsonSuccess(msg);
-        } else {
+        }
+        else {
             renderJsonSuccess();
         }
     }
@@ -534,9 +484,7 @@ public class QareportAdminController extends JBoltBaseController {
         renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("更新失败"));
     }
 
-    /**
-     * 删除（软删除到回收站）
-     */
+    /** 删除（软删除到回收站） */
     public void deleteByIds() {
         String idsJson = getPara("ids");
         if (StrKit.isBlank(idsJson)) {
@@ -565,7 +513,7 @@ public class QareportAdminController extends JBoltBaseController {
             renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
             return;
         }
-        // === afterCommit: 缓存清理 ===
+        // afterCommit: 缓存清理
         service.clearFlowCountsCache();
         renderJsonSuccess();
     }
@@ -605,19 +553,14 @@ public class QareportAdminController extends JBoltBaseController {
             renderFail("数据不存在");
             return;
         }
-        // === afterCommit: 缓存清理 ===
+        // afterCommit: 缓存清理
         service.clearFlowCountsCache();
         renderJsonSuccess();
     }
 
     /**
-     * 永久删除报告单（物理删除）
-     * URL: /admin/siargo/qarep/permanentDelete
-     * <p>afterCommit 模式：物理文件删除不可回滚，必须在事务提交后执行——</p>
-     * <ol>
-     *   <li>Db.tx() 锁定并校验回收站产品，读取最终PDF地址，再级联删除数据库记录</li>
-     *   <li>事务提交成功后检查文件引用并清理PDF，同时清理缓存</li>
-     * </ol>
+     * 永久删除回收站产品，并清理已无产品的报告单。
+     * Db.tx 内锁定校验并级联删除记录；提交后检查引用、清理 PDF 和缓存。
      */
     public void permanentDelete() {
         String idsJson = getPara("ids");
@@ -640,7 +583,7 @@ public class QareportAdminController extends JBoltBaseController {
             renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
             return;
         }
-        // === afterCommit: 缓存清理 + 物理文件删除 ===
+        // afterCommit: 缓存清理 + 物理文件删除
         service.clearFlowCountsCache();
         service.cleanupInvalidatedPdfs(retHolder[0]);
         renderJsonSuccess();

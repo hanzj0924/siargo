@@ -1,8 +1,9 @@
 .jcalculator_wrap {
     position: relative;
 }
-.jbolt_table td .jcalculator_wrap{
-	height: 100%;
+
+.jbolt_table td .jcalculator_wrap {
+    height: 100%;
 }
 
 .jcalculator {
@@ -10,19 +11,21 @@
     width: 201px;
     display: block;
     position: absolute;
-    left:0;
+    left: 0;
     text-align: center;
     z-index: 1200;
-	border-right: 1px solid #000000;
+    border-right: 1px solid #000000;
     border-top: 1px solid #000000;
-    
+
 }
-.jcalculator.d-none{
+
+.jcalculator.d-none {
     display: none;
 }
-.jbolt_table td .jcalculator{
-	 position: fixed!important;
-	 display: block;
+
+.jbolt_table td .jcalculator {
+    position: fixed !important;
+    display: block;
 }
 
 .jcalculator span {
@@ -35,28 +38,31 @@
     line-height: 50px;
     font-size: 16px;
     box-sizing: border-box;
-      border-left: 1px solid #000000;
+    border-left: 1px solid #000000;
     border-bottom: 1px solid #000000;
     -webkit-touch-callout: none;
-	-webkit-user-select:none;
-	-khtml-user-select: none;
-   -moz-user-select:none;
-   -ms-user-select:none;
-   user-select:none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
-.jcalculator span:hover, 
+
+.jcalculator span:hover,
 .jcalculator span:active {
-    font-size:20px;
+    font-size: 20px;
 }
 
 .jcalculator .op {
     background: #191919;
     font-size: 20px;
 }
+
 .jcalculator .close {
     width: 100px;
     height: 50px;
 }
+
 .jcalculator .eq {
     width: 100px;
     height: 50px;
@@ -151,7 +157,7 @@
 }
 
 .jcalculator.material .eq {
-     background: #e30028;
+    background: #e30028;
     color: #ffffff;
     border-bottom: 0;
     box-shadow: none;

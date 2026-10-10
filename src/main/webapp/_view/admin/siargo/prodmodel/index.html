@@ -13,8 +13,12 @@
             </div>
             <div class="col">
                 <form class="form-inline" id="prodModelForm_#(pageId)" onsubmit="return false;" method="post">
-                    <input type="text" autocomplete="off" class="form-control" placeholder="输入系列/分支/描述关键字搜索"
-                           name="keywords" value=""/>
+                    <input type="text"
+                           autocomplete="off"
+                           class="form-control"
+                           placeholder="输入系列/分支/描述关键字搜索"
+                           name="keywords"
+                           value=""/>
                     <button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i> 查询</button>
                 </form>
             </div>
@@ -23,7 +27,7 @@
         </div>
     </div>
     <div class="jbolt_page_content">
-        <!-- JBoltTable的数据模板定义-->
+
         <textarea class="jb_tpl_box" id="prodModelRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.id}" >
@@ -43,8 +47,13 @@
         <!-- 工具条 toolbar -->
         <div class="jbolt_table_toolbar" id="prodModel_toolbar_#(pageId)">
             <div class="btn-group" role="group" aria-label="btn-group">
-                <button data-dialogbtn data-area="94%,94%" data-success-handler="SiargoProdModelDialogs.fit" data-title="新增产品型号" data-handler="refreshJBoltTable"
-                        data-url="admin/siargo/prodmodel/add" class="btn btn-outline-primary btn-sm"><i
+                <button data-dialogbtn
+                        data-area="94%,94%"
+                        data-success-handler="SiargoProdModelDialogs.fit"
+                        data-title="新增产品型号"
+                        data-handler="refreshJBoltTable"
+                        data-url="admin/siargo/prodmodel/add"
+                        class="btn btn-outline-primary btn-sm"><i
                         class="fa fa-plus"></i> 新增
                 </button>
                 <button onclick="SiargoProdModel.edit(this)" class="btn btn-outline-info btn-sm"><i

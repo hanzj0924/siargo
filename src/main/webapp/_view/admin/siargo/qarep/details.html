@@ -9,8 +9,11 @@
 <div class="insp-step insp-step-rejected" role="listitem" tooltip data-html="false"
      data-title="驳回原因：#escape(log.reject_des??)">
     <span class="insp-step-name">#escape(log.reject_insp_name??)</span>
-    <button type="button" class="insp-step-badge insp-badge-rejected" data-dialogbtn data-area="560,520" data-btn="close"
-            data-title="驳回历史" data-url="admin/siargo/qarep/rejectHistory?productId=#(p.id)" aria-label="查看全部驳回历史">已驳回</button>
+    <button type="button" class="insp-step-badge insp-badge-rejected" data-dialogbtn data-area="560,520"
+            data-btn="close"
+            data-title="驳回历史" data-url="admin/siargo/qarep/rejectHistory?productId=#(p.id)"
+            aria-label="查看全部驳回历史">已驳回
+    </button>
     <span class="insp-step-time">#escape(log.reject_time??)</span>
 </div>
 #end
@@ -26,11 +29,11 @@
 #end
 #if(hasStageReject)
 <div class="insp-reject-flow" role="list" aria-label="对应环节的驳回记录，按时间先后排列">
-#for(log : p.reject_logs)
-#if(log.reject_insp == stage || (otherStage != null && log.reject_insp == otherStage))
-#@rejectStepNode(p, log)
-#end
-#end
+    #for(log : p.reject_logs)
+    #if(log.reject_insp == stage || (otherStage != null && log.reject_insp == otherStage))
+    #@rejectStepNode(p, log)
+    #end
+    #end
 </div>
 #end
 #end
@@ -55,22 +58,33 @@
                 <h1>报告信息</h1>
                 #if(qapro.rep_type == 1 || qapro.rep_type == 2)
                 <span class="dt-report-type" role="group" aria-label="报告类型：#(qapro.retype_name ??)">
-                    <span class="dt-report-type-option"><span aria-hidden="true">#if(qapro.rep_type == 1)☑#else☐#end</span>产成品</span>
-                    <span class="dt-report-type-option"><span aria-hidden="true">#if(qapro.rep_type == 2)☑#else☐#end</span>退修品</span>
+                    <span class="dt-report-type-option"><span
+                            aria-hidden="true">#if(qapro.rep_type == 1)☑#else☐#end</span>产成品</span>
+                    <span class="dt-report-type-option"><span
+                            aria-hidden="true">#if(qapro.rep_type == 2)☑#else☐#end</span>退修品</span>
                 </span>
                 #end
             </div>
             <table class="dt-data-table" aria-label="报告单基本信息">
-                <colgroup><col class="dt-label-col"><col><col class="dt-label-col"><col></colgroup>
+                <colgroup>
+                    <col class="dt-label-col">
+                    <col>
+                    <col class="dt-label-col">
+                    <col>
+                </colgroup>
                 <tbody>
-                    <tr>
-                        <th scope="row">报告单号</th><td class="dt-value dt-report-number">#(qapro.formnum ??)</td>
-                        <th scope="row">订单号</th><td class="dt-value dt-value-code">#(qapro.order_id ??)</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">客户名称</th><td class="dt-value">#(qapro.sc_name ??)</td>
-                        <th scope="row">版号</th><td class="dt-value">#(qapro.pdfver_name ??)</td>
-                    </tr>
+                <tr>
+                    <th scope="row">报告单号</th>
+                    <td class="dt-value dt-report-number">#(qapro.formnum ??)</td>
+                    <th scope="row">订单号</th>
+                    <td class="dt-value dt-value-code">#(qapro.order_id ??)</td>
+                </tr>
+                <tr>
+                    <th scope="row">客户名称</th>
+                    <td class="dt-value">#(qapro.sc_name ??)</td>
+                    <th scope="row">版号</th>
+                    <td class="dt-value">#(qapro.pdfver_name ??)</td>
+                </tr>
                 </tbody>
             </table>
         </section>
@@ -82,31 +96,52 @@
                 <div class="dt-product-head">
                     <div class="dt-product-heading">
                         <span class="dt-product-index">#if(for.index < 9)0#end#(for.index + 1)</span>
-                        <span class="dt-series-label">系列</span><h3 class="dt-product-series">#(p.model_series?? "未关联")</h3>
+                        <span class="dt-series-label">系列</span>
+                        <h3 class="dt-product-series">#(p.model_series?? "未关联")</h3>
                     </div>
-                    <span class="dt-status" data-color="#if(p.insp == 1)acc#else if(p.insp == 6)leak#else if(p.insp == 2)vis#else if(p.insp == 3)pack#else if(p.insp == 4)appr#else if(p.insp == 5)done#end">#(p.insp_name ??)</span>
+                    <span class="dt-status"
+                          data-color="#if(p.insp == 1)acc#else if(p.insp == 6)leak#else if(p.insp == 2)vis#else if(p.insp == 3)pack#else if(p.insp == 4)appr#else if(p.insp == 5)done#end">#(p.insp_name ??)</span>
                 </div>
                 <section class="dt-product-section" aria-label="产品信息">
                     <table class="dt-data-table dt-product-table" aria-label="产品基本信息">
-                        <colgroup><col class="dt-label-col"><col><col class="dt-label-col"><col></colgroup>
+                        <colgroup>
+                            <col class="dt-label-col">
+                            <col>
+                            <col class="dt-label-col">
+                            <col>
+                        </colgroup>
                         <tbody>
-                            <tr><th scope="row">产品型号</th><td colspan="3" class="dt-value dt-model">#(p.model??)</td></tr>
-                            <tr>
-                                <th scope="row">产品类型</th><td class="dt-value">#(p.type_name??)</td>
-                                <th scope="row">成品检漏</th>
-                                <td>
-                                    <div class="dt-leak-options">
-                                        <label class="dt-radio"><input type="radio" disabled #if(p.lt_status== 1)checked#end/> 已检漏</label>
-                                        <label class="dt-radio"><input type="radio" disabled #if(p.lt_status== null || p.lt_status !=1)checked#end/> 无</label>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">送检数量</th><td class="dt-value dt-value-code">#(p.qsi??)</td>
-                                <th scope="row">检验数量</th><td class="dt-value dt-value-code">#(p.qi??)</td>
-                            </tr>
-                            <tr><th scope="row">产品编号</th><td colspan="3" class="dt-value dt-val-pre dt-value-code">#(p.number??)</td></tr>
-                            <tr><th scope="row">备注</th><td colspan="3" class="dt-value dt-val-muted">#(p.des??)</td></tr>
+                        <tr>
+                            <th scope="row">产品型号</th>
+                            <td colspan="3" class="dt-value dt-model">#(p.model??)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">产品类型</th>
+                            <td class="dt-value">#(p.type_name??)</td>
+                            <th scope="row">成品检漏</th>
+                            <td>
+                                <div class="dt-leak-options">
+                                    <label class="dt-radio"><input type="radio" disabled #if(p.lt_status==
+                                                                   1)checked#end/> 已检漏</label>
+                                    <label class="dt-radio"><input type="radio" disabled #if(p.lt_status== null ||
+                                                                   p.lt_status !=1)checked#end/> 无</label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">送检数量</th>
+                            <td class="dt-value dt-value-code">#(p.qsi??)</td>
+                            <th scope="row">检验数量</th>
+                            <td class="dt-value dt-value-code">#(p.qi??)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">产品编号</th>
+                            <td colspan="3" class="dt-value dt-val-pre dt-value-code">#(p.number??)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">备注</th>
+                            <td colspan="3" class="dt-value dt-val-muted">#(p.des??)</td>
+                        </tr>
                         </tbody>
                     </table>
                 </section>
@@ -114,27 +149,48 @@
                 <details class="dt-params" open>
                     <summary class="dt-param-toggle">
                         <h4 class="dt-subtitle">大表参数</h4>
-                        <span class="dt-param-action" aria-hidden="true"><span class="dt-param-expand">展开</span><span class="dt-param-collapse">收起</span><i class="fa fa-angle-down dt-param-chevron"></i></span>
+                        <span class="dt-param-action" aria-hidden="true"><span class="dt-param-expand">展开</span><span
+                                class="dt-param-collapse">收起</span><i
+                                class="fa fa-angle-down dt-param-chevron"></i></span>
                     </summary>
                     <table class="dt-data-table dt-params-table" aria-label="大表参数">
-                        <colgroup><col class="dt-label-col"><col><col class="dt-label-col"><col><col class="dt-label-col"><col></colgroup>
+                        <colgroup>
+                            <col class="dt-label-col">
+                            <col>
+                            <col class="dt-label-col">
+                            <col>
+                            <col class="dt-label-col">
+                            <col>
+                        </colgroup>
                         <tbody>
-                            <tr><th scope="row">流量范围</th><td colspan="5" class="dt-value">#(p.flow_name??)</td></tr>
-                            <tr>
-                                <th scope="row">电池电压</th><td class="dt-value">#(p.bv??)</td>
-                                <th scope="row">热头电压</th><td class="dt-value">#(p.thv??)</td>
-                                <th scope="row">脉冲电压</th><td class="dt-value">#(p.pv??)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">整机电流 24V</th><td class="dt-value">#(p.cucmax??)</td>
-                                <th scope="row">整机电流 12V</th><td class="dt-value">#(p.cucmin??)</td>
-                                <th scope="row">整机电流 8V</th><td class="dt-value">#(p.cuc??)</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">本地地址</th><td class="dt-value">#(p.la??)</td>
-                                <th scope="row">零点内码</th><td class="dt-value">#(p.zp??)</td>
-                                <th scope="row">故障电平</th><td class="dt-value">#(p.fl??)</td>
-                            </tr>
+                        <tr>
+                            <th scope="row">流量范围</th>
+                            <td colspan="5" class="dt-value">#(p.flow_name??)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">电池电压</th>
+                            <td class="dt-value">#(p.bv??)</td>
+                            <th scope="row">热头电压</th>
+                            <td class="dt-value">#(p.thv??)</td>
+                            <th scope="row">脉冲电压</th>
+                            <td class="dt-value">#(p.pv??)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">整机电流 24V</th>
+                            <td class="dt-value">#(p.cucmax??)</td>
+                            <th scope="row">整机电流 12V</th>
+                            <td class="dt-value">#(p.cucmin??)</td>
+                            <th scope="row">整机电流 8V</th>
+                            <td class="dt-value">#(p.cuc??)</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">本地地址</th>
+                            <td class="dt-value">#(p.la??)</td>
+                            <th scope="row">零点内码</th>
+                            <td class="dt-value">#(p.zp??)</td>
+                            <th scope="row">故障电平</th>
+                            <td class="dt-value">#(p.fl??)</td>
+                        </tr>
                         </tbody>
                     </table>
                 </details>
@@ -166,12 +222,12 @@
                         #-- 第一排只展示检验进度，真实的精度重检状态保留 --#
                         <div class="insp-flow">
                             <div class="insp-stage" data-stage="1">
-                            <div class="insp-step" data-color="acc">
-                                <span class="insp-step-name">精度检验</span>
-                                <span class="insp-step-badge insp-badge-redo">重检中</span>
-                                <span class="insp-step-time">&nbsp;</span>
-                            </div>
-                            #@rejectStageNodes(p, 6, p.lt_status == 1 ? null : 2)
+                                <div class="insp-step" data-color="acc">
+                                    <span class="insp-step-name">精度检验</span>
+                                    <span class="insp-step-badge insp-badge-redo">重检中</span>
+                                    <span class="insp-step-time">&nbsp;</span>
+                                </div>
+                                #@rejectStageNodes(p, 6, p.lt_status == 1 ? null : 2)
                             </div>
                         </div>
                         #end
@@ -182,28 +238,28 @@
                         <div class="insp-flow">
                             <!-- 精度检验 -->
                             <div class="insp-stage" data-stage="1">
-                            <div class="insp-step" data-color="acc">
-                                <span class="insp-step-name">精度检验</span>
-                                <span class="insp-step-badge insp-badge-accq">#(p.accq_name ??)</span>
-                                <span class="insp-step-time">#if(p.accq_time)#date(p.accq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
-                            </div>
-                            #@rejectStageNodes(p, 6, p.lt_status == 1 ? null : 2)
+                                <div class="insp-step" data-color="acc">
+                                    <span class="insp-step-name">精度检验</span>
+                                    <span class="insp-step-badge insp-badge-accq">#(p.accq_name ??)</span>
+                                    <span class="insp-step-time">#if(p.accq_time)#date(p.accq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
+                                </div>
+                                #@rejectStageNodes(p, 6, p.lt_status == 1 ? null : 2)
                             </div>
                             #if(p.lt_status == 1 && (p.insp == 2 || p.insp == 3 || p.insp == 4 || p.insp == 5 || (p.insp
                             == 6 && p.reject_insp == 2 && p.reject_des != null)))
                             <!-- 成品检漏检验：仅已检验或有驳回重检时显示；待检/未检验不显示（与其他环节一致） -->
                             <div class="insp-stage" data-stage="6">
-                            <span class="insp-arrow">&#8594;</span>
-                            <div class="insp-step" data-color="leak">
-                                <span class="insp-step-name">成品检漏</span>
-                                #if(p.insp == 6)
-                                <span class="insp-step-badge insp-badge-redo">重检中</span>
-                                #else
-                                <span class="insp-step-badge insp-badge-lt">#(p.lt_name ??)</span>
-                                #end
-                                <span class="insp-step-time">#if(p.lt_time)#date(p.lt_time, "yyyy-MM-dd HH:mm:ss")#end</span>
-                            </div>
-                            #@rejectStageNodes(p, 2, null)
+                                <span class="insp-arrow">&#8594;</span>
+                                <div class="insp-step" data-color="leak">
+                                    <span class="insp-step-name">成品检漏</span>
+                                    #if(p.insp == 6)
+                                    <span class="insp-step-badge insp-badge-redo">重检中</span>
+                                    #else
+                                    <span class="insp-step-badge insp-badge-lt">#(p.lt_name ??)</span>
+                                    #end
+                                    <span class="insp-step-time">#if(p.lt_time)#date(p.lt_time, "yyyy-MM-dd HH:mm:ss")#end</span>
+                                </div>
+                                #@rejectStageNodes(p, 2, null)
                             </div>
                             #end
                             #-- insp=6（成品检漏待检）数值大于 5 但流程上位于精度与外观之间，以下环节判断必须排除
@@ -211,52 +267,54 @@
                             #if(p.insp >= 3 && p.insp != 6)
                             <!-- 外观检验 -->
                             <div class="insp-stage" data-stage="2">
-                            <span class="insp-arrow">&#8594;</span>
-                            <div class="insp-step" data-color="vis">
-                                <span class="insp-step-name">外观检验</span>
-                                <span class="insp-step-badge insp-badge-funq">#(p.funq_name ??)</span>
-                                <span class="insp-step-time">#if(p.funq_time)#date(p.funq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
-                            </div>
-                            #@rejectStageNodes(p, 3, null)
+                                <span class="insp-arrow">&#8594;</span>
+                                <div class="insp-step" data-color="vis">
+                                    <span class="insp-step-name">外观检验</span>
+                                    <span class="insp-step-badge insp-badge-funq">#(p.funq_name ??)</span>
+                                    <span class="insp-step-time">#if(p.funq_time)#date(p.funq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
+                                </div>
+                                #@rejectStageNodes(p, 3, null)
                             </div>
                             #end
                             #if(p.insp >= 4 && p.insp != 6)
                             <!-- 包装检验 -->
                             <div class="insp-stage" data-stage="3">
-                            <span class="insp-arrow">&#8594;</span>
-                            <div class="insp-step" data-color="pack">
-                                <span class="insp-step-name">包装检验</span>
-                                <span class="insp-step-badge insp-badge-appq">#(p.appq_name ??)</span>
-                                <span class="insp-step-time">#if(p.appq_time)#date(p.appq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
-                            </div>
-                            #@rejectStageNodes(p, 4, null)
+                                <span class="insp-arrow">&#8594;</span>
+                                <div class="insp-step" data-color="pack">
+                                    <span class="insp-step-name">包装检验</span>
+                                    <span class="insp-step-badge insp-badge-appq">#(p.appq_name ??)</span>
+                                    <span class="insp-step-time">#if(p.appq_time)#date(p.appq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
+                                </div>
+                                #@rejectStageNodes(p, 4, null)
                             </div>
                             #end
                             #if(p.insp >= 5 && p.insp != 6)
                             <!-- 批准 -->
                             <div class="insp-stage" data-stage="4">
-                            <span class="insp-arrow">&#8594;</span>
-                            <div class="insp-step" data-color="appr">
-                                <span class="insp-step-name">批准</span>
-                                <span class="insp-step-badge insp-badge-allq">#(p.allq_name ??)</span>
-                                <span class="insp-step-time">#if(p.allq_time)#date(p.allq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
-                            </div>
+                                <span class="insp-arrow">&#8594;</span>
+                                <div class="insp-step" data-color="appr">
+                                    <span class="insp-step-name">批准</span>
+                                    <span class="insp-step-badge insp-badge-allq">#(p.allq_name ??)</span>
+                                    <span class="insp-step-time">#if(p.allq_time)#date(p.allq_time, "yyyy-MM-dd HH:mm:ss")#end</span>
+                                </div>
                             </div>
                             #end
-                            #-- 包装驳回至外观、批准驳回至包装时显示重检；成品检漏编号 6 不能按减 1 推导，否则会误中已完成状态 5 --#
-                            #if(p.reject_des != null && ((p.insp == 2 && p.reject_insp == 3) || (p.insp == 3 && p.reject_insp == 4)))
+                            #-- 包装驳回至外观、批准驳回至包装时显示重检；成品检漏编号 6 不能按减 1 推导，否则会误中已完成状态
+                            5 --#
+                            #if(p.reject_des != null && ((p.insp == 2 && p.reject_insp == 3) || (p.insp == 3 &&
+                            p.reject_insp == 4)))
                             <div class="insp-stage" data-stage="#(p.insp)">
-                            <span class="insp-arrow">&#8594;</span>
-                            <div class="insp-step">
-                                <span class="insp-step-name">#if(p.insp == 2)外观检验#else 包装检验#end</span>
-                                <span class="insp-step-badge insp-badge-redo">重检中</span>
-                                <span class="insp-step-time">&nbsp;</span>
-                            </div>
-                            #if(p.insp == 2)
-                            #@rejectStageNodes(p, 3, null)
-                            #else
-                            #@rejectStageNodes(p, 4, null)
-                            #end
+                                <span class="insp-arrow">&#8594;</span>
+                                <div class="insp-step">
+                                    <span class="insp-step-name">#if(p.insp == 2)外观检验#else 包装检验#end</span>
+                                    <span class="insp-step-badge insp-badge-redo">重检中</span>
+                                    <span class="insp-step-time">&nbsp;</span>
+                                </div>
+                                #if(p.insp == 2)
+                                #@rejectStageNodes(p, 3, null)
+                                #else
+                                #@rejectStageNodes(p, 4, null)
+                                #end
                             </div>
                             #end
                         </div>
@@ -268,19 +326,22 @@
                         #set(hasFallbackReject=false)
                         #for(log : p.reject_logs)
                         #if((!showReverseReject && ((log.reject_insp == 6 && !showAcc)
-                            || (log.reject_insp == 2 && (p.lt_status == 1 ? !showLeak : !showAcc))
-                            || (log.reject_insp == 3 && !showVis) || (log.reject_insp == 4 && !showPack)))
-                            || (log.reject_insp != 6 && log.reject_insp != 2 && log.reject_insp != 3 && log.reject_insp != 4))
+                        || (log.reject_insp == 2 && (p.lt_status == 1 ? !showLeak : !showAcc))
+                        || (log.reject_insp == 3 && !showVis) || (log.reject_insp == 4 && !showPack)))
+                        || (log.reject_insp != 6 && log.reject_insp != 2 && log.reject_insp != 3 && log.reject_insp !=
+                        4))
                         #set(hasFallbackReject=true)
                         #end
                         #end
                         #if(hasFallbackReject)
-                        <div class="insp-reject-flow insp-reject-fallback" role="list" aria-label="其他驳回记录，按时间先后排列">
+                        <div class="insp-reject-flow insp-reject-fallback" role="list"
+                             aria-label="其他驳回记录，按时间先后排列">
                             #for(log : p.reject_logs)
                             #if((!showReverseReject && ((log.reject_insp == 6 && !showAcc)
-                                || (log.reject_insp == 2 && (p.lt_status == 1 ? !showLeak : !showAcc))
-                                || (log.reject_insp == 3 && !showVis) || (log.reject_insp == 4 && !showPack)))
-                                || (log.reject_insp != 6 && log.reject_insp != 2 && log.reject_insp != 3 && log.reject_insp != 4))
+                            || (log.reject_insp == 2 && (p.lt_status == 1 ? !showLeak : !showAcc))
+                            || (log.reject_insp == 3 && !showVis) || (log.reject_insp == 4 && !showPack)))
+                            || (log.reject_insp != 6 && log.reject_insp != 2 && log.reject_insp != 3 && log.reject_insp
+                            != 4))
                             #@rejectStepNode(p, log)
                             #end
                             #end

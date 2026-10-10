@@ -1,11 +1,11 @@
 
 
-/* ================================================================ */
-/* 1. CME — 计量学学习模块                                         */
-/* ================================================================ */
 
-/* --- 1.1 CME 首页 (index.html) --- */
-/* ==================== CME 学习门户介绍页 ==================== */
+/* 1. CME — 计量学学习模块 */
+
+
+/* 1.1 CME 首页 (index.html) */
+/* CME 学习门户介绍页 */
 /* 页面背景（类名限定 body，避免污染共享本样式表的其他模块页面） */
 body.cme-body {
     margin: 0;
@@ -31,7 +31,7 @@ body.cme-body {
 .cme-page *::before,
 .cme-page *::after { box-sizing: border-box; }
 
-/* ---------- Hero 区 ---------- */
+/* Hero 区 */
 .cme-hero {
     text-align: center;
     padding: 24px 0 40px;
@@ -92,7 +92,7 @@ body.cme-body {
     opacity: 0.55;
 }
 
-/* ---------- 区块标题 ---------- */
+/* 区块标题 */
 .cme-section {
     margin-top: 52px;
     animation: cme-fade-up 0.6s ease both;
@@ -114,7 +114,7 @@ body.cme-body {
     color: #8a92ab;
 }
 
-/* ---------- 学科卡片 ---------- */
+/* 学科卡片 */
 .cme-cards {
     display: flex;
     gap: 24px;
@@ -254,7 +254,7 @@ body.cme-body {
     opacity: 0.9;
 }
 
-/* ---------- 学习路径 ---------- */
+/* 学习路径 */
 .cme-path {
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(120, 135, 190, 0.13);
@@ -350,7 +350,7 @@ body.cme-body {
     font-weight: 600;
 }
 
-/* ---------- CTA ---------- */
+/* CTA */
 .cme-cta {
     margin-top: 56px;
     text-align: center;
@@ -400,7 +400,7 @@ body.cme-body {
     letter-spacing: 1px;
 }
 
-/* ---------- 页脚 ---------- */
+/* 页脚 */
 .cme-footer {
     margin-top: 60px;
     text-align: center;
@@ -409,7 +409,7 @@ body.cme-body {
     letter-spacing: 1px;
 }
 
-/* ---------- 动画 ---------- */
+/* 动画 */
 @keyframes cme-fade-up {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -420,7 +420,7 @@ body.cme-body {
 .cme-delay-1 { animation-delay: 0.08s; }
 .cme-delay-2 { animation-delay: 0.16s; }
 
-/* ---------- 响应式 ---------- */
+/* 响应式 */
 @media (max-width: 860px) {
     .cme-page { padding: 36px 20px 56px; }
     .cme-hero-title { font-size: 30px; }
@@ -433,11 +433,11 @@ body.cme-body {
     }
 }
 
-/* --- 1.2 CME 学习界面 (learn.html) --- */
-/* ==================== CME 学习界面（目录树 + 阅读器） ==================== */
+/* 1.2 CME 学习界面 (learn.html) */
+/* CME 学习界面（目录树 + 阅读器） */
 /* 注：.jbolt_admin_main_container 与 html/body 的全局覆盖保留在 learn.html 页面内，未迁入本文件 */
 
-/* ---------- 整体布局 ---------- */
+/* 整体布局 */
 .cme-learn-wrap {
     display: flex;
     width: 100%;
@@ -452,7 +452,7 @@ body.cme-body {
 .cme-learn-wrap *::before,
 .cme-learn-wrap *::after { box-sizing: border-box; }
 
-/* ==================== 左侧面板 ==================== */
+/* 左侧面板 */
 .cme-learn-side {
     flex: none;
     width: 300px;
@@ -578,7 +578,7 @@ body.cme-body {
 }
 .cme-learn-tree-tip.cme-learn-tip-error { color: #c96a6a; }
 
-/* ---------- 目录树节点 ---------- */
+/* 目录树节点 */
 .cme-learn-tree,
 .cme-learn-tree ul {
     margin: 0;
@@ -699,7 +699,7 @@ body.cme-body {
     grid-template-rows: 1fr;
 }
 
-/* ==================== 右侧查看区 ==================== */
+/* 右侧查看区 */
 .cme-learn-main {
     flex: 1;
     min-width: 0;
@@ -840,12 +840,12 @@ body.cme-body {
 .cme-learn-empty-float { animation: cme-learn-float 3.6s ease-in-out infinite; }
 
 
-/* ================================================================ */
-/* 2. DMS — 文件管理模块                                           */
-/* ================================================================ */
 
-/* --- 2.1 文件列表 & 类别管理 --- */
-/* ---- dms\file\index.html: dms\file\index.html ---- */
+/* 2. DMS — 文件管理模块 */
+
+
+/* 2.1 文件列表 & 类别管理 */
+/* dms\file\index.html: dms\file\index.html */
 /* 页面容器 - flex纵向布局，让子元素正确分配高度 */
 .jbolt_page {
 	box-sizing: border-box;
@@ -876,7 +876,7 @@ body.cme-body {
 	flex-shrink: 0;
 }
 
-/* ========== 树形导航 + 紧凑列表布局（新版） ========== */
+/* 树形导航 + 紧凑列表布局（新版） */
 
 /* 顶部全局搜索框：相对整个标题行绝对定位，保证在页面中真正居中 */
 .dms-page-header-row {
@@ -951,7 +951,7 @@ body.cme-body {
 }
 
 /* data-with-clearbtn 的包裹层（.ac_input_box）被 JBolt 强制 inline-block，
-   基线对齐产生底部空隙导致输入框偏下，改为 inline-flex 垂直居中 */
+基线对齐产生底部空隙导致输入框偏下，改为 inline-flex 垂直居中 */
 .dms-list-panel form[id^="dmsFileForm_"] .ac_input_box {
 	display: inline-flex !important;
 	align-items: center;
@@ -988,7 +988,7 @@ mark.dms-search-hit {
 
 .dms-tree-header {
 	/* 上内边距 25px = 右侧 .jbolt_page 的 15px 页内边距 + .jbolt_page_title 的 10px 内边距，
-	   使搜索框与右侧表单控件水平对齐、底部分隔线连成一条 */
+	使搜索框与右侧表单控件水平对齐、底部分隔线连成一条 */
 	padding: 25px 12px 10px;
 	border-bottom: 1px solid #e9ecef;
 	flex-shrink: 0;
@@ -1150,7 +1150,7 @@ mark.dms-search-hit {
 	margin-bottom: 0;
 }
 
-/* ========== 页面标题区 ========== */
+/* 页面标题区 */
 
 .dms-page-title {
 	font-size: 20px;
@@ -1212,7 +1212,7 @@ mark.dms-search-hit {
 	100% { background-position: -200% 0; }
 }
 
-/* ========== 面包屑导航样式 ========== */
+/* 面包屑导航样式 */
 .breadcrumb-nav {
 	font-size: 16px; /* 导航字号 */
 }
@@ -1240,11 +1240,11 @@ mark.dms-search-hit {
 	font-weight: 500; /* 中等粗细 */
 }
 
-/* ========== 所属类别列显示控制 ========== */
+/* 所属类别列显示控制 */
 .category-col { display: none; }
 .show-category .category-col { display: table-cell; }
 
-/* ========== 关键字标签样式 ========== */
+/* 关键字标签样式 */
 .keyword-badge {
 	display: inline-block; /* 行内块级元素 */
 	padding: 2px 8px; /* 内边距 */
@@ -1255,9 +1255,9 @@ mark.dms-search-hit {
 	font-size: 12px; /* 小字号 */
 }
 
-/* ========== 类别管理页：限宽居中 + 表格视觉 ========== */
+/* 类别管理页：限宽居中 + 表格视觉 */
 /* JBoltTable 初始化时会把工具条移入自动生成的 .jbolt_table_view 容器内，
-   故通过工具条 id 前缀反向锁定该容器整体限宽（含工具条、表格、分页） */
+故通过工具条 id 前缀反向锁定该容器整体限宽（含工具条、表格、分页） */
 .jbolt_table_view:has(> [id^="dmsCategory_toolbar_"]) {
 	max-width: 960px;
 	margin-left: auto;
@@ -1289,7 +1289,7 @@ mark.dms-search-hit {
 	color: #adb5bd;
 }
 
-/* ---- 通用居中卡片表格布局（dms/category、customer 等模块复用） ---- */
+/* 通用居中卡片表格布局（dms/category、customer 等模块复用） */
 /* 内容区 - 填充剩余高度并水平居中卡片，自身不滚动（滚动交给卡片内表格） */
 .jb-center-wrap {
 	flex: 1;
@@ -1373,11 +1373,11 @@ mark.dms-search-hit {
 }
 
 
-/* ================================================================ */
-/* 3. Equipment — 设备管理模块                                     */
-/* ================================================================ */
 
-/* --- 3.1 表单通用 --- */
+/* 3. Equipment — 设备管理模块 */
+
+
+/* 3.1 表单通用 */
 .equip-section-header {
 	display: flex;
 	align-items: center;
@@ -1419,7 +1419,7 @@ mark.dms-search-hit {
 	transform-origin: top left;
 }
 
-/* --- 3.2 设备首页-仪表盘 --- */
+/* 3.2 设备首页-仪表盘 */
 /* 设备页内容区需要建立纵向 flex 高度传递，供下方表格填充剩余空间 */
 .equip-page-content {
 	display: flex;
@@ -1805,7 +1805,7 @@ mark.dms-search-hit {
 	cursor: zoom-in;
 }
 
-/* --- 3.3 设备时间线 --- */
+/* 3.3 设备时间线 */
 /* 设备概要条（可折叠） */
 .equip-summary-bar {
 	background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
@@ -2164,7 +2164,7 @@ mark.dms-search-hit {
 	overflow: hidden;
 }
 
-/* --- 3.4 批量操作 --- */
+/* 3.4 批量操作 */
 .batch-preview-box {
 	margin-bottom: 14px;
 }
@@ -2236,9 +2236,9 @@ mark.dms-search-hit {
 }
 
 
-/* ================================================================ */
-/* 4. Qarep — 报告管理模块                                         */
-/* ================================================================ */
+
+/* 4. Qarep — 报告管理模块 */
+
 
 /* --- 4.0 流程环节共享颜色库（唯一权威来源：首页步进器五色） ---
    环节相关颜色一律引用 --flow-* 变量，禁止散写十六进制色值；
@@ -2254,8 +2254,8 @@ mark.dms-search-hit {
 	--merge-accent: #6f9e8a;   /* 合并组专属强调色（低饱和灰绿，耐看不疲劳，非流程色） */
 }
 
-/* --- 4.1 表单通用（新增/编辑/编辑描述） --- */
-/* ---- qarep\add.html: qarep\add.html ---- */
+/* 4.1 表单通用（新增/编辑/编辑描述） */
+/* qarep\add.html: qarep\add.html */
 .fm-wrap {
 	padding: 16px 18px;
 	font-size: 13px;
@@ -2583,14 +2583,14 @@ mark.dms-search-hit {
     .qa-pdf-month-actions > .btn { height: 36px; }
 }
 
-/* ---- qarep\editdes.html：.editdes-page 前缀隔离的紧凑变体（页面根元素带 class="editdes-page"），
-   避免覆盖 add/edit 共用的 16px 18px 通用版；原同名 .fm-hd 三条为死代码（editdes.html 不含 .fm-hd）已删除 ---- */
+/* qarep\editdes.html：.editdes-page 前缀隔离的紧凑变体（页面根元素带 class="editdes-page"），
+避免覆盖 add/edit 共用的 16px 18px 通用版；原同名 .fm-hd 三条为死代码（editdes.html 不含 .fm-hd）已删除 */
 .editdes-page .fm-wrap{padding:14px 16px;font-size:13px;color:#333}
 .editdes-page .fm-sec{margin-bottom:12px}
 .editdes-page .fm-wrap textarea.form-control{border-color:#dee2e6;border-radius:4px;font-size:13px;color:#212529;resize:vertical}
 .editdes-page .fm-wrap textarea.form-control:focus{border-color:#80bdff;box-shadow:0 0 0 2px rgba(0,123,255,.1)}
 
-/* --- 4.2 报告单详情 --- */
+/* 4.2 报告单详情 */
 /* 按790px详情弹窗排版：两组基本信息、三组参数与紧凑检验流程。 */
 .qa-details-page .dt-wrap{flex:0 0 auto;width:100%;max-width:1120px;margin:0 auto;padding:16px;box-sizing:border-box;color:#354052;font-size:18px;line-height:1.5}
 .qa-details-page .dt-sec{margin:0 0 16px}
@@ -2741,9 +2741,9 @@ mark.dms-search-hit {
 .qa-details-page .insp-reject-flow .insp-badge-rejected,.qa-details-page .insp-recheck-flow .insp-badge-rejected{border:0;cursor:pointer}
 .qa-details-page .insp-reject-flow .insp-badge-rejected:focus-visible,.qa-details-page .insp-recheck-flow .insp-badge-rejected:focus-visible{outline:2px solid var(--flow-appr);outline-offset:3px}
 
-/* --- 4.3 报告管理首页 --- */
-/* ---- qarep\index.html: qarep\index.html ---- */
-/* ===== 流程步骤条导航 ===== */
+/* 4.3 报告管理首页 */
+/* qarep\index.html: qarep\index.html */
+/* 流程步骤条导航 */
 #qarepTabView > .jbolt_tab_links { display: none !important; }
 
 .flow-stepper-nav {
@@ -2837,7 +2837,7 @@ mark.dms-search-hit {
 }
 
 /* 右侧步骤条——现代化流线：环节节点骑在一条首→尾连续渐变的彩色流线上，
-   像地铁线路/流水线，数量气泡浮在节点上方，流转方向与状态一目了然 */
+像地铁线路/流水线，数量气泡浮在节点上方，流转方向与状态一目了然 */
 .flow-stepper {
 	position: relative;
 	z-index: 1;
@@ -2942,8 +2942,8 @@ mark.dms-search-hit {
 }
 
 /* 连接流线——轨道槽透明：本体承载淡渐变流线（4px 居中），
-   右侧留出 margin（30px）给外侧双箭头与间距，连接线相应变短，避免箭头超出面板宽度；
-   选中段进度填充（::before）与右端外侧箭头（::after）构成"流向下一环节"的完整表达 */
+右侧留出 margin（30px）给外侧双箭头与间距，连接线相应变短，避免箭头超出面板宽度；
+选中段进度填充（::before）与右端外侧箭头（::after）构成"流向下一环节"的完整表达 */
 .flow-connector {
 	position: relative;
 	z-index: 1;
@@ -2973,8 +2973,8 @@ mark.dms-search-hit {
 }
 
 /* 箭头——位于进度条右端外侧（连接线 margin 留出的 24px 空间内，right 负值超出连接线右边界），
-   指向下一环节；SVG 流线箭头（圆头平滑曲线 + 箭头头，比三角更流线），取该段"流向的后环节"色，
-   z-index 高于节点避免被盖住 */
+指向下一环节；SVG 流线箭头（圆头平滑曲线 + 箭头头，比三角更流线），取该段"流向的后环节"色，
+z-index 高于节点避免被盖住 */
 .flow-connector::after {
 	content: "";
 	position: absolute;
@@ -3013,7 +3013,7 @@ mark.dms-search-hit {
 }
 
 /* 进度填充层——表示"进入下一环节"的进度条动画：
-   推进仅播放一次（width 0 → 100%，transition），推进完成后流光循环扫过；无阴影 */
+推进仅播放一次（width 0 → 100%，transition），推进完成后流光循环扫过；无阴影 */
 .flow-connector::before {
 	content: "";
 	position: absolute;
@@ -3035,13 +3035,13 @@ mark.dms-search-hit {
 .flow-stepper-item[data-color="pack"] + .flow-connector::before { background: linear-gradient(90deg, var(--flow-pack), var(--flow-appr)); }
 .flow-stepper-item[data-color="appr"] + .flow-connector::before { background: linear-gradient(90deg, var(--flow-appr), var(--flow-done)); }
 /* 选中环节后的连接线：进度条一次性推进 0 → 100%（仅一次，transition 驱动，不循环），
-   推进完成后静止，无流光 */
+推进完成后静止，无流光 */
 .flow-stepper-item.active + .flow-connector::before {
 	opacity: 1;
 	width: 100%;
 }
 
-/* ===== 各步骤主题色：直接使用全局业务色 --flow-*（与报告单业务 stepper 强调色对齐） ===== */
+/* 各步骤主题色：直接使用全局业务色 --flow-*（与报告单业务 stepper 强调色对齐） */
 .flow-stepper-item[data-color="acc"]  { --c: var(--flow-acc); }
 .flow-stepper-item[data-color="leak"] { --c: var(--flow-leak); }
 .flow-stepper-item[data-color="vis"]  { --c: var(--flow-vis); }
@@ -3087,7 +3087,7 @@ mark.dms-search-hit {
 	transform: translate(-50%, -50%) scale(1.1);
 }
 
-/* ===== 流程推进按钮 ===== */
+/* 流程推进按钮 */
 .flow-action-btn {
 	border-radius: 20px;
 	padding: 6px 18px;
@@ -3194,33 +3194,33 @@ mark.dms-search-hit {
     color: var(--merge-accent);
 }
 
-/* --- 4.4 其他 --- */
+/* 4.4 其他 */
 
-/* ===== qarep 通用工具类 ===== */
+/* qarep 通用工具类 */
 .qarep-search-input,
 .qarep-search-select { width: 130px; }
 .qarep-des-link { cursor: pointer; color: #007bff; }
 .qarep-des-link:hover { color: #0056b3; text-decoration: underline; }
 
-/* ===== 步骤条 active 过渡增强 ===== */
+/* 步骤条 active 过渡增强 */
 .flow-stepper-item.active .flow-node {
 	transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ---- qarep\\inactiveList.html: qarep\\inactiveList.html ---- */
+/* qarep\\inactiveList.html: qarep\\inactiveList.html */
 .il-search-bar{background:#f8f9fa;border:1px solid #e9ecef;border-radius:6px;padding:8px 12px;margin-bottom:10px}
 .il-search-bar .form-control{border-color:#dee2e6;border-radius:4px;font-size:13px}
 .il-search-bar .btn{border-radius:4px;font-size:13px}
 
-/* --- 4.5 审批工作台（approval.html）+ 曾驳回角标 --- */
+/* 4.5 审批工作台（approval.html）+ 曾驳回角标 */
 
-/* ===== 曾驳回角标（index.html 表格 与 approval 审批页共用）：红底白字小圆标 ===== */
+/* 曾驳回角标（index.html 表格 与 approval 审批页共用）：红底白字小圆标 */
 .qa-reject-flag{display:inline-block;min-width:18px;height:18px;line-height:18px;margin-left:5px;padding:0 4px;font-size:11px;font-weight:600;font-style:normal;color:#fff;background:#e05260;border-radius:50%;text-align:center;cursor:pointer;vertical-align:1px;box-shadow:0 0 0 2px rgba(224,82,96,0.18),0 1px 3px rgba(224,82,96,0.4);transition:transform .15s,box-shadow .15s,background .15s}
 .qa-reject-flag:hover{background:#c93a49;transform:scale(1.15);box-shadow:0 0 0 3px rgba(224,82,96,0.25),0 2px 5px rgba(224,82,96,0.45)}
 /* 靠左修饰：备注列/备注行中角标钉在最左侧（float 不受单元格居中对齐影响） */
 .qa-reject-flag-left{float:left;margin-left:0;margin-right:6px}
 
-/* --- 4.6 驳回历史弹窗（reject_history.html）：倒序时间线 --- */
+/* 4.6 驳回历史弹窗（reject_history.html）：倒序时间线 */
 .rjh-wrap{padding:16px 20px}
 .rjh-empty{padding:40px 0;text-align:center;color:#8a92a6;font-size:13px}
 .rjh-count{margin-bottom:14px;font-size:12px;color:#8a92a6}
@@ -3239,10 +3239,10 @@ mark.dms-search-hit {
 .rjh-des{font-size:13px;color:#3c4257;line-height:1.6;white-space:pre-wrap;word-wrap:break-word}
 .rjh-ft{margin-top:6px;font-size:12px;color:#8a92a6}
 
-/* ===== 整页布局：flex 纵向，头/驳回区/脚固定，主体滚动 ===== */
+/* 整页布局：flex 纵向，头/驳回区/脚固定，主体滚动 */
 .qa-appr-page{display:flex;flex-direction:column;height:100vh;background:#f5f6f8;font-size:13px;color:#333;overflow:hidden}
 
-/* ===== 头部（固定）：阶段流转 + 汇总 + 全选 ===== */
+/* 头部（固定）：阶段流转 + 汇总 + 全选 */
 .qa-appr-head{flex:none;padding:14px 18px 10px;background:#fff;border-bottom:1px solid #e8eaef;box-shadow:0 1px 4px rgba(40,60,100,0.04);z-index:2}
 .qa-appr-flow{display:flex;align-items:center;justify-content:center;gap:14px}
 .qa-appr-stage{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:999px;font-size:14px;font-weight:600;background:#f2f4f7;color:#556}
@@ -3271,7 +3271,7 @@ mark.dms-search-hit {
 .qa-appr-checkall:hover{background:#f2f4f7}
 .qa-appr-checkall input{width:15px;height:15px;margin:0;cursor:pointer}
 
-/* ===== 主体滚动区 ===== */
+/* 主体滚动区 */
 .qa-appr-body{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 18px}
 .qa-appr-body::-webkit-scrollbar{width:7px}
 .qa-appr-body::-webkit-scrollbar-thumb{background:rgba(120,135,160,0.28);border-radius:4px}
@@ -3315,7 +3315,7 @@ mark.dms-search-hit {
 .qa-appr-empty{padding:70px 0;text-align:center;font-size:14px;color:#a0a8b8}
 .qa-appr-empty i{display:block;font-size:36px;margin-bottom:10px;color:#c8cedb}
 
-/* ===== 驳回原因区（默认隐藏，.qa-appr-open 展开） ===== */
+/* 驳回原因区（默认隐藏，.qa-appr-open 展开） */
 .qa-appr-reject-box{display:none;flex:none;padding:12px 18px;background:#fff7f7;border-top:1px solid #f3d6d9}
 .qa-appr-reject-box.qa-appr-open{display:block;animation:qa-appr-slide-up 0.2s ease}
 @keyframes qa-appr-slide-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -3326,7 +3326,7 @@ mark.dms-search-hit {
 .qa-appr-reject-cancel{margin-top:8px;padding:3px 10px;font-size:12px;color:#8a92a6;background:transparent;border:1px solid #d8dce5;border-radius:4px;cursor:pointer;transition:color 0.15s ease,border-color 0.15s ease}
 .qa-appr-reject-cancel:hover{color:#c9424f;border-color:#e6b8bd}
 
-/* ===== 底部固定操作栏 ===== */
+/* 底部固定操作栏 */
 .qa-appr-footer{flex:none;display:flex;gap:12px;padding:12px 18px;background:#fff;border-top:1px solid #e8eaef;box-shadow:0 -2px 8px rgba(40,60,100,0.05);z-index:2}
 .qa-appr-btn{flex:1;height:40px;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity 0.15s ease,box-shadow 0.15s ease}
 .qa-appr-btn:hover:not(:disabled){opacity:0.9;box-shadow:0 4px 12px rgba(40,60,100,0.16)}
@@ -3345,9 +3345,9 @@ mark.dms-search-hit {
 /* 计数数字略突出 */
 .qa-appr-cnt{font-weight:700}
 
-/* ================================================================ */
-/* 5. Changelog — 更新日志页面                                     */
-/* ================================================================ */
+
+/* 5. Changelog — 更新日志页面 */
+
 
 /* 容器 — 居中卡片，留白呼吸 */
 .cl-wrap{max-width:960px;margin:0 auto;padding:30px 24px 40px}
@@ -3358,7 +3358,7 @@ mark.dms-search-hit {
 /* 全部展开/折叠 按钮 */
 .cl-toggle{font-size:13px;color:#4a6cf7;cursor:pointer;user-select:none;padding:5px 14px;border:1px solid #4a6cf7;border-radius:4px;transition:all .2s}
 .cl-toggle:hover{background:#4a6cf7;color:#fff}
-/* ---- 折叠组 ---- */
+/* 折叠组 */
 .cl-group{margin-bottom:16px;border:1px solid #e4e8f0;border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:box-shadow .2s,border-color .2s}
 .cl-group:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
 .cl-group[open]{box-shadow:0 2px 12px rgba(74,108,247,.1);border-color:#cdd5f5}
@@ -3377,17 +3377,17 @@ mark.dms-search-hit {
 .cl-list li::before{content:"";position:absolute;left:4px;top:13px;width:6px;height:6px;border-radius:50%;background:#c4cdd8}
 .cl-list li code{display:inline-block;padding:1px 6px;background:#f1f3f6;border-radius:3px;font-size:13px;color:#e83e8c}
 
-/* ================================================================ */
-/* 6. Dashboard — 首页仪表盘                                       */
-/* ================================================================ */
 
-/* --- 6.1 页面容器 --- */
+/* 6. Dashboard — 首页仪表盘 */
+
+
+/* 6.1 页面容器 */
 /* 页面底——canvas-soft 微灰白，衬托白色卡片 */
 .db-wrapper{min-height:100%;padding:14px 10px 12px;background:#fafafa}
 /* 内容区竖向滚动（页面内容超出视口时不被遮挡） */
 .db-scroll{height:100%;overflow-y:auto;overflow-x:hidden}
 
-/* --- 6.2 流程环节看板（hero）—— Stripe 科技数据风：浅色 canvas + 电光靛紫主强调 + 顶部 mesh 渐变氛围光 + 环节流转漏斗（非卡片） --- */
+/* 6.2 流程环节看板（hero）—— Stripe 科技数据风：浅色 canvas + 电光靛紫主强调 + 顶部 mesh 渐变氛围光 + 环节流转漏斗（非卡片） */
 .db-hero{
 	--db-ink:#0d253d;          /* Stripe 深海军蓝文字 */
 	--db-mute:#64748d;
@@ -3447,7 +3447,7 @@ mark.dms-search-hit {
 .db-stat-bar-pend,.db-stat-bar-done{background:var(--db-sep)}
 /* 竖向分隔——teal 色短竖线（一点竖向：固定高度覆盖数字区，居中，不贯穿；粗细与颜色均与横向短条一致，统一醒目） */
 .db-stat-divider{width:6px;height:70px;align-self:center;background:var(--db-sep);border-radius:9999px;flex-shrink:0}
-/* --- 6.3 环节堆叠占比条：一条 100% 宽大胶囊条按 6 环节在检单数占比分段（数据可视化，非卡片/列表） --- */
+/* 6.3 环节堆叠占比条：一条 100% 宽大胶囊条按 6 环节在检单数占比分段（数据可视化，非卡片/列表） */
 .db-stack{position:relative;margin-top:16px;z-index:1}
 /* 堆叠条——浅灰轨道 + 内部环节色分段（flex 按 flex-grow 比例分布，段间 3px 白缝） */
 .db-stack-bar{position:relative;display:flex;align-items:stretch;height:34px;border-radius:9999px;background:var(--db-line-soft);border:1px solid var(--db-line);overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.05) inset}
@@ -3479,7 +3479,7 @@ mark.dms-search-hit {
 .db-stack-qsi{font-size:12.5px;color:var(--db-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
 .db-stack-qsi b{color:var(--db-mute);font-weight:700}
 
-/* --- 6.4 图表卡片——玻璃拟态 + 顶部色条 + 渐变标题 --- */
+/* 6.4 图表卡片——玻璃拟态 + 顶部色条 + 渐变标题 */
 .db-chart-card{position:relative;border-radius:8px;background:#fff;border:1px solid #e0e6ef;box-shadow:0 1px 2px rgba(15,23,42,.04);margin-bottom:14px;overflow:hidden;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
 /* 卡片顶部色条——与标题 accent 类语义一致（通过 :has 联动） */
 .db-chart-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(15,23,42,.08)}
@@ -3499,7 +3499,7 @@ mark.dms-search-hit {
 .db-fullscreen-btn:hover{color:#4361ee;background:color-mix(in srgb,#4361ee 6%,#fff);border-color:#4361ee;text-decoration:none}
 .db-echart{width:100%}
 
-/* --- 6.5 入场动画 --- */
+/* 6.5 入场动画 */
 @keyframes db-fadeInUp{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes db-shimmer{0%{left:-40%}60%,100%{left:110%}}
 @keyframes db-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
@@ -3507,7 +3507,7 @@ mark.dms-search-hit {
 .db-d1{animation-delay:.06s}.db-d2{animation-delay:.14s}.db-d3{animation-delay:.22s}.db-d4{animation-delay:.30s}.db-d5{animation-delay:.38s}.db-d6{animation-delay:.46s}.db-d7{animation-delay:.28s}.db-d8{animation-delay:.38s}
 @media (prefers-reduced-motion:reduce){.db-anim{animation:none}.db-meta-live i{animation:none}}
 
-/* --- 6.6 响应式：窄屏堆叠条标签列收紧、统计模块收窄、hero 内边距收紧 --- */
+/* 6.6 响应式：窄屏堆叠条标签列收紧、统计模块收窄、hero 内边距收紧 */
 @media (max-width:1199px){
 	.db-stack-cols{gap:4px}
 	.db-stack-qsi{display:none}
@@ -3528,7 +3528,7 @@ mark.dms-search-hit {
 	.db-stack-num{font-size:22px}
 }
 
-/* ============ 7. 产品系列与产品资料 ============ */
+/* 7. 产品系列与产品资料 */
 /* 本模块原生 Dialog 的视口上限；百分比 area 使 Layer 随窗口变化重算居中及内容高度。 */
 .layui-layer.pm-responsive-dialog{max-width:min(1180px,94vw);max-height:min(820px,94vh)}
 .layui-layer.pm-responsive-dialog-materials{max-width:min(1280px,94vw);max-height:94vh}
@@ -3671,7 +3671,7 @@ mark.dms-search-hit {
 .pm-tip{padding:6px 10px;border:1px dashed #dbe6f5;border-radius:4px;color:#6b7a90;background:#f8fbff;font-size:.85rem;line-height:1.7}
 .pm-tip b{color:#2f7df6}
 .pm-inputer{display:inline-block;font-family:Consolas,Menlo,monospace}
-/* ---------- 产品分支与字典参数段位 ---------- */
+/* 产品分支与字典参数段位 */
 .pm-v2-branch+.pm-v2-branch{margin-top:22px}
 .pm-v2-branch .pm-format-heading{display:flex;align-items:baseline;gap:10px;margin:0 0 10px;color:#2b4058;font-size:.95rem;font-weight:600;line-height:1.6}
 .pm-v2-branch .pm-format-heading small{color:#718096;font-size:.8rem;font-weight:400}
@@ -3738,7 +3738,7 @@ mark.dms-search-hit {
 .pmv-selection-variant .pmv-format-heading>span{color:#143d7a;font-family:Consolas,Menlo,monospace;font-size:1.1rem}
 .pmv-selection-note{margin:5px 0 0;color:#718096;font-size:.82rem;line-height:1.65;overflow-wrap:anywhere}
 @media(max-width:700px){.pm-dictionary-value-list{grid-template-columns:minmax(0,1fr)}.pm-selection-cards-toolbar{padding-left:12px;padding-right:12px}}
-/* ---------- 产品资料卡片（机械尺寸图 + 技术参数） ---------- */
+/* 产品资料卡片（机械尺寸图 + 技术参数） */
 .pm-mat-subtitle{margin:0;color:#6b7a90;font-size:.85rem;line-height:1.7}
 .pm-material-grid{margin:0 -8px}
 .pm-material-card-col{padding:0 8px 16px}
@@ -3790,7 +3790,7 @@ mark.dms-search-hit {
 .pm-mat-tip-inline{color:#8a949e;font-size:.82rem;line-height:1.6}
 .pm-mat-empty{display:flex;align-items:center;justify-content:center;gap:9px;min-height:92px;padding:18px;border:1px dashed #cfdbe8;border-radius:4px;color:#718096;background:#fbfcfe;font-size:.9rem;line-height:1.6}
 .pm-mat-empty .fa{color:#7f9fc8;font-size:1.2rem}
-/* ---------- 段位面板：仅选择参数值 ---------- */
+/* 段位面板：仅选择参数值 */
 .pm-panel-value-list{display:flex;flex-wrap:wrap;gap:2px 0}
 @media (max-width:991px){
 	.pm-material-card-col{padding-bottom:14px}
@@ -3818,7 +3818,7 @@ mark.dms-search-hit {
 	.pm-mat-empty{min-height:76px;padding:14px;align-items:flex-start}
 }
 
-/* ---------- 产品资料展示页（只读，版式参照产品目录内页） ---------- */
+/* 产品资料展示页（只读，版式参照产品目录内页） */
 .jbolt_page.pmv-page{height:100%;min-height:0;padding:0;border-radius:0;overflow:hidden}
 .pmv-page .jbolt_page_content{height:100%;padding:0;background:#fff}
 .pmv-scroll{overflow-y:auto;overflow-x:hidden}
@@ -3918,7 +3918,7 @@ mark.dms-search-hit {
 	.pmv-footer{margin:16px 16px 0}
 }
 
-/* ---- 型号参数管理 ---- */
+/* 型号参数管理 */
 .prod-param-card>.card-header{height:56px;flex-shrink:0;}
 .prod-param-card>.card-body{height:calc(100vh - 220px);flex:none;}
 .prod-param-value-header{display:flex;flex-wrap:nowrap;align-items:center;gap:16px;padding-right:110px;}
@@ -3928,7 +3928,7 @@ mark.dms-search-hit {
     .prod-param-value-header{gap:8px;}
 }
 
-/* ---- 报告单模板管理 ---- */
+/* 报告单模板管理 */
 
 .qa-pdf-template-page>.jbolt_page_title{flex-shrink:0;}
 .qa-pdf-template-page>.jbolt_page_content{min-height:0;overflow:hidden;}

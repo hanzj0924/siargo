@@ -13,7 +13,7 @@
  * | | C | 0 | = | | / | |
  * | |___|___|___| |___| |
  * |_____________________|
- * 
+ *
  * @author: Marius Balaj & Adrian Valentin Dan
  * @contact: balajmarius93@gmail.com
  */
@@ -43,10 +43,10 @@ var template =
 
 
 ;
-(function($) {
+(function ($) {
 
 
-    $.fn.calculator = function(options) {
+    $.fn.calculator = function (options) {
 
         function Controller(el) {
             var self = this;
@@ -65,17 +65,17 @@ var template =
             this.wrap = this.display.closest(".jcalculator_wrap");
             this.element = this.wrap.find(".jcalculator");
             this.inJBoltTable = isOk(this.element.closest("table[data-editable]"));
-            if(this.inJBoltTable){
-            	var pos = this.display.offset();
-            	var top = pos.top+this.display.outerHeight()+1;
-            	this.element.css({
-            		top:top,
-            		left:pos.left
-            	});
+            if (this.inJBoltTable) {
+                var pos = this.display.offset();
+                var top = pos.top + this.display.outerHeight() + 1;
+                this.element.css({
+                    top: top,
+                    left: pos.left
+                });
                 this.element.removeClass("d-none");
             }
 
-            this.element.attr("id",randomId())
+            this.element.attr("id", randomId())
 
             /**
              * Add theme
@@ -90,37 +90,36 @@ var template =
             this.stackOp = null;
             this.clearStack = true;
 
-            var that=this;
-            this.display.on("clear",function(){
+            var that = this;
+            this.display.on("clear", function () {
                 self.digit = "";
             })
-            $('span', this.element).on('click', function(e) {
+            $('span', this.element).on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation()
                 var code = $(this).text().trim();
-                var va=$.trim(that.display.val());
-                if(!self.v && va.length>0 && !isNaN(va) && va.charAt(0)!='-'){
-                    for(var i=0;i<va.length;i++){
+                var va = $.trim(that.display.val());
+                if (!self.v && va.length > 0 && !isNaN(va) && va.charAt(0) != '-') {
+                    for (var i = 0; i < va.length; i++) {
                         self.digit = va.charAt(i);
                     }
                 }
                 if (isNaN(code)) {
-                    if(code == 'close'){
+                    if (code == 'close') {
                         $(this).closest(".jcalculator").addClass("d-none");
-                        if(that.inJBoltTable){
-                            if(window.finishEditingCells){
+                        if (that.inJBoltTable) {
+                            if (window.finishEditingCells) {
                                 var table = JBoltTableUtil.get($(this));
-                                if(isOk(table)){
-                                    finishEditingCells(table,true);
+                                if (isOk(table)) {
+                                    finishEditingCells(table, true);
                                 }
                             }
                         }
                         return false;
-                    }
-                	else if (code == 'C') {
+                    } else if (code == 'C') {
                         self.digit;
-                	} else if (code=='·') {
-                		 self.digit = code;
+                    } else if (code == '·') {
+                        self.digit = code;
                     } else if (code.charCodeAt(0) == 247) {
                         self.op = '/';
                     } else if (code.charCodeAt(0) == 61) {
@@ -139,24 +138,26 @@ var template =
 
                 } else {
 
-                        self.digit = code;
+                    self.digit = code;
 
                 }
                 /**
                  * Material ripple effect
                  */
-                         
-                var $ripple;   
+
+                var $ripple;
 
                 if (self.options.theme == 'material') {
 
                     $ripple = $(this).find('.ripple');
 
-                    if (!$ripple.length) {                        
+                    if (!$ripple.length) {
                         $('<i class="ripple"></i>').appendTo($(this)).addClass('animate');
                     } else {
                         $ripple.removeClass('animate');
-                        setTimeout(function() { $ripple.addClass('animate') }, 0);
+                        setTimeout(function () {
+                            $ripple.addClass('animate')
+                        }, 0);
                     }
 
                 }
@@ -169,16 +170,16 @@ var template =
                 return false;
             });
         }
-        
+
         Controller.prototype = {
 
 
-            load: function() {
+            load: function () {
                 return this.display.val() || this.display.text();
             },
 
 
-            save: function() {
+            save: function () {
                 if (this.display.is('input')) this.display.val(this.value).change();
                 else this.display.text(this.value);
             },
@@ -218,17 +219,17 @@ var template =
 
                 switch (this.stackOp) {
                     case '+':
-                        this.v = tofixed(this.stack + this.v,4,true);
+                        this.v = tofixed(this.stack + this.v, 4, true);
                         break;
                     case '-':
-                        this.v = tofixed(this.stack - this.v,4,true);
+                        this.v = tofixed(this.stack - this.v, 4, true);
                         break;
                     case 'x':
-                        this.v = tofixed(this.stack * this.v,4,true);
+                        this.v = tofixed(this.stack * this.v, 4, true);
                         break;
                     case '/':
-                    	this.v = tofixed(this.stack / this.v,4,true);
-                    	break;
+                        this.v = tofixed(this.stack / this.v, 4, true);
+                        break;
                 }
                 this.stack = this.v;
                 this.stackOp = value;
@@ -240,26 +241,26 @@ var template =
              */
 
             set digit(d) {
-                if(d.length==0){
+                if (d.length == 0) {
                     this.clearStack = true;
                     this.value = "";
                     this.stack = "";
                     this.save();
                     return "";
                 }
-            	if(this.v.toString().indexOf(".")!=-1){
-            		if(d=='·'){
-                		d = '.';
-                		return this.v = this.v;
-                	}
-            		if (this.clearStack) return this.v = d;
-            		return this.v = this.v+d;
+                if (this.v.toString().indexOf(".") != -1) {
+                    if (d == '·') {
+                        d = '.';
+                        return this.v = this.v;
+                    }
+                    if (this.clearStack) return this.v = d;
+                    return this.v = this.v + d;
                 }
-            	if(d=='·'){
-            		d = '.';
-            		return this.v = this.v+d
-            	}
-            	d = parseInt(d);
+                if (d == '·') {
+                    d = '.';
+                    return this.v = this.v + d
+                }
+                d = parseInt(d);
                 if (this.clearStack) return this.v = d;
                 return this.v = (this.v * 10) + d;
             },
@@ -281,8 +282,10 @@ var template =
 
         Controller.defaults = {
             theme: 'material',
-            onInput: function() {},
-            onResult: function() {}
+            onInput: function () {
+            },
+            onResult: function () {
+            }
         };
 
         /**
@@ -291,19 +294,19 @@ var template =
 
         var controller;
 
-        this.each(function() {
+        this.each(function () {
             controller = new Controller($(this));
         });
 
 
-        jboltBody.on('click', function(e) {
-            var tar=$(e.target);
-            if(isOk(tar.closest(".jcalculator_wrap")) || isOk(tar.closest(".jcalculator"))){
+        jboltBody.on('click', function (e) {
+            var tar = $(e.target);
+            if (isOk(tar.closest(".jcalculator_wrap")) || isOk(tar.closest(".jcalculator"))) {
                 var elel = tar.parent().find(".jcalculator");
                 var idv = elel.attr("id");
-                jboltBody.find(".jcalculator:not([id='"+idv+"'])").addClass("d-none");
+                jboltBody.find(".jcalculator:not([id='" + idv + "'])").addClass("d-none");
                 elel.removeClass("d-none");
-            }else{
+            } else {
                 controller.element.addClass("d-none");
             }
         });

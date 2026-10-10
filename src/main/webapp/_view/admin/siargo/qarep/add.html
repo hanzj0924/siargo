@@ -5,135 +5,155 @@
 
 #define main()
 #set(pageId=RandomUtil.random(6))
-<div class="jbolt_page qa-product-form" data-page-id="#(pageId)" data-form-mode="add" data-init-handler="SiargoQarepForm.init" data-close-handler="SiargoQarepForm.close">
-	<div class="jbolt_page_content">
-		<form onsubmit="return false;" id="qareportForm_#(pageId)"
-			action="admin/siargo/qarep/save" method="post">
-			<input type="hidden" name="qareport.id" value="#(qareport.id??)" />
-			<input type="hidden" name="productsJson" value="[]" />
-			<div class="fm-wrap">
-				<div class="qa-add-layout">
-					<!-- 左栏：报告单信息、独立参数区与订单导入 -->
-					<div class="qa-add-sidebar">
-						<!-- 报告单信息 -->
-						<div class="fm-sec">
-							<div class="fm-hd">
-								<span>&#128203; 报告单信息</span><i></i>
-							</div>
-							<div class="fm-card qa-report-fields">
-								<div class="form-group qa-report-field">
-									<label class="col-form-label">类型</label>
-									<div class="qa-report-control">
-										<select class="form-control" data-autoload
-											name="qareport.rep_type"
-											data-url="admin/dictionary/options?key=siargo_rep_type"
-											data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
-											data-value="" data-value-attr="sn"
-											data-select="#(qareport.repType ??)">
-										</select>
-									</div>
-								</div>
-								<div class="form-group qa-report-field">
-									<label class="col-form-label">版号</label>
-									<div class="qa-report-control input-group">
-										<select class="form-control" data-autoload
-											name="product.pdfver"
-											data-url="admin/dictionary/options?key=siargo_pdfver"
-											data-rule="select" data-tips="请选择版号" data-value=""
-											data-value-attr="name" data-text-attr="name"
-											data-select="#(qareport.pdfver ??)">
-										</select>
-										<span class="input-group-btn">
-											<button class="btn btn-default qa-report-addon" type="button" aria-label="管理报告单版号"
-												data-dialogbtn data-area="1045,725"
-												data-handler="SiargoQarepForm.refreshVersions"
-												data-url="/admin/siargo/qarep/pdffolder">
+<div class="jbolt_page qa-product-form"
+     data-page-id="#(pageId)"
+     data-form-mode="add"
+     data-large-meter-series-ids="#(largeMeterSeriesIds??)"
+     data-init-handler="SiargoQarepForm.init"
+     data-close-handler="SiargoQarepForm.close">
+    <div class="jbolt_page_content">
+        <form onsubmit="return false;" id="qareportForm_#(pageId)"
+              action="admin/siargo/qarep/save" method="post">
+            <input type="hidden" name="qareport.id" value="#(qareport.id??)"/>
+            <input type="hidden" name="productsJson" value="[]"/>
+            <div class="fm-wrap">
+                <div class="qa-add-layout">
+                    <!-- 左栏：报告单信息、独立参数区与订单导入 -->
+                    <div class="qa-add-sidebar">
+                        <!-- 报告单信息 -->
+                        <div class="fm-sec">
+                            <div class="fm-hd">
+                                <span>&#128203; 报告单信息</span><i></i>
+                            </div>
+                            <div class="fm-card qa-report-fields">
+                                <div class="form-group qa-report-field">
+                                    <label class="col-form-label">类型</label>
+                                    <div class="qa-report-control">
+                                        <select class="form-control" data-autoload
+                                                name="qareport.rep_type"
+                                                data-url="admin/dictionary/options?key=siargo_rep_type"
+                                                data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
+                                                data-value="" data-value-attr="sn"
+                                                data-select="#(qareport.repType ??)">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group qa-report-field">
+                                    <label class="col-form-label">版号</label>
+                                    <div class="qa-report-control input-group">
+                                        <select class="form-control" data-autoload
+                                                name="product.pdfver"
+                                                data-url="admin/dictionary/options?key=siargo_pdfver"
+                                                data-rule="select" data-tips="请选择版号" data-value=""
+                                                data-value-attr="name" data-text-attr="name"
+                                                data-select="#(qareport.pdfver ??)">
+                                        </select>
+                                        <span class="input-group-btn">
+											<button class="btn btn-default qa-report-addon"
+                                                    type="button"
+                                                    aria-label="管理报告单版号"
+                                                    data-dialogbtn
+                                                    data-area="1045,725"
+                                                    data-handler="SiargoQarepForm.refreshVersions"
+                                                    data-url="/admin/siargo/qarep/pdffolder">
 												<i class="fa fa-cog"></i>
 											</button>
 										</span>
-									</div>
-								</div>
-								<div class="form-group qa-report-field">
-									<label class="col-form-label">订单号</label>
-									<div class="qa-report-control">
-										<input type="text" data-with-clearbtn="true"
-											autocomplete="off" class="form-control" data-rule="pint"
-											placeholder="=请填写=" maxlength="10" name="qareport.order_id"
-											value="#(qareport.orderId??)" />
-									</div>
-								</div>
-								<div class="form-group qa-report-field">
-									<label class="col-form-label">检验进度</label>
-									<div class="qa-report-control">
-										<select class="form-control" data-autoload name="product.insp"
-											data-rule="select" data-tips="请选择检验进度" data-value=""
-											data-options="精度待检:1,精度已检:2"
-											data-select="#(qareport.insp ??)">
-										</select>
-									</div>
-								</div>
-								<div class="form-group qa-report-field qa-report-field-wide">
-									<label class="col-form-label">客户名称</label>
-									<div class="qa-report-control input-group">
-										<select class="form-control " data-autoload
-											data-refresh="true" data-url="admin/siargo/qarep/getCustName"
-											name="qareport.cust_id" data-text="=请选择=" data-value-attr="id"
-											data-rule="select" data-text-attr="name"
-											data-select="#(qareport.custId ??)"
-											data-select-type="select2" id="custSelect_#(pageId)">
-										</select>
-										<span class="input-group-btn">
-											<button class="btn btn-default qa-report-addon" type="button" aria-label="新增客户"
-												data-dialogbtn data-area="350,250"
-												data-handler="SiargoQarepForm.refreshCustomer" data-title="新增客户"
-												data-url="admin/siargo/customer/add">
+                                    </div>
+                                </div>
+                                <div class="form-group qa-report-field">
+                                    <label class="col-form-label">订单号</label>
+                                    <div class="qa-report-control">
+                                        <input type="text" data-with-clearbtn="true"
+                                               autocomplete="off" class="form-control" data-rule="pint"
+                                                maxlength="10" name="qareport.order_id"
+                                               value="#(qareport.orderId??)"/>
+                                    </div>
+                                </div>
+                                <div class="form-group qa-report-field">
+                                    <label class="col-form-label">检验进度</label>
+                                    <div class="qa-report-control">
+                                        <select class="form-control" data-autoload name="product.insp"
+                                                data-rule="select" data-tips="请选择检验进度" data-value=""
+                                                data-options="精度待检:1,精度已检:2"
+                                                data-select="#(qareport.insp ??)">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group qa-report-field qa-report-field-wide">
+                                    <label class="col-form-label">客户名称</label>
+                                    <div class="qa-report-control input-group">
+                                        <select class="form-control " data-autoload
+                                                data-refresh="true" data-url="admin/siargo/qarep/getCustName"
+                                                name="qareport.cust_id" data-text="=请选择=" data-value-attr="id"
+                                                data-rule="select" data-text-attr="name"
+                                                data-select="#(qareport.custId ??)"
+                                                data-select-type="select2" id="custSelect_#(pageId)">
+                                        </select>
+                                        <span class="input-group-btn">
+											<button class="btn btn-default qa-report-addon"
+                                                    type="button"
+                                                    aria-label="新增客户"
+                                                    data-dialogbtn
+                                                    data-area="350,250"
+                                                    data-handler="SiargoQarepForm.refreshCustomer"
+                                                    data-title="新增客户"
+                                                    data-url="admin/siargo/customer/add">
 												<i class="fa fa-plus"></i>
 											</button>
 										</span>
-									</div>
-								</div>
-							</div>
-						</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-						<div class="fm-sec">
-							<div class="fm-hd"><span>&#9889; 大流量计参数</span><i></i></div>
-							#include("_product_parameters.html")
-						</div>
-						<!-- 数据导入 -->
-						<div class="fm-sec">
-							<div class="fm-hd">
-								<span>&#128229; 订单导入</span><i></i>
-							</div>
-							<div class="fm-card qa-order-import">
-								<div class="j_upload_file_box" data-name="file"
-									data-btn-class="btn btn-success" data-placeholder="导入Excel"
-									data-accept="excel" data-maxsize="20480"
-									data-handler="uploadFile"
-									data-url="admin/siargo/qarep/importExcel"
-									data-upload-success-handler="SiargoQarepForm.importSuccess"></div>
-								<p class="help-block" data-order-import-status role="status" aria-live="polite" hidden></p>
-							</div>
-						</div>
-					</div>
-					<!-- 右栏与左栏等高，每个型号独立维护产品信息 -->
-					<div class="qa-add-products">
-						<div class="fm-sec qa-products-panel">
-							<div class="fm-hd"><span>&#128230; 产品信息</span><i></i></div>
-							<div class="fm-card">
-								<div class="prod-scroll">
-									<div data-product-list></div>
-									<template data-product-template>#include("_product_fields.html",separateParameters=true)</template>
-									<div data-product-empty class="prod-empty-tip">暂无产品，点击下方按钮添加</div>
-								</div>
-								<button type="button" class="prod-add-btn align-self-center" data-product-add>+ 添加产品</button>
-							</div>
-						</div>
-					</div>
-				</div>
+                        <div class="fm-sec">
+                            <div class="fm-hd"><span>&#9889; 大流量计参数</span><i></i></div>
+                            #include("_product_parameters.html")
+                        </div>
+                        <!-- 数据导入 -->
+                        <div class="fm-sec">
+                            <div class="fm-hd">
+                                <span>&#128229; 订单导入</span><i></i>
+                            </div>
+                            <div class="fm-card qa-order-import">
+                                <div class="j_upload_file_box" data-name="file"
+                                     data-btn-class="btn btn-success" data-placeholder="导入Excel"
+                                     data-accept="excel" data-maxsize="20480"
+                                     data-handler="uploadFile"
+                                     data-url="admin/siargo/qarep/importExcel"
+                                     data-upload-success-handler="SiargoQarepForm.importSuccess"></div>
+                                <p class="help-block"
+                                   data-order-import-status
+                                   role="status"
+                                   aria-live="polite"
+                                   hidden></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 右栏与左栏等高，每个型号独立维护产品信息 -->
+                    <div class="qa-add-products">
+                        <div class="fm-sec qa-products-panel">
+                            <div class="fm-hd"><span>&#128230; 产品信息</span><i></i></div>
+                            <div class="fm-card">
+                                <div class="prod-scroll">
+                                    <div data-product-list></div>
+                                    <template data-product-template>
+                                        #include("_product_fields.html",separateParameters=true)
+                                    </template>
+                                    <div data-product-empty class="prod-empty-tip">暂无产品，点击下方按钮添加</div>
+                                </div>
+                                <button type="button" class="prod-add-btn align-self-center" data-product-add>
+                                    + 添加产品
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-			</div>
-		</form>
-	</div>
+            </div>
+        </form>
+    </div>
 </div>
 #end
 

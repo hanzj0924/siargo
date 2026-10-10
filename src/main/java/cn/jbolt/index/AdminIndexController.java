@@ -39,301 +39,303 @@ import cn.jbolt.core.permission.UnCheckIfSystemAdmin;
 import cn.jbolt.core.service.JBoltLoginLogUtil;
 import com.jfinal.kit.Ret;
 
-/**
- * 系统后台主入口
- * @ClassName:  AdminIndexController
- * @author: JFinal学院-小木 QQ：909854136
- * @date:   2020年3月8日
- */
+/** 系统后台主入口 */
 public class AdminIndexController extends JBoltBaseController {
-	@Inject
-	private UserService userService;
-	@Inject
-	private GlobalConfigService globalConfigService;
-	@Inject
-	private TopnavService topnavService;
-	@Inject
-	private OnlineUserService onlineUserService;
-	@Inject
-	private QareportService qareportservice;
-	@UnCheck
-	@Before(JBoltNoUrlPara.class)
-	public void index(){
-		render("index.html");
-	}
+    @Inject
+    private UserService userService;
+    @Inject
+    private GlobalConfigService globalConfigService;
+    @Inject
+    private TopnavService topnavService;
+    @Inject
+    private OnlineUserService onlineUserService;
+    @Inject
+    private QareportService qareportservice;
 
-	@UnCheck
-	public void menu(){
-		set("leftMenus", JBoltPermissionCache.me.getRoleMenus(JBoltUserKit.getUserRoleIds()));
-		render("menu.html");
-	}
-	@UnCheck
-	public void lockSystem(){
-		renderJson(onlineUserService.lockCurrentUserScreen());
-	}
-	@UnCheck
-	public void unLockSystem(){
-		String password=get("password");
-		if(notOk(password)) {
-			renderJsonFail("请输入登录密码");
-		}else {
-			boolean success=userService.checkPwd(JBoltUserKit.getUserId(),password);
-			if(success) {
-				renderJson(onlineUserService.unlockCurrentUserScreen());
-			}else {
-				renderJsonFail("密码不正确");
-			}
-		}
+    @UnCheck
+    @Before(JBoltNoUrlPara.class)
+    public void index() {
+        render("index.html");
+    }
 
-	}
+    @UnCheck
+    public void menu() {
+        set("leftMenus", JBoltPermissionCache.me.getRoleMenus(JBoltUserKit.getUserRoleIds()));
+        render("menu.html");
+    }
 
-	@CheckPermission("dashboard")
-	@UnCheckIfSystemAdmin
-	public void dashboard(){
-		// 流程环节看板数据（带30分钟缓存）：all/noq/accq/funq/appq/allq
-		// 看板使用报告单级、本年度口径（与环形图“本年度报告单来源/订单”保持一致）
-		set("flowCounts", qareportservice.getDashboardFlowCounts());
-		// 本年度送检/检验总量（hero 头部副标题展示）
-		set("totalQsi", String.format("%,d", qareportservice.getTotalQSI(0)==null? 0:qareportservice.getTotalQSI(0)));
-		set("totalQi", String.format("%,d", qareportservice.getTotalQI(0)==null? 0:qareportservice.getTotalQI(0)));
+    @UnCheck
+    public void lockSystem() {
+        renderJson(onlineUserService.lockCurrentUserScreen());
+    }
 
-		set("donutData",qareportservice.getDonutData());
-		set("repalldata",qareportservice.getRepAllData());
-		set("repfixdata",qareportservice.getRepData());
-		// 季度同比：今年 vs 去年各季度送检只数
-		set("quarterData",qareportservice.getQuarterCompareData());
-		render("dashboard.html");
-	}
+    @UnCheck
+    public void unLockSystem() {
+        String password = get("password");
+        if (notOk(password)) {
+            renderJsonFail("请输入登录密码");
+        }
+        else {
+            boolean success = userService.checkPwd(JBoltUserKit.getUserId(), password);
+            if (success) {
+                renderJson(onlineUserService.unlockCurrentUserScreen());
+            }
+            else {
+                renderJsonFail("密码不正确");
+            }
+        }
 
-	@Clear
-	public void relogin(){
-		render("relogin.html");
-	}
-	/**
-	 * 手动操作退出系统
-	 */
-	@Clear
-	public void logout(){
-		HttpSession session=getSession();
-		if(session!=null) {
-			session.invalidate();
-		}
-		//当前用户自行离线
-		onlineUserService.currentUserLogout();
-		//删除cookie存的sessionId
-		removeCookie(JBoltConst.JBOLT_SESSIONID_KEY);
-		removeCookie(JBoltConst.JBOLT_SESSIONID_REFRESH_TOKEN);
-		removeCookie(JBoltConst.JBOLT_KEEPLOGIN_KEY);
-		redirect(JBoltBaseHandler.processBasePath(getRequest()));
-	}
-	/**
-	 * 进入一个异端顶替登录下线的提示界面
-	 */
-	@Clear
-	public void terminalOffline() {
-		setMsg(JBoltMsg.ADMIN_TERMINAL_OFFLINE_PAGE_MSG);
-		render("offline.html");
-	}
-	/**
-	 * 进入一个被强制下线的界面
-	 */
-	@Clear
-	public void forcedOffline() {
-		setMsg(JBoltMsg.ADMIN_TERMINAL_OFFLINE_PAGE_MSG);
-		render("offline.html");
-	}
-	/**
-	 * 登录
-	 */
-	@Clear
-	public void login(){
-		//判断不是post就是进登录页面
-		if(!getRequest().getMethod().equalsIgnoreCase("post")) {
-			render(getLoginFileName());
-			return;
-		}
-		String username=get("username");
-		//创建登录日志
-		LoginLog log=JBoltLoginLogUtil.createLoginLog(getRequest());
-		// 修正 Windows 11 检测（UA Freeze 策略导致 Win11 UA 与 Win10 相同，通过 Client Hints 修正）
-		String osName = log.getOsName();
-		if (osName != null && osName.contains("Windows 10")) {
-			// 优先从前端 JS 主动传递的参数获取，其次从浏览器自动发送的请求头获取
-			String platformVersion = getPara("_platformVersion");
-			if (platformVersion == null || platformVersion.isEmpty()) {
-				platformVersion = getRequest().getHeader("Sec-CH-UA-Platform-Version");
-			}
-			if (platformVersion != null && !platformVersion.isEmpty()) {
-				try {
-					String cleanVersion = platformVersion.replace("\"", "").trim();
-					String majorStr = cleanVersion.contains(".") ? cleanVersion.substring(0, cleanVersion.indexOf(".")) : cleanVersion;
-					int majorVersion = Integer.parseInt(majorStr);
-					if (majorVersion >= 13) {
-						// 根据主版本号映射 Windows 11 的发行版本
-						String release;
-						switch (majorVersion) {
-							case 13: release = "22H2"; break;
-							case 14: release = "23H2"; break;
-							case 15:
-							case 16:
-							case 17:
-							case 18: release = "24H2"; break;
-							case 19: release = "25H2"; break;
-							default: release = ""; break;
-						}
-						// 获取 CPU 架构信息
-						String architecture = getPara("_architecture");
-						String bitness = getPara("_bitness");
-						String arch = "";
-						if (bitness != null && !bitness.isEmpty()) {
-							arch = " x" + bitness; // 如 " x64"
-						} else if (architecture != null && !architecture.isEmpty()) {
-							arch = " " + architecture; // 如 " x86"
-						}
-						// 组装完整的 OS 名称：Windows 11 [发行版本] [架构]
-						StringBuilder osBuilder = new StringBuilder("Windows 11");
-						if (!release.isEmpty()) {
-							osBuilder.append(" ").append(release);
-						}
-						if (!arch.isEmpty()) {
-							osBuilder.append(arch);
-						}
-						log.setOsName(osBuilder.toString());
-					}
-				} catch (NumberFormatException e) {
-					// 解析失败，保持原值不影响登录流程
-				}
-			}
-		}
-		log.setUsername(username);
+    }
 
-		//根据全局配置判断是否需要验证码 默认需要
-		boolean checkCaptcha=JBoltGlobalConfigCache.me.isJBoltLoginUseCapture();
-		if(checkCaptcha){
-			boolean checkSuccess=validateCaptcha("captcha");
-			if(!checkSuccess) {
-				log.setLoginState(JBoltLoginState.CAPTURE_ERROR.getValue());
-				log.save();
-				renderJsonFail(JBoltLoginState.CAPTURE_ERROR.getText());
-				return;
-			}
-		}
+    @CheckPermission("dashboard")
+    @UnCheckIfSystemAdmin
+    public void dashboard() {
+        // 流程看板按产品统计：在检全量、完成按本年度批准时间，缓存30分钟。
+        set("flowCounts", qareportservice.getDashboardFlowCounts());
+        // 本年度送检/检验总量（hero 头部副标题展示）
+        set("totalQsi",
+                String.format("%,d", qareportservice.getTotalQSI(0) == null ? 0 : qareportservice.getTotalQSI(0)));
+        set("totalQi", String.format("%,d", qareportservice.getTotalQI(0) == null ? 0 : qareportservice.getTotalQI(0)));
 
-		Ret ret=userService.getUser(username,get("password"));
-		User user = ret.isFail()?null:ret.getAs("data");
-		//检测用户名密码是否正确输入并得到user
-		if(user==null){
-			log.setLoginState(JBoltLoginState.USERNAME_PWD_ERROR.getValue());
-			log.save();
-			renderJson(ret);
-			return;
-		}
+        set("donutData", qareportservice.getDonutData());
+        set("repalldata", qareportservice.getRepAllData());
+        set("repfixdata", qareportservice.getRepData());
+        // 季度同比：今年 vs 去年各季度送检只数
+        set("quarterData", qareportservice.getQuarterCompareData());
+        render("dashboard.html");
+    }
 
-		log.setUserId(user.getId());
-		//检测用户是否禁用
-		if(user.getEnable()==null|| !user.getEnable()){
-			log.setLoginState(JBoltLoginState.ENABLE_ERROR.getValue());
-			log.save();
-			renderJsonFail(JBoltLoginState.ENABLE_ERROR.getText());
-			return;
-		}
+    @Clear
+    public void relogin() {
+        render("relogin.html");
+    }
 
-		//检测角色权限分配
-		if(notOk(user.getRoles())&&(user.getIsSystemAdmin()==null|| !user.getIsSystemAdmin())){
-			log.setLoginState(JBoltLoginState.NOT_ASSIGN_ROLE_ERROR.getValue());
-			log.save();
-			renderJsonFail(JBoltLoginState.NOT_ASSIGN_ROLE_ERROR.getText());
-			return;
-		}
+    /** 手动操作退出系统 */
+    @Clear
+    public void logout() {
+        HttpSession session = getSession();
+        if (session != null) {
+            session.invalidate();
+        }
+        // 当前用户自行离线
+        onlineUserService.currentUserLogout();
+        // 删除cookie存的sessionId
+        removeCookie(JBoltConst.JBOLT_SESSIONID_KEY);
+        removeCookie(JBoltConst.JBOLT_SESSIONID_REFRESH_TOKEN);
+        removeCookie(JBoltConst.JBOLT_KEEPLOGIN_KEY);
+        redirect(JBoltBaseHandler.processBasePath(getRequest()));
+    }
 
-		log.setLoginState(JBoltLoginState.LOGIN_SUCCESS.getValue());
-		log.save();
+    /** 进入一个异端顶替登录下线的提示界面 */
+    @Clear
+    public void terminalOffline() {
+        setMsg(JBoltMsg.ADMIN_TERMINAL_OFFLINE_PAGE_MSG);
+        render("offline.html");
+    }
 
-		//处理用户登录信息 异地登录异常信息
-		boolean isRemoteLogin=userService.processUserRemoteLogin(user,log);
-		userService.processUserLoginInfo(user,isRemoteLogin,log);
-		//登录后的处理
-		afterLogin(user,log);
-		renderJsonSuccess();
-	}
-	/**
-	 * 获取登录页文件名
-	 * @return
-	 */
-	private String getLoginFileName() {
-		String fileName = JBoltGlobalConfigCache.me.getLoginFile();
-		if(isOk(fileName)) {
-			String filePath = PathKit.getWebRootPath()+File.separator+"_view"+File.separator+"_admin"+File.separator+"index"+File.separator+fileName;
-			if(!FileUtil.exist(filePath)) {
-				fileName = JBoltConst.JBOLT_ADMIN_LOGIN_DEFAULT_FILE;
-			}
-		}else {
-			fileName = JBoltConst.JBOLT_ADMIN_LOGIN_DEFAULT_FILE;
-		}
-		return fileName;
-	}
-	/**
-	 * 登录后设置用户相关的登录cookie
-	 * @param user
-	 * @param log
-	 */
-	private void afterLogin(User user, LoginLog log) {
-		//处理onlineUser
-		boolean keeplogin = getCheckBoxBoolean("keepLogin");
-		Kv result=onlineUserService.processUserLogin(keeplogin,user,log);
-		if(result!=null && !result.isEmpty()) {
-			int keepLoginSeconds = result.getInt("keepLoginSeconds");
-			String sessionId = result.getStr("sessionId");
-			//设置时长根据参数配置中的值 如果没配置或者获取配置异常 就按照默认8小时
-			setCookie(JBoltConst.JBOLT_SESSIONID_KEY,sessionId,keepLoginSeconds,JFinal.me().getContextPath(),true);
-			//设置refreshToken jwt
-			int refreshTokenLiveSeconds = keepLoginSeconds + 28800;
-			setCookie(JBoltConst.JBOLT_SESSIONID_REFRESH_TOKEN,onlineUserService.genNewSessionIdRefreshToken(user,sessionId,refreshTokenLiveSeconds),refreshTokenLiveSeconds,JFinal.me().getContextPath(),true);
-			//设置是否keepLogin
-			setCookie(JBoltConst.JBOLT_KEEPLOGIN_KEY,keeplogin?"true":"false",refreshTokenLiveSeconds,JFinal.me().getContextPath(),true);
-		}
-		//设置用户样式配置的cookie
-		resetUserConfigCookie(user.getId());
-	}
-	/**
-	 * 跳转到锁屏页面
-	 */
-	public void redirectToScreenLock() {
-		JBoltControllerKit.renderSystemLockedPage(this);
-	}
-	/**
-	 * 登录后重置登录页面用户设置cookie
-	 * @param userId
-	 */
-	private void resetUserConfigCookie(Long userId) {
-		int seconds = 31536000;
-		//365天不失效 cookie
-//		boolean glass=JBoltUserConfigCache.me.getJBoltLoginFormStyleGlass(userId);
+    /** 进入一个被强制下线的界面 */
+    @Clear
+    public void forcedOffline() {
+        setMsg(JBoltMsg.ADMIN_TERMINAL_OFFLINE_PAGE_MSG);
+        render("offline.html");
+    }
+
+    /** 登录 */
+    @Clear
+    public void login() {
+        // 判断不是post就是进登录页面
+        if (!getRequest().getMethod().equalsIgnoreCase("post")) {
+            render(getLoginFileName());
+            return;
+        }
+        String username = get("username");
+        // 创建登录日志
+        LoginLog log = JBoltLoginLogUtil.createLoginLog(getRequest());
+        // 修正 Windows 11 检测（UA Freeze 策略导致 Win11 UA 与 Win10 相同，通过 Client Hints 修正）
+        String osName = log.getOsName();
+        if (osName != null && osName.contains("Windows 10")) {
+            // 优先从前端 JS 主动传递的参数获取，其次从浏览器自动发送的请求头获取
+            String platformVersion = getPara("_platformVersion");
+            if (platformVersion == null || platformVersion.isEmpty()) {
+                platformVersion = getRequest().getHeader("Sec-CH-UA-Platform-Version");
+            }
+            if (platformVersion != null && !platformVersion.isEmpty()) {
+                try {
+                    String cleanVersion = platformVersion.replace("\"", "").trim();
+                    String majorStr = cleanVersion.contains(".") ? cleanVersion.substring(0,
+                            cleanVersion.indexOf(".")) : cleanVersion;
+                    int majorVersion = Integer.parseInt(majorStr);
+                    if (majorVersion >= 13) {
+                        // 根据主版本号映射 Windows 11 的发行版本
+                        String release;
+                        switch (majorVersion) {
+                            case 13:
+                                release = "22H2";
+                                break;
+                            case 14:
+                                release = "23H2";
+                                break;
+                            case 15:
+                            case 16:
+                            case 17:
+                            case 18:
+                                release = "24H2";
+                                break;
+                            case 19:
+                                release = "25H2";
+                                break;
+                            default:
+                                release = "";
+                                break;
+                        }
+                        // 获取 CPU 架构信息
+                        String architecture = getPara("_architecture");
+                        String bitness = getPara("_bitness");
+                        String arch = "";
+                        if (bitness != null && !bitness.isEmpty()) {
+                            arch = " x" + bitness; // 如 " x64"
+                        }
+                        else if (architecture != null && !architecture.isEmpty()) {
+                            arch = " " + architecture; // 如 " x86"
+                        }
+                        // 组装完整的 OS 名称：Windows 11 [发行版本] [架构]
+                        StringBuilder osBuilder = new StringBuilder("Windows 11");
+                        if (!release.isEmpty()) {
+                            osBuilder.append(" ").append(release);
+                        }
+                        if (!arch.isEmpty()) {
+                            osBuilder.append(arch);
+                        }
+                        log.setOsName(osBuilder.toString());
+                    }
+                } catch (NumberFormatException e) {
+                    // 解析失败，保持原值不影响登录流程
+                }
+            }
+        }
+        log.setUsername(username);
+
+        // 根据全局配置判断是否需要验证码 默认需要
+        boolean checkCaptcha = JBoltGlobalConfigCache.me.isJBoltLoginUseCapture();
+        if (checkCaptcha) {
+            boolean checkSuccess = validateCaptcha("captcha");
+            if (!checkSuccess) {
+                log.setLoginState(JBoltLoginState.CAPTURE_ERROR.getValue());
+                log.save();
+                renderJsonFail(JBoltLoginState.CAPTURE_ERROR.getText());
+                return;
+            }
+        }
+
+        Ret ret = userService.getUser(username, get("password"));
+        User user = ret.isFail() ? null : ret.getAs("data");
+        // 检测用户名密码是否正确输入并得到user
+        if (user == null) {
+            log.setLoginState(JBoltLoginState.USERNAME_PWD_ERROR.getValue());
+            log.save();
+            renderJson(ret);
+            return;
+        }
+
+        log.setUserId(user.getId());
+        // 检测用户是否禁用
+        if (user.getEnable() == null || !user.getEnable()) {
+            log.setLoginState(JBoltLoginState.ENABLE_ERROR.getValue());
+            log.save();
+            renderJsonFail(JBoltLoginState.ENABLE_ERROR.getText());
+            return;
+        }
+
+        // 检测角色权限分配
+        if (notOk(user.getRoles()) && (user.getIsSystemAdmin() == null || !user.getIsSystemAdmin())) {
+            log.setLoginState(JBoltLoginState.NOT_ASSIGN_ROLE_ERROR.getValue());
+            log.save();
+            renderJsonFail(JBoltLoginState.NOT_ASSIGN_ROLE_ERROR.getText());
+            return;
+        }
+
+        log.setLoginState(JBoltLoginState.LOGIN_SUCCESS.getValue());
+        log.save();
+
+        // 处理用户登录信息 异地登录异常信息
+        boolean isRemoteLogin = userService.processUserRemoteLogin(user, log);
+        userService.processUserLoginInfo(user, isRemoteLogin, log);
+        // 登录后的处理
+        afterLogin(user, log);
+        renderJsonSuccess();
+    }
+
+    /** 获取登录页文件名 */
+    private String getLoginFileName() {
+        String fileName = JBoltGlobalConfigCache.me.getLoginFile();
+        if (isOk(fileName)) {
+            String filePath =
+                    PathKit.getWebRootPath() + File.separator + "_view" + File.separator + "_admin" + File.separator +
+                            "index" + File.separator + fileName;
+            if (!FileUtil.exist(filePath)) {
+                fileName = JBoltConst.JBOLT_ADMIN_LOGIN_DEFAULT_FILE;
+            }
+        }
+        else {
+            fileName = JBoltConst.JBOLT_ADMIN_LOGIN_DEFAULT_FILE;
+        }
+        return fileName;
+    }
+
+    /** 登录后设置用户相关的登录cookie */
+    private void afterLogin(User user, LoginLog log) {
+        // 处理onlineUser
+        boolean keeplogin = getCheckBoxBoolean("keepLogin");
+        Kv result = onlineUserService.processUserLogin(keeplogin, user, log);
+        if (result != null && !result.isEmpty()) {
+            int keepLoginSeconds = result.getInt("keepLoginSeconds");
+            String sessionId = result.getStr("sessionId");
+            // 设置时长根据参数配置中的值 如果没配置或者获取配置异常 就按照默认8小时
+            setCookie(JBoltConst.JBOLT_SESSIONID_KEY, sessionId, keepLoginSeconds, JFinal.me().getContextPath(), true);
+            // 设置refreshToken jwt
+            int refreshTokenLiveSeconds = keepLoginSeconds + 28800;
+            setCookie(JBoltConst.JBOLT_SESSIONID_REFRESH_TOKEN,
+                    onlineUserService.genNewSessionIdRefreshToken(user, sessionId, refreshTokenLiveSeconds),
+                    refreshTokenLiveSeconds, JFinal.me().getContextPath(), true);
+            // 设置是否keepLogin
+            setCookie(JBoltConst.JBOLT_KEEPLOGIN_KEY, keeplogin ? "true" : "false", refreshTokenLiveSeconds,
+                    JFinal.me().getContextPath(), true);
+        }
+        // 设置用户样式配置的cookie
+        resetUserConfigCookie(user.getId());
+    }
+
+    /** 跳转到锁屏页面 */
+    public void redirectToScreenLock() {
+        JBoltControllerKit.renderSystemLockedPage(this);
+    }
+
+    /** 登录后重置登录页面用户设置cookie */
+    private void resetUserConfigCookie(Long userId) {
+        int seconds = 31536000;
+        // 365天不失效 cookie
+// boolean glass=JBoltUserConfigCache.me.getJBoltLoginFormStyleGlass(userId);
 //		setCookie("jbolt_login_glassStyle",glass+"",seconds,JFinal.me().getContextPath());
-		boolean blur=JBoltUserConfigCache.me.getJBoltLoginBgimgBlur(userId);
-		setCookie("jbolt_login_bgimgBlur",blur+"" ,seconds,JFinal.me().getContextPath());
-		boolean nest=JBoltUserConfigCache.me.getJBoltLoginNest(userId);
-		setCookie("jbolt_login_nest",nest+"" ,seconds,JFinal.me().getContextPath());
-	}
+        boolean blur = JBoltUserConfigCache.me.getJBoltLoginBgimgBlur(userId);
+        setCookie("jbolt_login_bgimgBlur", blur + "", seconds, JFinal.me().getContextPath());
+        boolean nest = JBoltUserConfigCache.me.getJBoltLoginNest(userId);
+        setCookie("jbolt_login_nest", nest + "", seconds, JFinal.me().getContextPath());
+    }
 
-	/**
-	 * 验证码
-	 */
-	@Clear
-	public void captcha(){
-		renderJBoltCaptcha(JBoltGlobalConfigCache.me.getConfigValue(JBoltGlobalConfigKey.JBOLT_LOGIN_CAPTURE_TYPE));
-	}
+    /** 验证码 */
+    @Clear
+    public void captcha() {
+        renderJBoltCaptcha(JBoltGlobalConfigCache.me.getConfigValue(JBoltGlobalConfigKey.JBOLT_LOGIN_CAPTURE_TYPE));
+    }
 
 
-	/**
-	 * 获取当前用户Cookie里的TOKEN-jboltid
-	 */
-	@UnCheck
-	public void myToken(){
-		Kv kv = Kv.by("token",JBoltUserKit.getUserSessionId());
-		if(JBoltConfig.SAAS_ENABLE && JBoltSaasTenantKit.me.isSelfRequest()) {
-			kv.set("tenantSn",JBoltSaasTenantKit.me.getSn());
-		}
-		renderJsonData(kv);
-	}
+    /** 获取当前用户Cookie里的TOKEN-jboltid */
+    @UnCheck
+    public void myToken() {
+        Kv kv = Kv.by("token", JBoltUserKit.getUserSessionId());
+        if (JBoltConfig.SAAS_ENABLE && JBoltSaasTenantKit.me.isSelfRequest()) {
+            kv.set("tenantSn", JBoltSaasTenantKit.me.getSn());
+        }
+        renderJsonData(kv);
+    }
 }

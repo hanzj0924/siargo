@@ -1,10 +1,12 @@
-说明：
-这里_admin是整个JBolt后台管理的公用部分核心
-demo 自定义前端组件自动化 演示demo
-dictionary 数据字典管理
-global cofig 全局配置
-interceptor permission  role rolepermission  user  是用户 角色 权限和拦截器组成的JBolt的权限管理模块
-
-jbolt file 文件库 所有上传文件都保存一条记录在这里
-systemlog是系统的操作日志记录模块
-updatemgr 是一个demo 拥有完整的CURD操作 列表管理 日志管理等逻辑代码和UI 开发其他基础模块可以直接复制源码修改使用
+JBolt 后台公共管理模块，页面主要位于 _view/_admin。
+user、role、permission、rolepermission：用户、角色、权限及角色授权。
+dept、post：部门与岗位；userconfig：用户个性化配置。
+dictionary、globalconfig：数据字典与全局配置。
+systemlog、loginlog：操作日志与登录日志。
+msgcenter：私信、系统通知与待办；onlineuser：在线用户管理。
+jboltfile、qiniu：文件记录与七牛存储管理。
+topnav：顶部导航；monitor、redis：服务器与 Redis 管理。
+codegen：代码生成；customtablerender：自定义表格渲染示例。
+hiprint：打印模板；sensitiveword：敏感词管理。
+cache、event、websocket：公共缓存、事件监听与消息推送。
+项目业务模块位于 cn.jbolt.admin，Siargo 业务位于其 siargo 子包。

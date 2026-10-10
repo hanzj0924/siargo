@@ -1,13 +1,12 @@
-/**
- * JBolt web socket js
+/** JBolt web socket js
  */
 import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
-	//jbolt websocket
+	// jbolt websocket
 	let JBoltWS     = {};
 	JBoltWS.isOk = false;
 	JBoltWS.version = "0.1.0";
 	JBoltWS.genTokenUrl = "admin/myToken";
-	//消息类型定义
+	// 消息类型定义
 	JBoltWS.msgType = {COMMAND:1,COMMAND_RET:2,TEXT:3,FILE:4};
 	/**
 	 * 初始化
@@ -60,18 +59,16 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 	}
 
 
-	/**
-	 * 开启心跳检测
+	/** 开启心跳检测
 	 */
 	JBoltWS.startHeartBeatCheck = function() {
 		jboltlog("JBolt websocket start heartBeatCheck...");
 		let self = this;
-		//设置启动心跳检测
+		// 设置启动心跳检测
         this.pingIntervalId = setInterval(()=>self.ping(),self.heartbeatSendInterval);
 	}
 
-	/**
-	 * 连接服务端
+	/** 连接服务端
 	 */
 	JBoltWS.connect = function() {
 		jboltlog("JBolt websocket connecting...");
@@ -92,48 +89,47 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 			return;
 		}
 		var self = this;
-		//open状态处理
+		// open状态处理
 		this.ws.onopen = function(event) {
 			jboltlog("JBolt websocket onopen...");
 			JBoltWebSocketHandler.onopen(event);
 			JBoltWS.isOk = true;
 			console.log("JBolt websocket isOk!");
-			//设置最后一次交互时间
+			// 设置最后一次交互时间
             self.lastInteractionTime(new Date().getTime());
-            //启动心跳检测
+            // 启动心跳检测
             self.startHeartBeatCheck();
-            //执行链接后回调函数
+            // 执行链接后回调函数
             if(self.callback){
             	self.callback();
             }
 		};
-		//收到服务器消息处理
+		// 收到服务器消息处理
 		this.ws.onmessage = function(event) {
 			jboltlog("JBolt websocket onmessage...");
 			JBoltWebSocketHandler.onmessage(event);
-			//设置最后一次交互时间
+			// 设置最后一次交互时间
 			self.lastInteractionTime(new Date().getTime());
 		};
-		//连接关闭处理
+		// 连接关闭处理
 		this.ws.onclose = function (event) {
 			jboltlog("JBolt websocket onclose...");
 			JBoltWS.isOk = false;
-			//关闭心跳检测
+			// 关闭心跳检测
 			clearInterval(self.pingIntervalId);
 			JBoltWebSocketHandler.onclose(event);
-			//执行重连
+			// 执行重连
 			self.reconn();
 		};
 
-		//通讯error 处理
+		// 通讯error 处理
 		this.ws.onerror = function(event) {
 			jboltlog("JBolt websocket onclose...");
 			JBoltWebSocketHandler.onerror(event);
 		};
 	}
 
-	/**
-	 * 重连接服务端
+	/** 重连接服务端
 	 */
 	JBoltWS.reconn = function() {
 		jboltlog("JBolt websocket reconnecting after:" + this.reconnInterval +"ms");
@@ -144,8 +140,7 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 	}
 
 
-	/**
-	 * 执行心跳ping
+	/** 执行心跳ping
 	 */
 	JBoltWS.ping = function() {
 		jboltlog("JBolt websocket check ping...");
@@ -159,8 +154,7 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 		}
 	}
 
-	/**
-	 * 执行发送指令到服务器
+	/** 执行发送指令到服务器
 	 */
 	JBoltWS.sendCommand = function({command,data,to=-1}) {
 		this.send({
@@ -170,8 +164,7 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 			to:to
 		});
 	}
-	/**
-	 * 执行发送文本
+	/** 执行发送文本
 	 */
 	JBoltWS.sendText = function({data,to=-1}) {
 		this.send({
@@ -181,8 +174,7 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 		});
 	}
 
-	/**
-	 * 执行发送
+	/** 执行发送
 	 */
 	JBoltWS.send = function({type = JBoltWS.msgType.TEXT,command,data,to=-1}) {
 		if (this.isOk && this.ws != null && this.ws.readyState == 1) {
@@ -198,16 +190,13 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 	}
 
 
-	/**
-	 * 设置生成token的url
-	 * @param url
+	/** 设置生成token的url
 	 */
 	JBoltWS.setGenTokenUrl=function(url){
 		this.genTokenUrl = url||"admin/myToken";
 	}
 
-	/**
-	 * 设置guest模式
+	/** 设置guest模式
 	 */
 	JBoltWS.setGuestMode=function(guestMode){
 		if(guestMode){
@@ -217,8 +206,7 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 		}
 	}
 
-	/**
-	 * 初始化JBolt webSocket
+	/** 初始化JBolt webSocket
 	 */
 	JBoltWS.initJBoltWebsocket =  function(ctx,callback,token,tenantSn) {
 		console.log("JBolt websocket v"+this.version + " starting...");
@@ -244,12 +232,7 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 		}
 	}
 
-	/**
-	 * 初始化
-	 * @param ctx
-	 * @param token
-	 * @param tenantSn
-	 * @param callback
+	/** 初始化
 	 */
 	JBoltWS.initTheJBoltWebsocket=function(ctx,token,tenantSn,callback){
 		if(!token){

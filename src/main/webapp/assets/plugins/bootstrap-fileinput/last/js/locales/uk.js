@@ -77,7 +77,7 @@
         msgAjaxError: 'Щось не так з операцією {operation}. Будь ласка, спробуйте пізніше!',
         msgAjaxProgressError: 'помилка {operation}',
         msgDuplicateFile: 'Файл "{name}" з розміром "{size} KB" вже був обраний раніше. Пропуск повторюваного вибору.',
-        msgResumableUploadRetriesExceeded:  'Відвантаження перерване після <b>{max}</b> спроб для файлу <b>{file}</b>! Інформація про помилку: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: 'Відвантаження перерване після <b>{max}</b> спроб для файлу <b>{file}</b>! Інформація про помилку: <pre>{error}</pre>',
         msgPendingTime: '{time} залишилося',
         msgCalculatingTime: 'розрахунок часу, який залишився',
         ajaxOperations: {
@@ -99,7 +99,7 @@
             indicatorSuccessTitle: 'Відвантажено',
             indicatorErrorTitle: 'Помилка при відвантаженні',
             indicatorPausedTitle: 'Відвантаження призупинено',
-            indicatorLoadingTitle:  'Завантаження &hellip;'
+            indicatorLoadingTitle: 'Завантаження &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Переглянути попередній файл',

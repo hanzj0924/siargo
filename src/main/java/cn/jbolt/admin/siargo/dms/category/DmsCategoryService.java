@@ -1,7 +1,9 @@
 package cn.jbolt.admin.siargo.dms.category;
 
 import com.jfinal.plugin.activerecord.Page;
+
 import java.util.List;
+
 import cn.jbolt.extend.systemlog.ProjectSystemLogTargetType;
 import cn.jbolt.core.service.base.JBoltBaseService;
 import com.jfinal.kit.Kv;
@@ -11,294 +13,282 @@ import com.jfinal.plugin.activerecord.Db;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.DmsCategory;
 import com.jfinal.plugin.activerecord.Record;
-/**
- * 文件类别表管理 Service
- * @ClassName: DmsCategoryService   
- * @author: hanzj
- * @date: 2026-03-23 13:31  
- */
+
+/** 文件类别表管理 Service */
 public class DmsCategoryService extends JBoltBaseService<DmsCategory> {
-	/** 数据访问对象 */
-	private final DmsCategory dao=new DmsCategory().dao();
-	@Override
-	protected DmsCategory dao() {
-		return dao;
-	}
-		
-	/**
-	 * 后台管理分页查询（附带每个类别下的文件数量 fileCount）
-	 * @param pageNumber
-	 * @param pageSize
-	 * @param keywords
-	 * @return
-	 */
-	public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords) {
-		// CAST 防止雪花ID在前端 JSON 反序列化时精度丢失
-		String select = "SELECT CAST(c.id AS CHAR) AS id, c.name, c.sort_rank, COUNT(f.id) AS fileCount";
-		StringBuilder sqlExceptSelect = new StringBuilder(" FROM siargo_dms_category c ")
-				.append("LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 ");
-		if(isOk(keywords)) {
-			sqlExceptSelect.append("WHERE c.name LIKE CONCAT('%',?,'%') ");
-			sqlExceptSelect.append("GROUP BY c.id, c.name, c.sort_rank ORDER BY c.sort_rank ASC");
-			return Db.paginate(pageNumber, pageSize, true, select, sqlExceptSelect.toString(), keywords);
-		}
-		sqlExceptSelect.append("GROUP BY c.id, c.name, c.sort_rank ORDER BY c.sort_rank ASC");
-		return Db.paginate(pageNumber, pageSize, true, select, sqlExceptSelect.toString());
-	}
-	
-	/**
-	 * 保存
-	 * @param dmsCategory
-	 * @return
-	 */
-	public Ret save(DmsCategory dmsCategory) {
-		if(dmsCategory==null || isOk(dmsCategory.getId())) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-		//if(existsName(dmsCategory.getName())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
-		dmsCategory.setSortRank(getNextSortRank());
-		boolean success=dmsCategory.save();
-		if(success) {
-			//添加日志
-			//addSaveSystemLog(dmsCategory.getId(), JBoltUserKit.getUserId(), dmsCategory.getName());
-		}
-		return ret(success);
-	}
-	
-	/**
-	 * 更新
-	 * @param dmsCategory
-	 * @return
-	 */
-	public Ret update(DmsCategory dmsCategory) {
-		if(dmsCategory==null || notOk(dmsCategory.getId())) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-		//更新时需要判断数据存在
-		DmsCategory dbDmsCategory=findById(dmsCategory.getId());
-		if(dbDmsCategory==null) {return fail(JBoltMsg.DATA_NOT_EXIST);}
-		//if(existsName(dmsCategory.getName(), dmsCategory.getId())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
-		boolean success=dmsCategory.update();
-		if(success) {
-			//添加日志
-			//addUpdateSystemLog(dmsCategory.getId(), JBoltUserKit.getUserId(), dmsCategory.getName());
-		}
-		return ret(success);
-	}
-	
-	/**
-	 * 删除 指定多个ID
-	 * @param ids
-	 * @return
-	 */
-	public Ret deleteByBatchIds(String ids) {
-		return deleteByIds(ids,true);
-	}
-	
-	/**
-	 * 删除数据后执行的回调
-	 * @param dmsCategory 要删除的model
-	 * @param kv 携带额外参数一般用不上
-	 * @return
-	 */
-	@Override
-	protected String afterDelete(DmsCategory dmsCategory, Kv kv) {
-		//addDeleteSystemLog(dmsCategory.getId(), JBoltUserKit.getUserId(),dmsCategory.getName());
-		return null;
-	}
-	
-	/**
-	 * 检测是否可以删除
-	 * @param dmsCategory 要删除的model
-	 * @param kv 携带额外参数一般用不上
-	 * @return
-	 */
-	@Override
-	public String checkCanDelete(DmsCategory dmsCategory, Kv kv) {
-		//如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
-		return checkInUse(dmsCategory, kv);
-	}
-	
-	/**
-	 * 设置返回二开业务所属的关键systemLog的targetType 
-	 * @return
-	 */
-	@Override
-	protected int systemLogTargetType() {
-		return ProjectSystemLogTargetType.NONE.getValue();
-	}
-	
-	/**
-	 * 类别排序上移
-	 * 业务逻辑：将当前类别与排序序号比它小1的类别交换序号
-	 * @param id 类别ID
-	 * @return 操作结果
-	 */
-	public Ret up(Long id) {
-		DmsCategory dmsCategory=findById(id);
-		if(dmsCategory==null){
-			return fail("数据不存在或已被删除");
-		}
-		Integer rank=dmsCategory.getSortRank();
-		if(rank==null||rank<=0){
-			return fail("顺序需要初始化");
-		}
-		// 已经是第一个，无法上移
-		if(rank==1){
-			return fail("已经是第一个");
-		}
-		// 找到上一个类别（排序序号比当前小1）
-		DmsCategory upDmsCategory=findFirst(Okv.by("sort_rank", rank-1));
-		if(upDmsCategory==null){
-			return fail("顺序需要初始化");
-		}
-		// 交换两个类别的排序序号
-		upDmsCategory.setSortRank(rank);
-		dmsCategory.setSortRank(rank-1);
-		
-		upDmsCategory.update();
-		dmsCategory.update();
-		return SUCCESS;
-	}
-	
-	/**
-	 * 类别排序下移
-	 * 业务逻辑：将当前类别与排序序号比它大1的类别交换序号
-	 * @param id 类别ID
-	 * @return 操作结果
-	 */
-	public Ret down(Long id) {
-		DmsCategory dmsCategory=findById(id);
-		if(dmsCategory==null){
-			return fail("数据不存在或已被删除");
-		}
-		Integer rank=dmsCategory.getSortRank();
-		if(rank==null||rank<=0){
-			return fail("顺序需要初始化");
-		}
-		// 获取类别总数，判断是否已经是最后一个
-		int max=getCount();
-		// 已经是最后一个，无法下移
-		if(rank==max){
-			return fail("已经是最后已一个");
-		}
-		// 找到下一个类别（排序序号比当前大1）
-		DmsCategory upDmsCategory=findFirst(Okv.by("sort_rank", rank+1));
-		if(upDmsCategory==null){
-			return fail("顺序需要初始化");
-		}
-		// 交换两个类别的排序序号
-		upDmsCategory.setSortRank(rank);
-		dmsCategory.setSortRank(rank+1);
-		
-		upDmsCategory.update();
-		dmsCategory.update();
-		return SUCCESS;
-	}
-	
-	/**
-	 * 获取除指定类别外的所有类别（按排序序号升序）
-	 * 用于“移动到”弹窗的目标位置选择器
-	 * @param id 要排除的类别ID
-	 * @return 类别列表
-	 */
-	public List<DmsCategory> getOtherCategories(Long id) {
-		return find("SELECT * FROM siargo_dms_category WHERE id != ? ORDER BY sort_rank ASC", id);
-	}
-	
-	/**
-	 * 移动类别到指定类别的之前/之后
-	 * 业务逻辑：计算目标排序序号，中间类别的序号整体顺移，再更新当前类别序号
-	 * @param id 要移动的类别ID
-	 * @param targetId 目标位置的类别ID
-	 * @param position 相对位置：before=之前 after=之后
-	 * @return 操作结果
-	 */
-	public Ret moveTo(Long id, Long targetId, String position) {
-		if(notOk(id) || notOk(targetId) || id.equals(targetId)) {
-			return fail(JBoltMsg.PARAM_ERROR);
-		}
-		DmsCategory dmsCategory=findById(id);
-		if(dmsCategory==null){
-			return fail("数据不存在或已被删除");
-		}
-		DmsCategory target=findById(targetId);
-		if(target==null){
-			return fail("目标类别不存在或已被删除");
-		}
-		Integer curRank=dmsCategory.getSortRank();
-		Integer targetRank=target.getSortRank();
-		if(curRank==null||curRank<=0||targetRank==null||targetRank<=0){
-			return fail("顺序需要初始化");
-		}
-		// 计算新序号：之前=目标序号 之后=目标序号+1
-		int newRank="after".equals(position) ? targetRank+1 : targetRank;
-		// 当前项移除后，后方序号整体前移，目标位置需修正
-		if(curRank<newRank){
-			newRank--;
-		}
-		if(newRank==curRank){
-			return SUCCESS;
-		}
-		if(curRank<newRank){
-			// 向后移动：(curRank, newRank] 区间内的类别序号-1
-			Db.update("UPDATE siargo_dms_category SET sort_rank = sort_rank - 1 WHERE sort_rank > ? AND sort_rank <= ?", curRank, newRank);
-		}else{
-			// 向前移动：[newRank, curRank) 区间内的类别序号+1
-			Db.update("UPDATE siargo_dms_category SET sort_rank = sort_rank + 1 WHERE sort_rank >= ? AND sort_rank < ?", newRank, curRank);
-		}
-		dmsCategory.setSortRank(newRank);
-		dmsCategory.update();
-		return SUCCESS;
-	}
-	
-	/**
-	 * 初始化排序
-	 * 按现有排序序号升序重排，保持现有顺序不变，仅修复序号空洞/重复
-	 */
-	public Ret initRank(){
-		List<DmsCategory> allList=find("SELECT * FROM siargo_dms_category ORDER BY sort_rank ASC, id ASC");
-		if(allList.size()>0){
-			for(int i=0;i<allList.size();i++){
-				allList.get(i).setSortRank(i+1);
-			}
-			batchUpdate(allList);
-		}
-		//添加日志
-		//addUpdateSystemLog(null, JBoltUserKit.getUserId(), "所有数据", "的顺序:初始化所有");
-		return SUCCESS;
-	}
-	
-	/**
-	 * 检测类别是否仍被文件引用
-	 * 存在有效文件时阻止删除，避免文件成为孤儿数据（列表不可见但记录与物理文件残留）
-	 * @param dmsCategory model
-	 * @param kv 携带额外参数一般用不上
-	 * @return 阻止删除的提示信息，null 表示可删除
-	 */
-	@Override
-	public String checkInUse(DmsCategory dmsCategory, Kv kv) {
-		Long fileCount = Db.queryLong("SELECT COUNT(*) FROM siargo_dms_file WHERE category_id = ? AND status = 1", dmsCategory.getId());
-		if (fileCount != null && fileCount > 0) {
-			return "类别【" + dmsCategory.getName() + "】下仍有 " + fileCount + " 个文件，不能删除";
-		}
-		return null;
-	}
-	
-	/**
-	 * 获取所有类别列表，附带每个类别下的文件数量和最近上传时间
-	 * 用于前端展示类别选择器或统计信息
-	 * @return 类别列表（Record格式），每项包含 id, name, sortRank, fileCount, lastupdatetime
-	 */
-	public List<Record> getCategoryListWithCount() {
-		// 使用驼峰风格别名，与前端 JavaScript 保持一致；CAST 防止雪花ID精度丢失
-		String sql = "SELECT CAST(c.id AS CHAR) AS id, c.name, c.sort_rank AS sortRank, COUNT(f.id) AS fileCount, " +
-				"MAX(f.upload_time) AS lastupdatetime " +
-				"FROM siargo_dms_category c " +
-				"LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 " +
-				"GROUP BY c.id, c.name, c.sort_rank " +
-				"ORDER BY c.sort_rank ASC";
-		return Db.find(sql);
-	}
-	
+
+    private final DmsCategory dao = new DmsCategory().dao();
+
+    @Override
+    protected DmsCategory dao() {
+        return dao;
+    }
+
+    /** 后台管理分页查询（附带每个类别下的文件数量 fileCount） */
+    public Page<Record> paginateAdminDatas(int pageNumber, int pageSize, String keywords) {
+        // CAST 防止雪花ID在前端 JSON 反序列化时精度丢失
+        String select = "SELECT CAST(c.id AS CHAR) AS id, c.name, c.sort_rank, COUNT(f.id) AS fileCount";
+        StringBuilder sqlExceptSelect = new StringBuilder(" FROM siargo_dms_category c ")
+                .append("LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 ");
+        if (isOk(keywords)) {
+            sqlExceptSelect.append("WHERE c.name LIKE CONCAT('%',?,'%') ");
+            sqlExceptSelect.append("GROUP BY c.id, c.name, c.sort_rank ORDER BY c.sort_rank ASC");
+            return Db.paginate(pageNumber, pageSize, true, select, sqlExceptSelect.toString(), keywords);
+        }
+        sqlExceptSelect.append("GROUP BY c.id, c.name, c.sort_rank ORDER BY c.sort_rank ASC");
+        return Db.paginate(pageNumber, pageSize, true, select, sqlExceptSelect.toString());
+    }
+
+    /** 保存 */
+    public Ret save(DmsCategory dmsCategory) {
+        if (dmsCategory == null || isOk(dmsCategory.getId())) {
+            return fail(JBoltMsg.PARAM_ERROR);
+        }
+        //if(existsName(dmsCategory.getName())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+        dmsCategory.setSortRank(getNextSortRank());
+        boolean success = dmsCategory.save();
+        if (success) {
+            // 添加日志
+            //addSaveSystemLog(dmsCategory.getId(), JBoltUserKit.getUserId(), dmsCategory.getName());
+        }
+        return ret(success);
+    }
+
+    /** 更新 */
+    public Ret update(DmsCategory dmsCategory) {
+        if (dmsCategory == null || notOk(dmsCategory.getId())) {
+            return fail(JBoltMsg.PARAM_ERROR);
+        }
+        // 更新时需要判断数据存在
+        DmsCategory dbDmsCategory = findById(dmsCategory.getId());
+        if (dbDmsCategory == null) {
+            return fail(JBoltMsg.DATA_NOT_EXIST);
+        }
+        //if(existsName(dmsCategory.getName(), dmsCategory.getId())) {return fail(JBoltMsg.DATA_SAME_NAME_EXIST);}
+        boolean success = dmsCategory.update();
+        if (success) {
+            // 添加日志
+            //addUpdateSystemLog(dmsCategory.getId(), JBoltUserKit.getUserId(), dmsCategory.getName());
+        }
+        return ret(success);
+    }
+
+    /** 删除 指定多个ID */
+    public Ret deleteByBatchIds(String ids) {
+        return deleteByIds(ids, true);
+    }
+
+    /**
+     * 删除数据后执行的回调
+     *
+     * @param dmsCategory 要删除的model
+     * @param kv          携带额外参数一般用不上
+     */
+    @Override
+    protected String afterDelete(DmsCategory dmsCategory, Kv kv) {
+        //addDeleteSystemLog(dmsCategory.getId(), JBoltUserKit.getUserId(),dmsCategory.getName());
+        return null;
+    }
+
+    /**
+     * 检测是否可以删除
+     *
+     * @param dmsCategory 要删除的model
+     * @param kv          携带额外参数一般用不上
+     */
+    @Override
+    public String checkCanDelete(DmsCategory dmsCategory, Kv kv) {
+        // 如果检测被用了 返回信息 则阻止删除 如果返回null 则正常执行删除
+        return checkInUse(dmsCategory, kv);
+    }
+
+    /** 设置返回二开业务所属的关键systemLog的targetType */
+    @Override
+    protected int systemLogTargetType() {
+        return ProjectSystemLogTargetType.NONE.getValue();
+    }
+
+    /**
+     * 类别排序上移
+     * 业务逻辑：将当前类别与排序序号比它小1的类别交换序号
+     *
+     * @param id 类别ID
+     * @return 操作结果
+     */
+    public Ret up(Long id) {
+        DmsCategory dmsCategory = findById(id);
+        if (dmsCategory == null) {
+            return fail("数据不存在或已被删除");
+        }
+        Integer rank = dmsCategory.getSortRank();
+        if (rank == null || rank <= 0) {
+            return fail("顺序需要初始化");
+        }
+        // 已经是第一个，无法上移
+        if (rank == 1) {
+            return fail("已经是第一个");
+        }
+        // 找到上一个类别（排序序号比当前小1）
+        DmsCategory upDmsCategory = findFirst(Okv.by("sort_rank", rank - 1));
+        if (upDmsCategory == null) {
+            return fail("顺序需要初始化");
+        }
+        // 交换两个类别的排序序号
+        upDmsCategory.setSortRank(rank);
+        dmsCategory.setSortRank(rank - 1);
+
+        upDmsCategory.update();
+        dmsCategory.update();
+        return SUCCESS;
+    }
+
+    /**
+     * 类别排序下移
+     * 业务逻辑：将当前类别与排序序号比它大1的类别交换序号
+     *
+     * @param id 类别ID
+     * @return 操作结果
+     */
+    public Ret down(Long id) {
+        DmsCategory dmsCategory = findById(id);
+        if (dmsCategory == null) {
+            return fail("数据不存在或已被删除");
+        }
+        Integer rank = dmsCategory.getSortRank();
+        if (rank == null || rank <= 0) {
+            return fail("顺序需要初始化");
+        }
+        // 获取类别总数，判断是否已经是最后一个
+        int max = getCount();
+        // 已经是最后一个，无法下移
+        if (rank == max) {
+            return fail("已经是最后已一个");
+        }
+        // 找到下一个类别（排序序号比当前大1）
+        DmsCategory upDmsCategory = findFirst(Okv.by("sort_rank", rank + 1));
+        if (upDmsCategory == null) {
+            return fail("顺序需要初始化");
+        }
+        // 交换两个类别的排序序号
+        upDmsCategory.setSortRank(rank);
+        dmsCategory.setSortRank(rank + 1);
+
+        upDmsCategory.update();
+        dmsCategory.update();
+        return SUCCESS;
+    }
+
+    /**
+     * 获取除指定类别外的所有类别（按排序序号升序）
+     * 用于“移动到”弹窗的目标位置选择器
+     *
+     * @param id 要排除的类别ID
+     * @return 类别列表
+     */
+    public List<DmsCategory> getOtherCategories(Long id) {
+        return find("SELECT * FROM siargo_dms_category WHERE id != ? ORDER BY sort_rank ASC", id);
+    }
+
+    /**
+     * 移动类别到指定类别的之前/之后
+     * 业务逻辑：计算目标排序序号，中间类别的序号整体顺移，再更新当前类别序号
+     *
+     * @param id       要移动的类别ID
+     * @param targetId 目标位置的类别ID
+     * @param position 相对位置：before=之前 after=之后
+     * @return 操作结果
+     */
+    public Ret moveTo(Long id, Long targetId, String position) {
+        if (notOk(id) || notOk(targetId) || id.equals(targetId)) {
+            return fail(JBoltMsg.PARAM_ERROR);
+        }
+        DmsCategory dmsCategory = findById(id);
+        if (dmsCategory == null) {
+            return fail("数据不存在或已被删除");
+        }
+        DmsCategory target = findById(targetId);
+        if (target == null) {
+            return fail("目标类别不存在或已被删除");
+        }
+        Integer curRank = dmsCategory.getSortRank();
+        Integer targetRank = target.getSortRank();
+        if (curRank == null || curRank <= 0 || targetRank == null || targetRank <= 0) {
+            return fail("顺序需要初始化");
+        }
+        // 计算新序号：之前=目标序号 之后=目标序号+1
+        int newRank = "after".equals(position) ? targetRank + 1 : targetRank;
+        // 当前项移除后，后方序号整体前移，目标位置需修正
+        if (curRank < newRank) {
+            newRank--;
+        }
+        if (newRank == curRank) {
+            return SUCCESS;
+        }
+        if (curRank < newRank) {
+            // 向后移动：(curRank, newRank] 区间内的类别序号-1
+            Db.update("UPDATE siargo_dms_category SET sort_rank = sort_rank - 1 WHERE sort_rank > ? AND sort_rank <= ?",
+                    curRank, newRank);
+        }
+        else {
+            // 向前移动：[newRank, curRank) 区间内的类别序号+1
+            Db.update("UPDATE siargo_dms_category SET sort_rank = sort_rank + 1 WHERE sort_rank >= ? AND sort_rank < ?",
+                    newRank, curRank);
+        }
+        dmsCategory.setSortRank(newRank);
+        dmsCategory.update();
+        return SUCCESS;
+    }
+
+    /**
+     * 初始化排序
+     * 按现有排序序号升序重排，保持现有顺序不变，仅修复序号空洞/重复
+     */
+    public Ret initRank() {
+        List<DmsCategory> allList = find("SELECT * FROM siargo_dms_category ORDER BY sort_rank ASC, id ASC");
+        if (allList.size() > 0) {
+            for (int i = 0; i < allList.size(); i++) {
+                allList.get(i).setSortRank(i + 1);
+            }
+            batchUpdate(allList);
+        }
+        // 添加日志
+        //addUpdateSystemLog(null, JBoltUserKit.getUserId(), "所有数据", "的顺序:初始化所有");
+        return SUCCESS;
+    }
+
+    /**
+     * 检测类别是否仍被文件引用
+     * 存在有效文件时阻止删除，避免文件成为孤儿数据（列表不可见但记录与物理文件残留）
+     *
+     * @param dmsCategory model
+     * @param kv          携带额外参数一般用不上
+     * @return 阻止删除的提示信息，null 表示可删除
+     */
+    @Override
+    public String checkInUse(DmsCategory dmsCategory, Kv kv) {
+        Long fileCount = Db.queryLong("SELECT COUNT(*) FROM siargo_dms_file WHERE category_id = ? AND status = 1",
+                dmsCategory.getId());
+        if (fileCount != null && fileCount > 0) {
+            return "类别【" + dmsCategory.getName() + "】下仍有 " + fileCount + " 个文件，不能删除";
+        }
+        return null;
+    }
+
+    /**
+     * 获取所有类别列表，附带每个类别下的文件数量和最近上传时间
+     * 用于前端展示类别选择器或统计信息
+     *
+     * @return 类别列表（Record格式），每项包含 id, name, sortRank, fileCount, lastupdatetime
+     */
+    public List<Record> getCategoryListWithCount() {
+        // 使用驼峰风格别名，与前端 JavaScript 保持一致；CAST 防止雪花ID精度丢失
+        String sql = "SELECT CAST(c.id AS CHAR) AS id, c.name, c.sort_rank AS sortRank, COUNT(f.id) AS fileCount, " +
+                "MAX(f.upload_time) AS lastupdatetime " +
+                "FROM siargo_dms_category c " +
+                "LEFT JOIN siargo_dms_file f ON f.category_id = c.id AND f.status = 1 " +
+                "GROUP BY c.id, c.name, c.sort_rank " +
+                "ORDER BY c.sort_rank ASC";
+        return Db.find(sql);
+    }
+
 }

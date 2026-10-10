@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Set;
+
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfReader;
@@ -22,9 +23,12 @@ public class PdfRenderer {
             try {
                 AcroFields form = stamper.getAcroFields();
                 form.addSubstitutionFont(BaseFont.createFont(font + ",0", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED));
-                if (form.getFields().isEmpty()) throw new IOException("模板没有可填写的表单字段");
+                if (form.getFields().isEmpty()) {
+                    throw new IOException("模板没有可填写的表单字段");
+                }
                 for (Map.Entry<String, String> field : values.entrySet()) {
-                    if (form.getFields().containsKey(field.getKey()) && !form.setField(field.getKey(), field.getValue())) {
+                    if (form.getFields().containsKey(field.getKey()) &&
+                            !form.setField(field.getKey(), field.getValue())) {
                         throw new IOException("模板字段填写失败：" + field.getKey());
                     }
                 }
@@ -40,11 +44,17 @@ public class PdfRenderer {
     }
 
     public static void validate(Path file) throws IOException {
-        if (!Files.isRegularFile(file) || Files.size(file) == 0) throw new IOException("PDF 文件不存在或为空");
+        if (!Files.isRegularFile(file) || Files.size(file) == 0) {
+            throw new IOException("PDF 文件不存在或为空");
+        }
         PdfReader reader = new PdfReader(Files.readAllBytes(file));
         try {
-            if (reader.getNumberOfPages() < 1) throw new IOException("PDF 没有页面");
-            for (int page = 1; page <= reader.getNumberOfPages(); page++) reader.getPageContent(page);
+            if (reader.getNumberOfPages() < 1) {
+                throw new IOException("PDF 没有页面");
+            }
+            for (int page = 1; page <= reader.getNumberOfPages(); page++) {
+                reader.getPageContent(page);
+            }
         } finally {
             reader.close();
         }
@@ -56,8 +66,12 @@ public class PdfRenderer {
         PdfReader reader = new PdfReader(Files.readAllBytes(file));
         try {
             Set<String> fields = Set.copyOf(reader.getAcroFields().getFields().keySet());
-            if (fields.isEmpty()) throw new IOException("模板没有可填写的表单字段");
+            if (fields.isEmpty()) {
+                throw new IOException("模板没有可填写的表单字段");
+            }
             return fields;
-        } finally { reader.close(); }
+        } finally {
+            reader.close();
+        }
     }
 }

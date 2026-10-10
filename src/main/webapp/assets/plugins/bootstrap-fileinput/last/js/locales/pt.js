@@ -98,7 +98,7 @@
             indicatorSuccessTitle: 'Enviado',
             indicatorErrorTitle: 'Erro de Envio',
             indicatorPausedTitle: 'Envio Parado',
-            indicatorLoadingTitle:  'A enviar &hellip;'
+            indicatorLoadingTitle: 'A enviar &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Ver ficheiro anterior',

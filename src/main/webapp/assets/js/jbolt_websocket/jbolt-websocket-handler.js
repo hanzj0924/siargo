@@ -1,5 +1,4 @@
-/**
- * JBolt websocket 消息 handler处理
+/** JBolt websocket 消息 handler处理
  */
 import JBoltWS from "./jbolt-websocket.js"
 import JBoltCommands from "./jbolt-websocket-command.js"
@@ -9,8 +8,7 @@ import JBoltTextMsgHandlerExtend from "./extend/jbolt-websocket-textmsg-handler-
 
 
 export default {
-	/**
-	 * 页面自定义注册command {command:handler}
+	/** 页面自定义注册command {command:handler}
 	 */
 	registeredCommands:{},
 	/**
@@ -58,15 +56,13 @@ export default {
         	jboltlog("emitCommand没有找到指令["+command+"]对应处理handler 如果是自定义注册command可能是移除了");
         }
 	},
-    /**
-     * onopen事件
+    /** onopen事件
      */
     onopen(event){
         jboltlog("handler:websocket connection open.");
         jboltlog(event);
     },
-    /**
-     * onmessage事件
+    /** onmessage事件
      */
     onmessage(event) {
         jboltlog("handler:websocket message received.");
@@ -74,25 +70,23 @@ export default {
         if (event.data) {
             var edata = JSON.parse(event.data);
             if (edata.type == JBoltWS.msgType.COMMAND || edata.type == JBoltWS.msgType.COMMAND_RET) {
-            	//如果是command 就去执行指令handler处理器 优先找内置处理 内置没有找扩展 扩展没有找页面自定义注册
+            	// 如果是command 就去执行指令handler处理器 优先找内置处理 内置没有找扩展 扩展没有找页面自定义注册
             	this.emitCommand(edata.command,edata);
             }else if(edata.type == JBoltWS.msgType.TEXT){
-            	//如果是文本消息 就去执行文本消息handler处理器
+            	// 如果是文本消息 就去执行文本消息handler处理器
             	JBoltTextMsgHandler.process(edata);
-            	//调用二开处理文本消息
+            	// 调用二开处理文本消息
             	JBoltTextMsgHandlerExtend.process(edata);
             }
         }
     },
-    /**
-     * onclose事件
+    /** onclose事件
      */
     onclose(event) {
         jboltlog("handler:websocket connection close.");
         jboltlog(event.code);
     },
-    /**
-     * onerror事件
+    /** onerror事件
      */
     onerror(event) {
         jboltlog("handler:websocket connection error.");

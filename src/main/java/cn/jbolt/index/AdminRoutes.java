@@ -32,50 +32,46 @@ import cn.jbolt.common.interceptor.SiargoTerminalOfflineInterceptor;
 import cn.jbolt.common.style.JBoltStyleAdminController;
 import cn.jbolt.core.permission.JBoltAdminAuthInterceptor;
 import com.jfinal.config.Routes;
-/**
- * admin后台的路由配置
- * @ClassName:  AdminRoutes   
- * @author: JFinal学院-小木 QQ：909854136 
- * @date:   2019年3月26日 下午12:25:20   
- */
+
+/** admin后台的路由配置 */
 public class AdminRoutes extends Routes {
 
-	@Override
-	public void config() {
-		this.setBaseViewPath("/_view/_admin");
-		this.addInterceptor(new SiargoTerminalOfflineInterceptor());
-		this.addInterceptor(new JBoltAdminAuthInterceptor());
-		this.add("/admin", AdminIndexController.class,"/index");
-		this.add("/admin/pjaxerror", PjaxErrorController.class);
-		this.add("/admin/jboltstyle", JBoltStyleAdminController.class);
-		this.add("/admin/user", UserAdminController.class,"/user");
-		this.add("/admin/role", RoleAdminController.class,"/role");
-		this.add("/admin/dictionarytype", DictionaryTypeAdminController.class,"/dictionary/type");
-		this.add("/admin/dictionary", DictionaryAdminController.class,"/dictionary");
-		this.add("/admin/permission", PermissionAdminController.class,"/permission");
-		this.add("/admin/rolepermission", RolePermissionAdminController.class,"/rolepermission");
-		this.add("/admin/systemlog", SystemLogAdminController.class,"/systemlog");
-		this.add("/admin/loginlog", LoginLogAdminController.class,"/loginlog");
-		this.add("/admin/globalconfig", GlobalConfigAdminController.class,"/globalconfig");
-		this.add("/admin/globalconfig/type", GlobalConfigTypeAdminController.class,"/globalconfig/type");
-		this.add("/admin/neditor/upload", NeditorUploadAdminController.class);
-		this.add("/admin/neditor/preview", NeditorPreviewAdminController.class);
-		this.add("/admin/summernote/upload", SummernoteUploadAdminController.class);
-		this.add("/admin/userconfig", UserConfigAdminController.class,"/userconfig");
-		this.add("/admin/servermonitor", ServerMonitorAdminController.class,"/servermonitor");
-		this.add("/admin/topnav", TopnavAdminController.class,"/topnav");
-		this.add("/admin/topnav/menu", TopnavMenuAdminController.class,"/topnav/menu");
-		this.add("/admin/dept", DeptAdminController.class,"/dept");
-		this.add("/admin/post", PostAdminController.class,"/post");
-		this.add("/admin/onlineuser", OnlineUserAdminController.class,"/onlineuser");
-		this.add("/admin/msgcenter", JBoltMsgCenterAdminController.class,"/msgcenter");
-		this.add("/admin/sysnotice", SysNoticeAdminController.class,"/msgcenter/sysnotice");
-		this.add("/admin/todo", TodoAdminController.class,"/msgcenter/todo");
-		this.add("/admin/qiniu", QiniuAdminController.class,"/qiniu");
-		this.add("/admin/qiniu/bucket", QiniuBucketAdminController.class,"/qiniu/bucket");
-		this.add("/admin/sensitiveword", SensitiveWordAdminController.class,"/sensitiveword");
-		this.add("/admin/redis", RedisAdminController.class);
-		this.add("/admin/hiprint", HiprintAdminController.class,"/hiprint");
-	}
+    @Override
+    public void config() {
+        this.setBaseViewPath("/_view/_admin");
+        this.addInterceptor(new SiargoTerminalOfflineInterceptor());
+        this.addInterceptor(new JBoltAdminAuthInterceptor());
+        this.add("/admin", AdminIndexController.class, "/index");
+        this.add("/admin/pjaxerror", PjaxErrorController.class);
+        this.add("/admin/jboltstyle", JBoltStyleAdminController.class);
+        this.add("/admin/user", UserAdminController.class, "/user");
+        this.add("/admin/role", RoleAdminController.class, "/role");
+        this.add("/admin/dictionarytype", DictionaryTypeAdminController.class, "/dictionary/type");
+        this.add("/admin/dictionary", DictionaryAdminController.class, "/dictionary");
+        this.add("/admin/permission", PermissionAdminController.class, "/permission");
+        this.add("/admin/rolepermission", RolePermissionAdminController.class, "/rolepermission");
+        this.add("/admin/systemlog", SystemLogAdminController.class, "/systemlog");
+        this.add("/admin/loginlog", LoginLogAdminController.class, "/loginlog");
+        this.add("/admin/globalconfig", GlobalConfigAdminController.class, "/globalconfig");
+        this.add("/admin/globalconfig/type", GlobalConfigTypeAdminController.class, "/globalconfig/type");
+        this.add("/admin/neditor/upload", NeditorUploadAdminController.class);
+        this.add("/admin/neditor/preview", NeditorPreviewAdminController.class);
+        this.add("/admin/summernote/upload", SummernoteUploadAdminController.class);
+        this.add("/admin/userconfig", UserConfigAdminController.class, "/userconfig");
+        this.add("/admin/servermonitor", ServerMonitorAdminController.class, "/servermonitor");
+        this.add("/admin/topnav", TopnavAdminController.class, "/topnav");
+        this.add("/admin/topnav/menu", TopnavMenuAdminController.class, "/topnav/menu");
+        this.add("/admin/dept", DeptAdminController.class, "/dept");
+        this.add("/admin/post", PostAdminController.class, "/post");
+        this.add("/admin/onlineuser", OnlineUserAdminController.class, "/onlineuser");
+        this.add("/admin/msgcenter", JBoltMsgCenterAdminController.class, "/msgcenter");
+        this.add("/admin/sysnotice", SysNoticeAdminController.class, "/msgcenter/sysnotice");
+        this.add("/admin/todo", TodoAdminController.class, "/msgcenter/todo");
+        this.add("/admin/qiniu", QiniuAdminController.class, "/qiniu");
+        this.add("/admin/qiniu/bucket", QiniuBucketAdminController.class, "/qiniu/bucket");
+        this.add("/admin/sensitiveword", SensitiveWordAdminController.class, "/sensitiveword");
+        this.add("/admin/redis", RedisAdminController.class);
+        this.add("/admin/hiprint", HiprintAdminController.class, "/hiprint");
+    }
 
 }

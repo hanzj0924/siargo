@@ -5,18 +5,18 @@
 
 #define main()
 <div class="cl-wrap">
-	#(changelogHtml)
+    #(changelogHtml)
 </div>
 <script>
-function ChangelogToggleAll(btn) {
-	var expanded = btn.getAttribute('data-expanded') === '1';
-	var groups = document.querySelectorAll('.cl-group');
-	groups.forEach(function(g) {
-		if (expanded) g.removeAttribute('open');
-		else g.setAttribute('open', '');
-	});
-	btn.textContent = expanded ? '全部展开' : '全部折叠';
-	btn.setAttribute('data-expanded', expanded ? '0' : '1');
-}
+    function ChangelogToggleAll(btn) {
+        var expanded = btn.getAttribute('data-expanded') === '1';
+        var groups = document.querySelectorAll('.cl-group');
+        groups.forEach(function (g) {
+            if (expanded) g.removeAttribute('open');
+            else g.setAttribute('open', '');
+        });
+        btn.textContent = expanded ? '全部展开' : '全部折叠';
+        btn.setAttribute('data-expanded', expanded ? '0' : '1');
+    }
 </script>
 #end

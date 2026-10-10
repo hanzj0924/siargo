@@ -57,11 +57,16 @@
         placeholder: '请选择城市',
         searchPlaceholder: '输入关键词搜索',
         hotCity: [],
-        onInit: function () {},
-        onForbid: function () {},
-        onTabsAfter: function (target) {},
-        onTabsForbid: function (target) {},
-        onCallerAfter: function (target, values) {}
+        onInit: function () {
+        },
+        onForbid: function () {
+        },
+        onTabsAfter: function (target) {
+        },
+        onTabsForbid: function (target) {
+        },
+        onCallerAfter: function (target, values) {
+        }
     };
 
     /**
@@ -152,82 +157,82 @@
             //匹配城市数据
             switch (value.letter) {
                 case ('A'):
-                        parameter.filterCity.A.push(value);
+                    parameter.filterCity.A.push(value);
                     break;
                 case ('B'):
-                        parameter.filterCity.B.push(value);
+                    parameter.filterCity.B.push(value);
                     break;
                 case ('C'):
-                        parameter.filterCity.C.push(value);
+                    parameter.filterCity.C.push(value);
                     break;
                 case ('D'):
-                        parameter.filterCity.D.push(value);
+                    parameter.filterCity.D.push(value);
                     break;
                 case ('E'):
-                        parameter.filterCity.E.push(value);
+                    parameter.filterCity.E.push(value);
                     break;
                 case ('F'):
-                        parameter.filterCity.F.push(value);
+                    parameter.filterCity.F.push(value);
                     break;
                 case ('G'):
-                        parameter.filterCity.G.push(value);
+                    parameter.filterCity.G.push(value);
                     break;
                 case ('H'):
-                        parameter.filterCity.H.push(value);
+                    parameter.filterCity.H.push(value);
                     break;
                 case ('I'):
-                        parameter.filterCity.I.push(value);
+                    parameter.filterCity.I.push(value);
                     break;
                 case ('J'):
-                        parameter.filterCity.J.push(value);
+                    parameter.filterCity.J.push(value);
                     break;
                 case ('K'):
-                        parameter.filterCity.K.push(value);
+                    parameter.filterCity.K.push(value);
                     break;
                 case ('L'):
-                        parameter.filterCity.L.push(value);
+                    parameter.filterCity.L.push(value);
                     break;
                 case ('M'):
-                        parameter.filterCity.M.push(value);
+                    parameter.filterCity.M.push(value);
                     break;
                 case ('N'):
-                        parameter.filterCity.N.push(value);
+                    parameter.filterCity.N.push(value);
                     break;
                 case ('O'):
-                        parameter.filterCity.O.push(value);
+                    parameter.filterCity.O.push(value);
                     break;
                 case ('P'):
-                        parameter.filterCity.P.push(value);
+                    parameter.filterCity.P.push(value);
                     break;
                 case ('Q'):
-                        parameter.filterCity.Q.push(value);
+                    parameter.filterCity.Q.push(value);
                     break;
                 case ('R'):
-                        parameter.filterCity.R.push(value);
+                    parameter.filterCity.R.push(value);
                     break;
                 case ('S'):
-                        parameter.filterCity.S.push(value);
+                    parameter.filterCity.S.push(value);
                     break;
                 case ('T'):
-                        parameter.filterCity.T.push(value);
+                    parameter.filterCity.T.push(value);
                     break;
                 case ('U'):
-                        parameter.filterCity.U.push(value);
+                    parameter.filterCity.U.push(value);
                     break;
                 case ('V'):
-                        parameter.filterCity.V.push(value);
+                    parameter.filterCity.V.push(value);
                     break;
                 case ('W'):
-                        parameter.filterCity.W.push(value);
+                    parameter.filterCity.W.push(value);
                     break;
                 case ('X'):
-                        parameter.filterCity.X.push(value);
+                    parameter.filterCity.X.push(value);
                     break;
                 case ('Y'):
-                        parameter.filterCity.Y.push(value);
+                    parameter.filterCity.Y.push(value);
                     break;
                 case ('Z'):
-                        parameter.filterCity.Z.push(value);
+                    parameter.filterCity.Z.push(value);
                     break;
                 default:
             }
@@ -273,9 +278,9 @@
             } else {
 
                 html += '<li class="caller" data-parentid="' + value.parentId + '" data-id="' + value.id + '" data-title="' + name + '" data-letter="' + value.letter + '">' +
-                        '<span class="name">' + name + '</span>' +
-                        '<span class="spell">' + value.pinyin + '</span>' +
-                     '</li>';
+                    '<span class="name">' + name + '</span>' +
+                    '<span class="spell">' + value.pinyin + '</span>' +
+                    '</li>';
             }
 
         });
@@ -285,35 +290,35 @@
 
     functionality.template = [
         '<div class="city-pavilion hide">',
-            '<div class="city-tabs">',
-                '<a href="javascript:;" class="tab-a active" data-letter="HOT">热门城市</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="AB">AB</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="CD">CD</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="EFG">EFG</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="HI">HI</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="JK">JK</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="LM">LM</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="NOP">NOP</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="QR">QR</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="S">S</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="TU">TU</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="VWX">VWX</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="Y">Y</a>',
-                '<a href="javascript:;" class="tab-a" data-letter="Z">Z</a>',
-            '</div>',
-            '<div class="city-cont">',
-                '{cont}',
-            '</div>',
-            '<p class="city-txt">',
-            '<a href="javascript:;" class="empty"><i></i>清空</a><span class="city-count"><i>0</i>/{maxnum}</span>',
-            '<em>*可以直接搜索查找城市（支持名称、拼音模糊搜索）</em>',
-            '</p>',
+        '<div class="city-tabs">',
+        '<a href="javascript:;" class="tab-a active" data-letter="HOT">热门城市</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="AB">AB</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="CD">CD</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="EFG">EFG</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="HI">HI</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="JK">JK</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="LM">LM</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="NOP">NOP</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="QR">QR</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="S">S</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="TU">TU</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="VWX">VWX</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="Y">Y</a>',
+        '<a href="javascript:;" class="tab-a" data-letter="Z">Z</a>',
+        '</div>',
+        '<div class="city-cont">',
+        '{cont}',
+        '</div>',
+        '<p class="city-txt">',
+        '<a href="javascript:;" class="empty"><i></i>清空</a><span class="city-count"><i>0</i>/{maxnum}</span>',
+        '<em>*可以直接搜索查找城市（支持名称、拼音模糊搜索）</em>',
+        '</p>',
         '</div>',
         '<div class="city-info{type}">',
-            '{name}',
-            '<div class="city-input {not}">',
-                '<input type="text" class="input-search" value="" placeholder="{placeholder}" />',
-            '</div>',
+        '{name}',
+        '<div class="city-input {not}">',
+        '<input type="text" class="input-search" value="" placeholder="{placeholder}" />',
+        '</div>',
         '</div>',
         '<ul class="city-list hide"></ul>',
         '<div class="city-tips hide">最多只能选择<span>{tipnum}</span>项</div>'
@@ -322,13 +327,13 @@
     functionality.split = function (str) {
         var letArray = [];
 
-        for ( var i = 0; i < str.length; i++ ) {
+        for (var i = 0; i < str.length; i++) {
             letArray.push(str[i]);
         }
 
         return letArray;
     }
-    
+
     functionality.groupArray = [
         'HOT',
         'AB',
@@ -364,7 +369,7 @@
         }
 
         self.isfocus = true;
-    
+
         self.$selector.addClass('down').find('.city-pavilion').removeClass('hide').siblings('.city-list').addClass('hide');
 
         $(event.currentTarget).find('.input-search').focus();
@@ -377,7 +382,7 @@
         var $target = $(event.target),
             configure = this.options,
             letter = $target.data('letter');
-        
+
         //tabs禁止点击后的回调
         if ($target.hasClass('forbid')) {
             configure.onTabsForbid.call(self, $target);
@@ -388,7 +393,7 @@
         $target.addClass('active').siblings().removeClass('active');
 
         //显示对应索引的城市列表
-        this.$selector.find('dl').addClass('hide').siblings('.city-'+ letter).removeClass('hide');
+        this.$selector.find('dl').addClass('hide').siblings('.city-' + letter).removeClass('hide');
 
         //切换列表回调
         configure.onTabsAfter.call(this, $target);
@@ -405,15 +410,15 @@
 
         //存储选中的值
         this.values = [];
-        this.values.push({ 'name': name, 'id': id, 'parentId': parentId });
+        this.values.push({'name': name, 'id': id, 'parentId': parentId});
 
         //添加选中状态
         this.$selector.find('.caller').removeClass('active');
-        this.$selector.find('.caller[data-id="'+ id +'"]').addClass('active');
+        this.$selector.find('.caller[data-id="' + id + '"]').addClass('active');
 
         //赋值选中的给文本框
         $cityInfo.find('span').remove();
-        this.$selector.find('.city-input').before('<span data-id="'+ id +'" data-parentid="'+ parentId +'">'+ name +'<i class="del"></i></span>').find('.input-search').val('');
+        this.$selector.find('.city-input').before('<span data-id="' + id + '" data-parentid="' + parentId + '">' + name + '<i class="del"></i></span>').find('.input-search').val('');
 
         //调整文本框位置
         functionality.singleResize.call(this);
@@ -448,7 +453,7 @@
             if (self.selectIndex >= configure.multiMaximum) {
                 $selector.find('.city-tips').removeClass('hide');
 
-                setTimeout(function() {
+                setTimeout(function () {
                     $selector.find('.city-tips').addClass('hide');
                 }, 1000);
 
@@ -462,10 +467,10 @@
                 self.provinceId.push(parentId);
 
                 //拼接生成选中值
-                joinSpan = '<span data-id="'+ id +'" data-parentid="'+ parentId +'">'+ name +'<i class="del"></i></span>';
+                joinSpan = '<span data-id="' + id + '" data-parentid="' + parentId + '">' + name + '<i class="del"></i></span>';
 
                 //添加选中状态
-                $selector.find('.caller[data-id="'+ id +'"]').addClass('active');
+                $selector.find('.caller[data-id="' + id + '"]').addClass('active');
 
                 //添加选中的城市显示方式
                 if (configure.multiType < 1) {
@@ -483,10 +488,10 @@
             self.provinceId.splice($.inArray(parentId, self.provinceId), 1);
 
             //去掉选中状态
-            $selector.find('.caller[data-id="'+ id +'"]').removeClass('active');
+            $selector.find('.caller[data-id="' + id + '"]').removeClass('active');
 
             //删除选中的城市
-            $selector.find('.city-info').find('span[data-id="'+ id +'"]').remove();
+            $selector.find('.city-info').find('span[data-id="' + id + '"]').remove();
 
             //选中数
             self.selectIndex -= 1;
@@ -494,14 +499,18 @@
 
         //存储选中的值
         self.values = [];
-        self.multiSelectResult.length > 0 ? self.values.push({ 'name': self.multiSelectResult, 'id': self.multiSelectResultId, 'parentId': self.provinceId }) : '';
+        self.multiSelectResult.length > 0 ? self.values.push({
+            'name': self.multiSelectResult,
+            'id': self.multiSelectResultId,
+            'parentId': self.provinceId
+        }) : '';
 
         //拼接后的选中name
         mosaicName = self.multiSelectResult.join(configure.mosaic);
 
         //添加选中的城市显示方式
         if (configure.multiType === 1) {
-            $selector.find('.city-name').html('<span class="span-over" title="'+ mosaicName +'">'+ mosaicName +'</span>');
+            $selector.find('.city-name').html('<span class="span-over" title="' + mosaicName + '">' + mosaicName + '</span>');
         }
 
         //有选中就清除，没有值就添加
@@ -537,15 +546,15 @@
         if (keyCode !== 13 && keyCode !== 38 && keyCode !== 40) {
 
             self.isfocus = false;
-    
-            $.each(self.contain, function(key, value) {
+
+            $.each(self.contain, function (key, value) {
                 //拼音或者名称搜索
-                if(value.pinyin.toLocaleLowerCase().search(inputVal.toLocaleLowerCase()) > -1 || value.name.search(inputVal) > -1 || value.id.search(inputVal) > -1 ){
+                if (value.pinyin.toLocaleLowerCase().search(inputVal.toLocaleLowerCase()) > -1 || value.name.search(inputVal) > -1 || value.id.search(inputVal) > -1) {
                     result.push(value);
                 }
             });
 
-            resultHtml = result.length > 0 ? functionality.montage.call(self, result) : '<li class="not-have">没有找到<strong>'+ inputVal +'</strong>相关城市</li>';
+            resultHtml = result.length > 0 ? functionality.montage.call(self, result) : '<li class="not-have">没有找到<strong>' + inputVal + '</strong>相关城市</li>';
 
             self.$selector.find('.city-list').html(resultHtml);
 
@@ -572,10 +581,10 @@
         if (self.values.length > 0) {
             if (self.values[0].id instanceof Array) {
                 $.each(self.values[0].id, function (key, value) {
-                    self.$selector.find('.caller[data-id="'+ value +'"]').addClass('active');
+                    self.$selector.find('.caller[data-id="' + value + '"]').addClass('active');
                 });
             } else {
-                self.$selector.find('.caller[data-id="'+ self.values[0].id +'"]').addClass('active');
+                self.$selector.find('.caller[data-id="' + self.values[0].id + '"]').addClass('active');
             }
         }
     }
@@ -599,10 +608,10 @@
 
             return false;
         }
-        
+
         //按下上下键
         if (keyCode === 38 || keyCode === 40) {
-            
+
             //方向
             direction = keyCode === 38 ? -1 : 1;
 
@@ -678,7 +687,7 @@
                 _letter = _this.data('letter');
 
             if (!$(value).text()) {
-                self.$selector.find('.tab-a[data-letter="'+ _letter +'"]').addClass('forbid');
+                self.$selector.find('.tab-a[data-letter="' + _letter + '"]').addClass('forbid');
             }
         });
 
@@ -699,11 +708,15 @@
 
         //存储剩下城市的值
         self.values = [];
-        self.multiSelectResult.length > 0 ? self.values.push({ 'name': self.multiSelectResult, 'id': self.multiSelectResultId, 'parentId': self.provinceId }) : '';
+        self.multiSelectResult.length > 0 ? self.values.push({
+            'name': self.multiSelectResult,
+            'id': self.multiSelectResultId,
+            'parentId': self.provinceId
+        }) : '';
 
         //删除
         $parent.remove();
-        self.$selector.find('.caller[data-id="'+ id +'"]').removeClass('active');
+        self.$selector.find('.caller[data-id="' + id + '"]').removeClass('active');
 
         //如果是多选才执行以下事情
         if (self.options.multiSelect) {
@@ -751,7 +764,7 @@
             montage,
             hide;
 
-        for ( var i = 0; i < functionality.groupArray.length; i++ ) {
+        for (var i = 0; i < functionality.groupArray.length; i++) {
             //字母数组
             groupArray = functionality.groupArray[i];
 
@@ -762,7 +775,7 @@
             hide = i > 0 ? ' hide' : '';
 
             //创建对应的dl
-            domtel += '<dl class="city-'+ groupArray + hide +'" data-letter="'+ groupArray +'">{dl}</dl>';
+            domtel += '<dl class="city-' + groupArray + hide + '" data-letter="' + groupArray + '">{dl}</dl>';
 
             if (letterStr && letterStr.length > 1) {
 
@@ -775,8 +788,8 @@
                     //不为空就执行下面创建节点
                     if (montage) {
 
-                        list += '<dt>'+ letterStr[j] +'</dt>'+
-                                '<dd>'+ montage +'</dd>';
+                        list += '<dt>' + letterStr[j] + '</dt>' +
+                            '<dd>' + montage + '</dd>';
 
                     }
 
@@ -785,14 +798,14 @@
             } else {
 
                 montage = functionality.montage.call(self, 0, groupArray);
-                
+
                 //不为空就执行下面创建节点
                 if (montage) {
 
-                    list = groupArray !== 'HOT' ? 
-                            '<dt>'+ groupArray +'</dt>'+
-                            '<dd>'+ functionality.montage.call(self, 0, groupArray) +'</dd>' :
-                            '<dd>'+ functionality.montage.call(self, 0, groupArray) +'</dd>';
+                    list = groupArray !== 'HOT' ?
+                        '<dt>' + groupArray + '</dt>' +
+                        '<dd>' + functionality.montage.call(self, 0, groupArray) + '</dd>' :
+                        '<dd>' + functionality.montage.call(self, 0, groupArray) + '</dd>';
 
                 }
 
@@ -831,12 +844,12 @@
         self.$selector.html(template.replace('{cont}', self.groupCity()));
 
         //单选就去掉
-        !configure.multiSelect ?  self.$selector.find('.city-count').html(''): '';
+        !configure.multiSelect ? self.$selector.find('.city-count').html('') : '';
 
         //没有开启搜索，就remove掉搜索dom
 
         if (!configure.search) {
-            self.$selector.find('.city-input').addClass('not-search').html('<em>'+ configure.placeholder +'</em>');
+            self.$selector.find('.city-input').addClass('not-search').html('<em>' + configure.placeholder + '</em>');
             self.$selector.find('.city-txt').find('em').remove();
         } else {
             self.$selector.find('.city-input').removeClass('not-search');
@@ -873,7 +886,7 @@
     Cityselect.prototype.unBindEvent = function (event) {
         var self = this,
             $selector = self.$selector;
-        
+
         $selector.off('click.cityselect', '.city-info');
 
         $selector.off('click.cityselect', '.tab-a');
@@ -912,16 +925,16 @@
                         self.provinceId.push(value.parentId);
 
                         //添加选中状态
-                        self.$selector.find('.caller[data-id="'+ value.id +'"]').addClass('active');
+                        self.$selector.find('.caller[data-id="' + value.id + '"]').addClass('active');
 
                         //选中的值拼接dom
-                        joinSpan = '<span data-id="'+ value.id +'" data-parentid="'+ value.parentId +'">'+ name +'<i class="del"></i></span>';
+                        joinSpan = '<span data-id="' + value.id + '" data-parentid="' + value.parentId + '">' + name + '<i class="del"></i></span>';
 
                         //添加选中的城市显示方式
                         if (configure.multiType < 1) {
                             self.$selector.find('.city-input').before(joinSpan);
                         }
-                        
+
                     }
 
                 });
@@ -932,18 +945,23 @@
                     self.$selector.find('.city-count').find('i').text(i + 1);
                 }
 
-            };
+            }
+            ;
 
             //存储设置城市的值
             self.values = [];
-            self.multiSelectResult.length > 0 ? self.values.push({ 'name': self.multiSelectResult, 'id': self.multiSelectResultId, 'parentId': self.provinceId }) : '';
+            self.multiSelectResult.length > 0 ? self.values.push({
+                'name': self.multiSelectResult,
+                'id': self.multiSelectResultId,
+                'parentId': self.provinceId
+            }) : '';
 
             //拼接后的选中name
             mosaicName = self.multiSelectResult.join(configure.mosaic);
 
             //添加选中的城市显示方式
             if (configure.multiType === 1) {
-                self.$selector.find('.city-name').html('<span class="span-over" title="'+ mosaicName +'">'+ mosaicName +'</span>');
+                self.$selector.find('.city-name').html('<span class="span-over" title="' + mosaicName + '">' + mosaicName + '</span>');
             }
 
             //有值就去掉此class

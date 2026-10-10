@@ -15,9 +15,7 @@ export default {
 			hideMsgCenterRedDot();
 		}
 	},
-	/**
-	 * 接收服务器处理完的check_last_pwd_update_time指令结果 true为提醒 false为不提醒
-	 * @param res
+	/** 接收服务器处理完的check_last_pwd_update_time指令结果 true为提醒 false为不提醒
 	 */
 	check_last_pwd_update_time:function(res){
 		if(res.data.need){

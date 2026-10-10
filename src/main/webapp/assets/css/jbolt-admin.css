@@ -1,4 +1,4 @@
-/*********jbolt_admin_css_version="3.9.3*************/
+/** jbolt_admin_css_version="3.9.3 */
 html, body {
 	margin: 0;
 	padding: 0;
@@ -35,7 +35,7 @@ a:hover{
 	color:#007bff;
 }
 
-/******滚动条样式重置*****/
+/** 滚动条样式重置 */
 ::-webkit-scrollbar {
 	width: 10px;
 	height: 10px;
@@ -70,7 +70,7 @@ a:hover{
 	background: transparent;
 }
 
-/***********后台主框架 class**************/
+/** 后台主框架 class */
 .jbolt_admin{
 	margin-left:0;
 	margin-right:0;
@@ -85,7 +85,7 @@ a:hover{
 .jbolt_admin.row{
 	position: relative!important;
 }
-/*****后台左侧导航区域*****/
+/** **后台左侧导航区域 */
 .jbolt_admin_left {
 	width: 220px;
 	position: fixed;
@@ -439,7 +439,7 @@ a:hover{
 /* .card-body{
 	padding: 5px;
 } */
-/**********多样式全局定制*********/
+/** 多样式全局定制 */
 
 .jbolt_admin.jbolt_style_4 .jbolt_admin_left,
 .jbolt_admin.jbolt_style_5 .jbolt_admin_left,
@@ -510,7 +510,7 @@ a:hover{
 	vertical-align: middle;
 }
 
-/******************后台主页左侧导航 css定义**********************/
+/** 后台主页左侧导航 css定义 */
 .jbolt_admin_nav {
 	padding:0;
 	overflow: hidden;
@@ -832,7 +832,7 @@ a:hover{
 }
 
 
-/*********************结束************************/
+/** 结束 */
 
 .jbolt_page_title {
 	display: block;
@@ -873,7 +873,7 @@ a:hover{
 	.jbolt_page_title form button,
 	.jbolt_page_title form>label,
 	.jbolt_page_title form .form-control{
-		/*margin-right:2px;*/
+		/* margin-right:2px; */
 		display: block;
 		width: 100%;
 	}
@@ -1330,7 +1330,7 @@ table.thin>tbody>tr>td [data-switchbtn]{
     .checkbox input[type="checkbox"]:focus + label::before {
       /* outline: thin dotted;
       outline: 5px auto -webkit-focus-ring-color;
-      outline-offset: -2px;  */}
+      outline-offset: -2px; */}
     .checkbox input[type="checkbox"]:checked + label::after {
          font-family: 'FontAwesome';
     	content: "\f00c";
@@ -1399,7 +1399,7 @@ table.thin>tbody>tr>td [data-switchbtn]{
     display: inline-block;
     position: relative;
     padding-left: 5px!important;
-    /*  white-space: nowrap; */
+    /* white-space: nowrap; */
      margin-bottom:0;
      cursor: pointer;
      }
@@ -1450,7 +1450,7 @@ table.thin>tbody>tr>td [data-switchbtn]{
     .radio input[type="radio"]:focus + label::before {
       /* outline: thin dotted;
       outline: 50px auto -webkit-focus-ring-color;
-      outline-offset: -2px;  */}
+      outline-offset: -2px; */}
     .radio input[type="radio"]:checked + label::after {
       -webkit-transform: scale(1, 1);
       -ms-transform: scale(1, 1);
@@ -1716,7 +1716,7 @@ color:red;
 	min-height: 200px;
 	padding-left: 6px;
 }
-/*************分页组件***************/
+/** 分页组件 */
 .pages {
 	display:block;
 	width:100%;
@@ -1832,10 +1832,7 @@ color:red;
   text-decoration: none;
 }
 
-/*
- * bootstrap-tagsinput v0.8.0
- *
- */
+/* bootstrap-tagsinput v0.8.0 */
 
 .bootstrap-tagsinput {
   background-color: #fff;
@@ -1912,7 +1909,7 @@ color:red;
 	margin-right:8px;
 	/* margin-top:18px; */
 	 vertical-align: top;
-	/*vertical-align: middle;*/
+	/* vertical-align: middle; */
 	transition:.2s;
 	-webkit-transition:.2s;
 	-moz-transition:.2s;
@@ -2746,7 +2743,7 @@ img{max-width: 100%;}
 
 
 
-/****************tab版封装*******************/
+/** tab版封装 */
 .jbolt_admin.withtabs .jbolt_admin_main{
 	top:102px;
 }
@@ -2839,7 +2836,7 @@ ul.jbolt_tabs>li{
 	position:relative;
 	display: inline-block;
 	padding:0 12px;
-/* 	border-right:1px solid #eff3f6; */
+/* border-right:1px solid #eff3f6; */
 	border-right:1px solid #f2f2f2;
 	min-width: 0;
 	margin-right:0!important;
@@ -2943,7 +2940,7 @@ ul.jbolt_tabs>li>i.close:hover{
 	opacity: 1;
 }
 
-/***********jbolt_layer组件***************/
+/** jbolt_layer组件 */
 .jbolt_layer{
 	display:block;
 	position:fixed;
@@ -3070,7 +3067,7 @@ right:0;
 	color:#333!important;
 }
 
-/*******autocomplete css*********/
+/** autocomplete css */
 .ac_input_box{
 	display:block;
 	position:relative;
@@ -3082,8 +3079,8 @@ right:0;
 .ac_input_box.input-group{
 	display:flex!important;
 }
-/*.form-inline .ac_input_box.input-group{*/
-/*	display:inline-block!important;*/
+/* .form-inline .ac_input_box.input-group{ */
+/* display:inline-block!important; */
 /*}*/
 .ac_input_box .closeBtnBox{
 	position:absolute;
@@ -3228,7 +3225,7 @@ right:0;
     background-color: rgb(245,247,250);
 }
 
-/*******主从方案********/
+/** 主从方案 */
 .jbolt_master_slave_box{
 	display: flex;
 	display: -webkit-flex;
@@ -3295,7 +3292,7 @@ right:0;
 	height:200px;
 }
 
-/*************table****************/
+/** table */
 .table-bordered thead td, .table-bordered thead th {
     border-bottom-width: 1px;
     border-color:#ededed;
@@ -3536,7 +3533,7 @@ width:100%;
 }
 
 
-/************常用选项卡*************/
+/** 常用选项卡 */
 .jbolt_tab_view>.jbolt_tab_contents{
 	border-radius:4px;
 	position: relative;
@@ -3777,7 +3774,7 @@ label.is_required:after{
 }
 
 
-/*********************************************************/
+
 .jbolt_top_nav_box{
 	display: inline-block;
 	height:60px;
@@ -4413,7 +4410,7 @@ vertical-align: top;
 	transform: translateY(-50%);
 }
 
-/***********5.0.1***************/
+/** 5.0.1 */
 a{
 	text-decoration: none!important;
 }
@@ -4462,7 +4459,7 @@ form.form-inline>.btn{
 #sysNoticeRedDot{
 	display: none;
 }
-/*******************hiprint***********************/
+/** hiprint */
 .hiprintElement-types{
 	padding: 10px 0;
 }

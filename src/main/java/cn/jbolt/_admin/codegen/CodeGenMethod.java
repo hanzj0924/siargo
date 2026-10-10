@@ -23,35 +23,40 @@ public class CodeGenMethod {
     private String uploadColName;
     private String uploadType;
     private List<CodeGenModelAttr> headers;
-    private String toggleColumnName;//多个是逗号
-    public String[] getToggleColumns(){
-        if(isToggle && StrKit.notBlank(toggleColumnName)){
+    private String toggleColumnName;// 多个是逗号
+
+    public String[] getToggleColumns() {
+        if (isToggle && StrKit.notBlank(toggleColumnName)) {
             return JBoltArrayUtil.from(toggleColumnName);
         }
         return null;
     }
-    public CodeGenMethod(String name){
+
+    public CodeGenMethod(String name) {
         this.name = name;
     }
-    public CodeGenMethod(String name,String value){
+
+    public CodeGenMethod(String name, String value) {
         this.name = name;
         this.value = value;
     }
-    public CodeGenMethod(String name,List<CodeGenModelAttr> headers){
+
+    public CodeGenMethod(String name, List<CodeGenModelAttr> headers) {
         this.name = name;
         this.headers = headers;
     }
-    public CodeGenMethod(String name,boolean isToggle,String toggleColumnName){
+
+    public CodeGenMethod(String name, boolean isToggle, String toggleColumnName) {
         this.name = name;
-        if(!isToggle && StrKit.isBlank(toggleColumnName)){
+        if (!isToggle && StrKit.isBlank(toggleColumnName)) {
             throw new RuntimeException("isToggle为true时 toggleColumnName必须指定");
         }
         this.isToggle = isToggle;
         this.toggleColumnName = toggleColumnName;
     }
 
-    public CodeGenMethod(String name,boolean isToggle,String[] toggleColumnNames){
-        this(name,isToggle,JBoltArrayUtil.join(toggleColumnNames,","));
+    public CodeGenMethod(String name, boolean isToggle, String[] toggleColumnNames) {
+        this(name, isToggle, JBoltArrayUtil.join(toggleColumnNames, ","));
     }
 
     public String getName() {
@@ -93,6 +98,7 @@ public class CodeGenMethod {
     public void setHeaders(List<CodeGenModelAttr> headers) {
         this.headers = headers;
     }
+
     public boolean getIsUploadAction() {
         return isUploadAction;
     }

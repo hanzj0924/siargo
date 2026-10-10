@@ -18,293 +18,261 @@ import cn.jbolt.siargo.model.EquipmentCertificate;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.alibaba.fastjson.JSON;
+
 import java.util.List;
-/**
- * 设备管理 Controller
- * @ClassName: EquipmentAdminController
- * @author: hanzj
- * @date: 2026-04-18 10:47
- */
+
+/** 设备管理 Controller */
 @CheckPermission(PermissionKey.SIARGO)
 @UnCheckIfSystemAdmin
 @Path(value = "/admin/siargo/equipment", viewPath = "/_view/admin/siargo/equipment")
-//true
+// true
 public class EquipmentAdminController extends JBoltBaseController {
 
-	@Inject
-	private EquipmentService service;
-	/** 证书服务 */
-	@Inject
-	private EquipmentCertificateService certificateService;
-	/** 角色服务 */
-	@Inject
-	private RoleService roleService;
-	
-   /**
-	* 首页
-	*/
-	public void index() {
-		Long userId = JBoltUserKit.getUserId();
-		
-		// 设备审核权限：管理员/设备 角色可覆盖，或直接拥有设备审核角色
-		set("audit", roleService.hasRoleOrAbove(userId, 221));
-		
-		// 动态分类列表（从字典表查询，支持任意数量分类）
-		List<Record> categories = service.getCategories();
-		set("categories", categories);
-		set("categoriesJson", JSON.toJSONString(categories));
-		
-		render("index.html");
-	}
-  	
-  	/**
-	* 数据源
-	*/
-	public void datas() {
-		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords(),get("category"),get("filter"),get("status"),get("inspectionMethod"),get("inspectionCycle")));
-	}
-	
-	/**
-	* 获取概览统计数量
-	*/
-	public void getOverviewCounts() {
-		renderJsonData(service.getOverviewCounts());
-	}
-	
-	/**
-	* 批量编制表单页
-	*/
-	public void batchInspectionForm() {
-		String ids = get("ids");
-		List<Record> equipmentList = service.findByIdsForBatch(ids);
-		if (equipmentList == null || equipmentList.isEmpty()) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		set("ids", ids);
-		set("equipmentList", equipmentList);
-		set("equipmentListJson", JSON.toJSONString(equipmentList));
-		render("batchInspection.html");
-	}
-	
-	/**
-	* 批量定期对比
-	* <p>Db.tx() 手动事务：多步写（先更新全部设备检校日期→逐台校验状态→建对比记录），
-	* 中途 Ret.fail 时 @Before(Tx.class) 不会回滚（只认异常），故必须 Db.tx() 保证原子性</p>
-	*/
-	public void batchInspection() {
-		final Ret[] retHolder = {null};
-		boolean txOk = Db.tx(() -> {
-			retHolder[0] = service.batchInspection(get("ids"),getParaToDate("lastInspectionDate"),getParaToDate("nextInspectionDate"),getInt("status"));
-			return retHolder[0] != null && retHolder[0].isOk();
-		});
-		if (!txOk) {
-			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "批量定期对比失败");
-			return;
-		}
-		// === afterCommit: 缓存清理 ===
-		service.clearOverviewCountsCache();
-		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("批量定期对比失败"));
-	}
+    @Inject
+    private EquipmentService service;
+    /** 证书服务 */
+    @Inject
+    private EquipmentCertificateService certificateService;
 
-	/**
-	* 批量审核
-	* <p>Db.tx() 手动事务：逐台审核，中途 Ret.fail 时需整体回滚</p>
-	*/
-	public void batchAudit() {
-		final Ret[] retHolder = {null};
-		boolean txOk = Db.tx(() -> {
-			retHolder[0] = service.batchAudit(get("ids"));
-			return retHolder[0] != null && retHolder[0].isOk();
-		});
-		if (!txOk) {
-			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "批量审核失败");
-			return;
-		}
-		// === afterCommit: 缓存清理 ===
-		service.clearOverviewCountsCache();
-		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("批量审核失败"));
-	}
-	
-	/**
-	* 设备对比记录页面
-	*/
-	public void records() {
-		Long equipmentId = getLong("equipmentId");
-		if (equipmentId == null) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		Equipment equipment = service.findById(equipmentId);
-		if (equipment == null) {
-			renderFail(JBoltMsg.DATA_NOT_EXIST);
-			return;
-		}
-		set("equipmentId", equipmentId);
-		set("equipment", equipment);
-		render("inspectionBatch/index.html");
-	}
-	
-	/**
-	* 设备对比记录数据源
-	*/
-	public void recordDatas() {
-		Long equipmentId = getLong("equipmentId");
-		if (equipmentId == null) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		renderJsonData(service.paginateRecordDatas(getPageNumber(), getPageSize(), equipmentId));
-	}
-	
-	/**
-	* 查看证书
-	*/
-	public void certificates() {
-		Long comparisonId = getLong("comparisonId");
-		if (notOk(comparisonId)) { renderFail(JBoltMsg.PARAM_ERROR); return; }
-		List<EquipmentCertificate> certs = certificateService.findByComparisonId(comparisonId);
-		set("certs", certs);
-		set("comparisonId", comparisonId);
-		render("certificates.html");
-	}
-	
-   /**
-	* 新增
-	*/
-	public void add() {
-		set("equipment", new Equipment());
-		render("add.html");
-	}
-	
-   /**
-	* 编辑
-	*/
-	public void edit() {
-		Equipment equipment=service.findById(getLong(0)); 
-		if(equipment == null){
-			renderFail(JBoltMsg.DATA_NOT_EXIST);
-			return;
-		}
-		set("equipment",equipment);
-		render("edit.html");
-	}
-	
-  /**
-	* 保存
-	*/
+    @Inject
+    private RoleService roleService;
+
+    /** 首页 */
+    public void index() {
+        Long userId = JBoltUserKit.getUserId();
+
+        // 设备审核权限：管理员/设备 角色可覆盖，或直接拥有设备审核角色
+        set("audit", roleService.hasRoleOrAbove(userId, 221));
+
+        // 动态分类列表（从字典表查询，支持任意数量分类）
+        List<Record> categories = service.getCategories();
+        set("categories", categories);
+        set("categoriesJson", JSON.toJSONString(categories));
+
+        render("index.html");
+    }
+
+    /** 数据源 */
+    public void datas() {
+        renderJsonData(service.paginateAdminDatas(getPageNumber(), getPageSize(), getKeywords(), get("category"),
+                get("filter"), get("status"), get("inspectionMethod"), get("inspectionCycle")));
+    }
+
+    /** 获取概览统计数量 */
+    public void getOverviewCounts() {
+        renderJsonData(service.getOverviewCounts());
+    }
+
+    /** 批量编制表单页 */
+    public void batchInspectionForm() {
+        String ids = get("ids");
+        List<Record> equipmentList = service.findByIdsForBatch(ids);
+        if (equipmentList == null || equipmentList.isEmpty()) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        set("ids", ids);
+        set("equipmentList", equipmentList);
+        set("equipmentListJson", JSON.toJSONString(equipmentList));
+        render("batchInspection.html");
+    }
+
+    /**
+     * 批量定期对比
+     * <p>Db.tx() 手动事务：多步写（先更新全部设备检校日期→逐台校验状态→建对比记录），
+     * 中途 Ret.fail 时 @Before(Tx.class) 不会回滚（只认异常），故必须 Db.tx() 保证原子性</p>
+     */
+    public void batchInspection() {
+        final Ret[] retHolder = {null};
+        boolean txOk = Db.tx(() -> {
+            retHolder[0] = service.batchInspection(get("ids"), getParaToDate("lastInspectionDate"),
+                    getParaToDate("nextInspectionDate"), getInt("status"));
+            return retHolder[0] != null && retHolder[0].isOk();
+        });
+        if (!txOk) {
+            renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "批量定期对比失败");
+            return;
+        }
+        // afterCommit: 缓存清理
+        service.clearOverviewCountsCache();
+        renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("批量定期对比失败"));
+    }
+
+    /**
+     * 批量审核
+     * <p>Db.tx() 手动事务：逐台审核，中途 Ret.fail 时需整体回滚</p>
+     */
+    public void batchAudit() {
+        final Ret[] retHolder = {null};
+        boolean txOk = Db.tx(() -> {
+            retHolder[0] = service.batchAudit(get("ids"));
+            return retHolder[0] != null && retHolder[0].isOk();
+        });
+        if (!txOk) {
+            renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "批量审核失败");
+            return;
+        }
+        // afterCommit: 缓存清理
+        service.clearOverviewCountsCache();
+        renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("批量审核失败"));
+    }
+
+    /** 设备对比记录页面 */
+    public void records() {
+        Long equipmentId = getLong("equipmentId");
+        if (equipmentId == null) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        Equipment equipment = service.findById(equipmentId);
+        if (equipment == null) {
+            renderFail(JBoltMsg.DATA_NOT_EXIST);
+            return;
+        }
+        set("equipmentId", equipmentId);
+        set("equipment", equipment);
+        render("inspectionBatch/index.html");
+    }
+
+    /** 设备对比记录数据源 */
+    public void recordDatas() {
+        Long equipmentId = getLong("equipmentId");
+        if (equipmentId == null) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        renderJsonData(service.paginateRecordDatas(getPageNumber(), getPageSize(), equipmentId));
+    }
+
+    /** 查看证书 */
+    public void certificates() {
+        Long comparisonId = getLong("comparisonId");
+        if (notOk(comparisonId)) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        List<EquipmentCertificate> certs = certificateService.findByComparisonId(comparisonId);
+        set("certs", certs);
+        set("comparisonId", comparisonId);
+        render("certificates.html");
+    }
+
+    /** 新增 */
+    public void add() {
+        set("equipment", new Equipment());
+        render("add.html");
+    }
+
+    /** 编辑 */
+    public void edit() {
+        Equipment equipment = service.findById(getLong(0));
+        if (equipment == null) {
+            renderFail(JBoltMsg.DATA_NOT_EXIST);
+            return;
+        }
+        set("equipment", equipment);
+        render("edit.html");
+    }
+
+    /** 保存 */
     public void save() {
         renderJson(service.save(getModel(Equipment.class, "equipment"), get("certificateImageUrls")));
     }
-	
-   /**
-	* 更新
-	*/
+
+    /** 更新 */
     @Before(Tx.class)
-	public void update() {
-		renderJson(service.update(getModel(Equipment.class, "equipment")));
-	}
-	
-   /**
-	* 批量删除
-	* <p>Db.tx() 手动事务：循环删除，中途 checkInUse 阻止需整体回滚（@Before(Tx.class) 不认 Ret.fail）</p>
-	*/
-	public void deleteByIds() {
-		final Ret[] retHolder = {null};
-		boolean txOk = Db.tx(() -> {
-			retHolder[0] = service.deleteByBatchIds(get("ids"));
-			return retHolder[0] != null && retHolder[0].isOk();
-		});
-		if (!txOk) {
-			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
-			return;
-		}
-		// === afterCommit: 缓存清理 ===
-		service.clearOverviewCountsCache();
-		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
-	}
-	
-	/**
-	* 批量更改状态表单页
-	*/
-	public void batchStatusForm() {
-		String ids = get("ids");
-		List<Record> equipmentList = service.findByIdsForBatch(ids);
-		if (equipmentList == null || equipmentList.isEmpty()) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		set("ids", ids);
-		set("equipmentList", equipmentList);
-		set("equipmentListJson", JSON.toJSONString(equipmentList));
-		render("batchStatus.html");
-	}
-	
-	/**
-	* 批量更改状态
-	*/
-	@Before(Tx.class)
-	public void batchStatus() {
-		renderJson(service.batchStatus(get("ids"), getInt("status")));
-	}
-	
-	/**
-	 * 设备时间线页面
-	 */
-	public void timeline() {
-		Long equipmentId = getLong("equipmentId");
-		if (equipmentId == null) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		Equipment equipment = service.findById(equipmentId);
-		if (equipment == null) {
-			renderFail(JBoltMsg.DATA_NOT_EXIST);
-			return;
-		}
-		set("equipment", equipment);
-		render("timeline/index.html");
-	}
-	
-	/**
-	 * 时间线数据源 - 合并对比+维修记录按日期倒序
-	 */
-	public void timelineDatas() {
-		Long equipmentId = getLong("equipmentId");
-		if (equipmentId == null) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		renderJsonData(service.paginateTimelineDatas(getPageNumber(), getPageSize(), equipmentId, getInt("type")));
-	}
+    public void update() {
+        renderJson(service.update(getModel(Equipment.class, "equipment")));
+    }
 
-	/**
-	 * 检查设备是否有待审核数据
-	 */
-	public void checkPendingAudit() {
-		Long equipmentId = getLong("equipmentId");
-		if (equipmentId == null) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		renderJsonData(service.hasPendingAudit(equipmentId));
-	}
+    /**
+     * 批量删除
+     * <p>Db.tx() 手动事务：循环删除，中途 checkInUse 阻止需整体回滚（@Before(Tx.class) 不认 Ret.fail）</p>
+     */
+    public void deleteByIds() {
+        final Ret[] retHolder = {null};
+        boolean txOk = Db.tx(() -> {
+            retHolder[0] = service.deleteByBatchIds(get("ids"));
+            return retHolder[0] != null && retHolder[0].isOk();
+        });
+        if (!txOk) {
+            renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+            return;
+        }
+        // afterCommit: 缓存清理
+        service.clearOverviewCountsCache();
+        renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
+    }
 
-	/**
-	 * 获取设备当前状态
-	 */
-	public void getStatus() {
-		Long equipmentId = getLong("equipmentId");
-		if (equipmentId == null) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		Integer status = service.getEquipmentStatus(equipmentId);
-		if (status == null) {
-			renderFail("设备不存在或状态异常");
-			return;
-		}
-		renderJsonData(status);
-	}
+    /** 批量更改状态表单页 */
+    public void batchStatusForm() {
+        String ids = get("ids");
+        List<Record> equipmentList = service.findByIdsForBatch(ids);
+        if (equipmentList == null || equipmentList.isEmpty()) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        set("ids", ids);
+        set("equipmentList", equipmentList);
+        set("equipmentListJson", JSON.toJSONString(equipmentList));
+        render("batchStatus.html");
+    }
+
+    /** 批量更改状态 */
+    @Before(Tx.class)
+    public void batchStatus() {
+        renderJson(service.batchStatus(get("ids"), getInt("status")));
+    }
+
+    /** 设备时间线页面 */
+    public void timeline() {
+        Long equipmentId = getLong("equipmentId");
+        if (equipmentId == null) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        Equipment equipment = service.findById(equipmentId);
+        if (equipment == null) {
+            renderFail(JBoltMsg.DATA_NOT_EXIST);
+            return;
+        }
+        set("equipment", equipment);
+        render("timeline/index.html");
+    }
+
+    /** 时间线数据源 - 合并对比+维修记录按日期倒序 */
+    public void timelineDatas() {
+        Long equipmentId = getLong("equipmentId");
+        if (equipmentId == null) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        renderJsonData(service.paginateTimelineDatas(getPageNumber(), getPageSize(), equipmentId, getInt("type")));
+    }
+
+    /** 检查设备是否有待审核数据 */
+    public void checkPendingAudit() {
+        Long equipmentId = getLong("equipmentId");
+        if (equipmentId == null) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        renderJsonData(service.hasPendingAudit(equipmentId));
+    }
+
+    /** 获取设备当前状态 */
+    public void getStatus() {
+        Long equipmentId = getLong("equipmentId");
+        if (equipmentId == null) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        Integer status = service.getEquipmentStatus(equipmentId);
+        if (status == null) {
+            renderFail("设备不存在或状态异常");
+            return;
+        }
+        renderJsonData(status);
+    }
 
 }

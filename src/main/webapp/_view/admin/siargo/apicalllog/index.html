@@ -1,36 +1,68 @@
 #@jboltLayout()
 #define main()
 #set(pageId=RandomUtil.random(6))
-<div class="jbolt_page jb_vflex" data-key="#(pmkey)" data-require-plugin="echarts,splitjs" data-init-handler="initApiCallLogChart_#(pageId)">
+<div class="jbolt_page jb_vflex"
+     data-key="#(pmkey)"
+     data-require-plugin="echarts,splitjs"
+     data-init-handler="initApiCallLogChart_#(pageId)">
 
-<div class="jbolt_page_title">
-	<div class="row">
-	<div class="col-auto">
-	<h1>API调用记录</h1>
-	</div>
-	<div class="col">
-		<form class="form-inline" id="apiCallLogForm_#(pageId)" onsubmit="return false;" method="post">
-		<input type="text" autocomplete="off" class="form-control" placeholder="API路径搜索" name="keywords" value="" />
-		<input type="text" autocomplete="off" class="form-control ml-2" placeholder="请求追踪搜索" name="traceId" value="" style="width:140px;" />
-		<select class="form-control ml-2" name="responseStatus" onchange="jboltTableSearch(this)">
-			<option value="">全部状态</option>
-			<option value="ok">成功</option>
-			<option value="fail">失败</option>
-		</select>
-		<input type="text" autocomplete="off" class="form-control ml-2" name="startDate" data-date data-type="date" data-fmt="yyyy-MM-dd" placeholder="开始日期" style="width:130px;" />
-		<span class="ml-1 mr-1">-</span>
-		<input type="text" autocomplete="off" class="form-control" name="endDate" data-date data-type="date" data-fmt="yyyy-MM-dd" placeholder="结束日期" style="width:130px;" />
-		<button type="submit" onclick="jboltTableSearch(this)" class="btn btn-outline-secondary ml-2"><i class="fa fa-search"></i> 查询</button>
-		</form>
-	</div>
-	<div class="col-auto"></div>
-	</div>
-</div>
+    <div class="jbolt_page_title">
+        <div class="row">
+            <div class="col-auto">
+                <h1>API调用记录</h1>
+            </div>
+            <div class="col">
+                <form class="form-inline" id="apiCallLogForm_#(pageId)" onsubmit="return false;" method="post">
+                    <input type="text"
+                           autocomplete="off"
+                           class="form-control"
+                           placeholder="API路径搜索"
+                           name="keywords"
+                           value=""/>
+                    <input type="text"
+                           autocomplete="off"
+                           class="form-control ml-2"
+                           placeholder="请求追踪搜索"
+                           name="traceId"
+                           value=""
+                           style="width:140px;"/>
+                    <select class="form-control ml-2" name="responseStatus" onchange="jboltTableSearch(this)">
+                        <option value="">全部状态</option>
+                        <option value="ok">成功</option>
+                        <option value="fail">失败</option>
+                    </select>
+                    <input type="text"
+                           autocomplete="off"
+                           class="form-control ml-2"
+                           name="startDate"
+                           data-date
+                           data-type="date"
+                           data-fmt="yyyy-MM-dd"
+                           placeholder="开始日期"
+                           style="width:130px;"/>
+                    <span class="ml-1 mr-1">-</span>
+                    <input type="text"
+                           autocomplete="off"
+                           class="form-control"
+                           name="endDate"
+                           data-date
+                           data-type="date"
+                           data-fmt="yyyy-MM-dd"
+                           placeholder="结束日期"
+                           style="width:130px;"/>
+                    <button type="submit" onclick="jboltTableSearch(this)" class="btn btn-outline-secondary ml-2"><i
+                            class="fa fa-search"></i> 查询
+                    </button>
+                </form>
+            </div>
+            <div class="col-auto"></div>
+        </div>
+    </div>
 
-<div class="jbolt_page_content jb_vbody">
+    <div class="jbolt_page_content jb_vbody">
 
-<!-- JBoltTable 数据模板 -->
-<textarea class="jb_tpl_box" id="apiCallLogRowtpl_#(pageId)">
+        <!-- JBoltTable 数据模板 -->
+        <textarea class="jb_tpl_box" id="apiCallLogRowtpl_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.id}" style="text-align:center;">
 <td >${pageNumber,pageSize,index | rownum}</td>
@@ -49,281 +81,292 @@
 {@/each}
 </textarea>
 
-<div class="jbolttable_master_slave_box">
-	<div class="split" id="apicalllog_master_#(pageId)">
-		<!-- 统计卡片区 -->
-		<div class="row mb-2 px-2 pt-2">
-			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-				<div class="card border-0 mb-2 jb-dashboard-card hand">
-					<div class="card-body p-4 text-nowrap">
-						<span class="float-left"><i class="fa fa-bar-chart j_font_30 j_left_fa text-primary rounded"></i></span>
-						<div class="text-right">
-							<span class="d-block j_font_24" id="stat_total_#(pageId)">...</span>
-							<span class="d-block">总调用次数</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-				<div class="card border-0 mb-2 jb-dashboard-card hand">
-					<div class="card-body p-4 text-nowrap">
-						<span class="float-left"><i class="fa fa-check-circle j_font_30 j_left_fa text-success rounded"></i></span>
-						<div class="text-right">
-							<span class="d-block j_font_24" id="stat_success_#(pageId)">...</span>
-							<span class="d-block">成功次数</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-				<div class="card border-0 mb-2 jb-dashboard-card hand">
-					<div class="card-body p-4 text-nowrap">
-						<span class="float-left"><i class="fa fa-times-circle j_font_30 j_left_fa text-danger rounded"></i></span>
-						<div class="text-right">
-							<span class="d-block j_font_24" id="stat_fail_#(pageId)">...</span>
-							<span class="d-block">失败次数</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-6 col-sm-12 px-2">
-				<div class="card border-0 mb-2 jb-dashboard-card hand">
-					<div class="card-body p-4 text-nowrap">
-						<span class="float-left"><i class="fa fa-clock-o j_font_30 j_left_fa text-info rounded"></i></span>
-						<div class="text-right">
-							<span class="d-block j_font_24" id="stat_avgtime_#(pageId)">...<small>ms</small></span>
-							<span class="d-block">平均耗时</span>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- ECharts 折线图区 -->
-		<div class="row px-2">
-			<div class="col-lg-12 px-2">
-				<div class="card border-0 mb-2">
-					<div class="card-body p-2" style="height:240px">
-						<a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="pull-right text-black-50" style="position:relative;z-index:10;"><i class="jbicon2 jbi-fullscreen"></i></a>
-						<div id="echarts-line_#(pageId)" style="width:100%;height:100%;"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="split" id="apicalllog_slave_#(pageId)">
-<!-- 工具条 -->
-		<div class="jbolt_table_toolbar" id="apiCallLog_toolbar_#(pageId)">
-			<div class="btn-group" role="group">
-				<button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
-			</div>
-			<div class="clearfix"></div>
-		</div>
-		<!-- JBoltTable -->
-		<table class="jbolt_table thead_font_normal"
-		data-jbolttable
-		data-height="fill_box"
-		data-ajax="true"
-		data-url="admin/siargo/apicalllog/datas"
-		data-column-resize="true"
-		data-column-prepend=""
-		data-conditions-form="apiCallLogForm_#(pageId)"
-		data-rowtpl="apiCallLogRowtpl_#(pageId)"
-		data-page="apiCallLogPage_#(pageId)"
-		data-toolbar="apiCallLog_toolbar_#(pageId)"
-		data-pagesize="100"
-		data-fixed-columns-left="1,2,3"
-		>
-		<thead class="fw-normal">
-		<tr style="text-align:center;">
-			<th data-width="60" data-align="center">序号</th>
-			<th data-width="220" data-column="api_path">API路径</th>
-			<th data-width="80" data-column="api_method" data-align="center">方法</th>
-			<th data-width="80" data-column="order_id" data-align="center">订单号</th>
-			<th data-min-width="200" data-column="order_ids">批量订单号</th>
-			<th data-width="110" data-column="request_ip" data-align="center">请求IP</th>
-			<th data-width="90" data-column="response_status" data-align="center">状态</th>
-			<th data-width="80" data-column="response_code">状态码</th>
-			<th data-width="100" data-column="response_msg" data-align="center">响应消息</th>
-			<th data-width="140" data-column="trace_id" data-align="center">Trace ID</th>
-			<th data-width="90" data-column="cost_time" data-align="center">耗时(ms)</th>
-			<th data-width="160" data-column="create_time" data-align="center">调用时间</th>
-		</tr>
-		</thead>
-		<tbody>
-		</tbody>
-		</table>
-	</div>
-</div>
+        <div class="jbolttable_master_slave_box">
+            <div class="split" id="apicalllog_master_#(pageId)">
+                <!-- 统计卡片区 -->
+                <div class="row mb-2 px-2 pt-2">
+                    <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                        <div class="card border-0 mb-2 jb-dashboard-card hand">
+                            <div class="card-body p-4 text-nowrap">
+                                <span class="float-left"><i class="fa fa-bar-chart j_font_30 j_left_fa text-primary rounded"></i></span>
+                                <div class="text-right">
+                                    <span class="d-block j_font_24" id="stat_total_#(pageId)">...</span>
+                                    <span class="d-block">总调用次数</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                        <div class="card border-0 mb-2 jb-dashboard-card hand">
+                            <div class="card-body p-4 text-nowrap">
+                                <span class="float-left"><i class="fa fa-check-circle j_font_30 j_left_fa text-success rounded"></i></span>
+                                <div class="text-right">
+                                    <span class="d-block j_font_24" id="stat_success_#(pageId)">...</span>
+                                    <span class="d-block">成功次数</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                        <div class="card border-0 mb-2 jb-dashboard-card hand">
+                            <div class="card-body p-4 text-nowrap">
+                                <span class="float-left"><i class="fa fa-times-circle j_font_30 j_left_fa text-danger rounded"></i></span>
+                                <div class="text-right">
+                                    <span class="d-block j_font_24" id="stat_fail_#(pageId)">...</span>
+                                    <span class="d-block">失败次数</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-12 px-2">
+                        <div class="card border-0 mb-2 jb-dashboard-card hand">
+                            <div class="card-body p-4 text-nowrap">
+                                <span class="float-left"><i class="fa fa-clock-o j_font_30 j_left_fa text-info rounded"></i></span>
+                                <div class="text-right">
+                                    <span class="d-block j_font_24"
+                                          id="stat_avgtime_#(pageId)">...<small>ms</small></span>
+                                    <span class="d-block">平均耗时</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ECharts 折线图区 -->
+                <div class="row px-2">
+                    <div class="col-lg-12 px-2">
+                        <div class="card border-0 mb-2">
+                            <div class="card-body p-2" style="height:240px">
+                                <a tabindex="-1"
+                                   data-fullscreenbtn
+                                   data-target="parent.card"
+                                   class="pull-right text-black-50"
+                                   style="position:relative;z-index:10;"><i class="jbicon2 jbi-fullscreen"></i></a>
+                                <div id="echarts-line_#(pageId)" style="width:100%;height:100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="split" id="apicalllog_slave_#(pageId)">
+                <!-- 工具条 -->
+                <div class="jbolt_table_toolbar" id="apiCallLog_toolbar_#(pageId)">
+                    <div class="btn-group" role="group">
+                        <button onclick="jboltTableRefresh(this)" class="btn btn-outline-info btn-sm">
+                            <i class="fa fa-refresh"></i> 刷新
+                        </button>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!-- JBoltTable -->
+                <table class="jbolt_table thead_font_normal"
+                       data-jbolttable
+                       data-height="fill_box"
+                       data-ajax="true"
+                       data-url="admin/siargo/apicalllog/datas"
+                       data-column-resize="true"
+                       data-column-prepend=""
+                       data-conditions-form="apiCallLogForm_#(pageId)"
+                       data-rowtpl="apiCallLogRowtpl_#(pageId)"
+                       data-page="apiCallLogPage_#(pageId)"
+                       data-toolbar="apiCallLog_toolbar_#(pageId)"
+                       data-pagesize="100"
+                       data-fixed-columns-left="1,2,3"
+                >
+                    <thead class="fw-normal">
+                    <tr style="text-align:center;">
+                        <th data-width="60" data-align="center">序号</th>
+                        <th data-width="220" data-column="api_path">API路径</th>
+                        <th data-width="80" data-column="api_method" data-align="center">方法</th>
+                        <th data-width="80" data-column="order_id" data-align="center">订单号</th>
+                        <th data-min-width="200" data-column="order_ids">批量订单号</th>
+                        <th data-width="110" data-column="request_ip" data-align="center">请求IP</th>
+                        <th data-width="90" data-column="response_status" data-align="center">状态</th>
+                        <th data-width="80" data-column="response_code">状态码</th>
+                        <th data-width="100" data-column="response_msg" data-align="center">响应消息</th>
+                        <th data-width="140" data-column="trace_id" data-align="center">Trace ID</th>
+                        <th data-width="90" data-column="cost_time" data-align="center">耗时(ms)</th>
+                        <th data-width="160" data-column="create_time" data-align="center">调用时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-</div>
+    </div>
 </div>
 #end
 #define js()
 <script type="text/javascript">
-$(function(){
-	Split(['#apicalllog_master_#(pageId)', '#apicalllog_slave_#(pageId)'],{
-		direction:'vertical',
-		sizes:[40,60],
-		minSize:[200,300],
-		gutterSize:10
-	});
-});
-function initApiCallLogChart_#(pageId)(){
-	// 异步加载统计数据，避免阻塞页面渲染
-	$.ajax({
-		url: '#(ctxPath)/admin/siargo/apicalllog/statsData',
-		type: 'GET',
-		dataType: 'json',
-		success: function(res){
-			if(res.state === 'ok' && res.data){
-				// 更新统计卡片
-				var cs = res.data.callStats || {};
-				$('#stat_total_#(pageId)').text(cs.total || 0);
-				$('#stat_success_#(pageId)').text(cs.successCount || 0);
-				$('#stat_fail_#(pageId)').text(cs.failCount || 0);
-				$('#stat_avgtime_#(pageId)').html((cs.avgCostTime || 0) + '<small>ms</small>');
-				// 渲染图表
-				renderDailyChart_#(pageId)(res.data.dailyStats || []);
-			} else {
-				// 响应状态异常或数据为空，降级显示
-				console.warn('[ApiCallLog] 统计数据加载异常, state:', res.state, 'msg:', res.msg);
-				$('#stat_total_#(pageId)').text('--');
-				$('#stat_success_#(pageId)').text('--');
-				$('#stat_fail_#(pageId)').text('--');
-				$('#stat_avgtime_#(pageId)').html('--<small>ms</small>');
-			}
-		},
-		error: function(xhr, status, error){
-			// 网络异常或服务端错误，降级显示
-			console.error('[ApiCallLog] 统计数据请求失败:', status, error);
-			$('#stat_total_#(pageId)').text('--');
-			$('#stat_success_#(pageId)').text('--');
-			$('#stat_fail_#(pageId)').text('--');
-			$('#stat_avgtime_#(pageId)').html('--<small>ms</small>');
-		}
-	});
-}
-function renderDailyChart_#(pageId)(rawData){
-	var chartDom = document.getElementById('echarts-line_#(pageId)');
-	if(!chartDom) return;
-	var existChart = echarts.getInstanceByDom(chartDom);
-	if(existChart) existChart.dispose();
-	var myChart = echarts.init(chartDom);
-	// 构建最近30天日期映射，没有数据的日补0
-	var dataMap = {};
-	if(rawData && rawData.length > 0){
-		for(var i = 0; i < rawData.length; i++){
-			var dayKey = rawData[i].day;
-			// 兼容多种日期格式：Date对象、时间戳、带时间的字符串
-			if(typeof dayKey === 'number'){
-				var dt = new Date(dayKey);
-				dayKey = dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2);
-			} else if(typeof dayKey === 'string' && dayKey.length > 10){
-				dayKey = dayKey.substring(0, 10);
-			}
-			dataMap[dayKey] = rawData[i];
-		}
-	}
-	var days = [];
-	var successData = [];
-	var failData = [];
-	var now = new Date();
-	for(var i = 29; i >= 0; i--){
-		var d = new Date(now);
-		d.setDate(d.getDate() - i);
-		var mm = ('0' + (d.getMonth() + 1)).slice(-2);
-		var dd = ('0' + d.getDate()).slice(-2);
-		var fullDay = d.getFullYear() + '-' + mm + '-' + dd;
-		days.push(mm + '-' + dd);
-		if(dataMap[fullDay]){
-			successData.push(dataMap[fullDay].success_count || 0);
-			failData.push(dataMap[fullDay].fail_count || 0);
-		} else {
-			successData.push(0);
-			failData.push(0);
-		}
-	}
-	var option = {
-		title: {
-			text: '最近30天API调用量',
-			textStyle: { fontSize: 14, fontWeight: 600, color: '#333' },
-			left: 10, top: 5
-		},
-		tooltip: {
-			trigger: 'axis'
-		},
-		legend: {
-			data: ['成功', '失败'],
-			top: 5, right: 40
-		},
-		grid: {
-			left: '3%',
-			right: '4%',
-			bottom: '3%',
-			containLabel: true
-		},
-		xAxis: {
-			type: 'category',
-			boundaryGap: false,
-			data: days,
-			axisLabel: {
-				interval: 'auto',
-				hideOverlap: true,
-				rotate: 0,
-				fontSize: 11
-			},
-			axisTick: {
-				alignWithLabel: true
-			}
-		},
-		yAxis: {
-			type: 'value',
-			minInterval: 1
-		},
-		series: [
-			{
-				name: '成功',
-				type: 'line',
-				smooth: true,
-				symbol: 'circle',
-				symbolSize: 4,
-				showSymbol: false,
-				lineStyle: { width: 2.5, color: '#10c888' },
-				itemStyle: { color: '#10c888' },
-				areaStyle: {
-					color: {
-						type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-						colorStops: [
-							{ offset: 0, color: 'rgba(16,200,136,0.25)' },
-							{ offset: 1, color: 'rgba(16,200,136,0.02)' }
-						]
-					}
-				},
-				data: successData
-			},
-			{
-				name: '失败',
-				type: 'line',
-				smooth: true,
-				symbol: 'circle',
-				symbolSize: 4,
-				showSymbol: false,
-				lineStyle: { width: 2.5, color: '#f43f5d' },
-				itemStyle: { color: '#f43f5d' },
-				areaStyle: {
-					color: {
-						type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-						colorStops: [
-							{ offset: 0, color: 'rgba(244,63,93,0.2)' },
-							{ offset: 1, color: 'rgba(244,63,93,0.02)' }
-						]
-					}
-				},
-				data: failData
-			}
-		]
-	};
-	myChart.setOption(option);
-}
+    $(function () {
+        Split(['#apicalllog_master_#(pageId)', '#apicalllog_slave_#(pageId)'], {
+            direction: 'vertical',
+            sizes: [40, 60],
+            minSize: [200, 300],
+            gutterSize: 10
+        });
+    });
+
+    function initApiCallLogChart_#(pageId)()
+    {
+        // 异步加载统计数据，避免阻塞页面渲染
+        $.ajax({
+            url: '#(ctxPath)/admin/siargo/apicalllog/statsData',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                if (res.state === 'ok' && res.data) {
+                    // 更新统计卡片
+                    var cs = res.data.callStats || {};
+                    $('#stat_total_#(pageId)').text(cs.total || 0);
+                    $('#stat_success_#(pageId)').text(cs.successCount || 0);
+                    $('#stat_fail_#(pageId)').text(cs.failCount || 0);
+                    $('#stat_avgtime_#(pageId)').html((cs.avgCostTime || 0) + '<small>ms</small>');
+                    // 渲染图表
+                    renderDailyChart_#(pageId)(res.data.dailyStats || []);
+                } else {
+                    // 响应状态异常或数据为空，降级显示
+                    console.warn('[ApiCallLog] 统计数据加载异常, state:', res.state, 'msg:', res.msg);
+                    $('#stat_total_#(pageId)').text('--');
+                    $('#stat_success_#(pageId)').text('--');
+                    $('#stat_fail_#(pageId)').text('--');
+                    $('#stat_avgtime_#(pageId)').html('--<small>ms</small>');
+                }
+            },
+            error: function (xhr, status, error) {
+                // 网络异常或服务端错误，降级显示
+                console.error('[ApiCallLog] 统计数据请求失败:', status, error);
+                $('#stat_total_#(pageId)').text('--');
+                $('#stat_success_#(pageId)').text('--');
+                $('#stat_fail_#(pageId)').text('--');
+                $('#stat_avgtime_#(pageId)').html('--<small>ms</small>');
+            }
+        });
+    }
+
+    function renderDailyChart_#(pageId)(rawData)
+    {
+        var chartDom = document.getElementById('echarts-line_#(pageId)');
+        if (!chartDom) return;
+        var existChart = echarts.getInstanceByDom(chartDom);
+        if (existChart) existChart.dispose();
+        var myChart = echarts.init(chartDom);
+        // 构建最近30天日期映射，没有数据的日补0
+        var dataMap = {};
+        if (rawData && rawData.length > 0) {
+            for (var i = 0; i < rawData.length; i++) {
+                var dayKey = rawData[i].day;
+                // 兼容多种日期格式：Date对象、时间戳、带时间的字符串
+                if (typeof dayKey === 'number') {
+                    var dt = new Date(dayKey);
+                    dayKey = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2);
+                } else if (typeof dayKey === 'string' && dayKey.length > 10) {
+                    dayKey = dayKey.substring(0, 10);
+                }
+                dataMap[dayKey] = rawData[i];
+            }
+        }
+        var days = [];
+        var successData = [];
+        var failData = [];
+        var now = new Date();
+        for (var i = 29; i >= 0; i--) {
+            var d = new Date(now);
+            d.setDate(d.getDate() - i);
+            var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+            var dd = ('0' + d.getDate()).slice(-2);
+            var fullDay = d.getFullYear() + '-' + mm + '-' + dd;
+            days.push(mm + '-' + dd);
+            if (dataMap[fullDay]) {
+                successData.push(dataMap[fullDay].success_count || 0);
+                failData.push(dataMap[fullDay].fail_count || 0);
+            } else {
+                successData.push(0);
+                failData.push(0);
+            }
+        }
+        var option = {
+            title: {
+                text: '最近30天API调用量',
+                textStyle: {fontSize: 14, fontWeight: 600, color: '#333'},
+                left: 10, top: 5
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['成功', '失败'],
+                top: 5, right: 40
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: days,
+                axisLabel: {
+                    interval: 'auto',
+                    hideOverlap: true,
+                    rotate: 0,
+                    fontSize: 11
+                },
+                axisTick: {
+                    alignWithLabel: true
+                }
+            },
+            yAxis: {
+                type: 'value',
+                minInterval: 1
+            },
+            series: [
+                {
+                    name: '成功',
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    showSymbol: false,
+                    lineStyle: {width: 2.5, color: '#10c888'},
+                    itemStyle: {color: '#10c888'},
+                    areaStyle: {
+                        color: {
+                            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                {offset: 0, color: 'rgba(16,200,136,0.25)'},
+                                {offset: 1, color: 'rgba(16,200,136,0.02)'}
+                            ]
+                        }
+                    },
+                    data: successData
+                },
+                {
+                    name: '失败',
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    showSymbol: false,
+                    lineStyle: {width: 2.5, color: '#f43f5d'},
+                    itemStyle: {color: '#f43f5d'},
+                    areaStyle: {
+                        color: {
+                            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                {offset: 0, color: 'rgba(244,63,93,0.2)'},
+                                {offset: 1, color: 'rgba(244,63,93,0.02)'}
+                            ]
+                        }
+                    },
+                    data: failData
+                }
+            ]
+        };
+        myChart.setOption(option);
+    }
 </script>
 #end

@@ -45,7 +45,7 @@ public class ProjectAssetResolver {
         boolean rooted = path.startsWith("/") && !path.startsWith("//");
         String localPath = rooted ? path.substring(1) : path;
         String source = localPath.replaceFirst("\\.min\\.(css|js)$", ".$1");
-        //精确清单匹配：不改写 CDN、第三方插件、同名外部文件及其他资源。
+        // 精确清单匹配：不改写 CDN、第三方插件、同名外部文件及其他资源。
         if (!assets.contains(source)) {
             return url;
         }
@@ -56,9 +56,11 @@ public class ProjectAssetResolver {
         String selected;
         if (Files.isRegularFile(webRoot.resolve(preferred))) {
             selected = preferred;
-        } else if (Files.isRegularFile(webRoot.resolve(alternative))) {
+        }
+        else if (Files.isRegularFile(webRoot.resolve(alternative))) {
             selected = alternative;
-        } else {
+        }
+        else {
             LOG.warn("项目资源的未压缩和压缩版本均不存在：" + source);
             return url;
         }

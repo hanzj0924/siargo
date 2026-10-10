@@ -59,17 +59,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * 此项目工程的配置类
- *
- * @ClassName: ProjectConfig
- * @author: JFinal学院-小木 QQ：909854136
- * @date: 2022年2月13日
- */
+/** 此项目工程的配置类 */
 public class ProjectConfig extends JBoltProjectConfig {
-    /**
-     * 配置系统常量
-     */
+    /** 配置系统常量 */
     @Override
     public void configConstants(Constants me) {
         // 设置404渲染视图
@@ -80,9 +72,7 @@ public class ProjectConfig extends JBoltProjectConfig {
         ExtendProjectConfig.configConstant(me);
     }
 
-    /**
-     * 配置路由
-     */
+    /** 配置路由 */
     @Override
     public void configRoutes(Routes me) {
         // 后台管理 主模块路由配置
@@ -96,9 +86,9 @@ public class ProjectConfig extends JBoltProjectConfig {
 
         // 后台管理 系统Api应用开发中心模块路由配置
         me.add(new AppDevCenterAdminRoutes());
-        //后台管理 开发中心 自定义业务 表格自定义渲染模块配置路由
+        // 后台管理 开发中心 自定义业务 表格自定义渲染模块配置路由
 //        me.add(new CustomTableRenderAdminRoutes());
-        //开发文档 路由
+        // 开发文档 路由
         me.add(new DevDocAdminRoutes());
 
         // 后台管理 系统微信API路由配置
@@ -108,7 +98,7 @@ public class ProjectConfig extends JBoltProjectConfig {
         me.add(new ApiTestRoutes());
         // 微信公众号H5测试
         me.add(new WechatTestRoutes());
-        //是否开启可视化设计与代码生成器
+        // 是否开启可视化设计与代码生成器
         if (JBoltConfig.JBOLT_CODE_GEN_ENABLE) {
             me.add(new JBoltCodeGenRoutes());
         }
@@ -129,38 +119,36 @@ public class ProjectConfig extends JBoltProjectConfig {
                 this.scan("cn.jbolt.api.common.controller");
             }
         });
-        
-		me.add(new Routes() {
-			@Override
-			public void config() {
-				this.addInterceptor(new SiargoTerminalOfflineInterceptor());
-				this.addInterceptor(new JBoltAdminAuthInterceptor());
-				this.scan("cn.jbolt.admin.siargo.apicalllog");
-				this.scan("cn.jbolt.admin.siargo.changelog");
-				this.scan("cn.jbolt.admin.siargo.cme");
-				this.scan("cn.jbolt.admin.siargo.customer");
-				this.scan("cn.jbolt.admin.siargo.dms");
-				this.scan("cn.jbolt.admin.siargo.equipment");
-				this.scan("cn.jbolt.admin.siargo.imi");
-				this.scan("cn.jbolt.admin.siargo.qarep");
-				this.scan("cn.jbolt.admin.siargo.supplier");
+
+        me.add(new Routes() {
+            @Override
+            public void config() {
+                this.addInterceptor(new SiargoTerminalOfflineInterceptor());
+                this.addInterceptor(new JBoltAdminAuthInterceptor());
+                this.scan("cn.jbolt.admin.siargo.apicalllog");
+                this.scan("cn.jbolt.admin.siargo.changelog");
+                this.scan("cn.jbolt.admin.siargo.cme");
+                this.scan("cn.jbolt.admin.siargo.customer");
+                this.scan("cn.jbolt.admin.siargo.dms");
+                this.scan("cn.jbolt.admin.siargo.equipment");
+                this.scan("cn.jbolt.admin.siargo.imi");
+                this.scan("cn.jbolt.admin.siargo.qarep");
+                this.scan("cn.jbolt.admin.siargo.supplier");
                 this.scan("cn.jbolt.admin.siargo.prodmodel");
                 this.scan("cn.jbolt.admin.siargo.prodparam");
-			}
-		});
+            }
+        });
         // Siargo 对外API路由（无登录认证）
-		me.add(new Routes() {
-			@Override
-			public void config() {
-				this.setMappingSuperClass(true);
-				this.scan("cn.jbolt.admin.siargo.api");
-			}
-		});
+        me.add(new Routes() {
+            @Override
+            public void config() {
+                this.setMappingSuperClass(true);
+                this.scan("cn.jbolt.admin.siargo.api");
+            }
+        });
     }
 
-    /**
-     * 配置模板引擎
-     */
+    /** 配置模板引擎 */
     @Override
     public void configEngines(Engine me) {
         // 配置自定义指令
@@ -180,7 +168,7 @@ public class ProjectConfig extends JBoltProjectConfig {
 
         // 添加JBoltConfig的访问
         me.addSharedObject("JBoltConfig", new JBoltConfig());
-        //仅选择 application.properties 清单中的本地 CSS/JS，外部资源保持原样。
+        // 仅选择 application.properties 清单中的本地 CSS/JS，外部资源保持原样。
         me.addSharedObject("ProjectAssets", new cn.jbolt.common.util.ProjectAssetResolver(
                 java.nio.file.Path.of(com.jfinal.kit.PathKit.getWebRootPath()),
                 com.jfinal.kit.PropKit.get("project_assets.environment_files", ""),
@@ -213,18 +201,16 @@ public class ProjectConfig extends JBoltProjectConfig {
         me.addSharedFunction("/_view/_admin/common/__jbolt_layout.html");
         // 常用前端组件
         me.addSharedFunction("/_view/_admin/common/__jboltassets.html");
-        //可视化生成器 index.html专用 查询条件公用模板
+        // 可视化生成器 index.html专用 查询条件公用模板
         me.addSharedFunction("/_view/_admin/_jbolt_code_gen/config/_condition.html");
-        //可视化生成器 _form.html专用 模板
+        // 可视化生成器 _form.html专用 模板
         me.addSharedFunction("/_view/_admin/_jbolt_code_gen/config/_form_ele_define_function.html");
 
         // 二开扩展配置 模板引擎
         ExtendProjectConfig.configEngine(me);
     }
 
-    /**
-     * 配置系统插件
-     */
+    /** 配置系统插件 */
     @Override
     public void configPlugins(Plugins me) {
         // 配置调度
@@ -232,15 +218,11 @@ public class ProjectConfig extends JBoltProjectConfig {
         // 配置JFinal Event插件
         configJFinalEvent(me);
 
-        //二开配置扩展插件
+        // 二开配置扩展插件
         ExtendProjectConfig.configPlugin(me, cron4jPlugin);
     }
 
-    /**
-     * 配置JFinal event
-     *
-     * @param me
-     */
+    /** 配置JFinal event */
     private void configJFinalEvent(Plugins me) {
         // 初始化插件
         EventPlugin eventPlugin = new EventPlugin();
@@ -256,12 +238,7 @@ public class ProjectConfig extends JBoltProjectConfig {
         me.add(eventPlugin);
     }
 
-    /**
-     * 配置自动调度插件
-     *
-     * @param me
-     * @return
-     */
+    /** 配置自动调度插件 */
     private Cron4jPlugin configCron4jPlugin(Plugins me) {
         Cron4jPlugin cron4jPlugin = new Cron4jPlugin();
         cron4jPlugin.addTask("0-59/1 * * * *", new JBoltOnlineUserClearTask());
@@ -269,28 +246,22 @@ public class ProjectConfig extends JBoltProjectConfig {
         return cron4jPlugin;
     }
 
-    /**
-     * 配置拦截器
-     */
+    /** 配置拦截器 */
     @Override
     public void configInterceptors(Interceptors me) {
         me.addGlobalActionInterceptor(new SessionInViewInterceptor());
         me.addGlobalActionInterceptor(new JBoltOnlineUserGlobalInterceptor());
-        //二开配置扩展全局拦截器
+        // 二开配置扩展全局拦截器
         ExtendProjectConfig.configInterceptor(me);
     }
 
-    /**
-     * 配置Sentinel限流
-     */
+    /** 配置Sentinel限流 */
     @Override
     protected void configSentinel() {
         //WebCallbackManager.setUrlBlockHandler(new JBoltSentinelUrlBlockHandler());
     }
 
-    /**
-     * 配置处理器handler
-     */
+    /** 配置处理器handler */
     @Override
     protected void configHandlers(Handlers me, JBoltBaseHandler baseHandler, XssHandler xssHandler) {
         if (JBoltConfig.JBOLT_UREPORT_ENABLE) {
@@ -299,13 +270,11 @@ public class ProjectConfig extends JBoltProjectConfig {
         }
         // renderFail增强日志Handler，捕获非异常路径的renderFail调用
         me.add(new cn.jbolt.common.handler.RenderFailLogHandler());
-        //二开配置扩展全局处理器
-        ExtendProjectConfig.configHandler(me, baseHandler,xssHandler);
+        // 二开配置扩展全局处理器
+        ExtendProjectConfig.configHandler(me, baseHandler, xssHandler);
     }
 
-    /**
-     * 配置
-     */
+    /** 配置 */
     @Override
     protected void configWebsocketHandler(Handlers me) {
         me.add(new UrlSkipHandler("^/websocket.ws", false));
@@ -340,21 +309,18 @@ public class ProjectConfig extends JBoltProjectConfig {
 
     @Override
     protected void configMainDbPlugins(DruidPlugin dbPlugin, JBoltActiveRecordPlugin arp, Engine sqlEngine) {
-        //处理二开配置扩展
+        // 处理二开配置扩展
         ExtendProjectConfig.configMainDbPlugin(dbPlugin, arp, sqlEngine);
     }
 
     @Override
-    protected void configExtendDbPlugins(DruidPlugin dbPlugin, JBoltActiveRecordPlugin arp, Engine sqlEngine, String configName, Setting dbSetting) {
-        //处理二开配置扩展
+    protected void configExtendDbPlugins(DruidPlugin dbPlugin, JBoltActiveRecordPlugin arp, Engine sqlEngine,
+                                         String configName, Setting dbSetting) {
+        // 处理二开配置扩展
         ExtendProjectConfig.configExtendDbPlugins(dbPlugin, arp, sqlEngine, configName, dbSetting);
     }
 
-    /**
-     * 配置ureport 报表设计器
-     *
-     * @param me
-     */
+    /** 配置ureport 报表设计器 */
     private void configUreport(Handlers me) {
         JBoltUreportViewHandler ureportViewHandler = new JBoltUreportViewHandler(new IUreportViewAuth() {
             @Override
@@ -378,7 +344,8 @@ public class ProjectConfig extends JBoltProjectConfig {
                 boolean has = false;
                 if (target.indexOf("/ureport/designer") != -1 || target.indexOf("/ureport/datasource") != -1) {
                     has = JBoltUserAuthKit.hasPermission(user.getId(), true, PermissionKey.UREPORT_DESIGNER);
-                } else {
+                }
+                else {
                     has = JBoltUserAuthKit.hasPermission(user.getId(), false, PermissionKey.UREPORT_DESIGNER,
                             PermissionKey.UREPORT_DETAIL);
                 }
@@ -388,9 +355,7 @@ public class ProjectConfig extends JBoltProjectConfig {
         me.add(ureportViewHandler);
     }
 
-    /**
-     * 配置cos组件
-     */
+    /** 配置cos组件 */
     @Override
     protected void configCos() {
         OreillyCos.setFileRenamePolicy(new FileRenamePolicy() {
@@ -409,39 +374,37 @@ public class ProjectConfig extends JBoltProjectConfig {
 
     @Override
     public void onStop() {
-        //调用默认
+        // 调用默认
         super.onStop();
-        //二开扩展配置服务器关闭前处理
+        // 二开扩展配置服务器关闭前处理
         ExtendProjectConfig.onStop();
     }
 
     @Override
     public void onStart() {
-        //调用默认
+        // 调用默认
         super.onStart();
-        //0、自动初始化数据
+        // 0、自动初始化数据
         JBoltAutoInitData.me.exe();
-        //1、自动执行一些需要升级的操作
+        // 1、自动执行一些需要升级的操作
         JBoltAutoUpgrade.me.exe();
-        //2、配置action report输出位置
+        // 2、配置action report输出位置
         JBoltConfig.configActionReportWriter();
-        //3、配置JBoltAutoCacheLog
+        // 3、配置JBoltAutoCacheLog
         JBoltConfig.configJBoltAutoCacheLog();
-        //4、配置assets version
+        // 4、配置assets version
         JBoltConfig.configAssetsVersion();
-        //5、配置微信公众平台
+        // 5、配置微信公众平台
         JBoltConfig.configWechat();
-        //6、配置是否action Report开启显示准确行号
+        // 6、配置是否action Report开启显示准确行号
         JBoltConfig.configJBoltActionReportLineNumberEnable();
-        //7、加载enums和caches services等
+        // 7、加载enums和caches services等
         loadCodeGenTranslateUseClasses();
-        //二开扩展配置服务器启动后处理
+        // 二开扩展配置服务器启动后处理
         ExtendProjectConfig.onStart();
     }
 
-    /**
-     * 加载enums和caches services等
-     */
+    /** 加载enums和caches services等 */
     private void loadCodeGenTranslateUseClasses() {
         new Thread(new Runnable() {
             @Override
@@ -458,55 +421,37 @@ public class ProjectConfig extends JBoltProjectConfig {
 
     }
 
-    /**
-     * 配置租户SN转ID的转换器
-     * @return
-     */
+    /** 配置租户SN转ID的转换器 */
     @Override
     protected JBoltSaasTenantSnToIdProcessor getSaasTenantSnToIdProcessor() {
         return ExtendProjectConfig.configSaasTenantSnToIdProcessor();
     }
 
-    /**
-     * 配置租户sn转name的转换器
-     * @return
-     */
+    /** 配置租户sn转name的转换器 */
     @Override
     protected JBoltSaasTenantSnToNameProcessor getSaasTenantSnToNameProcessor() {
         return ExtendProjectConfig.configSaasTenantSnToNameProcessor();
     }
 
-    /**
-     * 配置租户ID转Name的转换器
-     * @return
-     */
+    /** 配置租户ID转Name的转换器 */
     @Override
     protected JBoltSaasTenantIdToNameProcessor getSaasTenantIdToNameProcessor() {
         return ExtendProjectConfig.configSaasTenantIdToNameProcessor();
     }
 
-    /**
-     * 配置租户ID转sn的转换器
-     * @return
-     */
+    /** 配置租户ID转sn的转换器 */
     @Override
     protected JBoltSaasTenantIdToSnProcessor getSaasTenantIdToSnProcessor() {
         return ExtendProjectConfig.configSaasTenantIdToSnProcessor();
     }
 
-    /**
-     * 配置租户获得当前是否可访问的处理器
-     * @return
-     */
+    /** 配置租户获得当前是否可访问的处理器 */
     @Override
     protected JBoltSaasTenantAccessibleProcessor getSaasTenantAccessibleProcessor() {
         return ExtendProjectConfig.configSaasTenantAccessibleProcessor();
     }
 
-    /**
-     * 配置租户列表获取的处理器
-     * @return
-     */
+    /** 配置租户列表获取的处理器 */
     @Override
     protected JBoltSaasTenantGetAllProcessor getSaasTenantAllDatasProcessor() {
         return ExtendProjectConfig.configSaasTenantAllDatasProcessor();
@@ -522,13 +467,11 @@ public class ProjectConfig extends JBoltProjectConfig {
         return ExtendProjectOfModule.class.getSimpleName();
     }
 
-    /**
-     * 手动管理添加 新开项目的需要给租户分表的Model
-     */
+    /** 手动管理添加 新开项目的需要给租户分表的Model */
     @SuppressWarnings("unchecked")
     @Override
     protected void configProjectSaasSeparateTableModels() {
-        //项目里不包含在jbolt_core中的需要分表的加入model
+        // 项目里不包含在jbolt_core中的需要分表的加入model
         JBoltModelConfig.me.addProjectSeparateModels(
                 SysNotice.class,
                 UserExtend.class,
@@ -536,7 +479,7 @@ public class ProjectConfig extends JBoltProjectConfig {
                 Todo.class,
                 PrivateMessage.class
         );
-        //二开业务专用的配置调用
+        // 二开业务专用的配置调用
         ExtendProjectConfig.configProjectSaasSeparateTableModels();
     }
 

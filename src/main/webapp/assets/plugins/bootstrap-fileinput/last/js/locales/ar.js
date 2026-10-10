@@ -77,7 +77,7 @@
         msgAjaxError: 'حدث خطأ ما في العملية {operation} . الرجاء معاودة المحاولة في وقت لاحق!',
         msgAjaxProgressError: '{operation} فشلت',
         msgDuplicateFile: 'الملف "{name}" من نفس الحجم "{size} ك ب" تم بالفعل اختياره في وقت سابق. تخطى التحديد المكرر.',
-        msgResumableUploadRetriesExceeded:  'تم إحباط التحميل بعد <b>{max}</b> محاولات للملف <b>{file}</b>! تفاصيل الخطأ: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: 'تم إحباط التحميل بعد <b>{max}</b> محاولات للملف <b>{file}</b>! تفاصيل الخطأ: <pre>{error}</pre>',
         msgPendingTime: '{time} متبقي',
         msgCalculatingTime: 'حساب الوقت المتبقي',
         ajaxOperations: {
@@ -99,7 +99,7 @@
             indicatorSuccessTitle: 'تم الرفع',
             indicatorErrorTitle: 'خطأ بالرفع',
             indicatorPausedTitle: 'توقف التحميل مؤقتاً',
-            indicatorLoadingTitle:  'جارٍ الرفع &hellip;'
+            indicatorLoadingTitle: 'جارٍ الرفع &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'عرض الملف السابق',

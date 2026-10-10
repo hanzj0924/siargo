@@ -6,21 +6,21 @@
 #define main()
 #-- editdes-page：前缀类隔离本页 .fm-wrap/.fm-sec 的 14px 紧凑变体（siargo.css 4.1 区），避免污染 add/edit 共用的 16px 18px 通用版 --#
 <div class="jbolt_page editdes-page">
-	<div class="jbolt_page_content">
-		<form onsubmit="return false;" id="qareportUpdateDesForm"
-			action="admin/siargo/qarep/updateDes" method="post">
-			<input type="hidden" name="product.id" value="#(product.id??)" />
-			<div class="fm-wrap">
-				<div class="fm-sec">
-					<textarea class="form-control" style="height: 150px;white-space: pre-wrap;word-wrap: break-word;" 
-						placeholder="请输入备注" data-tips="请输入备注" 
-						maxlength="900" name="product.des" data-with-clearbtn="true">#(product.des??)</textarea>
-				</div>
-			</div>
-		</form>
-		#define js()
-		#include("/_view/_admin/common/_formjs.html",formId="qareportUpdateDesForm")
-		#end
-	</div>
+    <div class="jbolt_page_content">
+        <form onsubmit="return false;" id="qareportUpdateDesForm"
+              action="admin/siargo/qarep/updateDes" method="post">
+            <input type="hidden" name="product.id" value="#(product.id??)"/>
+            <div class="fm-wrap">
+                <div class="fm-sec">
+					<textarea class="form-control" style="height: 150px;white-space: pre-wrap;word-wrap: break-word;"
+                              placeholder="请输入备注" data-tips="请输入备注"
+                              maxlength="900" name="product.des" data-with-clearbtn="true">#(product.des??)</textarea>
+                </div>
+            </div>
+        </form>
+        #define js()
+        #include("/_view/_admin/common/_formjs.html",formId="qareportUpdateDesForm")
+        #end
+    </div>
 </div>
 #end

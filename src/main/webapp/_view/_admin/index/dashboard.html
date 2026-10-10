@@ -4,157 +4,175 @@
 #end
 #define main()
 #set(pageId=RandomUtil.random(6))
-<!--主页面内容显示区域 start-->
-<div class="jbolt_page shadow-none bg-transparent" data-key="#(pmkey)" data-require-plugin="echarts" data-init-handler="initDashboard_#(pageId)" data-page-id="#(pageId)" data-close-handler="SiargoDashboard.close" style="padding:0px 4px;">
-<div class="jbolt_page_content p-0 db-scroll">
-    <div class="db-wrapper">
+<!-- 主页面内容显示区域 start -->
+<div class="jbolt_page shadow-none bg-transparent"
+     data-key="#(pmkey)"
+     data-require-plugin="echarts"
+     data-init-handler="initDashboard_#(pageId)"
+     data-page-id="#(pageId)"
+     data-close-handler="SiargoDashboard.close"
+     style="padding:0px 4px;">
+    <div class="jbolt_page_content p-0 db-scroll">
+        <div class="db-wrapper">
 
-        <!-- ===== 流程环节看板（hero） ===== -->
-        <div class="db-hero db-anim db-d1">
-            <!-- 标题行：左侧标题 + 年度累计，右侧状态芯片 -->
-            <div class="db-hero-head">
-                <div class="db-hero-title-group">
-                    <span class="db-hero-title-icon"><i class="fa fa-tasks"></i></span>
-                    <div class="db-hero-title-txt">
-                        <h4 class="db-hero-title">报告单流程总览 <span class="db-hero-year" id="dbYear_#(pageId)"></span></h4>
-                        <p class="db-hero-sub">
-                            <span class="db-sub-item"><i class="jbicon2 jbi-send"></i>本年度送检 <b>#(totalQsi ?? '0')</b> 只</span>
-                            <span class="db-sub-sep"></span>
-                            <span class="db-sub-item"><i class="jbicon2 jbi-experiment"></i>本年度检验 <b>#(totalQi ?? '0')</b> 只</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="db-hero-meta">
-                    <span class="db-meta-chip db-meta-live"><i class="fa fa-circle"></i> 运行正常</span>
-                    <span class="db-meta-chip"><i class="fa fa-clock-o"></i> 更新 <b id="dbMetaTime_#(pageId)">--:--:--</b></span>
-                </div>
-            </div>
-
-            <!-- 统计模块：待处理 vs 已完成（各模块下方短色条分割，2 段） -->
-            <div class="db-hero-stats">
-                <div class="db-stat db-stat-pend">
-                    <div class="db-stat-head"><span class="db-stat-ico db-stat-ico-pend"><i class="fa fa-hourglass-half"></i></span>待处理</div>
-                    <b class="db-stat-num db-stat-num-pend" id="dbPend_#(pageId)">0</b>
-                    <span class="db-stat-sub">各环节在检 · 单位(单)</span>
-                    <span class="db-stat-bar db-stat-bar-pend"></span>
-                </div>
-                <div class="db-stat-divider"></div>
-                <div class="db-stat db-stat-done">
-                    <div class="db-stat-head"><span class="db-stat-ico db-stat-ico-done"><i class="fa fa-check-circle-o"></i></span>放行</div>
-                    <b class="db-stat-num db-stat-num-done" data-count="#(flowCounts.allq ?? 0)">0</b>
-                    <span class="db-stat-sub">本年度累计 · 单位(单)</span>
-                    <span class="db-stat-bar db-stat-bar-done"></span>
-                </div>
-            </div>
-
-            <!-- 环节堆叠占比：一条 100% 宽堆叠条按 5 个在检环节单数占比分段（已完成已在统计模块展示） -->
-            <div class="db-stack">
-                <div class="db-stack-bar">
-                    <div class="db-stack-seg" data-color="acc" data-count="#(flowCounts.noq ?? 0)"></div>
-                    <div class="db-stack-seg" data-color="leak" data-count="#(flowCounts.ltq ?? 0)"></div>
-                    <div class="db-stack-seg" data-color="vis" data-count="#(flowCounts.accq ?? 0)"></div>
-                    <div class="db-stack-seg" data-color="pack" data-count="#(flowCounts.funq ?? 0)"></div>
-                    <div class="db-stack-seg" data-color="appr" data-count="#(flowCounts.appq ?? 0)"></div>
-                </div>
-                <div class="db-stack-cols">
-                    <div class="db-stack-col" data-color="acc">
-                        <span class="db-stack-name"><i class="db-stack-dot"></i>精度待检</span>
-                        <b class="db-stack-num" data-count="#(flowCounts.noq ?? 0)">0</b>
-                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</span>
-                    </div>
-                    <div class="db-stack-col" data-color="leak">
-                        <span class="db-stack-name"><i class="db-stack-dot"></i>成品检漏</span>
-                        <b class="db-stack-num" data-count="#(flowCounts.ltq ?? 0)">0</b>
-                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.ltq_qsi ?? 0)">0</b> 只</span>
-                    </div>
-                    <div class="db-stack-col" data-color="vis">
-                        <span class="db-stack-name"><i class="db-stack-dot"></i>外观待检</span>
-                        <b class="db-stack-num" data-count="#(flowCounts.accq ?? 0)">0</b>
-                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</span>
-                    </div>
-                    <div class="db-stack-col" data-color="pack">
-                        <span class="db-stack-name"><i class="db-stack-dot"></i>包装待检</span>
-                        <b class="db-stack-num" data-count="#(flowCounts.funq ?? 0)">0</b>
-                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</span>
-                    </div>
-                    <div class="db-stack-col" data-color="appr">
-                        <span class="db-stack-name"><i class="db-stack-dot"></i>待批准</span>
-                        <b class="db-stack-num" data-count="#(flowCounts.appq ?? 0)">0</b>
-                        <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== 月度送检柱状图 + 季度同比 ===== -->
-        <div class="row mx-0">
-            <div class="col-lg-7 col-sm-12 px-2">
-                <div class="db-chart-card db-anim db-d6">
-                    <div class="card-body" style="height:330px;">
-                        <div class="db-chart-title">
-                            <span class="db-chart-title-text"><i class="fa fa-bar-chart"></i> 送检总量（含退修）/ 只</span>
-                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
-                                <i class="jbicon2 jbi-fullscreen"></i>
-                            </a>
+            <!-- 流程环节看板（hero） -->
+            <div class="db-hero db-anim db-d1">
+                <!-- 标题行：左侧标题 + 年度累计，右侧状态芯片 -->
+                <div class="db-hero-head">
+                    <div class="db-hero-title-group">
+                        <span class="db-hero-title-icon"><i class="fa fa-tasks"></i></span>
+                        <div class="db-hero-title-txt">
+                            <h4 class="db-hero-title">报告单流程总览 <span class="db-hero-year"
+                                                                           id="dbYear_#(pageId)"></span></h4>
+                            <p class="db-hero-sub">
+                                <span class="db-sub-item"><i class="jbicon2 jbi-send"></i>本年度送检 <b>#(totalQsi ?? '0')</b> 只</span>
+                                <span class="db-sub-sep"></span>
+                                <span class="db-sub-item"><i class="jbicon2 jbi-experiment"></i>本年度检验 <b>#(totalQi ?? '0')</b> 只</span>
+                            </p>
                         </div>
-                        <div id="dbBar_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
+                    </div>
+                    <div class="db-hero-meta">
+                        <span class="db-meta-chip db-meta-live"><i class="fa fa-circle"></i> 运行正常</span>
+                        <span class="db-meta-chip"><i class="fa fa-clock-o"></i> 更新 <b id="dbMetaTime_#(pageId)">--:--:--</b></span>
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-5 col-md-12 px-2">
-                <div class="db-chart-card db-anim db-d7">
-                    <div class="card-body" style="height:330px;">
-                        <div class="db-chart-title">
-                            <span class="db-chart-title-text db-quarter-accent"><i class="fa fa-calendar"></i> 季度送检同比 / 只</span>
-                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
-                                <i class="jbicon2 jbi-fullscreen"></i>
-                            </a>
-                        </div>
-                        <div id="dbQuarter_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- ===== 退修趋势折线 + 产品占比环形 ===== -->
-        <div class="row mx-0">
-            <div class="col-lg-9 col-sm-12 px-2">
-                <div class="db-chart-card db-anim db-d7">
-                    <div class="card-body" style="height:280px;">
-                        <div class="db-chart-title">
-                            <span class="db-chart-title-text db-line-accent"><i class="fa fa-line-chart"></i> 退修总量 / 只</span>
-                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
-                                <i class="jbicon2 jbi-fullscreen"></i>
-                            </a>
+                <!-- 统计模块：待处理 vs 已完成（各模块下方短色条分割，2 段） -->
+                <div class="db-hero-stats">
+                    <div class="db-stat db-stat-pend">
+                        <div class="db-stat-head">
+                            <span class="db-stat-ico db-stat-ico-pend"><i class="fa fa-hourglass-half"></i></span>待处理
                         </div>
-                        <div id="dbLine_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
+                        <b class="db-stat-num db-stat-num-pend" id="dbPend_#(pageId)">0</b>
+                        <span class="db-stat-sub">各环节在检 · 单位(单)</span>
+                        <span class="db-stat-bar db-stat-bar-pend"></span>
+                    </div>
+                    <div class="db-stat-divider"></div>
+                    <div class="db-stat db-stat-done">
+                        <div class="db-stat-head">
+                            <span class="db-stat-ico db-stat-ico-done"><i class="fa fa-check-circle-o"></i></span>放行
+                        </div>
+                        <b class="db-stat-num db-stat-num-done" data-count="#(flowCounts.allq ?? 0)">0</b>
+                        <span class="db-stat-sub">本年度累计 · 单位(单)</span>
+                        <span class="db-stat-bar db-stat-bar-done"></span>
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-12 px-2">
-                <div class="db-chart-card db-anim db-d8">
-                    <div class="card-body" style="height:280px;">
-                        <div class="db-chart-title">
-                            <span class="db-chart-title-text db-donut-accent"><i class="fa fa-pie-chart"></i> 本年度报告单来源 / 订单</span>
-                            <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
-                                <i class="jbicon2 jbi-fullscreen"></i>
-                            </a>
-                        </div>
-                        <div id="dbDonut_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-    </div><!-- /db-wrapper -->
+                <!-- 环节堆叠占比：一条 100% 宽堆叠条按 5 个在检环节单数占比分段（已完成已在统计模块展示） -->
+                <div class="db-stack">
+                    <div class="db-stack-bar">
+                        <div class="db-stack-seg" data-color="acc" data-count="#(flowCounts.noq ?? 0)"></div>
+                        <div class="db-stack-seg" data-color="leak" data-count="#(flowCounts.ltq ?? 0)"></div>
+                        <div class="db-stack-seg" data-color="vis" data-count="#(flowCounts.accq ?? 0)"></div>
+                        <div class="db-stack-seg" data-color="pack" data-count="#(flowCounts.funq ?? 0)"></div>
+                        <div class="db-stack-seg" data-color="appr" data-count="#(flowCounts.appq ?? 0)"></div>
+                    </div>
+                    <div class="db-stack-cols">
+                        <div class="db-stack-col" data-color="acc">
+                            <span class="db-stack-name"><i class="db-stack-dot"></i>精度待检</span>
+                            <b class="db-stack-num" data-count="#(flowCounts.noq ?? 0)">0</b>
+                            <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.noq_qsi ?? 0)">0</b> 只</span>
+                        </div>
+                        <div class="db-stack-col" data-color="leak">
+                            <span class="db-stack-name"><i class="db-stack-dot"></i>成品检漏</span>
+                            <b class="db-stack-num" data-count="#(flowCounts.ltq ?? 0)">0</b>
+                            <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.ltq_qsi ?? 0)">0</b> 只</span>
+                        </div>
+                        <div class="db-stack-col" data-color="vis">
+                            <span class="db-stack-name"><i class="db-stack-dot"></i>外观待检</span>
+                            <b class="db-stack-num" data-count="#(flowCounts.accq ?? 0)">0</b>
+                            <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.accq_qsi ?? 0)">0</b> 只</span>
+                        </div>
+                        <div class="db-stack-col" data-color="pack">
+                            <span class="db-stack-name"><i class="db-stack-dot"></i>包装待检</span>
+                            <b class="db-stack-num" data-count="#(flowCounts.funq ?? 0)">0</b>
+                            <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.funq_qsi ?? 0)">0</b> 只</span>
+                        </div>
+                        <div class="db-stack-col" data-color="appr">
+                            <span class="db-stack-name"><i class="db-stack-dot"></i>待批准</span>
+                            <b class="db-stack-num" data-count="#(flowCounts.appq ?? 0)">0</b>
+                            <span class="db-stack-qsi">送检 <b data-qsi="#(flowCounts.appq_qsi ?? 0)">0</b> 只</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 月度送检柱状图 + 季度同比 -->
+            <div class="row mx-0">
+                <div class="col-lg-7 col-sm-12 px-2">
+                    <div class="db-chart-card db-anim db-d6">
+                        <div class="card-body" style="height:330px;">
+                            <div class="db-chart-title">
+                                <span class="db-chart-title-text"><i class="fa fa-bar-chart"></i> 送检总量（含退修）/ 只</span>
+                                <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                    <i class="jbicon2 jbi-fullscreen"></i>
+                                </a>
+                            </div>
+                            <div id="dbBar_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 col-md-12 px-2">
+                    <div class="db-chart-card db-anim db-d7">
+                        <div class="card-body" style="height:330px;">
+                            <div class="db-chart-title">
+                                <span class="db-chart-title-text db-quarter-accent"><i class="fa fa-calendar"></i> 季度送检同比 / 只</span>
+                                <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                    <i class="jbicon2 jbi-fullscreen"></i>
+                                </a>
+                            </div>
+                            <div id="dbQuarter_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 退修趋势折线 + 产品占比环形 -->
+            <div class="row mx-0">
+                <div class="col-lg-9 col-sm-12 px-2">
+                    <div class="db-chart-card db-anim db-d7">
+                        <div class="card-body" style="height:280px;">
+                            <div class="db-chart-title">
+                                <span class="db-chart-title-text db-line-accent"><i class="fa fa-line-chart"></i> 退修总量 / 只</span>
+                                <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                    <i class="jbicon2 jbi-fullscreen"></i>
+                                </a>
+                            </div>
+                            <div id="dbLine_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-12 px-2">
+                    <div class="db-chart-card db-anim db-d8">
+                        <div class="card-body" style="height:280px;">
+                            <div class="db-chart-title">
+                                <span class="db-chart-title-text db-donut-accent"><i class="fa fa-pie-chart"></i> 本年度报告单来源 / 订单</span>
+                                <a tabindex="-1" data-fullscreenbtn data-target="parent.card" class="db-fullscreen-btn">
+                                    <i class="jbicon2 jbi-fullscreen"></i>
+                                </a>
+                            </div>
+                            <div id="dbDonut_#(pageId)" class="db-echart" style="height:calc(100% - 46px);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /db-wrapper -->
+    </div>
 </div>
-</div>
-<!--主页面内容显示区域 end-->
+<!-- 主页面内容显示区域 end -->
 #end
 #define js()
 <script>
-function initDashboard_#(pageId)(page) {
-    SiargoDashboard.init($('.jbolt_page[data-page-id="#(pageId)"]'), {flowCounts:#json(flowCounts),repalldata:#json(repalldata),repfixdata:#json(repfixdata),donutData:#json(donutData),quarterData:#json(quarterData)});
-}
+    function initDashboard_#(pageId)(page)
+    {
+        SiargoDashboard.init($('.jbolt_page[data-page-id="#(pageId)"]'), {
+            flowCounts: #json(flowCounts),
+            repalldata: #json(repalldata),
+            repfixdata: #json(repfixdata),
+            donutData: #json(donutData),
+            quarterData: #json(quarterData)
+        });
+    }
 </script>
 #end

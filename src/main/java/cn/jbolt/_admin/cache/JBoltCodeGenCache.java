@@ -15,19 +15,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-public class JBoltCodeGenCache extends JBoltCache{
+public class JBoltCodeGenCache extends JBoltCache {
     public static final JBoltCodeGenCache me = new JBoltCodeGenCache();
     private static final String TYPE_NAME = "code_gen";
+
     public String getCacheTypeName() {
         return TYPE_NAME;
     }
 
-    /**
-     * 获取项目里的枚举类
-     * @return
-     */
-    public List<Option> getCodeGenEnums(){
-        return JBoltCacheKit.get(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_enums",new IDataLoader() {
+    /** 获取项目里的枚举类 */
+    public List<Option> getCodeGenEnums() {
+        return JBoltCacheKit.get(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_enums", new IDataLoader() {
             @Override
             public Object load() {
                 return getJboltCodeGenEnums();
@@ -38,17 +36,17 @@ public class JBoltCodeGenCache extends JBoltCache{
     public List<Option> getJboltCodeGenEnums() {
         List<Option> options = new ArrayList<>();
         String[] packs = JBoltArrayUtil.from3(JBoltConfig.JBOLT_CODE_GEN_CLASS_SCAN_PACKAGES);
-        for(String packageName:packs){
+        for (String packageName : packs) {
             Set<Class<?>> enums = ClassUtil.scanPackageBySuper(packageName, java.lang.Enum.class);
-            if(enums!=null && enums.size()>0) {
-                enums.forEach(en->{
+            if (enums != null && enums.size() > 0) {
+                enums.forEach(en -> {
                     options.add(new OptionBean(en.getName()));
                 });
             }
         }
 
-        if(options.size()>0){
-            //排序
+        if (options.size() > 0) {
+            // 排序
             options.sort(new Comparator<Option>() {
                 @Override
                 public int compare(Option o1, Option o2) {
@@ -59,12 +57,9 @@ public class JBoltCodeGenCache extends JBoltCache{
         return options;
     }
 
-    /**
-     * 获取项目中的caches
-     * @return
-     */
+    /** 获取项目中的caches */
     public List<Option> getCodeGenCaches() {
-        return JBoltCacheKit.get(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_caches",new IDataLoader() {
+        return JBoltCacheKit.get(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_caches", new IDataLoader() {
             @Override
             public Object load() {
                 return getJboltCodeGenCaches();
@@ -75,17 +70,17 @@ public class JBoltCodeGenCache extends JBoltCache{
     public List<Option> getJboltCodeGenCaches() {
         List<Option> options = new ArrayList<>();
         String[] packs = JBoltArrayUtil.from3(JBoltConfig.JBOLT_CODE_GEN_CLASS_SCAN_PACKAGES);
-        for(String packageName:packs){
+        for (String packageName : packs) {
             Set<Class<?>> caches = ClassUtil.scanPackageBySuper(packageName, JBoltCache.class);
-            if(caches!=null && caches.size()>0) {
-                caches.forEach(en->{
+            if (caches != null && caches.size() > 0) {
+                caches.forEach(en -> {
                     options.add(new OptionBean(en.getName()));
                 });
             }
         }
 
-        if(options.size()>0){
-            //排序
+        if (options.size() > 0) {
+            // 排序
             options.sort(new Comparator<Option>() {
                 @Override
                 public int compare(Option o1, Option o2) {
@@ -96,12 +91,9 @@ public class JBoltCodeGenCache extends JBoltCache{
         return options;
     }
 
-    /**
-     * 获取项目中的Service
-     * @return
-     */
+    /** 获取项目中的Service */
     public List<Option> getCodeGenServices() {
-        return JBoltCacheKit.get(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_services",new IDataLoader() {
+        return JBoltCacheKit.get(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_services", new IDataLoader() {
             @Override
             public Object load() {
                 return getJboltCodeGenServices();
@@ -112,16 +104,16 @@ public class JBoltCodeGenCache extends JBoltCache{
     public List<Option> getJboltCodeGenServices() {
         List<Option> options = new ArrayList<>();
         String[] packs = JBoltArrayUtil.from3(JBoltConfig.JBOLT_CODE_GEN_CLASS_SCAN_PACKAGES);
-        for(String packageName:packs){
+        for (String packageName : packs) {
             Set<Class<?>> services = ClassUtil.scanPackageBySuper(packageName, IJBoltService.class);
-            if(services!=null && services.size()>0) {
-                services.forEach(en->{
+            if (services != null && services.size() > 0) {
+                services.forEach(en -> {
                     options.add(new OptionBean(en.getName()));
                 });
             }
         }
-        if(options.size()>0){
-            //排序
+        if (options.size() > 0) {
+            // 排序
             options.sort(new Comparator<Option>() {
                 @Override
                 public int compare(Option o1, Option o2) {
@@ -132,23 +124,17 @@ public class JBoltCodeGenCache extends JBoltCache{
         return options;
     }
 
-    /**
-     * 删除codegen用的caches
-     */
+    /** 删除codegen用的caches */
     public void removeCodeGenCaches() {
         JBoltCacheKit.remove(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_caches");
     }
 
-    /**
-     * 删除codegen用的enums
-     */
+    /** 删除codegen用的enums */
     public void removeCodeGenEnums() {
         JBoltCacheKit.remove(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_enums");
     }
 
-    /**
-     * 删除codegen用的services
-     */
+    /** 删除codegen用的services */
     public void removeCodeGenServices() {
         JBoltCacheKit.remove(JBoltConfig.JBOLT_CACHE_NAME, "codeGen_services");
     }

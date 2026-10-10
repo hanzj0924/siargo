@@ -8,6 +8,6 @@ export default {
 	 * @param res  {type:3,from:xxx,to:xxx,command:xxx,data:xxx}
 	 */
 	process:(res) => {
-		//有特殊需求处理在这里
+		// 有特殊需求处理在这里
 	}
 };

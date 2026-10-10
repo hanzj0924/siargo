@@ -1,8 +1,7 @@
 var jbolt_login_js_version = "1.0.4";
-/**
- * 登录页面使用
+/** 登录页面使用
  */
-//layer msg模块封装
+// layer msg模块封装
 var LayerMsgBox={
 		alert:function(msg,icon,handler){
 			if(icon){
@@ -22,11 +21,7 @@ var LayerMsgBox={
 			}
 			
 		},
-		/**
-		 * 弹出成功信息,并执行回调方法
-		 * @param msg
-		 * @param time
-		 * @param handler
+		/** 弹出成功信息,并执行回调方法
 		 */
 		success:function(msg,time,handler){
 			if(!msg){msg="操作成功";}
@@ -40,10 +35,7 @@ var LayerMsgBox={
 		},
 
 
-		/**
-		 * 弹出Error,并执行回调方法
-		 * @param msg
-		 * @param time
+		/** 弹出Error,并执行回调方法
 		 */
 		error:function(msg,time,handler){
 			if(!msg){msg="错误";}
@@ -55,10 +47,7 @@ var LayerMsgBox={
 			});
 			return index;
 		},
-		/**
-		 * 弹出进度
-		 * @param msg
-		 * @param time
+		/** 弹出进度
 		 */
 		loading:function(msg,time,handler){
 			if(!msg){msg="执行中...";}
@@ -77,17 +66,16 @@ var LayerMsgBox={
 		},
 		closeLoading:function(){
 			setTimeout(function(){
-				layer.closeAll('dialog'); //关闭加载层
+				layer.closeAll('dialog'); // 关闭加载层
 			}, 500);
 		},
 		closeLoadingNow:function(){
-				layer.closeAll('dialog'); //关闭加载层
+				layer.closeAll('dialog'); // 关闭加载层
 		}
 
 }
 
-/**
- * ajax封装
+/** ajax封装
  */
 var Ajax={
 	 post:function(url,data,success,error){
@@ -155,10 +143,10 @@ function getRandomString(len){
 	var _charStr = 'abacdefghjklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789',
 		min = 0,
 		max = _charStr.length-1,
-		_str = '';                    //定义随机字符串 变量
-	//判断是否指定长度，否则默认长度为15
+		_str = '';                    // 定义随机字符串 变量
+	// 判断是否指定长度，否则默认长度为15
 	len = len || 15;
-	//循环生成字符串
+	// 循环生成字符串
 	for(var i = 0, index; i < len; i++){
 		index = (function(randomIndexFunc, i){
 			return randomIndexFunc(min, max, i, randomIndexFunc);
@@ -380,7 +368,7 @@ function getPlatformVersion(callback){
 		callback({platformVersion: "", architecture: "", bitness: ""});
 	}
 }
-//提交登录
+// 提交登录
 function submitForm(form){
 		if(_submit_ing){
 			return false;
@@ -428,12 +416,10 @@ function submitForm(form){
 		return false;
 	}
 
-	/**
-	 * 初始化登录页面样式
-	 * @returns
+	/** 初始化登录页面样式
 	 */
 	function initLoginStyle(){
-		//var glassStyle=$.cookie('jbolt_login_glassStyle');
+		// var glassStyle=$.cookie('jbolt_login_glassStyle');
 		var bgimgBlur=$.cookie('jbolt_login_bgimgBlur');
 		var needNest=$.cookie('jbolt_login_nest');
 		
@@ -450,16 +436,14 @@ function submitForm(form){
 		var startnest=true;
 		if(needNest&&needNest=="false"||(!needNest&&systemLoginNest=="false")){
 			startnest=false;
-			//用户自己设置了false或者系统全局设置了false 但是用户的设置还未初始化的时候 就不启动nest
+			// 用户自己设置了false或者系统全局设置了false 但是用户的设置还未初始化的时候 就不启动nest
 		}
 		if(startnest){
 			nest();
 		}
 
 	}
-	/**
-	 * 调用nest特效
-	 * @returns
+	/** 调用nest特效
 	 */
 	function nest(){
 		$.getScript("assets/plugins/canvas-nest/canvas-nest.umd.js").

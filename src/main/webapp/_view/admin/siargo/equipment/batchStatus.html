@@ -1,17 +1,17 @@
 #@jboltLayout()
 #define main()
 <div class="jbolt_page">
-<div class="jbolt_page_content p-3">
-	<!-- 选中设备只读预览 -->
-	<div class="batch-preview-box">
-		<div class="batch-preview-total">共选中 <b>#(equipmentList.size())</b> 台设备</div>
-		<div class="batch-preview-list">
-			#for(item : equipmentList)
-			#if(for.index < 20)
-			<div class="batch-preview-item">
-				<span class="batch-preview-no">#(item.equipment_no ??)</span>
-				<span class="batch-preview-name" title="#(item.name ??)">#(item.name ??)</span>
-				<span class="batch-preview-status">
+    <div class="jbolt_page_content p-3">
+        <!-- 选中设备只读预览 -->
+        <div class="batch-preview-box">
+            <div class="batch-preview-total">共选中 <b>#(equipmentList.size())</b> 台设备</div>
+            <div class="batch-preview-list">
+                #for(item : equipmentList)
+                #if(for.index < 20)
+                <div class="batch-preview-item">
+                    <span class="batch-preview-no">#(item.equipment_no ??)</span>
+                    <span class="batch-preview-name" title="#(item.name ??)">#(item.name ??)</span>
+                    <span class="batch-preview-status">
 					#if(item.status == 1)<span class="badge badge-success">正常</span>
 					#elseif(item.status == 2)<span class="badge badge-primary">维修中</span>
 					#elseif(item.status == 3)<span class="badge badge-secondary">已封存</span>
@@ -19,29 +19,29 @@
 					#elseif(item.status == 5)<span class="badge badge-danger">异常</span>
 					#else<span class="text-muted">未知</span>#end
 				</span>
-				<span class="batch-preview-cycle">#(item.inspection_cycle ??) #(item.inspection_cycle_unit ??)</span>
-			</div>
-			#end
-			#end
-			#if(equipmentList.size() > 20)
-			<div class="batch-preview-more">等 #(equipmentList.size() - 20) 台设备…</div>
-			#end
-		</div>
-	</div>
-	<form onsubmit="return false;" id="batchStatusForm" action="admin/siargo/equipment/batchStatus" method="post">
-		<input type="hidden" name="ids" value="#(ids ??)" />
-		<div class="form-group row">
-			<label class="col-sm-4 col-form-label">设备状态</label>
-			<div class="col-sm-8">
-				<select class="form-control" data-autoload name="status"
-					data-rule="select" data-tips="请选择设备状态"
-					data-text="=请选择=" data-value=""
-					data-options="正常:1,维修中:2,已封存:3,报废:4,异常:5">
-				</select>
-			</div>
-		</div>
-	</form>
-</div>
+                    <span class="batch-preview-cycle">#(item.inspection_cycle ??) #(item.inspection_cycle_unit ??)</span>
+                </div>
+                #end
+                #end
+                #if(equipmentList.size() > 20)
+                <div class="batch-preview-more">等 #(equipmentList.size() - 20) 台设备…</div>
+                #end
+            </div>
+        </div>
+        <form onsubmit="return false;" id="batchStatusForm" action="admin/siargo/equipment/batchStatus" method="post">
+            <input type="hidden" name="ids" value="#(ids ??)"/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">设备状态</label>
+                <div class="col-sm-8">
+                    <select class="form-control" data-autoload name="status"
+                            data-rule="select" data-tips="请选择设备状态"
+                            data-text="=请选择=" data-value=""
+                            data-options="正常:1,维修中:2,已封存:3,报废:4,异常:5">
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 #end
 #define js()

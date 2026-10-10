@@ -172,7 +172,7 @@
 <div class="absolute bodybgmask #(bgimgBlur?'blur':'')" style="background-image: url('#(bgimg)');"></div>
 #else
 <video loop="loop" muted="muted" autoplay="autoplay" oncanplay="$('#bgmask').css({'background-image':'none'})">
-    <source src="#(bgimg)" type="video/mp4" ></source>
+    <source src="#(bgimg)" type="video/mp4"></source>
 </video>
 <div class="absolute bodybgmask #(bgimgBlur?'blur':'')" id="bgmask" style="background-image: url('#(bgimg).jpg')"></div>
 #end
@@ -233,10 +233,16 @@
     </div>
 </div>
 <footer class="fixed bottom-0 w-full py-4 text-center text-gray-500 text-sm z-[9999]">
-    <p>#setLocal(recordInfo = JBoltGlobalConfigCache.getSystemDomainPutOnRecordInfo()) #if(recordInfo!=null)<a target="_blank" style="margin-right:6px;color:#(JBoltGlobalConfigCache.getSystemCopyrightColor('#FFFFFF'));" href="#(JBoltGlobalConfigCache.getSystemDomainPutOnRecordLink())">#(recordInfo??)</a>#end<a target="_blank"  href="#globalConfig(GlobalConfigKey.SYSTEM_COPYRIGHT_LINK,'http://jbolt.cn')">#(JBoltGlobalConfigCache.getSystemCopyrightCompany("©JBolt(JBOLT.CN)"))</a></p>
+    <p>#setLocal(recordInfo = JBoltGlobalConfigCache.getSystemDomainPutOnRecordInfo())
+       #if(recordInfo!=null)<a target="_blank"
+                               style="margin-right:6px;color:#(JBoltGlobalConfigCache.getSystemCopyrightColor('#FFFFFF'));"
+                               href="#(JBoltGlobalConfigCache.getSystemDomainPutOnRecordLink())">#(recordInfo??)</a>#end<a
+                target="_blank"
+                href="#globalConfig(GlobalConfigKey.SYSTEM_COPYRIGHT_LINK,'http://jbolt.cn')">#(JBoltGlobalConfigCache.getSystemCopyrightCompany("©JBolt(JBOLT.CN)"))</a>
+    </p>
 </footer>
 <script type="text/javascript">
-    var systemLoginNest="#(JBoltGlobalConfigCache.getJboltLoginNest())";
+    var systemLoginNest = "#(JBoltGlobalConfigCache.getJboltLoginNest())";
 </script>
 #@jqueryjs?()
 #@jquerycookiejs?()

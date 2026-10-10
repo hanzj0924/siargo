@@ -76,7 +76,7 @@
         msgAjaxError: "Une erreur s'est produite pendant l'opération de {operation}. Veuillez réessayer plus tard.",
         msgAjaxProgressError: 'L\'opération "{operation}" a échouée',
         msgDuplicateFile: 'Le fichier "{name}" de taille "{size} KB" à déjà été envoyé. Les doublons sont ignorés.',
-        msgResumableUploadRetriesExceeded:  'Le transfert a été annulé après <b>{max}</b> essais pour le fichier <b>{file}</b>! Details de l\'erreur: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: 'Le transfert a été annulé après <b>{max}</b> essais pour le fichier <b>{file}</b>! Details de l\'erreur: <pre>{error}</pre>',
         msgPendingTime: '{time} restant',
         msgCalculatingTime: 'calcul du temps restant',
         ajaxOperations: {
@@ -98,7 +98,7 @@
             indicatorSuccessTitle: 'Posté',
             indicatorErrorTitle: 'Ajouter erreur',
             indicatorPausedTitle: 'Transfert suspendu',
-            indicatorLoadingTitle:  'En cours &hellip;'
+            indicatorLoadingTitle: 'En cours &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Voir le fichier précédent',

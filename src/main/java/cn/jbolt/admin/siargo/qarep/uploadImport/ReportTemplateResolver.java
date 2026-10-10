@@ -9,17 +9,19 @@ import cn.jbolt.common.storage.SiargoStorage;
 import cn.jbolt.siargo.model.PdfTemplate;
 import com.jfinal.kit.Ret;
 
-/**
- * 系列与版号唯一决定启用模板；存储组件决定物理目录。
- */
+/** 系列与版号唯一决定启用模板；存储组件决定物理目录。 */
 public class ReportTemplateResolver {
-    public record ResolvedTemplate(Path path, PdfTemplate template) {}
+    public record ResolvedTemplate(Path path, PdfTemplate template) {
+    }
+
     @Inject
     private PdfTemplateService templates;
 
     public ResolvedTemplate resolveSnapshot(SiargoStorage storage, String version, Long seriesId) throws IOException {
         Ret resolved = templates.resolveTemplate(seriesId, version);
-        if (resolved.isFail()) throw new IOException(resolved.getStr("msg"));
+        if (resolved.isFail()) {
+            throw new IOException(resolved.getStr("msg"));
+        }
         PdfTemplate template = resolved.getAs("template");
         return new ResolvedTemplate(PdfTemplateService.templatePath(storage, template), template);
     }

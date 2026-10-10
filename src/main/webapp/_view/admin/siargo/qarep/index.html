@@ -6,7 +6,7 @@
 #define main()
 #set(pageId=RandomUtil.random(6))
 
-#-- ===== Enjoy 宏：共享搜索表单 ===== --#
+#-- Enjoy 宏：共享搜索表单 --#
 #define qarepSearchForm(tabPrefix, withDateRange)
 <div class="col-sm-#(withDateRange ? 6 : 4) text-center">
     <form class="form-inline d-inline-block" id="#(tabPrefix)Form_#(pageId)" onsubmit="return false;" method="post">
@@ -29,7 +29,7 @@
 </div>
 #end
 
-#-- ===== Enjoy 宏：共享行模板列（序号~产品编号，共10列）；备注列最左侧渲染「曾驳回」角标 ===== --#
+#-- Enjoy 宏：共享行模板列（序号~产品编号，共10列）；备注列最左侧渲染「曾驳回」角标 --#
 #define sharedReportCols()
 <td>${pageNumber,pageSize,index | rownum}</td>
 <td>
@@ -39,16 +39,18 @@
 </td>
 <td>${data.orderId}</td>
 <td>${data.retypeName}</td>
-<td class="text-left">${data.modelSeries ? data.modelSeries : ''}${data.branchLabel ? '-'+data.branchLabel : ''}-${data.typeName ? data.typeName : ''}</td>
+<td class="text-left">${data.modelSeries ? data.modelSeries : ''}${data.branchLabel ? '-'+data.branchLabel :
+                      ''}-${data.typeName ? data.typeName : ''}
+</td>
 <td>
     #-- 驳回历史角标：有记录即显示，点击弹窗查看全部驳回历史 --#
     {@if data.rejectCount!=null && data.rejectCount>0}
     <span class="qa-reject-flag qa-reject-flag-left"
-        data-dialogbtn
-        data-area="560,520"
-        data-btn="close"
-        data-title="驳回历史"
-        data-url="admin/siargo/qarep/rejectHistory?productId=${data.spid}">驳</span>
+          data-dialogbtn
+          data-area="560,520"
+          data-btn="close"
+          data-title="驳回历史"
+          data-url="admin/siargo/qarep/rejectHistory?productId=${data.spid}">驳</span>
     {@/if}
     {@if data.spDes==null || data.spDes==""}
     <span class="text-muted">-</span>
@@ -69,7 +71,7 @@
 <th data-width="60">序号</th>
 <th data-width="100" data-column="formnum">报告单编号</th>
 <th data-width="80" data-column="order_id">订单号</th>
-<th data-width="80" data-column="rep_type">报告单类型</th>
+<th data-width="95" data-column="rep_type">报告单类型</th>
 <th data-width="250" data-column="prod_type">产品类型</th>
 <th data-width="200" data-column="sp_des">备注</th>
 <th data-width="80" data-column="sp_qsi">送检数量</th>
@@ -81,37 +83,37 @@
 
 #define qarepAccuracySignatureCol()
 <td>
-	<span class="badge badge-info">${data.accqName}</span>
-	<small class="text-muted d-block">${data.accqTime}</small>
+    <span class="badge badge-info">${data.accqName}</span>
+    <small class="text-muted d-block">${data.accqTime}</small>
 </td>
 #end
 
 #define qarepLeakSignatureCol()
 <td>
-	{@if data.ltStatus==1 && data.ltName!=null}
-		<span class="badge badge-leak">${data.ltName}</span>
-		<small class="text-muted d-block">${data.ltTime}</small>
-	{@else}
-		<span class="text-muted">-</span>
-	{@/if}
+    {@if data.ltStatus==1 && data.ltName!=null}
+    <span class="badge badge-leak">${data.ltName}</span>
+    <small class="text-muted d-block">${data.ltTime}</small>
+    {@else}
+    <span class="text-muted">-</span>
+    {@/if}
 </td>
 #end
 
 #define qarepAppearanceSignatureCol()
 <td>
-	{@if data.funqName==null}
-		<span class="text-muted">-</span>
-	{@else}
-		<span class="badge badge-primary">${data.funqName}</span>
-		<small class="text-muted d-block">${data.funqTime}</small>
-	{@/if}
+    {@if data.funqName==null}
+    <span class="text-muted">-</span>
+    {@else}
+    <span class="badge badge-primary">${data.funqName}</span>
+    <small class="text-muted d-block">${data.funqTime}</small>
+    {@/if}
 </td>
 #end
 
 #define qarepAddButton()
 <button data-openpage="dialog" data-area="1180,820"
         data-handler="refreshAllQarepTables_#(pageId)"
-        data-title="新建 <span style='color:#f0ad4e;font-size:18px;position:absolute;left:50%;top:0;line-height:56px;transform:translateX(-50%);'><i class='fa fa-exclamation-circle'></i> 注意编号：请按实际情况填写产品编号！</span>"
+        data-title="新建 <span style='color:#f0ad4e;font-size:18px;position:absolute;left:50%;top:0;line-height:56px;transform:translateX(-50%);'><i class='fa fa-exclamation-circle'></i> 注意产品编号：请按实际情况填写！</span>"
         data-url="admin/siargo/qarep/add"
         class="btn btn-outline-primary ">
     <i class="fa fa-plus"></i> 新增
@@ -135,31 +137,26 @@
 </button>
 #end
 
-#-- ===== Enjoy 宏：7 个 Tab 的 JBoltTable 公共属性收敛。差异项经参数传入：
-prefix    = id/搜索表单/行模板/分页/工具条的统一前缀（allreport/noq/ltq/accq/funq/appq/allq）
-insp      = 检验进度过滤参数（0 = 不带 insp 参数，即"全部"Tab）
-autoload  = 是否进入页面即自动加载（仅"全部"Tab 为 true，其余懒加载）
-fixedRight= 是否固定最后一列（仅"已完成"Tab 的查看PDF列） ===== --#
+#-- 七个 Tab 共用表格属性：prefix 关联组件 ID，insp 筛选进度（0=全部）。
+autoload 控制首次加载；fixedRight 仅为已完成 Tab 固定 PDF 操作列。 --#
 #define qarepTableAttrs(prefix, insp, autoload, fixedRight)
-class="jbolt_table jbolt_main_table table_striped table-center"
-data-jbolttable
-data-pagesize="100"
-data-ajax="true"
-#if(!autoload)data-autoload="false"
-#end
-id="#(prefix)_mgrtable_#(pageId)"
-data-height="fill_box"
-data-ajax-success-handler="SiargoQarepList.mergeReportRows"
-data-url="admin/siargo/qarep/datas#if(insp > 0)?insp=#(insp)#end"
-data-column-resize="true"
-data-column-prepend="1:checkbox"
-data-conditions-form="#(prefix)Form_#(pageId)"
-data-rowtpl="#(prefix)Rowtpl_#(pageId)"
-data-page="#(prefix)Page_#(pageId)"
-data-toolbar="#(prefix)_toolbar_#(pageId)"
-data-fixed-columns-left="1,2,3,4"
-#if(fixedRight)data-fixed-columns-right="-1"
-#end
+    class="jbolt_table jbolt_main_table table_striped table-center"
+    data-jbolttable
+    data-pagesize="100"
+    data-ajax="true"
+    #if(!autoload)data-autoload="false" #end
+    id="#(prefix)_mgrtable_#(pageId)"
+    data-height="fill_box"
+    data-ajax-success-handler="SiargoQarepList.mergeReportRows"
+    data-url="admin/siargo/qarep/datas#if(insp > 0)?insp=#(insp)#end"
+    data-column-resize="true"
+    data-column-prepend="1:checkbox"
+    data-conditions-form="#(prefix)Form_#(pageId)"
+    data-rowtpl="#(prefix)Rowtpl_#(pageId)"
+    data-page="#(prefix)Page_#(pageId)"
+    data-toolbar="#(prefix)_toolbar_#(pageId)"
+    data-fixed-columns-left="1,2,3,4"
+    #if(fixedRight)data-fixed-columns-right="-1" #end
 #end
 #-- qarep-scope：qarep 模块 badge 换色（siargo.css 4.3 区 .qarep-scope .badge-*）的作用域容器，防止污染其他模块 --#
 <div class="jbolt_page jb_vflex qarep-scope" data-key="#(pmkey)" data-page-id="#(pageId)"
@@ -191,7 +188,9 @@ data-fixed-columns-left="1,2,3,4"
             </div>
             <div class="qa-pdf-month-actions">
                 <button type="button" class="btn btn-outline-secondary" data-qarep-month-cancel>取消</button>
-                <button type="button" class="btn btn-primary" data-qarep-month-submit><i class="fa fa-download" aria-hidden="true"></i> 导出 PDF</button>
+                <button type="button" class="btn btn-primary" data-qarep-month-submit>
+                    <i class="fa fa-download" aria-hidden="true"></i> 导出 PDF
+                </button>
             </div>
         </div>
     </div>

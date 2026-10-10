@@ -1,136 +1,138 @@
 #@jboltLayout() #define main()
 <div class="jbolt_page">
-	<div class="jbolt_page_content">
-		<form onsubmit="return false;" id="imageForm"
-			action="admin/siargo/imi/save" method="post">
-			<input type="hidden" name="image.id" value="#(image.id??)" />
-			<div class="row">
-				<div class="col">
-					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">供应商</label>
-						<div class="col-sm-4 input-group">
-							<select class="form-control " data-autoload data-refresh="true"
-								data-url="admin/siargo/supplier/getSupplierName"
-								name="image.supplierId" data-text="=请选择/搜索="
-								data-value-attr="id" data-rule="select" data-text-attr="name"
-								data-select="#(image.supplierId ??)" data-select-type="select2"
-								id="supplierSelect">
-							</select>
-							<div class="input-group-append">
-								<button class="btn btn-outline-secondary" type="button"
-									data-dialogbtn data-area="400,350"
-									data-handler="refreshSupplierSelect" data-title="新增供应商"
-									data-url="admin/siargo/supplier/add">
-									<i class="fa fa-plus"></i>
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col">
-					<div class="form-group row">
-						<label class="col-sm-1 col-form-label">批量备注</label>
-						<div class="col">
+    <div class="jbolt_page_content">
+        <form onsubmit="return false;" id="imageForm"
+              action="admin/siargo/imi/save" method="post">
+            <input type="hidden" name="image.id" value="#(image.id??)"/>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group row">
+                        <label class="col-sm-1 col-form-label">供应商</label>
+                        <div class="col-sm-4 input-group">
+                            <select class="form-control " data-autoload data-refresh="true"
+                                    data-url="admin/siargo/supplier/getSupplierName"
+                                    name="image.supplierId" data-text="=请选择/搜索="
+                                    data-value-attr="id" data-rule="select" data-text-attr="name"
+                                    data-select="#(image.supplierId ??)" data-select-type="select2"
+                                    id="supplierSelect">
+                            </select>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        data-dialogbtn data-area="400,350"
+                                        data-handler="refreshSupplierSelect" data-title="新增供应商"
+                                        data-url="admin/siargo/supplier/add">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group row">
+                        <label class="col-sm-1 col-form-label">批量备注</label>
+                        <div class="col">
 							<textarea class="form-control"
-								style="height: 100px; white-space: pre;" placeholder="请输入图片备注"
-								data-tips="请输入图片备注" maxlength="900" name="image.description"
-								data-with-clearbtn="true">#(image.description??)
+                                      style="height: 100px; white-space: pre;" placeholder="请输入图片备注"
+                                      data-tips="请输入图片备注" maxlength="900" name="image.description"
+                                      data-with-clearbtn="true">#(image.description??)
 					</textarea>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col">
-					<input type="hidden" data-rule="required" data-tips="请在下方选择图片上传"
-						name="imgUploadUrl" id="imgUploadUrl" value="#(image.filePath??)"
-						class="form-control" />
-				</div>
-			</div>
-		</form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="hidden" data-rule="required" data-tips="请在下方选择图片上传"
+                           name="imgUploadUrl" id="imgUploadUrl" value="#(image.filePath??)"
+                           class="form-control"/>
+                </div>
+            </div>
+        </form>
 
-		#if(msg)
-		<div class="alert alert-danger">#(msg??)</div>
-		#end
-		<fieldset class="form-page-fieldset">
-			<legend>批量上传图片</legend>
-			<div class="form-group">
-				<div class="j_upload_imgbox_multi row">
-					<div class="col-md col-12">
-						<ul class="j_imgbox" style="border: 1px dashed #ddd;" id="imgbox"
-							data-remove-confirm="true"
-							data-imgstyle="width:100px;height:100px;"></ul>
-					</div>
-					<div class="col-md-auto col-12">
-						<div class="j_img_uploder" data-multi="true" data-imgbox="imgbox"
-							data-upload-success-handler="uploadHandler"
-							data-url="/admin/siargo/imi/uploadImages?save=true"
-							data-handler="uploadMultipleFile" data-hiddeninput="imgUploadUrl"
-							data-remove-url="/admin/siargo/imi/deleteTempFile?filePath=[file]"
-							data-limit="20" data-area="80,80" data-maxsize="102400"></div>
-					</div>
-				</div>
-			</div>
-		</fieldset>
-		#define js()
-		<script>
-		
-		// 新增供应商后刷新下拉列表
-		function refreshSupplierSelect(){
-			SelectUtil.refresh($('#supplierSelect'));
-		}
-		
-		// 上传成功回调
-		function uploadHandler(uploader, type, fileInput, result) {
-			console.log('upload success:', result);
-		}
-		
-		// ── 页面关闭时清理所有未保存的 temp 文件 ──────────────────
-		var _imiFormSaved = false;
-		var _imiCleaned = false;
+        #if(msg)
+        <div class="alert alert-danger">#(msg??)</div>
+        #end
+        <fieldset class="form-page-fieldset">
+            <legend>批量上传图片</legend>
+            <div class="form-group">
+                <div class="j_upload_imgbox_multi row">
+                    <div class="col-md col-12">
+                        <ul class="j_imgbox" style="border: 1px dashed #ddd;" id="imgbox"
+                            data-remove-confirm="true"
+                            data-imgstyle="width:100px;height:100px;"></ul>
+                    </div>
+                    <div class="col-md-auto col-12">
+                        <div class="j_img_uploder" data-multi="true" data-imgbox="imgbox"
+                             data-upload-success-handler="uploadHandler"
+                             data-url="/admin/siargo/imi/uploadImages?save=true"
+                             data-handler="uploadMultipleFile" data-hiddeninput="imgUploadUrl"
+                             data-remove-url="/admin/siargo/imi/deleteTempFile?filePath=[file]"
+                             data-limit="20" data-area="80,80" data-maxsize="102400"></div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        #define js()
+        <script>
 
-		// 表单提交成功后标记，避免清理已入库的文件
-		function afterFormSubmit(ret, callback) {
-			_imiFormSaved = true;
-			if (callback) callback();
-		}
+            // 新增供应商后刷新下拉列表
+            function refreshSupplierSelect() {
+                SelectUtil.refresh($('#supplierSelect'));
+            }
 
-		// 清理所有未保存的 temp 文件
-		function cleanupTempFiles() {
-			if (_imiFormSaved || _imiCleaned) return;
-			var remaining = $.trim($('#imgUploadUrl').val());
-			if (!remaining) return;
-			var paths = remaining.split(',').filter(function(p) { return $.trim(p) !== ''; });
-			if (paths.length === 0) return;
-			_imiCleaned = true;
-			var url = actionUrl('/admin/siargo/imi/deleteTempFiles?filePaths='
-					+ encodeURIComponent(paths.join(',')));
-			if (navigator.sendBeacon) {
-				navigator.sendBeacon(url);
-			} else {
-				$.ajax({ url: url, async: false });
-			}
-		}
+            // 上传成功回调
+            function uploadHandler(uploader, type, fileInput, result) {
+                console.log('upload success:', result);
+            }
 
-		// 拦截父窗口 layer 弹窗的关闭按钮（右上角X、右下角关闭）
-		$(function() {
-			try {
-				var idx = parent.layer.getFrameIndex(window.name);
-				var $layer = parent.$('#layui-layer' + idx);
-				$layer.find('.layui-layer-close, .layui-layer-btn1')
-					.on('mousedown.imiCleanup', cleanupTempFiles);
-			} catch(e) {
-				console.warn('无法绑定 layer 关闭事件', e);
-			}
-		});
+            // ── 页面关闭时清理所有未保存的 temp 文件 ──────────────────
+            var _imiFormSaved = false;
+            var _imiCleaned = false;
 
-		// 兜底：页面卸载时也尝试清理
-		$(window).on('beforeunload', cleanupTempFiles);
-		
-		</script>
-		#include("/_view/_admin/common/_formjs.html",formId="imageForm") #end
-	</div>
+            // 表单提交成功后标记，避免清理已入库的文件
+            function afterFormSubmit(ret, callback) {
+                _imiFormSaved = true;
+                if (callback) callback();
+            }
+
+            // 清理所有未保存的 temp 文件
+            function cleanupTempFiles() {
+                if (_imiFormSaved || _imiCleaned) return;
+                var remaining = $.trim($('#imgUploadUrl').val());
+                if (!remaining) return;
+                var paths = remaining.split(',').filter(function (p) {
+                    return $.trim(p) !== '';
+                });
+                if (paths.length === 0) return;
+                _imiCleaned = true;
+                var url = actionUrl('/admin/siargo/imi/deleteTempFiles?filePaths='
+                    + encodeURIComponent(paths.join(',')));
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(url);
+                } else {
+                    $.ajax({url: url, async: false});
+                }
+            }
+
+            // 拦截父窗口 layer 弹窗的关闭按钮（右上角X、右下角关闭）
+            $(function () {
+                try {
+                    var idx = parent.layer.getFrameIndex(window.name);
+                    var $layer = parent.$('#layui-layer' + idx);
+                    $layer.find('.layui-layer-close, .layui-layer-btn1')
+                        .on('mousedown.imiCleanup', cleanupTempFiles);
+                } catch (e) {
+                    console.warn('无法绑定 layer 关闭事件', e);
+                }
+            });
+
+            // 兜底：页面卸载时也尝试清理
+            $(window).on('beforeunload', cleanupTempFiles);
+
+        </script>
+        #include("/_view/_admin/common/_formjs.html",formId="imageForm") #end
+    </div>
 </div>
 #end

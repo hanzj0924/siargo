@@ -21,20 +21,18 @@ import com.jfinal.kit.Ret;
 @CrossOrigin
 @Path("/api/ws/guest/token/v2")
 public class JBoltWebsocketGuestTokenApiV2Controller extends Controller {
-    /**
-     * 获取当前访客 websocketGuestToken
-     */
+    /** 获取当前访客 websocketGuestToken */
     @Before(JBoltWebsocketGuestInterceptor.class)
-    public void gen(){
-        String token = "guest_ws_token_"+ JBoltUserKit.getUserId();
+    public void gen() {
+        String token = "guest_ws_token_" + JBoltUserKit.getUserId();
         Kv kv = Kv.by("token", JBoltWebSocketUtil.getGuestWebsocketToken(token));
-        if(JBoltConfig.SAAS_ENABLE && JBoltSaasTenantKit.me.isSelfRequest()) {
-            kv.set("tenantSn",JBoltSaasTenantKit.me.getSn());
+        if (JBoltConfig.SAAS_ENABLE && JBoltSaasTenantKit.me.isSelfRequest()) {
+            kv.set("tenantSn", JBoltSaasTenantKit.me.getSn());
         }
-        renderJson(Ret.ok("data",kv));
+        renderJson(Ret.ok("data", kv));
     }
 
-    public void check(){
-        renderJson(Ret.ok("data",JBoltWebSocketUtil.checkGuestWebsocketToken(get("token"))));
+    public void check() {
+        renderJson(Ret.ok("data", JBoltWebSocketUtil.checkGuestWebsocketToken(get("token"))));
     }
 }

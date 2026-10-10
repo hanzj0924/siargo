@@ -11,7 +11,7 @@ import cn.jbolt.core.annotation.JBoltAutoCache;
  */
 @SuppressWarnings("serial")
 @JBoltAutoCache
-@TableBind(dataSource = "main" , table = "jbc_custom_business" , primaryKey = "id" , idGenMode = JBoltIDGenMode.SNOWFLAKE)
+@TableBind(dataSource = "main", table = "jbc_custom_business", primaryKey = "id", idGenMode = JBoltIDGenMode.SNOWFLAKE)
 public class CustomBusiness extends BaseCustomBusiness<CustomBusiness> {
 }
 

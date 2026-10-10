@@ -1,158 +1,162 @@
 #@jboltLayout() #define main()
 <div class="jbolt_page" data-key="#(pmkey)">
-	<div class="jbolt_page_title">
-		<div class="row">
-			
-			<div class="col">
-				<form class="form-inline" id="inactiveForm"
-					action="javascript:void(0)"
-					method="get">
-					<input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-						placeholder="输入文件名搜索" name="keywords" value="#(keywords??)"
-						onkeydown="if(event.keyCode===13){event.preventDefault();searchInactiveFiles(1);}" />
-					<button type="button" onclick="searchInactiveFiles(1)" class="btn btn-light">
-						<i class="fa fa-search"></i> 查询
-					</button>
-				</form>
-			</div>
-		</div>
-	</div>
-	<div class="jbolt_page_content">
+    <div class="jbolt_page_title">
+        <div class="row">
 
-		<!-- JBoltTable -->
-		<table id="inactiveTable" cellspacing="0" cellpadding="0" border="0"
-			class="table_striped thead_font_normal" data-jbolttable
-			data-page="inactivePage" data-conditions-form="inactiveForm"
-			data-sortable-columns="file_name,modify_date,active_date,upload_time"
-			data-sort="#((sortColumn&&sortType)?(sortColumn+':'+sortType):'')"
-			data-default-sort-column="upload_time">
-			<thead>
-				<tr style="text-align:center">
-					<th data-width="60">序号</th>
-					<th data-min-width="500" data-column="file_name" >文件名</th>
-					<th data-width="120" >所属类别</th>
-					<th data-width="110" data-column="active_date">生效日期</th>
-					<th data-width="110" data-column="modify_date">失效日期</th>
-					<th data-width="80" >操作</th>
-				</tr>
-			</thead>
-			<tbody>
-				#for(data:pageData.list??)
-				<tr style="text-align:center">
-					<td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
-					<td style="text-align:left">
-						<a  class="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" 
-							href="#(data.filepath??)" onclick="loadPDF(event, this, '#(data.filepath??)')">
-						#(data.filename??)
-						</a>
-					</td>
-					<td>#(data.categoryname??)</td>
-					<td>#(data.activedate??)</td>
-					<td>#(data.modifydate??)</td>
-					<td><a tooltip title="恢复生效"
-						href="admin/siargo/dms/file/toggleActive/#(data.id)"
-						data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定恢复此文件为生效状态？"
-						class="text-success"><i class="fa fa-check-circle"></i></a> <a
-						tooltip title="删除"
-						href="admin/siargo/dms/file/deleteByIds?ids=#(data.id)"
-						data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定删除此文件？"
-						class="jbolt_table_delbtn ml-2"><i
-							class="fa fa-remove c-danger"></i></a></td>
-				</tr>
-				#end
-			</tbody>
-		</table>
-		#include("/_view/_admin/common/_jbolt_table_page.html",pageEleId="inactivePage")
-	</div>
+            <div class="col">
+                <form class="form-inline" id="inactiveForm"
+                      action="javascript:void(0)"
+                      method="get">
+                    <input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
+                           placeholder="输入文件名搜索" name="keywords" value="#(keywords??)"
+                           onkeydown="if(event.keyCode===13){event.preventDefault();searchInactiveFiles(1);}"/>
+                    <button type="button" onclick="searchInactiveFiles(1)" class="btn btn-light">
+                        <i class="fa fa-search"></i> 查询
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="jbolt_page_content">
+
+        <!-- JBoltTable -->
+        <table id="inactiveTable" cellspacing="0" cellpadding="0" border="0"
+               class="table_striped thead_font_normal" data-jbolttable
+               data-page="inactivePage" data-conditions-form="inactiveForm"
+               data-sortable-columns="file_name,modify_date,active_date,upload_time"
+               data-sort="#((sortColumn&&sortType)?(sortColumn+':'+sortType):'')"
+               data-default-sort-column="upload_time">
+            <thead>
+            <tr style="text-align:center">
+                <th data-width="60">序号</th>
+                <th data-min-width="500" data-column="file_name">文件名</th>
+                <th data-width="120">所属类别</th>
+                <th data-width="110" data-column="active_date">生效日期</th>
+                <th data-width="110" data-column="modify_date">失效日期</th>
+                <th data-width="80">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            #for(data:pageData.list??)
+            <tr style="text-align:center">
+                <td>#rownum(for.count,pageData.pageNumber,pageData.pageSize)</td>
+                <td style="text-align:left">
+                    <a class="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe"
+                       href="#(data.filepath??)" onclick="loadPDF(event, this, '#(data.filepath??)')">
+                        #(data.filename??)
+                    </a>
+                </td>
+                <td>#(data.categoryname??)</td>
+                <td>#(data.activedate??)</td>
+                <td>#(data.modifydate??)</td>
+                <td><a tooltip title="恢复生效"
+                       href="admin/siargo/dms/file/toggleActive/#(data.id)"
+                       data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定恢复此文件为生效状态？"
+                       class="text-success"><i class="fa fa-check-circle"></i></a> <a
+                        tooltip title="删除"
+                        href="admin/siargo/dms/file/deleteByIds?ids=#(data.id)"
+                        data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定删除此文件？"
+                        class="jbolt_table_delbtn ml-2"><i
+                        class="fa fa-remove c-danger"></i></a></td>
+            </tr>
+            #end
+            </tbody>
+        </table>
+        #include("/_view/_admin/common/_jbolt_table_page.html",pageEleId="inactivePage")
+    </div>
 </div>
 #end #define js()
 <script>
-$(function(){
-	initPage("inactivePage",#(pageData.totalPage??),#(pageData.pageNumber??), "inactiveForm");
-});
+    $(function () {
+        initPage("inactivePage",
+    #(pageData.totalPage ??),
+    #(pageData.pageNumber ??), "inactiveForm"
+    )
+        ;
+    });
 
-// AJAX搜索失效文件
-function searchInactiveFiles(pageNumber) {
-	var keywords = $('#inactiveForm').find('[name=keywords]').val() || '';
-	var pn = pageNumber || 1;
-	$.ajax({
-		url: 'admin/siargo/dms/file/inactiveDatas',
-		type: 'GET',
-		data: { page: pn, pageSize: 15, keywords: keywords },
-		dataType: 'json',
-		success: function(res) {
-			if (res.state === 'ok' && res.data) {
-				renderInactiveTable(res.data);
-			}
-		}
-	});
-}
+    // AJAX搜索失效文件
+    function searchInactiveFiles(pageNumber) {
+        var keywords = $('#inactiveForm').find('[name=keywords]').val() || '';
+        var pn = pageNumber || 1;
+        $.ajax({
+            url: 'admin/siargo/dms/file/inactiveDatas',
+            type: 'GET',
+            data: {page: pn, pageSize: 15, keywords: keywords},
+            dataType: 'json',
+            success: function (res) {
+                if (res.state === 'ok' && res.data) {
+                    renderInactiveTable(res.data);
+                }
+            }
+        });
+    }
 
-// 渲染失效文件表格
-function renderInactiveTable(pageData) {
-	var list = pageData.list || [];
-	var tbody = $('#inactiveTable tbody');
-	tbody.empty();
-	
-	if (list.length === 0) {
-		tbody.append('<tr><td colspan="6" style="text-align:center">暂无数据</td></tr>');
-		initPage("inactivePage", 0, 1, "inactiveForm");
-		return;
-	}
-	
-	for (var i = 0; i < list.length; i++) {
-		var data = list[i];
-		var rowNum = (pageData.pageNumber - 1) * pageData.pageSize + i + 1;
-		var activedate = data.activedate ? data.activedate.substring(0, 10) : '';
-		var modifydate = data.modifydate ? data.modifydate.substring(0, 10) : '';
-		var tr = '<tr style="text-align:center">' +
-			'<td>' + rowNum + '</td>' +
-			'<td style="text-align:left">' +
-				'<a class="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" ' +
-					'href="' + (data.filepath || '') + '" onclick="loadPDF(event, this, \'' + (data.filepath || '') + '\')">' +
-					(data.filename || '') +
-				'</a>' +
-			'</td>' +
-			'<td>' + (data.categoryname || '') + '</td>' +
-			'<td>' + activedate + '</td>' +
-			'<td>' + modifydate + '</td>' +
-			'<td>' +
-				'<a tooltip title="恢复生效" href="admin/siargo/dms/file/toggleActive/' + data.id + '" ' +
-					'data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定恢复此文件为生效状态？" ' +
-					'class="text-success"><i class="fa fa-check-circle"></i></a> ' +
-				'<a tooltip title="删除" href="admin/siargo/dms/file/deleteByIds?ids=' + data.id + '" ' +
-					'data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定删除此文件？" ' +
-					'class="jbolt_table_delbtn ml-2"><i class="fa fa-remove c-danger"></i></a>' +
-			'</td>' +
-			'</tr>';
-		tbody.append(tr);
-	}
-	
-	// 更新分页信息显示
-	var pagerParent = $('#inactivePage').closest('.pages');
-	pagerParent.find('#totalRow').text(pageData.totalRow || 0);
-	pagerParent.find('#totalPage').text(pageData.totalPage || 1);
-	pagerParent.find('#gonu').val(pageData.pageNumber || 1).attr('max', pageData.totalPage || 1);
+    // 渲染失效文件表格
+    function renderInactiveTable(pageData) {
+        var list = pageData.list || [];
+        var tbody = $('#inactiveTable tbody');
+        tbody.empty();
 
-	// 更新分页组件
-	initPage("inactivePage", pageData.totalPage || 0, pageData.pageNumber || 1, "inactiveForm");
-}
+        if (list.length === 0) {
+            tbody.append('<tr><td colspan="6" style="text-align:center">暂无数据</td></tr>');
+            initPage("inactivePage", 0, 1, "inactiveForm");
+            return;
+        }
 
-// 自定义刷新处理器（恢复生效/删除后刷新列表）
-function refreshInactiveList() {
-	var currentPage = $('#inactivePage').data('currentPage') || 1;
-	searchInactiveFiles(currentPage);
-}
+        for (var i = 0; i < list.length; i++) {
+            var data = list[i];
+            var rowNum = (pageData.pageNumber - 1) * pageData.pageSize + i + 1;
+            var activedate = data.activedate ? data.activedate.substring(0, 10) : '';
+            var modifydate = data.modifydate ? data.modifydate.substring(0, 10) : '';
+            var tr = '<tr style="text-align:center">' +
+                '<td>' + rowNum + '</td>' +
+                '<td style="text-align:left">' +
+                '<a class="pdfFrame" data-openpage="jboltlayer" data-resize="true" data-load-type="iframe" ' +
+                'href="' + (data.filepath || '') + '" onclick="loadPDF(event, this, \'' + (data.filepath || '') + '\')">' +
+                (data.filename || '') +
+                '</a>' +
+                '</td>' +
+                '<td>' + (data.categoryname || '') + '</td>' +
+                '<td>' + activedate + '</td>' +
+                '<td>' + modifydate + '</td>' +
+                '<td>' +
+                '<a tooltip title="恢复生效" href="admin/siargo/dms/file/toggleActive/' + data.id + '" ' +
+                'data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定恢复此文件为生效状态？" ' +
+                'class="text-success"><i class="fa fa-check-circle"></i></a> ' +
+                '<a tooltip title="删除" href="admin/siargo/dms/file/deleteByIds?ids=' + data.id + '" ' +
+                'data-ajaxbtn data-handler="refreshInactiveList" data-confirm="确定删除此文件？" ' +
+                'class="jbolt_table_delbtn ml-2"><i class="fa fa-remove c-danger"></i></a>' +
+                '</td>' +
+                '</tr>';
+            tbody.append(tr);
+        }
 
-//将PDF原本的href属性替换为带有时间戳的URL，以避免缓存
-function loadPDF (event, element, originalPdfUrl) {
-    // 阻止默认行为（如果链接已有默认行为）
-    event.preventDefault ? event.preventDefault() : (event.returnValue = false);
-    
-    const timestamp = new Date().getTime();
-    const pdfUrl = originalPdfUrl + '?t=' + timestamp;
-    
-    element.href = pdfUrl;
-}
+        // 更新分页信息显示
+        var pagerParent = $('#inactivePage').closest('.pages');
+        pagerParent.find('#totalRow').text(pageData.totalRow || 0);
+        pagerParent.find('#totalPage').text(pageData.totalPage || 1);
+        pagerParent.find('#gonu').val(pageData.pageNumber || 1).attr('max', pageData.totalPage || 1);
+
+        // 更新分页组件
+        initPage("inactivePage", pageData.totalPage || 0, pageData.pageNumber || 1, "inactiveForm");
+    }
+
+    // 自定义刷新处理器（恢复生效/删除后刷新列表）
+    function refreshInactiveList() {
+        var currentPage = $('#inactivePage').data('currentPage') || 1;
+        searchInactiveFiles(currentPage);
+    }
+
+    // 将PDF原本的href属性替换为带有时间戳的URL，以避免缓存
+    function loadPDF(event, element, originalPdfUrl) {
+        // 阻止默认行为（如果链接已有默认行为）
+        event.preventDefault ? event.preventDefault() : (event.returnValue = false);
+
+        const timestamp = new Date().getTime();
+        const pdfUrl = originalPdfUrl + '?t=' + timestamp;
+
+        element.href = pdfUrl;
+    }
 </script>
 #end

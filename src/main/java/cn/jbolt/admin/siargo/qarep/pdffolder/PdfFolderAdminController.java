@@ -10,140 +10,126 @@ import com.jfinal.kit.Ret;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.upload.UploadFile;
+
 import java.util.List;
+
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.siargo.model.PdfFolder;
 import cn.jbolt.siargo.model.PdfTemplate;
-/**
- * 报告单模板 Controller
- * @ClassName: PdfFolderAdminController
- * @author: hanzj
- * @date: 2026-07-20 13:37
- */
+
+/** 报告单模板 Controller */
 @CheckPermission(PermissionKey.SIARGO)
 @UnCheckIfSystemAdmin
 @Path(value = "/admin/siargo/qarep/pdffolder", viewPath = "/_view/admin/siargo/pdffolder")
-//true
+// true
 public class PdfFolderAdminController extends JBoltBaseController {
 
-	@Inject
-	private PdfFolderService service;
+    @Inject
+    private PdfFolderService service;
 
-	@Inject
-	private PdfTemplateService pdfTemplateService;
-	
-   /**
-	* 首页
-	*/
-	public void index() {
-		render("index.html");
-	}
-  	
-  	/**
-	* 数据源
-	*/
-	public void datas() {
-		renderJsonData(service.paginateAdminDatas(getPageNumber(),getPageSize(),getKeywords()));
-	}
-	
-   /**
-	* 新增
-	*/
-	public void add() {
-		render("add.html");
-	}
-	
-   /**
-	* 编辑
-	*/
-	public void edit() {
-		PdfFolder pdfFolder=service.findById(getLong(0)); 
-		if(pdfFolder == null){
-			renderFail(JBoltMsg.DATA_NOT_EXIST);
-			return;
-		}
-		set("pdfFolder",pdfFolder);
-		render("edit.html");
-	}
-	
-  /**
-	* 保存
-	*/
+    @Inject
+    private PdfTemplateService pdfTemplateService;
+
+    /** 首页 */
+    public void index() {
+        render("index.html");
+    }
+
+    /** 数据源 */
+    public void datas() {
+        renderJsonData(service.paginateAdminDatas(getPageNumber(), getPageSize(), getKeywords()));
+    }
+
+    /** 新增 */
+    public void add() {
+        render("add.html");
+    }
+
+    /** 编辑 */
+    public void edit() {
+        PdfFolder pdfFolder = service.findById(getLong(0));
+        if (pdfFolder == null) {
+            renderFail(JBoltMsg.DATA_NOT_EXIST);
+            return;
+        }
+        set("pdfFolder", pdfFolder);
+        render("edit.html");
+    }
+
+    /** 保存 */
     public void save() {
-		renderJson(service.save(getModel(PdfFolder.class, "pdfFolder")));
-	}
-	
-   /**
-	* 更新
-	*/
+        renderJson(service.save(getModel(PdfFolder.class, "pdfFolder")));
+    }
+
+    /** 更新 */
     public void update() {
-		renderJson(service.update(getModel(PdfFolder.class, "pdfFolder")));
-	}
-	
-   /**
-	* 批量删除
-	*/
+        renderJson(service.update(getModel(PdfFolder.class, "pdfFolder")));
+    }
+
+    /** 批量删除 */
     public void deleteByIds() {
         final Ret[] result = {null};
         boolean committed = Db.tx(() -> {
             result[0] = service.deleteByBatchIds(get("ids"));
             return result[0] != null && result[0].isOk();
         });
-        if (committed) service.clearCache();
+        if (committed) {
+            service.clearCache();
+        }
         renderJson(committed ? result[0] : Ret.fail("版号删除失败"));
     }
 
-	// ======================== 版号文件夹管理 ========================
+    // 版号文件夹管理
 
-	/** 获取所有已创建的版号文件夹 */
-	public void folders() {
-		renderJsonData(service.listAll());
-	}
+    /** 获取所有已创建的版号文件夹 */
+    public void folders() {
+        renderJsonData(service.listAll());
+    }
 
-	/** 获取字典中所有可用版号（标记是否已创建） */
-	public void dictVersions() {
-		renderJsonData(service.listDictVersions());
-	}
+    /** 获取字典中所有可用版号（标记是否已创建） */
+    public void dictVersions() {
+        renderJsonData(service.listDictVersions());
+    }
 
-	/** 创建版号文件夹（从字典联动） */
-	public void createFolder() {
-		renderJson(service.createVersionFolder(getLong("dictId")));
-	}
+    /** 创建版号文件夹（从字典联动） */
+    public void createFolder() {
+        renderJson(service.createVersionFolder(getLong("dictId")));
+    }
 
-	/** 删除版号文件夹（Db.tx + afterCommit：物理目录删除不可回滚，事务内仅删 DB） */
-	public void deleteFolder() {
-		String pdfver = get("pdfver");
-		if (StrKit.isBlank(pdfver)) {
-			renderFail(JBoltMsg.PARAM_ERROR);
-			return;
-		}
-		// 1. 事务外收集待删物理目录
-		List<String> dirs = service.collectFolderDirs(pdfver);
-		// 2. 事务内仅删 DB（模板规则 + folder 记录）
-		final Ret[] retHolder = {null};
-		boolean txOk = Db.tx(() -> {
-			retHolder[0] = service.deleteVersionFolder(pdfver);
-			return retHolder[0] != null && retHolder[0].isOk();
-		});
-		if (!txOk) {
-			renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
-			return;
-		}
-		// 3. afterCommit: 删除物理目录
-		service.clearCache();
+    /** 删除版号文件夹（Db.tx + afterCommit：物理目录删除不可回滚，事务内仅删 DB） */
+    public void deleteFolder() {
+        String pdfver = get("pdfver");
+        if (StrKit.isBlank(pdfver)) {
+            renderFail(JBoltMsg.PARAM_ERROR);
+            return;
+        }
+        // 1. 事务外收集待删物理目录
+        List<String> dirs = service.collectFolderDirs(pdfver);
+        // 2. 事务内校验引用并删除版号记录
+        final Ret[] retHolder = {null};
+        boolean txOk = Db.tx(() -> {
+            retHolder[0] = service.deleteVersionFolder(pdfver);
+            return retHolder[0] != null && retHolder[0].isOk();
+        });
+        if (!txOk) {
+            renderJsonFail(retHolder[0] != null ? retHolder[0].getStr("msg") : "删除失败");
+            return;
+        }
+        // 3. afterCommit: 删除物理目录
+        service.clearCache();
         pdfTemplateService.clearCache();
         service.deletePhysicalDirs(dirs);
-		renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
-	}
+        renderJson(retHolder[0] != null ? retHolder[0] : Ret.fail("删除失败"));
+    }
 
-	// ======================== 模板文件管理 ========================
+    // 模板文件管理
 
-	/** 获取指定版号的模板文件列表 */
-	public void templates() {
-		renderJsonData(pdfTemplateService.listTemplates(get("pdfver")));
-	}
+    /** 获取指定版号的模板文件列表 */
+    public void templates() {
+        renderJsonData(pdfTemplateService.listTemplates(get("pdfver")));
+    }
 
-	/** 上传模板文件 */
+    /** 上传模板文件 */
     public void upload() {
         try {
             String directory = cn.jbolt.common.storage.SiargoStorage.forReportTemplates()
@@ -152,46 +138,52 @@ public class PdfFolderAdminController extends JBoltBaseController {
             UploadFile file = getFile("file", directory);
             String ver = get("pdfver");
             renderJson(pdfTemplateService.uploadTemplate(ver, file));
-        } catch (Exception e) { renderJsonFail("上传失败：" + e.getMessage()); }
+        } catch (Exception e) {
+            renderJsonFail("上传失败：" + e.getMessage());
+        }
     }
 
-	/** 删除模板文件 */
-	public void deleteFile() {
-		renderJson(pdfTemplateService.deleteTemplate(get("pdfver"), get("fileName")));
-	}
+    /** 删除模板文件 */
+    public void deleteFile() {
+        renderJson(pdfTemplateService.deleteTemplate(get("pdfver"), get("fileName")));
+    }
 
-	// ======================== 匹配规则管理 ========================
+    // 匹配规则管理
 
-	/** 获取匹配规则列表 */
-	public void rules() {
-		renderJsonData(pdfTemplateService.paginateRules(get("pdfver"), getPageNumber(), getPageSize()));
-	}
+    /** 获取匹配规则列表 */
+    public void rules() {
+        renderJsonData(pdfTemplateService.paginateRules(get("pdfver"), getPageNumber(), getPageSize()));
+    }
 
     public void seriesOptions() {
         String version = getPara("pdfver");
-        if (StrKit.isBlank(version)) { renderJsonFail("请先选择版号"); return; }
-        renderJsonData(pdfTemplateService.seriesOptions(version, getLong("templateId"), getPara("keywords"), getPara("selectedIds")));
+        if (StrKit.isBlank(version)) {
+            renderJsonFail("请先选择版号");
+            return;
+        }
+        renderJsonData(pdfTemplateService.seriesOptions(version, getLong("templateId"), getPara("keywords"),
+                getPara("selectedIds")));
     }
 
-	/** 保存规则（新增/编辑） */
-	public void saveRule() {
+    /** 保存规则（新增/编辑） */
+    public void saveRule() {
         String[] values = getParaValues("modelIds");
         String modelIds = values == null ? "" : String.join(",", values);
-		renderJson(pdfTemplateService.saveRule(getModel(PdfTemplate.class, "rule"), modelIds));
-	}
+        renderJson(pdfTemplateService.saveRule(getModel(PdfTemplate.class, "rule"), modelIds));
+    }
 
-	/** 删除规则 */
-	public void deleteRule() {
-		renderJson(pdfTemplateService.deleteRule(getLong("id")));
-	}
+    /** 删除规则 */
+    public void deleteRule() {
+        renderJson(pdfTemplateService.deleteRule(getLong("id")));
+    }
 
-	// ======================== 缓存管理 ========================
+    // 缓存管理
 
-	/** 清除缓存 */
-	public void clearCache() {
-		service.clearCache();
-		pdfTemplateService.clearCache();
-		renderJsonSuccess("缓存已刷新");
-	}
+    /** 清除缓存 */
+    public void clearCache() {
+        service.clearCache();
+        pdfTemplateService.clearCache();
+        renderJsonSuccess("缓存已刷新");
+    }
 
 }

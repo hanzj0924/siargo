@@ -11,7 +11,7 @@ import cn.jbolt.core.base.JBoltIDGenMode;
  */
 @SuppressWarnings("serial")
 @JBoltAutoCache
-@TableBind(dataSource = "main" , table = "jb_user_extend" , primaryKey = "id" , idGenMode = JBoltIDGenMode.SNOWFLAKE)
+@TableBind(dataSource = "main", table = "jb_user_extend", primaryKey = "id", idGenMode = JBoltIDGenMode.SNOWFLAKE)
 public class UserExtend extends BaseUserExtend<UserExtend> {
 }
 

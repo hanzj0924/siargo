@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +15,8 @@ import java.util.Set;
 
 /** 删除字典值时精确移除型号槽内引用；空槽与空组合保留，等待用户重新维护。 */
 final class ProdModelValueRemoval {
-    private ProdModelValueRemoval() {}
+    private ProdModelValueRemoval() {
+    }
 
     static String remove(String source, Set<String> deletedIds,
                          Map<String, ? extends Collection<String>> references,
@@ -24,20 +26,28 @@ final class ProdModelValueRemoval {
         for (JSONArray branch : branches) {
             int position = 0;
             for (Object item : branch) {
-                if (!(item instanceof JSONObject slot)) continue;
+                if (!(item instanceof JSONObject slot)) {
+                    continue;
+                }
                 position++;
-                if (!slot.containsKey("t")) continue;
+                if (!slot.containsKey("t")) {
+                    continue;
+                }
                 JSONArray valueIds = slot.getJSONArray("valueIds");
                 if (slot.size() == 1) {
                     Collection<String> oldReferences = references.get(slot.getString("t"));
-                    if (oldReferences == null || oldReferences.stream().noneMatch(deletedIds::contains)) continue;
+                    if (oldReferences == null || oldReferences.stream().noneMatch(deletedIds::contains)) {
+                        continue;
+                    }
                     // 旧 t-only 结构依赖关联表取值，删除前固化到原段位，防止最后一个值删除后丢槽。
                     valueIds = new JSONArray(new ArrayList<>(oldReferences));
                     slot.put("key", "slot_" + position);
                     slot.put("label", typeNames.getOrDefault(slot.getString("t"), "参数" + position));
                     slot.put("valueIds", valueIds);
                 }
-                if (valueIds == null) continue;
+                if (valueIds == null) {
+                    continue;
+                }
                 Set<String> removedCodes = new LinkedHashSet<>(), survivingCodes = new LinkedHashSet<>();
                 JSONArray survivingIds = new JSONArray();
                 boolean removed = false;
@@ -48,13 +58,20 @@ final class ProdModelValueRemoval {
                             ? mappings.getString(id) : dictionaryCodes.get(id);
                     if (deletedIds.contains(id)) {
                         removed = true;
-                        if (code != null) removedCodes.add(code);
-                    } else {
+                        if (code != null) {
+                            removedCodes.add(code);
+                        }
+                    }
+                    else {
                         survivingIds.add(id);
-                        if (code != null) survivingCodes.add(code);
+                        if (code != null) {
+                            survivingCodes.add(code);
+                        }
                     }
                 }
-                if (!removed) continue;
+                if (!removed) {
+                    continue;
+                }
                 changed = true;
                 slot.put("valueIds", survivingIds);
                 removeMappings(slot, "codes", deletedIds);
@@ -66,30 +83,40 @@ final class ProdModelValueRemoval {
                 clampSelectionCount(slot, survivingIds.size());
             }
         }
-        if (!changed) return source;
+        if (!changed) {
+            return source;
+        }
         String result = JSON.toJSONString(branches.size() == 1 ? branches.get(0) : branches,
                 SerializerFeature.WriteMapNullValue);
-        if (result.getBytes(StandardCharsets.UTF_8).length > ProdModelTokens.MAX_BYTES)
+        if (result.getBytes(StandardCharsets.UTF_8).length > ProdModelTokens.MAX_BYTES) {
             throw new IllegalArgumentException("删除参数值后的型号结构超过" + ProdModelTokens.MAX_BYTES + "字节");
+        }
         return result;
     }
 
     private static void removeMappings(JSONObject slot, String field, Set<String> deletedIds) {
         JSONObject mappings = slot.getJSONObject(field);
-        if (mappings != null) deletedIds.forEach(mappings::remove);
+        if (mappings != null) {
+            deletedIds.forEach(mappings::remove);
+        }
     }
 
     private static void removeGroupCodes(JSONObject slot, Set<String> removedCodes) {
         JSONArray groups = slot.getJSONArray("groups");
-        if (groups == null) return;
+        if (groups == null) {
+            return;
+        }
         JSONArray remaining = new JSONArray();
         for (Object item : groups) {
             JSONObject group = (JSONObject) item;
             JSONArray values = group.getJSONArray("values");
             values.removeIf(value -> removedCodes.contains(value.toString()));
-            if (values.isEmpty()) continue;
-            if (group.containsKey("max") && group.getIntValue("max") > values.size())
+            if (values.isEmpty()) {
+                continue;
+            }
+            if (group.containsKey("max") && group.getIntValue("max") > values.size()) {
                 group.put("max", values.size());
+            }
             remaining.add(group);
         }
         slot.put("groups", remaining);
@@ -97,7 +124,9 @@ final class ProdModelValueRemoval {
 
     private static void removeCombinations(JSONObject slot, Set<String> removedCodes) {
         JSONArray combinations = slot.getJSONArray("allowedCombinations");
-        if (combinations == null) return;
+        if (combinations == null) {
+            return;
+        }
         // 删除整组而非组内某个编码：CV 删除 V 后不应变成原本未允许的 C。
         combinations.removeIf(item -> ((JSONArray) item).stream()
                 .anyMatch(code -> removedCodes.contains(code.toString())));
@@ -110,14 +139,17 @@ final class ProdModelValueRemoval {
             int min = Integer.MAX_VALUE, max = 0;
             for (Object item : combinations) {
                 int count = ((JSONArray) item).size();
-                min = Math.min(min, count); max = Math.max(max, count);
+                min = Math.min(min, count);
+                max = Math.max(max, count);
             }
-            slot.put("minSelect", min); slot.put("maxSelect", max);
+            slot.put("minSelect", min);
+            slot.put("maxSelect", max);
             return;
         }
         for (String field : List.of("minSelect", "maxSelect")) {
-            if (remainingCount == 0 || (slot.containsKey(field) && slot.getIntValue(field) > remainingCount))
+            if (remainingCount == 0 || (slot.containsKey(field) && slot.getIntValue(field) > remainingCount)) {
                 slot.put(field, remainingCount);
+            }
         }
     }
 }

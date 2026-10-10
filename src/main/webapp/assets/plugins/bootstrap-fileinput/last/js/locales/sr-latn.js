@@ -76,7 +76,7 @@
         msgAjaxError: 'Greška u {operation} operaciji. Molimo pokušajte ponovo kasnije!',
         msgAjaxProgressError: 'Operacija {operation} nije uspela.',
         msgDuplicateFile: 'Dokument "{name}" iste veličine "{size} KB" je već selektovan. Duplirani dokument je preskočen.',
-        msgResumableUploadRetriesExceeded:  'Slanje je prekinuto nakon <b>{max}</b> pokušaja za dokument <b>{file}</b>! Detalji greške: <pre>{error}</pre>',
+        msgResumableUploadRetriesExceeded: 'Slanje je prekinuto nakon <b>{max}</b> pokušaja za dokument <b>{file}</b>! Detalji greške: <pre>{error}</pre>',
         msgPendingTime: '{time} preostalo',
         msgCalculatingTime: 'računanje preostalog vremena',
         ajaxOperations: {
@@ -98,7 +98,7 @@
             indicatorSuccessTitle: 'Poslato',
             indicatorErrorTitle: 'Greška u slanju',
             indicatorPausedTitle: 'Pauzirano slanje',
-            indicatorLoadingTitle:  'Slanje u toku &hellip;'
+            indicatorLoadingTitle: 'Slanje u toku &hellip;'
         },
         previewZoomButtonTitles: {
             prev: 'Prethodni dokument',

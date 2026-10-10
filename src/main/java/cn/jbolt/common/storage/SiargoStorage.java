@@ -17,8 +17,14 @@ public final class SiargoStorage {
         IMI("imi"), DMS("dms"), EQCERT("eqcert"), QAREP("qarep"), PROD_MODEL("prod_model");
 
         private final String code;
-        Business(String code) { this.code = code; }
-        public String configKey() { return "siargo_" + code + (this == QAREP ? "_export_path" : "_upload_path"); }
+
+        Business(String code) {
+            this.code = code;
+        }
+
+        public String configKey() {
+            return "siargo_" + code + (this == QAREP ? "_export_path" : "_upload_path");
+        }
     }
 
     private final Path webRoot;
@@ -86,7 +92,9 @@ public final class SiargoStorage {
         forBusiness(Business.QAREP);
     }
 
-    public Path root() { return checked(root); }
+    public Path root() {
+        return checked(root);
+    }
 
     /** segments 可包含分层相对路径（如 G/2），但每一段必须是合法文件名。 */
     public Path path(String... segments) {
@@ -97,7 +105,9 @@ public final class SiargoStorage {
         return checked(result);
     }
 
-    public String url(String... segments) { return toUrl(path(segments)); }
+    public String url(String... segments) {
+        return toUrl(path(segments));
+    }
 
     public String toUrl(Path file) {
         Path relative = root.relativize(checked(file));
@@ -116,7 +126,9 @@ public final class SiargoStorage {
 
     public Path checked(Path file) {
         for (Path part : file) {
-            if (part.toString().equals("..") || part.toString().equals(".")) throw new IllegalArgumentException("文件路径不允许穿越段");
+            if (part.toString().equals("..") || part.toString().equals(".")) {
+                throw new IllegalArgumentException("文件路径不允许穿越段");
+            }
         }
         Path absolute = file.toAbsolutePath().normalize();
         verifyContained(root, absolute, true);
@@ -143,7 +155,9 @@ public final class SiargoStorage {
         Path target = path(segments);
         verifyContained(base, target, true);
         String relative = base.relativize(target).toString().replace('\\', '/');
-        if (!relative.isEmpty()) validateRelative(relative);
+        if (!relative.isEmpty()) {
+            validateRelative(relative);
+        }
         ensureDirectory(segments);
         return relative;
     }
@@ -165,7 +179,9 @@ public final class SiargoStorage {
     /** 仅创建新文件，复制失败只清理本次成功创建的目标，不触碰重名既有文件。 */
     public void copyNew(Path source, Path target) throws IOException {
         Path from = checked(source), to = checked(target);
-        if (!Files.isRegularFile(from, LinkOption.NOFOLLOW_LINKS)) throw new IOException("源文件不存在");
+        if (!Files.isRegularFile(from, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("源文件不存在");
+        }
         Files.createDirectories(checked(to.getParent()));
         boolean created = false;
         try {
@@ -175,7 +191,11 @@ public final class SiargoStorage {
             }
         } catch (IOException | RuntimeException e) {
             if (created) {
-                try { deleteFile(to); } catch (Exception cleanup) { e.addSuppressed(cleanup); }
+                try {
+                    deleteFile(to);
+                } catch (Exception cleanup) {
+                    e.addSuppressed(cleanup);
+                }
             }
             throw e;
         }
@@ -212,7 +232,9 @@ public final class SiargoStorage {
                 || relative.contains("\\")) {
             throw new IllegalArgumentException("必须使用以 / 分隔的非空相对路径");
         }
-        for (String segment : relative.split("/", -1)) { safeSegment(segment); }
+        for (String segment : relative.split("/", -1)) {
+            safeSegment(segment);
+        }
         return relative;
     }
 

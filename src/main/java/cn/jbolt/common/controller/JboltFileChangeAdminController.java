@@ -11,7 +11,8 @@ import com.jfinal.core.Path;
 public class JboltFileChangeAdminController extends JBoltBaseController {
     @Inject
     private JBoltFileService service;
-    public void index(){
+
+    public void index() {
         renderJsonData(service.getListByIds(get("ids")));
     }
 }

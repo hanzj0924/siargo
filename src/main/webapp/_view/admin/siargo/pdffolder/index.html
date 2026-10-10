@@ -7,80 +7,98 @@
 #define main()
 #set(pageId=RandomUtil.random(6))
 
-<div class="jbolt_page jb_vflex qa-pdf-template-page" data-key="#(pmkey)" data-page-id="#(pageId)" data-init-handler="SiargoPdfTemplates.init" data-close-handler="SiargoPdfTemplates.close">
-<div class="jbolt_page_title">
-	<div class="row">
-		<div class="col-md-auto"><h1>报告单模板管理</h1></div>
-		<div class="col-md-auto ml-auto">
-			<button class="btn btn-outline-secondary btn-sm" onclick="pfClearCache_#(pageId)()">
-				<i class="fa fa-refresh"></i> 刷新缓存
-			</button>
-		</div>
-	</div>
-</div>
-<div class="jbolt_page_content jb_vbody">
-<div class="pf-panel" id="pfPanel_#(pageId)">
+<div class="jbolt_page jb_vflex qa-pdf-template-page"
+     data-key="#(pmkey)"
+     data-page-id="#(pageId)"
+     data-init-handler="SiargoPdfTemplates.init"
+     data-close-handler="SiargoPdfTemplates.close">
+    <div class="jbolt_page_title">
+        <div class="row">
+            <div class="col-md-auto"><h1>报告单模板管理</h1></div>
+            <div class="col-md-auto ml-auto">
+                <button class="btn btn-outline-secondary btn-sm" onclick="pfClearCache_#(pageId)()">
+                    <i class="fa fa-refresh"></i> 刷新缓存
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="jbolt_page_content jb_vbody">
+        <div class="pf-panel" id="pfPanel_#(pageId)">
 
-<!-- ========== 左侧：版号文件夹列表 ========== -->
-<div class="pf-left">
-	<div class="pf-left-header">
-		<span style="font-weight:600;font-size:14px;"><i class="fa fa-folder-open-o"></i> 版号文件夹</span>
-		<button class="btn btn-outline-primary btn-xs" onclick="pfShowAddFolder_#(pageId)()">
-			<i class="fa fa-plus"></i> 新增
-		</button>
-	</div>
-	<div class="pf-left-body" id="pfFolderList_#(pageId)">
-		<div class="pf-empty">加载中...</div>
-	</div>
-	<!--<div class="pf-left-footer">
-		<button class="btn btn-outline-danger btn-xs" onclick="pfDeleteFolder_#(pageId)()">
-			<i class="fa fa-trash"></i> 删除选中
-		</button>
-	</div>-->
-</div>
+            <!-- 左侧：版号文件夹列表 -->
+            <div class="pf-left">
+                <div class="pf-left-header">
+                    <span style="font-weight:600;font-size:14px;"><i class="fa fa-folder-open-o"></i> 版号文件夹</span>
+                    <button class="btn btn-outline-primary btn-xs" onclick="pfShowAddFolder_#(pageId)()">
+                        <i class="fa fa-plus"></i> 新增
+                    </button>
+                </div>
+                <div class="pf-left-body" id="pfFolderList_#(pageId)">
+                    <div class="pf-empty">加载中...</div>
+                </div>
+                <!--<div class="pf-left-footer">
+                    <button class="btn btn-outline-danger btn-xs" onclick="pfDeleteFolder_#(pageId)()">
+                        <i class="fa fa-trash"></i> 删除选中
+                    </button>
+                </div>-->
+            </div>
 
-<!-- ========== 右侧：模板管理区 ========== -->
-<div class="pf-right">
-	<div class="pf-right-header">
-		<h4><i class="fa fa-cog"></i> <span id="pfCurrentVer_#(pageId)">请选择左侧版号</span></h4>
-	</div>
-	<div class="pf-right-body">
-		<!-- Tab 切换 -->
-		<div class="pf-tab-links" id="pfTabLinks_#(pageId)">
-			<a href="javascript:;" class="active" data-tab="files" onclick="pfSwitchTab_#(pageId)(this,'files')">
-				<i class="fa fa-file-pdf-o"></i> 模板文件
-			</a>
-			<a href="javascript:;" data-tab="rules" onclick="pfSwitchTab_#(pageId)(this,'rules')">
-				<i class="fa fa-random"></i> 系列关联
-			</a>
-		</div>
-		<!-- Tab 内容 -->
-		<div class="pf-tab-content">
-			<!-- 模板文件 Tab -->
-			<div class="pf-tab-pane active" id="pfTabFiles_#(pageId)">
-				<div style="margin-bottom:10px;">
-					<button class="btn btn-outline-primary btn-sm" onclick="pfUploadFile_#(pageId)()">
-						<i class="fa fa-upload"></i> 上传模板
-					</button>
-					<input type="file" id="pfFileInput_#(pageId)" style="display:none;" accept=".pdf"
-						onchange="pfDoUpload_#(pageId)(this)"/>
-				</div>
-				<table class="table table-bordered table-sm table-hover">
-					<thead><tr><th style="width:50px">#</th><th>文件名</th><th style="width:100px">大小</th><th style="width:80px">操作</th></tr></thead>
-					<tbody id="pfFileTable_#(pageId)">
-						<tr><td colspan="4" class="pf-empty">请先选择版号</td></tr>
-					</tbody>
-				</table>
-			</div>
-			<!-- 系列关联 Tab -->
-			<div class="pf-tab-pane pf-rules-pane" id="pfTabRules_#(pageId)">
-				<div style="margin-bottom:10px;">
-					<button class="btn btn-outline-primary btn-sm" onclick="pfAddRule_#(pageId)()">
-						<i class="fa fa-plus"></i> 新增模板关联
-					</button>
-				</div>
-                <form id="pfRuleSearch_#(pageId)" onsubmit="return false;"><input type="hidden" name="pdfver" data-rule-version/></form>
-                <textarea class="jb_tpl_box" id="pfRuleRows_#(pageId)">
+            <!-- 右侧：模板管理区 -->
+            <div class="pf-right">
+                <div class="pf-right-header">
+                    <h4><i class="fa fa-cog"></i> <span id="pfCurrentVer_#(pageId)">请选择左侧版号</span></h4>
+                </div>
+                <div class="pf-right-body">
+                    <!-- Tab 切换 -->
+                    <div class="pf-tab-links" id="pfTabLinks_#(pageId)">
+                        <a href="javascript:;"
+                           class="active"
+                           data-tab="files"
+                           onclick="pfSwitchTab_#(pageId)(this,'files')">
+                            <i class="fa fa-file-pdf-o"></i> 模板文件
+                        </a>
+                        <a href="javascript:;" data-tab="rules" onclick="pfSwitchTab_#(pageId)(this,'rules')">
+                            <i class="fa fa-random"></i> 系列关联
+                        </a>
+                    </div>
+                    <!-- Tab 内容 -->
+                    <div class="pf-tab-content">
+                        <!-- 模板文件 Tab -->
+                        <div class="pf-tab-pane active" id="pfTabFiles_#(pageId)">
+                            <div style="margin-bottom:10px;">
+                                <button class="btn btn-outline-primary btn-sm" onclick="pfUploadFile_#(pageId)()">
+                                    <i class="fa fa-upload"></i> 上传模板
+                                </button>
+                                <input type="file" id="pfFileInput_#(pageId)" style="display:none;" accept=".pdf"
+                                       onchange="pfDoUpload_#(pageId)(this)"/>
+                            </div>
+                            <table class="table table-bordered table-sm table-hover">
+                                <thead>
+                                <tr>
+                                    <th style="width:50px">#</th>
+                                    <th>文件名</th>
+                                    <th style="width:100px">大小</th>
+                                    <th style="width:80px">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="pfFileTable_#(pageId)">
+                                <tr>
+                                    <td colspan="4" class="pf-empty">请先选择版号</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- 系列关联 Tab -->
+                        <div class="pf-tab-pane pf-rules-pane" id="pfTabRules_#(pageId)">
+                            <div style="margin-bottom:10px;">
+                                <button class="btn btn-outline-primary btn-sm" onclick="pfAddRule_#(pageId)()">
+                                    <i class="fa fa-plus"></i> 新增模板关联
+                                </button>
+                            </div>
+                            <form id="pfRuleSearch_#(pageId)" onsubmit="return false;"><input type="hidden"
+                                                                                              name="pdfver"
+                                                                                              data-rule-version/></form>
+                            <textarea class="jb_tpl_box" id="pfRuleRows_#(pageId)">
 {@each datas as data,index}
 <tr data-id="${data.id}">
 <td>${pageNumber,pageSize,index | rownum}</td>
@@ -97,26 +115,45 @@
 </tr>
 {@/each}
                 </textarea>
-                <table id="pfRules_#(pageId)" class="jbolt_table jbolt_main_table table-center" data-jbolttable data-height="fill_box" data-ajax="true" data-autoload="false"
-                       data-url="admin/siargo/qarep/pdffolder/rules" data-conditions-form="pfRuleSearch_#(pageId)" data-pagesize="100"
-                       data-page="pfRulePage_#(pageId)" data-rowtpl="pfRuleRows_#(pageId)" data-ajax-success-handler="SiargoPdfTemplates.cacheRules">
-                    <thead><tr><th data-width="55">序号</th><th data-width="90">版号</th><th data-width="200">模板文件</th><th data-min-width="300">关联系列</th><th data-width="65">状态</th><th data-width="180">操作</th></tr></thead><tbody></tbody>
-                </table>
-			</div>
-		</div>
-	</div>
-</div>
+                            <table id="pfRules_#(pageId)"
+                                   class="jbolt_table jbolt_main_table table-center"
+                                   data-jbolttable
+                                   data-height="fill_box"
+                                   data-ajax="true"
+                                   data-autoload="false"
+                                   data-url="admin/siargo/qarep/pdffolder/rules"
+                                   data-conditions-form="pfRuleSearch_#(pageId)"
+                                   data-pagesize="100"
+                                   data-page="pfRulePage_#(pageId)"
+                                   data-rowtpl="pfRuleRows_#(pageId)"
+                                   data-ajax-success-handler="SiargoPdfTemplates.cacheRules">
+                                <thead>
+                                <tr>
+                                    <th data-width="55">序号</th>
+                                    <th data-width="90">版号</th>
+                                    <th data-width="200">模板文件</th>
+                                    <th data-min-width="300">关联系列</th>
+                                    <th data-width="65">状态</th>
+                                    <th data-width="180">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-</div>
-</div>
+        </div>
+    </div>
 </div>
 
 #end
 
 #define js()
 <script>
-$(function(){
-	SiargoPdfTemplates.init($('#pfPanel_#(pageId)').closest('.jbolt_page'));
-});
+    $(function () {
+        SiargoPdfTemplates.init($('#pfPanel_#(pageId)').closest('.jbolt_page'));
+    });
 </script>
 #end

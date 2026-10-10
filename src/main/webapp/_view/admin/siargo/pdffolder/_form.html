@@ -1,47 +1,84 @@
 <form onsubmit="return false;" id="pdfFolderForm" action="#(action)" method="post">
-<input type="hidden" name="pdfFolder.id" value="#(pdfFolder.id??)" />
-<div class="row">
-	<div class="col">
-	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">版号</label>
-		<div class="col">
-			<input type="text" class="form-control" readonly placeholder="根据关联字典自动确定" name="pdfFolder.pdfver" value="#(pdfFolder.pdfver??)"/>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">关联字典ID</label>
-		<div class="col">
-			<input type="text" data-with-clearbtn="true" autocomplete="off" class="form-control" data-rule="required;pint" placeholder="请输入关联字典ID(jb_dictionary.id)" data-tips="请输入关联字典ID" maxlength="19" name="pdfFolder.dict_id" value="#(pdfFolder.dictId??)"/>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">模板目录（自动生成）</label>
-		<div class="col">
-			<input type="text" class="form-control" readonly value="#(pdfFolder.templatePath??)" placeholder="由配置与版号自动生成"/>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">正式 PDF 目录（自动生成）</label>
-		<div class="col">
-			<input type="text" class="form-control" readonly value="#(pdfFolder.exportPath??)" placeholder="由配置与版号自动生成"/>
-		</div>
-	</div>
-	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">版本描述</label>
-		<div class="col">
-			<input type="text" data-with-clearbtn="true" autocomplete="off"  class="form-control"  placeholder="请输入版本描述" maxlength="200" name="pdfFolder.description" value="#(pdfFolder.description??)"/>
-		</div>
-	</div>
-	</div>
-	<div class="col">
-	<div class="form-group row">
-		<label class="col-sm-2 col-form-label">1=启用 0=停用</label>
-		<div class="col">
-			<input type="text" data-with-clearbtn="true"  autocomplete="off"  class="form-control" data-rule="pnumber" placeholder="请输入1=启用 0=停用"  maxlength="3" name="pdfFolder.isActive" value="#(pdfFolder.isActive??)"/>
-		</div>
-	</div>
-	</div>
-</div>
+    <input type="hidden" name="pdfFolder.id" value="#(pdfFolder.id??)"/>
+    <div class="row">
+        <div class="col">
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">版号</label>
+                <div class="col">
+                    <input type="text"
+                           class="form-control"
+                           readonly
+                           placeholder="根据关联字典自动确定"
+                           name="pdfFolder.pdfver"
+                           value="#(pdfFolder.pdfver??)"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">关联字典ID</label>
+                <div class="col">
+                    <input type="text"
+                           data-with-clearbtn="true"
+                           autocomplete="off"
+                           class="form-control"
+                           data-rule="required;pint"
+                           placeholder="请输入关联字典ID(jb_dictionary.id)"
+                           data-tips="请输入关联字典ID"
+                           maxlength="19"
+                           name="pdfFolder.dict_id"
+                           value="#(pdfFolder.dictId??)"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">模板目录（自动生成）</label>
+                <div class="col">
+                    <input type="text"
+                           class="form-control"
+                           readonly
+                           value="#(pdfFolder.templatePath??)"
+                           placeholder="由配置与版号自动生成"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">正式 PDF 目录（自动生成）</label>
+                <div class="col">
+                    <input type="text"
+                           class="form-control"
+                           readonly
+                           value="#(pdfFolder.exportPath??)"
+                           placeholder="由配置与版号自动生成"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">版本描述</label>
+                <div class="col">
+                    <input type="text"
+                           data-with-clearbtn="true"
+                           autocomplete="off"
+                           class="form-control"
+                           placeholder="请输入版本描述"
+                           maxlength="200"
+                           name="pdfFolder.description"
+                           value="#(pdfFolder.description??)"/>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">1=启用 0=停用</label>
+                <div class="col">
+                    <input type="text"
+                           data-with-clearbtn="true"
+                           autocomplete="off"
+                           class="form-control"
+                           data-rule="pnumber"
+                           placeholder="请输入1=启用 0=停用"
+                           maxlength="3"
+                           name="pdfFolder.isActive"
+                           value="#(pdfFolder.isActive??)"/>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </form>
 #define js()

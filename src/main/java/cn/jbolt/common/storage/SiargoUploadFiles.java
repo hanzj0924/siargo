@@ -2,6 +2,7 @@ package cn.jbolt.common.storage;
 
 import com.jfinal.kit.Ret;
 import com.jfinal.upload.UploadFile;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,7 +12,8 @@ import java.util.UUID;
 
 /** 上传暂存、文件发布补偿；不持有数据库事务。 */
 public final class SiargoUploadFiles {
-    private SiargoUploadFiles() {}
+    private SiargoUploadFiles() {
+    }
 
     public static Path temp(SiargoStorage storage, String url, boolean mustExist) {
         Path path = storage.resolveUrl(url);
@@ -34,21 +36,29 @@ public final class SiargoUploadFiles {
         Path source = storage.checked(upload.getFile().toPath());
         temp(storage, storage.toUrl(source), true);
         String name = upload.getOriginalFileName();
-        if (name == null || name.isBlank()) name = upload.getFileName();
+        if (name == null || name.isBlank()) {
+            name = upload.getFileName();
+        }
         name = SiargoStorage.safeSegment(name);
         Path target = storage.checked(source.getParent().resolve(name));
-        if (!source.equals(target)) storage.moveNew(source, target);
+        if (!source.equals(target)) {
+            storage.moveNew(source, target);
+        }
         return storage.toUrl(target);
     }
 
     public static Ret delete(SiargoStorage storage, List<String> urls, boolean tempOnly) {
         List<String> failures = new ArrayList<>();
-        if (urls != null) for (String url : urls) {
-            if (url == null || url.isBlank()) continue;
-            try {
-                storage.deleteFile(tempOnly ? temp(storage, url, false) : storage.resolveUrl(url));
-            } catch (Exception e) {
-                failures.add(url + "：" + e.getMessage());
+        if (urls != null) {
+            for (String url : urls) {
+                if (url == null || url.isBlank()) {
+                    continue;
+                }
+                try {
+                    storage.deleteFile(tempOnly ? temp(storage, url, false) : storage.resolveUrl(url));
+                } catch (Exception e) {
+                    failures.add(url + "：" + e.getMessage());
+                }
             }
         }
         return (failures.isEmpty() ? Ret.ok() : Ret.fail("部分文件清理失败，请检查失败清单"))
@@ -60,10 +70,15 @@ public final class SiargoUploadFiles {
     public static final class Moves {
         private final SiargoStorage storage;
         private final List<Path[]> moved = new ArrayList<>();
-        public Moves(SiargoStorage storage) { this.storage = storage; }
+
+        public Moves(SiargoStorage storage) {
+            this.storage = storage;
+        }
 
         public void move(Path source, Path target) throws IOException {
-            if (source.equals(target)) return;
+            if (source.equals(target)) {
+                return;
+            }
             storage.moveNew(source, target);
             moved.add(new Path[]{target, source});
         }
@@ -72,8 +87,11 @@ public final class SiargoUploadFiles {
             List<String> failures = new ArrayList<>();
             for (int i = moved.size() - 1; i >= 0; i--) {
                 Path[] pair = moved.get(i);
-                try { storage.moveNew(pair[0], pair[1]); }
-                catch (Exception e) { failures.add(pair[0] + " -> " + pair[1] + "：" + e.getMessage()); }
+                try {
+                    storage.moveNew(pair[0], pair[1]);
+                } catch (Exception e) {
+                    failures.add(pair[0] + " -> " + pair[1] + "：" + e.getMessage());
+                }
             }
             // 补偿失败时保留现存文件，不以删除文件掩盖失败。
             return Ret.fail(message + (failures.isEmpty() ? "" : "；文件恢复失败，须人工处理"))

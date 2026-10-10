@@ -5,75 +5,80 @@
 
 #define main()
 #set(pageId=RandomUtil.random(6))
-<div class="jbolt_page qa-product-form qa-edit-page" data-page-id="#(pageId)" data-form-mode="edit" data-large-meter-series-ids="#(largeMeterSeriesIds??)" data-init-handler="SiargoQarepForm.init" data-close-handler="SiargoQarepForm.close">
-	
-	<div class="jbolt_page_content">
-		<form onsubmit="return false;" id="qareportUpdateForm_#(pageId)"
-			action="admin/siargo/qarep/update" method="post">
-			<input type="hidden" name="qareport.id" value="#(qapro.id??)" />
-			<input type="hidden" name="product.id" value="#(qapro.proid??)" />
-			<input type="hidden" name="product.insp" value="#(qapro.insp??)" />
-			<div class="fm-wrap qa-edit-layout">
-				<div class="fm-sec qa-edit-section">
-					<div class="fm-hd"><i class="fa fa-file-text-o" aria-hidden="true"></i><span>报告信息</span></div>
-					<div class="fm-card qa-edit-report-fields">
-						<div class="form-group">
-							<label>类型</label>
-							<select class="form-control" data-autoload
-								name="qareport.rep_type"
-								data-url="admin/dictionary/options?key=siargo_rep_type"
-								data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
-								data-value="" data-value-attr="sn"
-								data-select="#(qapro.repType ??)">
-							</select>
-						</div>
-						<div class="form-group">
-							<label>版号</label>
-							<select class="form-control" data-autoload
-								name="product.pdfver"
-								data-url="admin/dictionary/options?key=siargo_pdfver"
-								data-rule="select" data-tips="请选择版号"
-								data-value="" data-value-attr="name" data-text-attr="name"
-								data-select="#(qapro.sp_pdfver ??)">
-							</select>
-						</div>
-						<div class="form-group">
-							<label>订单号</label>
-							<input type="number" data-with-clearbtn="true" autocomplete="off"
-								class="form-control" data-rule="pint" placeholder="=请填写="
-								maxlength="10" name="qareport.order_id"
-								value="#(qapro.order_id ??)" />
-						</div>
-						<div class="form-group qa-edit-customer-field">
-							<label>客户名称</label>
-							<div class="input-group qa-edit-customer-control">
-								<select class="form-control " data-autoload data-refresh="true"
-									data-url="admin/siargo/qarep/getCustName" name="qareport.cust_id"
-									data-text="=请选择=" data-value-attr="id" data-rule="select"
-									data-text-attr="name" data-select="#(qapro.cust_id ??)"
-									data-select-type="select2" id="custSelect_#(pageId)">
-								</select>
-								<span class="input-group-btn">
+<div class="jbolt_page qa-product-form qa-edit-page"
+     data-page-id="#(pageId)"
+     data-form-mode="edit"
+     data-large-meter-series-ids="#(largeMeterSeriesIds??)"
+     data-init-handler="SiargoQarepForm.init"
+     data-close-handler="SiargoQarepForm.close">
+
+    <div class="jbolt_page_content">
+        <form onsubmit="return false;" id="qareportUpdateForm_#(pageId)"
+              action="admin/siargo/qarep/update" method="post">
+            <input type="hidden" name="qareport.id" value="#(qapro.id??)"/>
+            <input type="hidden" name="product.id" value="#(qapro.proid??)"/>
+            <input type="hidden" name="product.insp" value="#(qapro.insp??)"/>
+            <div class="fm-wrap qa-edit-layout">
+                <div class="fm-sec qa-edit-section">
+                    <div class="fm-hd"><i class="fa fa-file-text-o" aria-hidden="true"></i><span>报告信息</span></div>
+                    <div class="fm-card qa-edit-report-fields">
+                        <div class="form-group">
+                            <label>类型</label>
+                            <select class="form-control" data-autoload
+                                    name="qareport.rep_type"
+                                    data-url="admin/dictionary/options?key=siargo_rep_type"
+                                    data-rule="select" data-tips="请选择报告单类型" data-text="=请选择="
+                                    data-value="" data-value-attr="sn"
+                                    data-select="#(qapro.repType ??)">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>版号</label>
+                            <select class="form-control" data-autoload
+                                    name="product.pdfver"
+                                    data-url="admin/dictionary/options?key=siargo_pdfver"
+                                    data-rule="select" data-tips="请选择版号"
+                                    data-value="" data-value-attr="name" data-text-attr="name"
+                                    data-select="#(qapro.sp_pdfver ??)">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>订单号</label>
+                            <input type="number" data-with-clearbtn="true" autocomplete="off"
+                                   class="form-control" data-rule="pint" placeholder="=请填写="
+                                   maxlength="10" name="qareport.order_id"
+                                   value="#(qapro.order_id ??)"/>
+                        </div>
+                        <div class="form-group qa-edit-customer-field">
+                            <label>客户名称</label>
+                            <div class="input-group qa-edit-customer-control">
+                                <select class="form-control " data-autoload data-refresh="true"
+                                        data-url="admin/siargo/qarep/getCustName" name="qareport.cust_id"
+                                        data-text="=请选择=" data-value-attr="id" data-rule="select"
+                                        data-text-attr="name" data-select="#(qapro.cust_id ??)"
+                                        data-select-type="select2" id="custSelect_#(pageId)">
+                                </select>
+                                <span class="input-group-btn">
 									<button class="btn btn-default qa-edit-customer-addon" type="button"
-										data-dialogbtn data-area="350,250"
-										data-handler="SiargoQarepForm.refreshCustomer" data-title="新增客户"
-										data-url="admin/siargo/customer/add">
+                                            data-dialogbtn data-area="350,250"
+                                            data-handler="SiargoQarepForm.refreshCustomer" data-title="新增客户"
+                                            data-url="admin/siargo/customer/add">
 										<i class="fa fa-plus"></i>
 									</button>
 								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="fm-sec qa-edit-section">
-					<div class="fm-hd"><i class="fa fa-cube" aria-hidden="true"></i><span>检验产品</span></div>
-					<div data-product-list>
-						#include("_product_fields.html")
-					</div>
-				</div>
-			</div>
-		</form>
-	</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fm-sec qa-edit-section">
+                    <div class="fm-hd"><i class="fa fa-cube" aria-hidden="true"></i><span>检验产品</span></div>
+                    <div data-product-list>
+                        #include("_product_fields.html")
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 #end
 
