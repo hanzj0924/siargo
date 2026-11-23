@@ -18,6 +18,7 @@ import cn.jbolt.common.model.*;
 import cn.jbolt.common.ureport.IUreportViewAuth;
 import cn.jbolt.common.ureport.JBoltUreportViewHandler;
 import cn.jbolt.common.util.CACHE;
+import cn.jbolt.common.util.ProjectAssetResolver;
 import cn.jbolt.core.Interceptor.JBoltOnlineUserGlobalInterceptor;
 import cn.jbolt.core.base.config.JBoltConfig;
 import cn.jbolt.core.base.config.JBoltProjectConfig;
@@ -168,11 +169,11 @@ public class ProjectConfig extends JBoltProjectConfig {
 
         // 添加JBoltConfig的访问
         me.addSharedObject("JBoltConfig", new JBoltConfig());
-        // 仅选择 application.properties 清单中的本地 CSS/JS，外部资源保持原样。
-        me.addSharedObject("ProjectAssets", new cn.jbolt.common.util.ProjectAssetResolver(
+        me.addSharedObject("ProjectAssets", new ProjectAssetResolver(
                 java.nio.file.Path.of(com.jfinal.kit.PathKit.getWebRootPath()),
                 com.jfinal.kit.PropKit.get("project_assets.environment_files", ""),
-                JBoltConfig::pdevIsPro));
+                JBoltConfig::pdevIsPro,
+                () -> JBoltConfig.ASSETS_VERSION));
         // 添加JBoltUserKit的访问
         me.addSharedObject("JBoltUserKit", new JBoltUserKit());
         // 添加JBoltStringUtil的访问

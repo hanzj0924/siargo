@@ -187,7 +187,9 @@ siargo/
 
 Enjoy 模板负责页面结构和数据传递，业务 JavaScript 统一维护在 `assets/js/siargo.js`，业务样式统一维护在 `assets/css/siargo.css`。
 
-`application.properties` 的 `project_assets.environment_files` 指定 12 项参与环境选择的本地 CSS/JS。模板通过 `ProjectAssets.url(...)` 选择文件：开发优先使用源文件，生产优先使用 `.min` 文件，首选文件缺失时使用存在的另一版本。日常维护修改源文件，正式打包时按发布流程增量压缩。
+`application.properties` 的 `project_assets.environment_files` 指定 12 项本地 CSS/JS。模板直接使用 `#(ProjectAssets.url('assets/css/siargo.css'))` 这样的完整地址。开发优先使用源文件，生产优先使用 `.min` 文件，首选文件缺失时使用存在的另一版本。日常维护修改源文件，正式打包时按发布流程增量压缩。
+
+资源地址的 `assetVersion` 参数直接使用后台的 `ASSETS_VERSION`。更新静态资源后，管理员可在系统参数配置管理中编辑 `ASSETS_VERSION`，点击“生成新版本号”并保存。用户下次刷新页面时会使用带新版本号的资源地址。
 
 ## 本地开发与启动
 
@@ -228,7 +230,7 @@ siargo/
 └── siargo.sh                # Linux 管理脚本
 ```
 
-项目版本同时维护在 `pom.xml` 与 `ProjectServer.getProjectVersion()` 中，发布时保持一致。暂存目录使用生产配置，最终归档与该目录保持一致。
+项目版本同时维护在 `pom.xml` 与 `ProjectServer.RELEASE_VERSION` 中，发布时保持一致。暂存目录使用生产配置，最终归档与该目录保持一致。
 
 Windows 环境在完整发布目录中由使用者执行 `./siargo.bat start`；Linux 使用 `siargo.sh` 前核对 JDK 25 的模块开放参数及目标环境配置。源码开发使用前述 IDE 入口，服务启动、停止和重启由使用者操作。
 

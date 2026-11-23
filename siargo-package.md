@@ -1,6 +1,6 @@
 ---
 name: siargo-package
-description: siargo 项目完整发布打包技能——代码变更比对、生成 CHANGELOG、版本号递增与双处同步、mvn clean 与打包（排除测试）、产出切 pro、压缩 siargo.rar、更新打包基线。 / Complete siargo release packaging workflow covering change review, CHANGELOG generation, version synchronization, Maven packaging, production configuration, archive creation, and package-baseline updates.
+description: siargo 项目完整发布打包技能——代码变更比对、生成 CHANGELOG、版本号递增与双处同步、mvn clean 与打包（排除测试）、产出切 pro、生成并校验 tar.gz 发布包、更新打包基线。 / Complete siargo release packaging workflow covering change review, CHANGELOG generation, version synchronization, Maven packaging, production configuration, tar.gz creation and verification, and package-baseline updates.
 whenToUse: 用户明确要求执行 siargo 发布/打包，或输入 siargo-package 主版本/子版本/修订版；仅提及或修改本文档不触发打包。没有已确认目标版本且缺少递增级别时先询问用户。
 user-invocable: true
 ---
@@ -10,7 +10,7 @@ user-invocable: true
 > 触发方式：`siargo-package 主版本` / `siargo-package 子版本` / `siargo-package 修订版`
 > 用户已明确确认的待发布目标版本优先；没有已确认目标时，参数决定版本号递增级别。两者均缺少时**必须先询问用户**（默认建议“修订版”），禁止自行假定。
 
-本技能仅在用户明确要求发布/打包时执行：**代码变更比对 → 确定目标版本并生成 CHANGELOG → 版本号双处同步 → 检查并增量压缩指定资源 → 清理旧产物（clean）→ Maven 打包（排除测试）→ 产出配置切 pro → 压缩 siargo.rar → 更新打包基线**。日常开发、修复和文档修改不触发发布，也不向 CHANGELOG 写入“未发布”分组或提前生成版本记录。
+本技能仅在用户明确要求发布/打包时执行：**代码变更比对 → 确定目标版本并生成 CHANGELOG → 版本号双处同步 → 检查并增量压缩指定资源 → 清理旧产物（clean）→ Maven 打包（排除测试）→ 产出配置切 pro → 生成并校验 tar.gz 发布包 → 更新打包基线**。日常开发、修复和文档修改不触发发布，也不向 CHANGELOG 写入“未发布”分组或提前生成版本记录。
 
 所有命令在项目根目录 `D:\Workspace\siargo` 下执行（PowerShell 7）。
 
@@ -18,7 +18,7 @@ user-invocable: true
 
 ## 版本号规则
 
-先读取 `pom.xml` 的 `<version>X.Y.Z</version>`（文件顶部 `<artifactId>siargo</artifactId>` 下一行）、`ProjectServer.getProjectVersion()` 与 `last_package.json.version`，区分代码版本、待发布目标与上次成功打包版本。
+先读取 `pom.xml` 的 `<version>X.Y.Z</version>`（文件顶部 `<artifactId>siargo</artifactId>` 下一行）、`ProjectServer.RELEASE_VERSION` 与 `last_package.json.version`，区分代码版本、待发布目标与上次成功打包版本。
 
 - 用户已明确确认待发布目标时，优先沿用该目标；本文末尾“当前待发布说明”可记录用户已确认但尚未发布的目标。两处代码版本已是目标版本时，不再递增，不能仅因提前改过版本号就把下一次发布跳到更高版本。
 - 没有已确认目标时，按用户指定的递增级别计算；版本来源不一致、或待发布目标已经存在于成功基线时，先核对当前状态，不擅自覆盖或推断新的发布意图。
@@ -35,7 +35,7 @@ user-invocable: true
 新版本号必须**同时**写入以下两处，缺一不可（打包前校验两处一致）：
 
 1. `D:\Workspace\siargo\pom.xml` —— `<version>新版本</version>`
-2. `D:\Workspace\siargo\src\main\java\cn\jbolt\starter\ProjectServer.java` —— `getProjectVersion()` 方法内的 `return "新版本";`
+2. `D:\Workspace\siargo\src\main\java\cn\jbolt\starter\ProjectServer.java` 中的 `RELEASE_VERSION` 常量，用于显示服务启动版本。
 
 ---
 
@@ -54,7 +54,7 @@ user-invocable: true
 
 基线用于比对"两次执行打包技能之间"的代码变更。
 
-成功打包后还需保存完整 `assetHashes`（结构见第 9 步），用于精确识别清单资源修改。旧基线没有该字段时，首次对所有有源文件的清单项建立压缩基线；仅有 min 的项保持现状。
+成功打包后还需保存完整 `assetHashes`（结构见第 8 步），用于精确识别清单资源修改。旧基线没有该字段时，首次对所有有源文件的清单项建立压缩基线；仅有 min 的项保持现状。
 
 ---
 
@@ -111,7 +111,7 @@ user-invocable: true
 按“版本号规则”确定本次目标，再同步两处。已确认目标、提前同步过的版本和失败恢复均不重复递增；文件已经是目标版本时跳过修改：
 
 1. `pom.xml`：`<version>旧版本</version>` → `<version>新版本</version>`
-2. `ProjectServer.java`：`return "旧版本";` → `return "新版本";`（位于 `getProjectVersion()` 方法内）
+2. 将 `ProjectServer.java` 中的 `RELEASE_VERSION` 设为新版本。
 
 修改后回读两处确认一致。
 
@@ -135,7 +135,7 @@ user-invocable: true
 - 源文件缺失但 min 存在时保留 min，不伪造未压缩文件；两者均缺失则停止依赖该资源的后续发布操作并报告，可继续只读诊断。空 JS 是合法源文件，允许压缩产物为空。
 - 使用已安装的 terser / csso；工具缺失或压缩失败时停止依赖该步的后续发布操作，可继续只读诊断，修复重试遵守本节的授权条件。不安装未知依赖，不使用旧 min 假装压缩成功。临时产物生成成功后才替换相应 min，JS 不开启顶层符号改名。
 - 脚本将源/min 哈希写入 `.codex/tmp/project-assets-manifest.json`，不修改成功打包基线；该清单放在 target 之外，不受随后 `mvn clean` 影响，不写 CHANGELOG、不加入发布业务资源。
-- 构建后按 manifest 校验发布目录中的清单资源与源目录一致；打包期间源/min 发生变化时重新执行本步并重新打包。第 9 步仅在全部发布步骤成功后合并新哈希到基线。
+- 构建后按 manifest 校验发布目录中的清单资源与源目录一致；打包期间源/min 发生变化时重新执行本步并重新打包。第 8 步仅在全部发布步骤成功后合并新哈希到基线。
 
 **限定清单的运行时加载校验：**
 
@@ -151,7 +151,7 @@ user-invocable: true
 mvn clean
 ```
 
-- `mvn clean` 删除整个 `target` 目录（含旧的 `siargo-release\`、残留的 `siargo.rar` / `siargo-release.tar.gz`）。
+- `mvn clean` 删除整个 `target` 目录（含旧的 `siargo-release\` 和 `siargo-release.tar.gz`）。
 - 若 `mvn clean` 因文件被占用失败，改为手动删除：`Remove-Item -Recurse -Force D:\Workspace\siargo\target`；仍失败则停止依赖 clean 的后续发布操作并报告占用原因，可继续只读诊断，修复重试遵守本节的授权条件。
 - 确认 `target\siargo-release` 目录已不存在，方可进入下一步。
 
@@ -166,34 +166,18 @@ mvn package -Dmaven.test.skip=true
 - assembly 按 `package.xml` 描述符产出 `target\siargo-release\siargo\`（dir 格式）与 `siargo-release.tar.gz`。
 - 构建失败：报告 Maven 错误和当前状态，停止依赖构建成功的后续发布操作，可继续只读诊断；仅在已有授权明确覆盖时修复重试，否则提交具体修复建议。不回滚已做的 CHANGELOG/版本号修改（由用户决定），不更新基线；同一次打包恢复沿用目标版本，在已有 CHANGELOG 分组内归纳必要变化，避免重复记录。
 - 构建成功后校验产物存在：`target\siargo-release\siargo\config\application.properties`、`siargo.bat`、`lib\siargo-<目标版本>.jar`。
-- `src/main/webapp/upload/siargo/dms/` 内的内容由用户手动复制；`package.xml` 使用 `upload/siargo/dms/**/*` 排除所有子项并保留空的 `dms` 目录。发布目录及 RAR、tar.gz 必须包含 `webapp/upload/siargo/dms/` 空目录，均不得包含其下的文件或子目录，源目录保持不变。
+- `src/main/webapp/upload/siargo/dms/` 内的内容由用户手动复制；`package.xml` 使用 `upload/siargo/dms/**/*` 排除所有子项并保留空的 `dms` 目录。发布目录和 tar.gz 发布包必须包含 `webapp/upload/siargo/dms/` 空目录，均不得包含其下的文件或子目录，源目录保持不变。
 
-### 第 7 步：产出配置切换生产环境
+### 第 7 步：切换发布配置并生成 tar.gz
 
 修改产出文件 `D:\Workspace\siargo\target\siargo-release\siargo\config\application.properties`：
 
 - 将 `pdev=dev` 改为 `pdev=pro`（仅改产出目录，**禁止改动 `src\main\resources\application.properties` 源文件**）。
 - 回读确认该行已为 `pdev=pro`。
 - 对发布目录中的 12 项清单资源按生产规则检查：有对应压缩版本时使用压缩文件，缺少压缩版本时使用实际存在的未压缩文件；外部引用和清单外资源保持现状。
-- 在项目根目录运行 `python .codex/scripts/create-release-tar.py`。脚本确认产出配置为 `pdev=pro`，在发布目录内补齐 Maven 可能省略的 DMS 空目录；发现 DMS 内有内容时会停止。tar.gz 写完后才替换 Maven 先前生成的归档，并保留 `siargo/` 根目录和启动脚本的执行权限。最终 RAR 和 tar.gz 均校验生产配置及 DMS 空目录。
+- 在项目根目录运行 `python .codex/scripts/create-release-tar.py`。脚本确认产出配置为 `pdev=pro`，在发布目录内补齐 Maven 可能省略的 DMS 空目录；发现 DMS 内有内容时会停止。tar.gz 写完后才替换 Maven 先前生成的归档，并保留 `siargo/` 根目录和启动脚本的执行权限。生成后核对 tar.gz 内的生产配置和 DMS 空目录。
 
-### 第 8 步：压缩 siargo.rar
-
-WinRAR 路径取自项目配置 `config.properties` 的 `winrar_exe_path`（默认 `C:\Program Files\WinRAR\WinRAR.exe`），先校验可执行文件存在：
-
-```powershell
-& "C:\Program Files\WinRAR\WinRAR.exe" a -r -idq "D:\Workspace\siargo\target\siargo-release\siargo.rar" "D:\Workspace\siargo\target\siargo-release\siargo"
-```
-
-- 归档内含 `siargo\` 根目录及其下全部文件（config/webapp/lib/启动脚本），与 tar.gz 结构一致，便于直接解压部署。
-- 压缩前确认不存在同名旧 rar（第 5 步 clean 已清理 target，正常不会残留；若有则先删除，避免追加模式混入旧文件）。
-- 压缩完成后校验 rar 存在且体积非零。
-- **WinRAR 不存在的降级方案**：改用 `Compress-Archive` 生成 `siargo.zip`，并明确告知用户产物格式已变更：
-  ```powershell
-  Compress-Archive -Path "D:\Workspace\siargo\target\siargo-release\siargo" -DestinationPath "D:\Workspace\siargo\target\siargo-release\siargo.zip" -Force
-  ```
-
-### 第 9 步：更新打包基线
+### 第 8 步：更新打包基线
 
 全部成功后更新 `last_package.json` 的发布字段，并将本次 `.codex/tmp/project-assets-manifest.json` 的完整 `assetHashes` 对象合并进去；保留其他已有字段。失败时不得更新哈希基线。
 
@@ -215,14 +199,14 @@ git -C D:\Workspace\siargo rev-parse HEAD   # 取当前 HEAD 完整哈希
 
 上述 JSON 只展示一个资源的哈希结构；实际写入必须使用 manifest 内完整的 12 项，不能只保存示例项。
 
-### 第 10 步：输出打包报告
+### 第 9 步：输出打包报告
 
 向用户汇报：
 
 - 版本变更：旧版本 → 新版本（主/子/修订）
 - 本次目标版本整理后的 CHANGELOG 全文
 - 变更文件统计（已提交 N 个 commit / 未提交修改 M 个文件）
-- 产物路径：`target\siargo-release\siargo.rar`（及 `siargo-release.tar.gz`）
+- 产物路径：发布目录 `target\siargo-release\siargo\` 和归档 `target\siargo-release.tar.gz`
 - `pdev=pro` 切换确认
 - 12 项清单中实际重压/跳过/仅有 min 的文件及发布目录产物一致性校验结果（仅打包报告，不写入 CHANGELOG）
 - 基线已更新至新 HEAD

@@ -66,8 +66,7 @@
             {@each datas as data,index}
             <tr data-id="${data.id}">
                 <td>${+index+1}</td>
-                <td {@if data.remark} tooltip data-title="${data.remark}" {@
-                /if}>${data.name}</td>
+                <td {@if data.remark} tooltip data-title="${data.remark}" {@/if}>${data.name}</td>
                 <td>${data.configKey}</td>
                 <td>
                     {@if data.valueType=="boolean"}

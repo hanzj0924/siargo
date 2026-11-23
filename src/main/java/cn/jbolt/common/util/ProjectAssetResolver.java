@@ -2,22 +2,28 @@ package cn.jbolt.common.util;
 
 import com.jfinal.log.Log;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
-/** 按部署环境选择配置清单内的本地资源，外部 URL 和其他资源保持原样。 */
+/** 按部署环境选择清单内的本地资源，并为其生成带版本的地址。 */
 public class ProjectAssetResolver {
     private static final Log LOG = Log.getLog(ProjectAssetResolver.class);
     private final Path webRoot;
     private final Set<String> assets = new HashSet<>();
     private final BooleanSupplier production;
+    private final Supplier<String> assetVersion;
 
-    public ProjectAssetResolver(Path webRoot, String configuredAssets, BooleanSupplier production) {
+    public ProjectAssetResolver(Path webRoot, String configuredAssets, BooleanSupplier production,
+                                Supplier<String> assetVersion) {
         this.webRoot = webRoot.toAbsolutePath().normalize();
         this.production = production;
+        this.assetVersion = assetVersion;
         for (String entry : configuredAssets.split(",")) {
             String asset = entry.trim();
             if (asset.isEmpty()) {
@@ -41,7 +47,6 @@ public class ProjectAssetResolver {
             end = Math.min(end, fragment);
         }
         String path = url.substring(0, end);
-        String suffix = url.substring(end);
         boolean rooted = path.startsWith("/") && !path.startsWith("//");
         String localPath = rooted ? path.substring(1) : path;
         String source = localPath.replaceFirst("\\.min\\.(css|js)$", ".$1");
@@ -64,6 +69,9 @@ public class ProjectAssetResolver {
             LOG.warn("项目资源的未压缩和压缩版本均不存在：" + source);
             return url;
         }
-        return (rooted ? "/" : "") + selected + suffix;
+        int queryEnd = fragment < 0 ? url.length() : fragment;
+        String originalQuery = query >= 0 && query + 1 < queryEnd ? "&" + url.substring(query + 1, queryEnd) : "";
+        String version = URLEncoder.encode(assetVersion.get(), StandardCharsets.UTF_8);
+        return (rooted ? "/" : "") + selected + "?assetVersion=" + version + originalQuery + url.substring(queryEnd);
     }
 }

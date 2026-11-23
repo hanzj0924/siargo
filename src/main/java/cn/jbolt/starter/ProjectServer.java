@@ -7,6 +7,8 @@ import cn.jbolt.core.server.JBoltServer;
 
 /** 项目服务器自定义 */
 public class ProjectServer extends JBoltServer {
+    public static final String RELEASE_VERSION = "2.9.7";
+
     @Override
     public String getProjectName() {
         return "矽翔质管部管理系统";
@@ -14,7 +16,7 @@ public class ProjectServer extends JBoltServer {
 
     @Override
     public String getProjectVersion() {
-        return "2.9.7";
+        return RELEASE_VERSION;
     }
 
     @Override
