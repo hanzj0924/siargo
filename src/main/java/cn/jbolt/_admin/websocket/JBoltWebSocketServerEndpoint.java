@@ -1,5 +1,6 @@
 package cn.jbolt._admin.websocket;
 
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -203,11 +204,11 @@ public class JBoltWebSocketServerEndpoint {
     /** 发生错误时调用 */
     @OnError
     public void onError(Session session, Throwable error) {
+        if (error.getClass() == SocketException.class && "Connection reset".equals(error.getMessage())) {
+            LOG.info("WebSocket 连接重置 (Connection reset)");
+            return;
+        }
         LOG.error("发生错误", error);
-// String errorMsg = error.getMessage();
-//        if(StrKit.notBlank(errorMsg) && errorJBoltMsg.indexOf("Connection timed out")!=-1) {
-//        	jbsession.close();
-//        }
     }
 
     /** 发送群消息 */

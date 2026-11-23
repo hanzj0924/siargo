@@ -67,18 +67,19 @@ export default {
     onmessage(event) {
         jboltlog("handler:websocket message received.");
         jboltlog(event.data);
-        if (event.data) {
-            var edata = JSON.parse(event.data);
-            if (edata.type == JBoltWS.msgType.COMMAND || edata.type == JBoltWS.msgType.COMMAND_RET) {
-            	// 如果是command 就去执行指令handler处理器 优先找内置处理 内置没有找扩展 扩展没有找页面自定义注册
-            	this.emitCommand(edata.command,edata);
-            }else if(edata.type == JBoltWS.msgType.TEXT){
-            	// 如果是文本消息 就去执行文本消息handler处理器
-            	JBoltTextMsgHandler.process(edata);
-            	// 调用二开处理文本消息
-            	JBoltTextMsgHandlerExtend.process(edata);
-            }
+        if (!event.data) return false;
+        const edata = JSON.parse(event.data);
+        if (!edata) return false;
+        if (edata.type == JBoltWS.msgType.COMMAND || edata.type == JBoltWS.msgType.COMMAND_RET) {
+            this.emitCommand(edata.command, edata);
+            return Boolean(edata.command);
         }
+        if (edata.type == JBoltWS.msgType.TEXT) {
+            JBoltTextMsgHandler.process(edata);
+            JBoltTextMsgHandlerExtend.process(edata);
+            return true;
+        }
+        return false;
     },
     /** onclose事件
      */

@@ -1,158 +1,236 @@
-/** JBolt web socket js
- */
-import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
-	// jbolt websocket
-	let JBoltWS     = {};
-	JBoltWS.isOk = false;
-	JBoltWS.version = "0.1.0";
-	JBoltWS.genTokenUrl = "admin/myToken";
-	// 消息类型定义
-	JBoltWS.msgType = {COMMAND:1,COMMAND_RET:2,TEXT:3,FILE:4};
-	/**
-	 * 初始化
-	 * @param protocol              协议 wss or ws
-	 * @param host                  hostname:port
-	 * @param ctx                   context
-	 * @param token                 用户令牌
-	 * @param tenantSn              租户SN
-	 * @param binaryType            数据类型 'blob' or 'arraybuffer'
-	 * @param reconnInterval        重连间隔时间
-	 * @param heartbeatTimeout      心跳超时时间
-	 */
-	JBoltWS.init = function({protocol = "ws", host = "localhost", ctx='',token='',tenantSn='', binaryType = 'arraybuffer', reconnInterval = 1000 , heartbeatTimeout = 10000, callback}){
-		this.protocol              = protocol;
-		this.host                  = host;
-		this.token                 = token;
-		this.tenantSn              = tenantSn;
-		this.isTenant              = (tenantSn!=null&&tenantSn.length>0);
-		if(!ctx || ctx==='/'){
-			ctx='';
-		}else if(ctx.length > 1){
-			if(ctx.endWith('/')){
-				ctx = ctx.substring(0,subString.length-1);
-			}
-			if(!ctx.startWith('/')){
-				ctx = '/' + ctx;
-			}
-		}else if(ctx.length == 1){
-			ctx = '/' + ctx;
-		}else{
-			ctx='';
-		}
-		this.ctx                   = ctx;
-		if(this.isTenant){
-			this.url                   = protocol + '://' + host + ctx + '/websocket.ws/' + token + "?jbtenantsn=" + tenantSn;
-		}else{
-			this.url                   = protocol + '://' + host + ctx + '/websocket.ws/' + token;
-		}
-		this.binaryType            = binaryType;
-		this.reconnInterval        = reconnInterval;
-		this.heartbeatTimeout      = heartbeatTimeout;
-		this.heartbeatSendInterval = heartbeatTimeout / 2;
-		this.callback              = callback;
-		this.lastInteractionTime   = function(time) {
-			if (time) {
-			  this.lastInteractionTimeValue = time;
-			}
-			return this.lastInteractionTimeValue;
-		}
-	}
+/** JBolt web socket js */
+import JBoltWebSocketHandler from './jbolt-websocket-handler.js';
 
+const reconnectDelays = [1000, 2000, 4000, 8000, 16000, 30000];
+const stableConnectionTime = 10000;
 
-	/** 开启心跳检测
-	 */
-	JBoltWS.startHeartBeatCheck = function() {
-		jboltlog("JBolt websocket start heartBeatCheck...");
-		let self = this;
-		// 设置启动心跳检测
-        this.pingIntervalId = setInterval(()=>self.ping(),self.heartbeatSendInterval);
-	}
+const JBoltWS = {
+    isOk: false,
+    version: '0.1.0',
+    genTokenUrl: 'admin/myToken',
+    msgType: {COMMAND: 1, COMMAND_RET: 2, TEXT: 3, FILE: 4}
+};
 
-	/** 连接服务端
-	 */
-	JBoltWS.connect = function() {
-		jboltlog("JBolt websocket connecting...");
-		if (this.ws == null || this.ws.readyState != 1){
-	       this.ws = null;
-	       try{
-	    	   	this.ws = new WebSocket(this.url);
-	    	   	this.ws.binaryType = this.binaryType;
-	          }catch(e){
-	        	this.ws = null;
-	        	console.error(e);
-	        	this.reconn();// 重连
-	         }
-	     }
+let connection = null;
+let reconnectTimer = null;
+let reconnectAttempt = 0;
+let tokenRequest = null;
+let pageHidden = false;
+let sessionSuspended = false;
+let lifecycleRegistered = false;
 
-		if(!this.ws){
-			jboltlog("connect fail! Websocket连接失败");
-			return;
-		}
-		var self = this;
-		// open状态处理
-		this.ws.onopen = function(event) {
-			jboltlog("JBolt websocket onopen...");
-			JBoltWebSocketHandler.onopen(event);
-			JBoltWS.isOk = true;
-			console.log("JBolt websocket isOk!");
-			// 设置最后一次交互时间
-            self.lastInteractionTime(new Date().getTime());
-            // 启动心跳检测
-            self.startHeartBeatCheck();
-            // 执行链接后回调函数
-            if(self.callback){
-            	self.callback();
-            }
-		};
-		// 收到服务器消息处理
-		this.ws.onmessage = function(event) {
-			jboltlog("JBolt websocket onmessage...");
-			JBoltWebSocketHandler.onmessage(event);
-			// 设置最后一次交互时间
-			self.lastInteractionTime(new Date().getTime());
-		};
-		// 连接关闭处理
-		this.ws.onclose = function (event) {
-			jboltlog("JBolt websocket onclose...");
-			JBoltWS.isOk = false;
-			// 关闭心跳检测
-			clearInterval(self.pingIntervalId);
-			JBoltWebSocketHandler.onclose(event);
-			// 执行重连
-			self.reconn();
-		};
+function canConnect() {
+    return !pageHidden && !sessionSuspended && navigator.onLine !== false;
+}
 
-		// 通讯error 处理
-		this.ws.onerror = function(event) {
-			jboltlog("JBolt websocket onclose...");
-			JBoltWebSocketHandler.onerror(event);
-		};
-	}
+function isCurrentOpenConnection(current) {
+    return connection === current && !current.retired && current.socket.readyState === window.WebSocket.OPEN;
+}
 
-	/** 重连接服务端
-	 */
-	JBoltWS.reconn = function() {
-		jboltlog("JBolt websocket reconnecting after:" + this.reconnInterval +"ms");
-		let self = this;
-		setTimeout(function () {
-			self.connect();
-		}, self.reconnInterval);
-	}
+function clearConnectionTimers(current) {
+    clearInterval(current.pingTimer);
+    for (const timer of current.delayedTasks) {
+        clearTimeout(timer);
+    }
+    current.delayedTasks.clear();
+}
 
+function stopConnection() {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+    if (tokenRequest) {
+        const request = tokenRequest;
+        tokenRequest = null;
+        request.abort();
+    }
+    JBoltWS.isOk = false;
+    if (connection && !connection.retired) {
+        // 旧连接收到 close 前仍占用连接位置，避免两个 socket 并存。
+        connection.retired = true;
+        clearConnectionTimers(connection);
+        connection.socket.close();
+    }
+}
 
-	/** 执行心跳ping
-	 */
-	JBoltWS.ping = function() {
-		jboltlog("JBolt websocket check ping...");
-		let iv = new Date().getTime() - this.lastInteractionTime(); // 已经多久没发消息了 // 单位：秒
-		if ((this.heartbeatSendInterval + iv) >= this.heartbeatTimeout) {
-			jboltlog("JBolt websocket ping doing...");
-			this.sendCommand({command:"ping"});
-			jboltlog("JBolt websocket ping done...");
-		}else{
-			jboltlog("JBolt websocket ping cancel...");
-		}
-	}
+function registerLifecycle() {
+    if (lifecycleRegistered) return;
+    lifecycleRegistered = true;
+    window.addEventListener('offline', stopConnection);
+    window.addEventListener('online', () => JBoltWS.connect());
+    window.addEventListener('pagehide', () => {
+        pageHidden = true;
+        stopConnection();
+    });
+    window.addEventListener('pageshow', event => {
+        if (event.persisted) {
+            pageHidden = false;
+            JBoltWS.connect();
+        }
+    });
+}
+
+function scheduleForConnection(current, task, delayMs) {
+    if (!isCurrentOpenConnection(current)) return;
+    const timer = setTimeout(() => {
+        current.delayedTasks.delete(timer);
+        if (isCurrentOpenConnection(current)) task();
+    }, delayMs);
+    current.delayedTasks.add(timer);
+}
+
+function updateToken(client, token, tenantSn) {
+    client.token = token;
+    client.tenantSn = tenantSn || '';
+    client.isTenant = Boolean(client.tenantSn);
+    client.url = token ? client.protocol + '://' + client.host + client.ctx + '/websocket.ws/' + token
+        + (client.isTenant ? '?jbtenantsn=' + client.tenantSn : '') : '';
+}
+
+function requestToken(client) {
+    if (tokenRequest) return;
+    const request = Ajax.get(client.genTokenUrl);
+    tokenRequest = request;
+    request.done(res => {
+        if (tokenRequest !== request || !canConnect() || res.state !== 'ok') return;
+        if (!res.data?.token) {
+            LayerMsgBox.alert('初始化系统Websocket-获取系统授权TOKEN失败', 2);
+            return;
+        }
+        updateToken(client, res.data.token, res.data.tenantSn);
+        client.connect();
+    }).always(() => {
+        if (tokenRequest === request) tokenRequest = null;
+    });
+}
+
+JBoltWS.init = function({protocol = 'ws', host = 'localhost', ctx = '', token = '', tenantSn = '',
+    binaryType = 'arraybuffer', reconnInterval = reconnectDelays[0], heartbeatTimeout = 10000, callback}) {
+    stopConnection();
+    this.protocol = protocol;
+    this.host = host;
+    this.ctx = ('/' + (ctx || '')).replace(/^\/+/, '/').replace(/\/+$/, '');
+    this.binaryType = binaryType;
+    this.reconnInterval = reconnInterval;
+    this.heartbeatTimeout = heartbeatTimeout;
+    this.heartbeatSendInterval = heartbeatTimeout / 2;
+    this.callback = callback;
+    updateToken(this, token, tenantSn);
+    reconnectAttempt = 0;
+    sessionSuspended = false;
+    registerLifecycle();
+};
+
+JBoltWS.lastInteractionTime = function(time) {
+    if (time !== undefined) this.lastInteractionTimeValue = time;
+    return this.lastInteractionTimeValue;
+};
+
+JBoltWS.startHeartBeatCheck = function() {
+    const current = connection;
+    if (!current || !isCurrentOpenConnection(current)) return;
+    clearInterval(current.pingTimer);
+    current.pingTimer = setInterval(() => {
+        if (isCurrentOpenConnection(current)) this.ping();
+    }, this.heartbeatSendInterval);
+};
+
+JBoltWS.connect = function() {
+    if (!canConnect() || connection || reconnectTimer !== null) return;
+    if (!this.token) {
+        requestToken(this);
+        return;
+    }
+
+    let socket;
+    try {
+        socket = new window.WebSocket(this.url);
+    } catch (error) {
+        console.error('JBolt WebSocket 连接失败', error.name);
+        this.reconn();
+        return;
+    }
+    socket.binaryType = this.binaryType;
+    this.ws = socket;
+    const current = {
+        socket,
+        retired: false,
+        pingTimer: null,
+        delayedTasks: new Set(),
+        openedAt: null,
+        receivedMessage: false
+    };
+    connection = current;
+
+    socket.onopen = event => {
+        if (!isCurrentOpenConnection(current)) return;
+        current.openedAt = Date.now();
+        this.isOk = true;
+        this.lastInteractionTime(current.openedAt);
+        JBoltWebSocketHandler.onopen(event);
+        this.startHeartBeatCheck();
+        if (this.callback) this.callback((task, delayMs) => scheduleForConnection(current, task, delayMs));
+    };
+    socket.onmessage = event => {
+        if (!isCurrentOpenConnection(current)) return;
+        if (JBoltWebSocketHandler.onmessage(event)) {
+            current.receivedMessage = true;
+            this.lastInteractionTime(Date.now());
+        }
+    };
+    socket.onerror = event => {
+        if (connection === current && !current.retired) JBoltWebSocketHandler.onerror(event);
+    };
+    socket.onclose = event => {
+        if (connection !== current) return;
+        clearConnectionTimers(current);
+        connection = null;
+        this.ws = null;
+        this.isOk = false;
+        if (current.retired) {
+            this.connect();
+            return;
+        }
+        JBoltWebSocketHandler.onclose(event);
+        if (current.receivedMessage && Date.now() - current.openedAt >= stableConnectionTime) {
+            reconnectAttempt = 0;
+        }
+        this.reconn();
+    };
+};
+
+JBoltWS.reconn = function() {
+    if (!canConnect() || connection || reconnectTimer !== null) return;
+    const base = Math.min(reconnectDelays[reconnectDelays.length - 1],
+        this.reconnInterval * reconnectDelays[reconnectAttempt] / reconnectDelays[0]);
+    reconnectAttempt = Math.min(reconnectAttempt + 1, reconnectDelays.length - 1);
+    const delay = Math.floor(base * (0.8 + Math.random() * 0.2));
+    jboltlog('JBolt WebSocket 将在 ' + delay + ' ms 后重连');
+    reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        this.connect();
+    }, delay);
+};
+
+JBoltWS.ping = function() {
+    const idleTime = Date.now() - this.lastInteractionTime();
+    if (this.heartbeatSendInterval + idleTime >= this.heartbeatTimeout) {
+        this.sendCommand({command: 'ping'});
+    }
+};
+
+JBoltWS.suspendSession = function() {
+    sessionSuspended = true;
+    updateToken(this, '', '');
+    stopConnection();
+};
+
+JBoltWS.refreshSession = function(token, tenantSn) {
+    this.suspendSession();
+    updateToken(this, token, tenantSn);
+    reconnectAttempt = 0;
+    sessionSuspended = false;
+    this.connect();
+};
 
 	/** 执行发送指令到服务器
 	 */
@@ -206,60 +284,28 @@ import JBoltWebSocketHandler from './jbolt-websocket-handler.js'
 		}
 	}
 
-	/** 初始化JBolt webSocket
-	 */
-	JBoltWS.initJBoltWebsocket =  function(ctx,callback,token,tenantSn) {
-		console.log("JBolt websocket v"+this.version + " starting...");
-		// 判断当前浏览器是否支持WebSocket或者MozWebSocket
-		if (!window.WebSocket) {
-			window.WebSocket = window.MozWebSocket;
-		}
-		// 判断当前浏览器是否支持WebSocket
-		if (window.WebSocket) {
-			if(token){
-				JBoltWS.initTheJBoltWebsocket(ctx,token,tenantSn,callback);
-			}else{
-				Ajax.get(this.genTokenUrl,function(res){
-					if(res.data.token){
-						JBoltWS.initTheJBoltWebsocket(ctx,res.data.token,res.data.tenantSn,callback);
-					}else{
-						LayerMsgBox.alert('初始化系统Websocket-获取系统授权TOKEN失败',2);
-					}
-				});
-			}
-		} else {
-			LayerMsgBox.alert('当前浏览器不支持websocket',2);
-		}
-	}
+/** 初始化后台 WebSocket，保留显式令牌及访客模式入口。 */
+JBoltWS.initJBoltWebsocket = function(ctx, callback, token, tenantSn) {
+    jboltlog('JBolt WebSocket v' + this.version + ' starting');
+    if (!window.WebSocket) window.WebSocket = window.MozWebSocket;
+    if (!window.WebSocket) {
+        LayerMsgBox.alert('当前浏览器不支持websocket', 2);
+        return;
+    }
+    this.initTheJBoltWebsocket(ctx, token, tenantSn, callback);
+};
 
-	/** 初始化
-	 */
-	JBoltWS.initTheJBoltWebsocket=function(ctx,token,tenantSn,callback){
-		if(!token){
-			LayerMsgBox.alert("未指定用户Token,无法初始化websocket");
-			return false;
-		}
-		let host = window.location.host;
-		let protocol = window.location.protocol.split(':')[0];
-		if(protocol === "https"){
-			protocol = "wss";
-		}else{
-			protocol = "ws";
-		}
-
-		// 执行JBoltWS初始化
-		JBoltWS.init({
-			protocol:protocol,
-			host:host,
-			ctx:ctx,
-			token:token,
-			tenantSn:tenantSn,
-			callback:callback
-		});
-		// 执行connect
-		JBoltWS.connect();
-	}
-
+JBoltWS.initTheJBoltWebsocket = function(ctx, token, tenantSn, callback) {
+    this.init({
+        protocol: window.location.protocol === 'https:' ? 'wss' : 'ws',
+        host: window.location.host,
+        ctx,
+        token,
+        tenantSn,
+        callback
+    });
+    this.connect();
+};
 
 	/**
 	 * 注册command-handler

@@ -2746,6 +2746,13 @@ mark.dms-search-hit {
 /* 流程步骤条导航 */
 #qarepTabView > .jbolt_tab_links { display: none !important; }
 
+/* 与 JBolt 默认 40px 行高一致，减少固定列测高时的重复布局；较高行仍由组件按实测值覆盖。 */
+#qarepTabView .jbolt_main_table > tbody > tr > td:first-child,
+#qarepTabView .jbolt_main_table > tbody > tr > td:last-child {
+    min-height: 40px;
+    max-height: 40px;
+}
+
 .flow-stepper-nav {
 	--fs-mute: #64748d;
 	--fs-faint: #94a3b8;
@@ -3197,7 +3204,7 @@ z-index 高于节点避免被盖住 */
 /* 4.4 其他 */
 
 /* qarep 通用工具类 */
-.qarep-search-input,
+.form-inline .qarep-search-input { min-width: 17rem; max-width: 100%; }
 .qarep-search-select { width: 130px; }
 .qarep-des-link { cursor: pointer; color: #007bff; }
 .qarep-des-link:hover { color: #0056b3; text-decoration: underline; }

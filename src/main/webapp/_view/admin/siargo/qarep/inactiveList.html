@@ -12,8 +12,9 @@
             <div class="col">
                 <div class="il-search-bar">
                     <form class="form-inline" id="inactiveForm_#(pageId)" onsubmit="return false;" method="post">
-                        <input type="text" autocomplete="off" class="form-control" data-with-clearbtn="true"
-                               placeholder="输入订单号搜索" name="keywords" value="" style="width: 130px;"/>
+                        <input type="text" autocomplete="off" class="form-control qarep-search-input" data-with-clearbtn="true"
+                               placeholder="订单号/报告单编号/产品编号" aria-label="订单号/报告单编号/产品编号"
+                               title="订单号、报告单编号请完整输入，产品编号可输入任意片段" name="keywords" value=""/>
                         <button type="submit" class="btn btn-outline-secondary">
                             <i class="fa fa-search"></i> 查询
                         </button>
@@ -57,7 +58,7 @@
                 <td>
                     <a tooltip title="恢复"
                        href="admin/siargo/qarep/restore/${data.spid}"
-                       data-ajaxbtn data-handler="refreshJBoltTable" data-confirm="确定恢复此报告单？"
+                       data-ajaxbtn data-handler="SiargoQarepList.restoreSuccess" data-confirm="确定恢复此报告单？"
                        class="text-success"><i class="fa fa-check-circle"></i></a>
                     <a tooltip title="永久删除"
                        href="admin/siargo/qarep/permanentDelete?ids=${data.spid}"

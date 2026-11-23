@@ -37,6 +37,7 @@ import cn.jbolt.common.model.Todo;
 import cn.jbolt.common.util.DateUtil;
 import cn.jbolt.core.base.JBoltMsg;
 import cn.jbolt.core.db.sql.Sql;
+import cn.jbolt.core.util.JBoltCamelCaseUtil;
 import cn.jbolt.core.kit.JBoltUserKit;
 import cn.jbolt.core.model.User;
 import cn.jbolt.siargo.model.Qareport;
@@ -80,8 +81,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
     private final ReentrantLock dashboardFlowCountsCacheLock = new ReentrantLock();
     private final ReentrantLock totalCountsCacheLock = new ReentrantLock();
     private final ReentrantLock paginateCacheLock = new ReentrantLock();
-    private volatile Map<String, Long> cachedFlowCounts;
-    private volatile long flowCountsCacheTimestamp;
+    private volatile FlowCountsSnapshot cachedFlowCounts;
     private volatile Map<String, Long> cachedDashboardFlowCounts;
     private volatile long dashboardFlowCountsCacheTimestamp;
     private volatile Map<String, Long> cachedTotalCounts;
@@ -185,27 +185,34 @@ public class QareportService extends JBoltBaseService<Qareport> {
      *
      * @return Map包含各阶段数量：all(全部), noq(精度待检), ltq(成品检漏待检), accq(外观待检), funq(包装待检), appq(待批准), allq(已完成)
      */
-    public java.util.Map<String, Long> getFlowCounts() {
-        // 先检查缓存是否有效（无锁快速路径）
-        if (cachedFlowCounts != null &&
-                (System.currentTimeMillis() - flowCountsCacheTimestamp) < FLOW_COUNTS_CACHE_TTL) {
-            return cachedFlowCounts;
+    public Map<String, Long> getFlowCounts() {
+        return getFlowCounts(false);
+    }
+
+    /** 手动刷新时重新查询，并将结果供后续普通请求复用。 */
+    public Map<String, Long> getFlowCounts(boolean fresh) {
+        FlowCountsSnapshot snapshot = cachedFlowCounts;
+        if (!fresh && snapshot != null && snapshot.isFresh()) {
+            return snapshot.counts();
         }
-        // 缓存失效，加锁查询并刷新缓存
         flowCountsCacheLock.lock();
         try {
-            // 双重检查：防止多线程同时穿透
-            if (cachedFlowCounts != null &&
-                    (System.currentTimeMillis() - flowCountsCacheTimestamp) < FLOW_COUNTS_CACHE_TTL) {
-                return cachedFlowCounts;
+            snapshot = cachedFlowCounts;
+            if (!fresh && snapshot != null && snapshot.isFresh()) {
+                return snapshot.counts();
             }
             // 存入不可变视图，getFlowCounts 对外始终只读
             Map<String, Long> counts = Collections.unmodifiableMap(loadFlowCountsFromDb());
-            cachedFlowCounts = counts;
-            flowCountsCacheTimestamp = System.currentTimeMillis();
+            cachedFlowCounts = new FlowCountsSnapshot(counts, System.currentTimeMillis());
             return counts;
         } finally {
             flowCountsCacheLock.unlock();
+        }
+    }
+
+    private record FlowCountsSnapshot(Map<String, Long> counts, long cachedAt) {
+        private boolean isFresh() {
+            return System.currentTimeMillis() - cachedAt < FLOW_COUNTS_CACHE_TTL;
         }
     }
 
@@ -247,8 +254,12 @@ public class QareportService extends JBoltBaseService<Qareport> {
      * <p>联动清理：年度数量总计缓存（getTotalQSI/getTotalQI）与流程统计同源，一并失效</p>
      */
     public void clearFlowCountsCache() {
-        cachedFlowCounts = null;
-        flowCountsCacheTimestamp = 0;
+        flowCountsCacheLock.lock();
+        try {
+            cachedFlowCounts = null;
+        } finally {
+            flowCountsCacheLock.unlock();
+        }
         cachedDashboardFlowCounts = null;
         dashboardFlowCountsCacheTimestamp = 0;
         cachedTotalCounts = null;
@@ -860,24 +871,28 @@ public class QareportService extends JBoltBaseService<Qareport> {
         return findRecord(sql);
     }
 
-    /**
-     * 对Record列表中的用户可控文本字段做HTML转义（防XSS，仅用于列表展示数据）
-     *
-     * @param records 记录列表
-     * @param fields  需转义的字段名
-     */
-    private void escapeRecordFields(List<Record> records, String... fields) {
-        if (records == null || records.isEmpty()) {
-            return;
+    /** 报告单列表与回收站共用编号筛选、分页及展示字段处理。 */
+    private Page<Record> paginateReportRows(Sql sql, int pageNumber, int pageSize, String keyword, String textColumn) {
+        if (!keyword.isEmpty()) {
+            String productFragment = keyword.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+            // 按显示的完整编号比较，避免 MySQL 将带字母的产品编号转换为数字。
+            sql.bracketLeft()
+                    .eq("CAST(sq.order_id AS CHAR)", keyword)
+                    .or().eq("CAST(sq.formnum AS CHAR)", keyword)
+                    .or().like("sp.number", productFragment)
+                    .bracketRight();
         }
-        for (Record r : records) {
-            for (String field : fields) {
-                String value = r.getStr(field);
-                if (value != null && !value.isEmpty()) {
-                    r.set(field, EscapeUtil.escapeHtml4(value));
-                }
+
+        String sqlExceptSelect = sql.toSqlExceptSelect();
+        Page<Record> page = Db.paginate(pageNumber, pageSize, sql.getSelect(), sqlExceptSelect, sql.getWhereValues());
+        for (Record row : page.getList()) {
+            String value = row.getStr(textColumn);
+            if (value != null && !value.isEmpty()) {
+                row.set(textColumn, EscapeUtil.escapeHtml4(value));
             }
         }
+        JBoltCamelCaseUtil.keyToCamelCase(page);
+        return page;
     }
 
     /**
@@ -887,7 +902,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
      *
      * @param pageNumber 页码
      * @param pageSize   每页数量
-     * @param keywords   搜索关键字（订单号模糊匹配）
+     * @param keywords   完整订单号、完整报告单编号或产品编号片段
      * @param prodType   产品类型字典 SN（0=全部）
      * @param insp       检验进度（1~6，0=全部）
      * @param startTime  创建时间起始
@@ -898,7 +913,8 @@ public class QareportService extends JBoltBaseService<Qareport> {
                                            Date startTime, Date endTime) {
         // 缓存键构建与快速路径检查
         // 仅缓存"空关键字+无日期范围+第一页"的查询，key空间有限（prodType×insp×pageSize），防止缓存无限增长
-        boolean cacheable = notOk(keywords) && startTime == null && endTime == null && pageNumber == 1;
+        String keyword = Objects.toString(keywords, "").trim();
+        boolean cacheable = keyword.isEmpty() && startTime == null && endTime == null && pageNumber == 1;
         String cacheKey = pageNumber + "_" + pageSize + "_" + prodType + "_" + insp;
         if (cacheable) {
             Map<String, Page<Record>> cache = cachedPaginateData;
@@ -911,7 +927,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
         }
 
         // 构建基础查询
-        Sql sql = Sql.mysql()
+        Sql sql = Sql.mysql().prepared()
                 // 选择字段：报告单基础信息（id/spid转CHAR防止前端雪花ID精度丢失）
                 .select("CAST(sq.id AS CHAR) AS id", "sq.order_id", "sq.formnum", "sp.insp",
                         // 检验时间信息
@@ -930,7 +946,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
                         // 驳回历史条数（>0 时前端显示「驳」角标，点击查看历史）
                         "sp.reject_count", "sc.name AS sc_name"
                 )
-                .page(pageNumber, pageSize).from("siargo_product", "sp")
+                .from("siargo_product", "sp")
                 .leftJoin("siargo_prod_model", "pm", "pm.id=sp.siargo_prod_model_id")
                 // 关联报告单表
                 .leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
@@ -954,9 +970,6 @@ public class QareportService extends JBoltBaseService<Qareport> {
                 .leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid")
                 .leftJoin("siargo_customer", "sc", "sc.id = sq.cust_id")
                 .eq("sp.vd", QarepConst.VD_VALID);
-
-        // 应用搜索条件
-        sql.like("sq.order_id", keywords);
 
         // 应用日期范围筛选
         if (isOk(startTime) && isOk(endTime)) {
@@ -1015,10 +1028,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
             sql.orderBy("sq.formnum", true);
         }
 
-        Page<Record> result = paginateRecord(sql, true);
-
-        // 列表展示数据防XSS：用户可控文本HTML转义（不影响编辑回显接口）
-        escapeRecordFields(result.getList(), "sp_des");
+        Page<Record> result = paginateReportRows(sql, pageNumber, pageSize, keyword, "sp_des");
 
         // 将查询结果放入缓存（仅可缓存查询）
         if (cacheable) {
@@ -1778,11 +1788,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
      *
      * @param pageNumber 页码
      * @param pageSize   每页数量
-     * @param keywords   搜索关键字（订单号模糊匹配）
+     * @param keywords   完整订单号、完整报告单编号或产品编号片段
      * @return 回收站数据分页
      */
     public Page<Record> paginateInactiveListDatas(int pageNumber, int pageSize, String keywords) {
-        Sql sql = Sql.mysql()
+        Sql sql = Sql.mysql().prepared()
                 // 选择字段：报告单基础信息（雪花ID统一CAST为字符串，避免前端精度丢失）
                 .select("CAST(sq.id AS CHAR) AS id", "sq.order_id", "sc.name AS sc_name", "sq.formnum", "sp.insp",
                         // 检验时间信息
@@ -1804,7 +1814,7 @@ public class QareportService extends JBoltBaseService<Qareport> {
                         // 删除信息
                         "sp.delete_des", "DATE_FORMAT(sp.delete_time, '%Y-%m-%d %H:%i') as delete_time"
                 )
-                .page(pageNumber, pageSize).from("siargo_product", "sp")
+                .from("siargo_product", "sp")
                 .leftJoin("siargo_prod_model", "pm", "pm.id=sp.siargo_prod_model_id")
                 // 关联报告单表
                 .leftJoin("siargo_qareport", "sq", "sq.id = sp.report_id")
@@ -1836,17 +1846,11 @@ public class QareportService extends JBoltBaseService<Qareport> {
                 .leftJoin("jb_user", "appq_user", "appq_user.id = sp.appq_uid")
                 .leftJoin("jb_user", "allq_user", "allq_user.id = sp.allq_uid")
                 // 查询回收站数据（vd=0）
-                .eq("sp.vd", QarepConst.VD_DELETED);
+                .eq("sp.vd", QarepConst.VD_DELETED)
+                .orderBy("sp.delete_time", true);
 
-        // 应用搜索条件
-        sql.like("sq.order_id", keywords);
-
-        sql.orderBy("sp.delete_time", true);
-
-        Page<Record> page = paginateRecord(sql, true);
-        // 用户可控文本转义，防止列表展示时XSS
-        escapeRecordFields(page.getList(), "delete_des");
-        return page;
+        String keyword = Objects.toString(keywords, "").trim();
+        return paginateReportRows(sql, pageNumber, pageSize, keyword, "delete_des");
     }
 
     /**

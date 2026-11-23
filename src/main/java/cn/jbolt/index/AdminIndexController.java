@@ -55,6 +55,8 @@ public class AdminIndexController extends JBoltBaseController {
     @UnCheck
     @Before(JBoltNoUrlPara.class)
     public void index() {
+        String tenantSn = currentTenantSn();
+        set("adminSessionTenantSn", tenantSn == null ? "" : tenantSn);
         render("index.html");
     }
 
@@ -333,9 +335,18 @@ public class AdminIndexController extends JBoltBaseController {
     @UnCheck
     public void myToken() {
         Kv kv = Kv.by("token", JBoltUserKit.getUserSessionId());
-        if (JBoltConfig.SAAS_ENABLE && JBoltSaasTenantKit.me.isSelfRequest()) {
-            kv.set("tenantSn", JBoltSaasTenantKit.me.getSn());
+        Long userId = JBoltUserKit.getUserId();
+        if (userId != null) {
+            kv.set("userId", userId.toString());
+        }
+        String tenantSn = currentTenantSn();
+        if (tenantSn != null) {
+            kv.set("tenantSn", tenantSn);
         }
         renderJsonData(kv);
+    }
+
+    private String currentTenantSn() {
+        return JBoltConfig.SAAS_ENABLE && JBoltSaasTenantKit.me.isSelfRequest() ? JBoltSaasTenantKit.me.getSn() : null;
     }
 }

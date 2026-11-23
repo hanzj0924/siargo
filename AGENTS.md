@@ -3,6 +3,13 @@
 > 适用于所有涉及 `D:/Workspace/siargo` 的开发、审查与排查请求。由 qoder 规则（`.qoder/rules/siargo.md`、`siargo-coding-rules` 技能）移植；编码规范已整合进 `D:/Workspace/.codex/agents/siargo-*.toml` 子智能体定义。
 > 项目 Wiki：`wiki/docs/README.md`；Git 历史模式：`.claude/skills/siargo-patterns/SKILL.md`；JBolt 平台源码参考库：`D:/Workspace/源码/`（只读）。
 
+## Siargo 新旧系统项目背景
+
+| 系统 | 源码目录 | 本机演示地址 | 测试账号 | 测试密码 |
+| --- | --- | --- | --- | --- |
+| 旧系统（Siargo） | `D:\Workspace\siargo\` | `http://localhost/` | `admin` | `siargo` |
+| 新系统（Siargo AI） | `D:\Workspace\siargo_ai\` | `http://127.0.0.1:5173/` | `admin` | `123456` |
+
 ## 项目概况
 
 矽翔质管部管理系统：**JFinal 5.2.7 + JBolt Core 5.3.6 + JDK 25 + MySQL + Caffeine 2.9.3 + Undertow 2.2.37 + Fastjson + Hutool + POI/iTextPDF + Cron4j + JFinal Event**。

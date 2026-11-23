@@ -107,14 +107,10 @@ public class QareportAdminController extends JBoltBaseController {
         render("index.html");
     }
 
-    /**
-     * 获取各流程阶段的数量统计
-     * URL: /admin/siargo/qarep/getFlowCounts
-     *
-     * @return 各阶段数量统计
-     */
+    /** 获取各流程阶段的数量统计，手动刷新时传 fresh=true。 */
     public void getFlowCounts() {
-        renderJsonData(service.getFlowCounts());
+        getResponse().setHeader("Cache-Control", "no-store");
+        renderJsonData(service.getFlowCounts(getBoolean("fresh", false)));
     }
 
     /** 解析 xls/xlsx，返回报告单预填数据及独立产品卡片，不写库。 */

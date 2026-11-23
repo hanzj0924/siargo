@@ -5472,6 +5472,9 @@ var JBoltTabUtil={
 				}
 				
 				activeJBoltTabFromArray(key);
+				if(!isCurrent){
+					$(document).trigger("jbolt:tab-activated", [mainTabContent]);
+				}
 			}
 			
 		},
@@ -10822,7 +10825,7 @@ var Ajax={
 				var async=true;
 			    if(sync){async=false;}
 			    url=actionUrl(url);
-				$.ajax({
+				var request = $.ajax({
 					url:url,
 					type:"get",
 					dataType:dateType?dateType:"json",
@@ -10854,6 +10857,7 @@ var Ajax={
 						}
 					},
 					error:function(xhr, status, e){
+							if(status === "abort"){return;}
 							var responseJSON = xhr.responseJSON;
 							var defaultMsg = "网络通讯异常";
 							var msg;
@@ -10870,6 +10874,7 @@ var Ajax={
 					
 				});
 				jboltAjaxTimeout=60000;
+				return request;
 			}
 }
 /** 处理option value取值
@@ -19093,6 +19098,82 @@ function refreshCurrentAjaxPortal(ele){
 		portal.ajaxPortal(true);
 	}
 }
+var reloginIdentityRequest;
+
+function cancelAdminSessionCheck(){
+	if(reloginIdentityRequest){
+		var previousRequest = reloginIdentityRequest;
+		reloginIdentityRequest = null;
+		previousRequest.abort();
+	}
+}
+
+function pauseAdminSession(){
+	document.body.hidden = true;
+	if(window.JBoltWS){
+		window.JBoltWS.suspendSession();
+	}
+	$(document).trigger("jbolt:relogin-checking");
+}
+
+function verifyAdminSession(onVerified){
+	cancelAdminSessionCheck();
+	pauseAdminSession();
+	var identity = document.getElementById("JBOLT_ADMIN_SESSION");
+	var request = $.ajax({
+		url: "admin/myToken",
+		dataType: "json",
+		cache: false,
+		global: false,
+		timeout: 10000
+	});
+	reloginIdentityRequest = request;
+	request.done(function(result){
+		if(reloginIdentityRequest !== request){return;}
+		var session = result && result.state === "ok" && result.data;
+		if(!identity || !identity.dataset.userId || !session || !session.token ||
+			session.userId !== identity.dataset.userId || (session.tenantSn || "") !== identity.dataset.tenantSn){
+			reloadAdmin();
+			return;
+		}
+		reloginIdentityRequest = null;
+		if(window.JBoltWS){
+			window.JBoltWS.refreshSession(session.token, session.tenantSn);
+		}
+		document.body.hidden = false;
+		if(onVerified){onVerified();}
+		$(document).trigger("jbolt:relogin-success");
+	}).fail(reloadAdmin);
+
+	function reloadAdmin(){
+		if(reloginIdentityRequest !== request){return;}
+		reloginIdentityRequest = null;
+		jbolt_tabs_array = [];
+		sessionStorage.removeItem("jbolt_tabs_array");
+		window.location.replace(new URL("admin", document.baseURI).href);
+	}
+}
+
+function completeRelogin(handler){
+	verifyAdminSession(function(){
+		DialogUtil.exeBindHandler(handler || refreshPjaxContainer, {});
+	});
+}
+
+if(window.self === window.top){
+	window.addEventListener("pagehide", function(event){
+		if(event.persisted && document.getElementById("JBOLT_ADMIN_SESSION")){
+			cancelAdminSessionCheck();
+			pauseAdminSession();
+		}
+	});
+	window.addEventListener("pageshow", function(event){
+		if(event.persisted && document.getElementById("JBOLT_ADMIN_SESSION")){
+			verifyAdminSession();
+		}
+	});
+}
+
 function showReloginDialog(showMsg,handler){
 	if(window.self!=window.top){
 		parent.showReloginDialog(showMsg,handler);
@@ -19105,7 +19186,7 @@ function showReloginDialog(showMsg,handler){
 			offset:"auto",
 			zIndex:20220610,
 			url:"admin/relogin",
-			handler:handler?handler:refreshPjaxContainer
+			handler:function(){completeRelogin(handler);}
 		});
 		if(showMsg || typeof(showMsg)=="undefined"){
 			LayerMsgBox.error("当前登录已经失效，请重新登录系统!",2000);

@@ -175,7 +175,7 @@ mvn package -Dmaven.test.skip=true
 - 将 `pdev=dev` 改为 `pdev=pro`（仅改产出目录，**禁止改动 `src\main\resources\application.properties` 源文件**）。
 - 回读确认该行已为 `pdev=pro`。
 - 对发布目录中的 12 项清单资源按生产规则检查：有对应压缩版本时使用压缩文件，缺少压缩版本时使用实际存在的未压缩文件；外部引用和清单外资源保持现状。
-- Maven 生成的 tar.gz 早于此配置切换，必须在切换后用 `.codex/scripts/create-release-tar.py` 从发布目录重新生成 `target/siargo-release.tar.gz`，保留 `siargo/` 根目录及根目录启动脚本的执行权限；最终 RAR 与 tar.gz 均核对 `pdev=pro`、DMS 内容排除及空目录保留结果。
+- 在项目根目录运行 `python .codex/scripts/create-release-tar.py`。脚本确认产出配置为 `pdev=pro`，在发布目录内补齐 Maven 可能省略的 DMS 空目录；发现 DMS 内有内容时会停止。tar.gz 写完后才替换 Maven 先前生成的归档，并保留 `siargo/` 根目录和启动脚本的执行权限。最终 RAR 和 tar.gz 均校验生产配置及 DMS 空目录。
 
 ### 第 8 步：压缩 siargo.rar
 

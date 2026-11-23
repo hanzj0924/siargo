@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.siargo</groupId>
 	<artifactId>siargo</artifactId>
-	<version>2.9.6</version>
+	<version>2.9.7</version>
 	<packaging>jar</packaging>
 	<name>siargo</name>
 	<description>siargo</description>
@@ -491,6 +491,13 @@
 			<groupId>com.qiniu</groupId>
 			<artifactId>qiniu-java-sdk</artifactId>
 			<version>${qiniu.version}</version>
+			<exclusions>
+				<!-- SDK 已编译完成，避免传递的旧 Lombok 在 JDK 25 测试编译时被加载。 -->
+				<exclusion>
+					<groupId>org.projectlombok</groupId>
+					<artifactId>lombok</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

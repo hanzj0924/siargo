@@ -2988,6 +2988,11 @@
         var number = ++state.counter;
         if (adding) {
             var values = normalize(data);
+            if (importedOptions && state.largeMeterSeriesIds.has(values.siargo_prod_model_id)) {
+                values.qsi = '1';
+                values.qi = '1';
+                values.lt_status = '2';
+            }
             card.find('[data-field]').each(function () {
                 var input = root.jQuery(this), key = input.attr('data-field');
                 input.val(values[key]);
@@ -3009,7 +3014,6 @@
             refreshLargeMeterParams(page, card);
         });
         if (page.attr('data-form-mode') === 'add') {
-            // 仅手动选择模板关联的系列时设置数量，导入与初始化保留原值。
             card.on('select2:select.qarepSeries', '[data-field="siargo_prod_model_id"]', function () {
                 if (state.largeMeterSeriesIds.has(text(root.jQuery(this).val()))) {
                     card.find('[data-field="qsi"], [data-field="qi"]').val('1');
@@ -3434,7 +3438,7 @@
             }
 
 // Tab懒加载与脏标记
-            var loadedTabs = {};
+            var tablePluginReady = false;
             var dirtyTabs = {};
             var tableIds = ['allreport', 'noq', 'ltq', 'accq', 'funq', 'appq', 'allq'];
 
@@ -3442,6 +3446,20 @@
             function getCurrentTabIndex() {
                 var activeLink = page.find('#qarepTabView .jbolt_tab_link.active');
                 return activeLink.length ? page.find('#qarepTabView .jbolt_tab_link').index(activeLink) : 0;
+            }
+
+            function loadTabTable(index) {
+                if (!tablePluginReady) return;
+                var prefix = tableIds[index];
+                var tableId = prefix + '_mgrtable_' + pageId;
+                var table = page.find('#' + tableId);
+                if (!table.is('[data-jbolttable]')) {
+                    SelectUtil.initSelect(page.find('#' + prefix + 'Form_' + pageId + ' select[name="prodType"]'));
+                    JBoltTableUtil.initTable(table, false);
+                } else if (dirtyTabs[index]) {
+                    refreshJBoltTableById(tableId);
+                }
+                dirtyTabs[index] = false;
             }
 
 // 切换Tab（函数名带 pageId 后缀，避免污染全局命名空间与其他页面冲突）
@@ -3455,69 +3473,139 @@
                     page.find('.flow-stepper-item').eq(index - 1).addClass('active');
                 }
 
-                // 懒加载 + 脏标记刷新
-                if (!loadedTabs[index] || dirtyTabs[index]) {
-                    loadedTabs[index] = true;
-                    dirtyTabs[index] = false;
-                    var tableId = tableIds[index] + '_mgrtable_' + pageId + '';
-                    setTimeout(function () {
-                        refreshJBoltTableById(tableId);
-                    }, 50);
-                }
-
-                // 切换底层JBolt Tab
+                // 显示后再初始化，固定列按可见表格的实际尺寸布局。
                 page.find('#qarepTabView .jbolt_tab_link').eq(index).trigger('click');
+                loadTabTable(index);
             }
 
-// 获取各流程阶段数量（带防抖，避免短时间内重复请求）
-            var loadFlowCountsTimer = null;
+            var shell = root.frameElement ? root.top : root;
+            var shellDocument = shell.jQuery(shell.document);
+            var listEvents = '.qarepList' + pageId;
+            var listListeners = new AbortController();
+            var listClosed = false;
+            var pageSuspended = false;
+            var flowCountsPaused = false;
+            var pendingFlowCountsUrl = null;
+            var flowCountsTimer = null;
+            var flowCountsRequest = null;
 
-            function loadFlowCounts() {
-                if (loadFlowCountsTimer) clearTimeout(loadFlowCountsTimer);
-                loadFlowCountsTimer = setTimeout(function () {
-                    // 规范 98：使用平台 Ajax 对象族（自动处理登录失效/系统锁定/终端离线等全局状态）
-                    Ajax.get('admin/siargo/qarep/getFlowCounts', function (res) {
+            function tabPortal() {
+                return (root.frameElement || page[0]).closest('.jbolt_tabcontent');
+            }
+
+            function canLoadFlowCounts() {
+                if (listClosed || pageSuspended || flowCountsPaused || document.hidden || !page[0].isConnected) {
+                    return false;
+                }
+                var portal = tabPortal();
+                return !portal || portal.classList.contains('active');
+            }
+
+            function scheduleFlowCounts() {
+                if (!pendingFlowCountsUrl || flowCountsRequest || flowCountsTimer !== null || !canLoadFlowCounts()) return;
+                flowCountsTimer = setTimeout(function () {
+                    flowCountsTimer = null;
+                    if (!canLoadFlowCounts()) return;
+                    var url = pendingFlowCountsUrl;
+                    pendingFlowCountsUrl = null;
+                    var request = Ajax.get(url);
+                    flowCountsRequest = request;
+                    request.done(function (res) {
+                        if (flowCountsRequest !== request || !canLoadFlowCounts() || res.state !== 'ok') return;
                         tableIds.slice(1).forEach(function (prefix) {
                             page.find('#count-' + prefix).text(res.data[prefix] || 0);
                         });
+                    }).always(function () {
+                        if (flowCountsRequest !== request) return;
+                        flowCountsRequest = null;
+                        var result = request.responseJSON;
+                        if (result && (result.msg === 'jbolt_terminal_offline' || result.msg === 'jbolt_nologin')) {
+                            pauseFlowCounts();
+                        }
+                        scheduleFlowCounts();
                     });
                 }, 100);
             }
 
+            function loadFlowCounts(fresh) {
+                if (listClosed || flowCountsPaused) return;
+                // 多个操作合并时，保留手动刷新要求的实时统计。
+                if (fresh || !pendingFlowCountsUrl) {
+                    pendingFlowCountsUrl = 'admin/siargo/qarep/getFlowCounts' + (fresh ? '?fresh=true' : '');
+                }
+                scheduleFlowCounts();
+            }
+
+            function clearFlowCounts() {
+                pendingFlowCountsUrl = null;
+                clearTimeout(flowCountsTimer);
+                flowCountsTimer = null;
+                var request = flowCountsRequest;
+                flowCountsRequest = null;
+                if (request) request.abort();
+            }
+
+            function pauseFlowCounts() {
+                flowCountsPaused = true;
+                clearFlowCounts();
+            }
+
+            function disposeListListeners() {
+                listClosed = true;
+                clearFlowCounts();
+                listListeners.abort();
+                shellDocument.off(listEvents);
+                page.off(listEvents);
+            }
+
+            page.data('qarepListDispose', disposeListListeners);
+            page.on('click' + listEvents, '[data-qarep-refresh]', function () {
+                jboltTableRefresh(this);
+                loadFlowCounts(true);
+            });
+            shellDocument
+                .on('jbolt:tab-activated' + listEvents, function (event, portal) {
+                    if (portal[0] === tabPortal() && canLoadFlowCounts()) refreshAllQarepTables();
+                })
+                .on('jbolt:relogin-checking' + listEvents, pauseFlowCounts)
+                .on('jbolt:relogin-success' + listEvents, function () {
+                    flowCountsPaused = false;
+                    loadFlowCounts();
+                });
+
 // 页面加载时获取数量（守卫：防止 JBolt 双重渲染导致重复初始化）
             $(function () {
-                if (!page[0].isConnected) return;
+                if (listClosed || !page[0].isConnected) return;
                 // 初始化步骤条active状态并触发首次流程数量加载（内建防抖）
                 const activeIndex = page.find('#qarepTabView').data('active-index') || 0;
 
-                // 预标记默认tab为已加载，防止switchTabByIndex中重复触发
-                loadedTabs[activeIndex] = true;
                 switchTabByIndex(activeIndex);
+                loadJBoltPlugin(['jbolttable'], function () {
+                    if (listClosed || !page[0].isConnected) return;
+                    tablePluginReady = true;
+                    loadTabTable(getCurrentTabIndex());
+                });
 
                 // 首次加载流程数量（防抖100ms确保只发一次请求）
                 loadFlowCounts();
 
-                // 定时刷新数量（每30秒），页面不可见时暂停以节省资源；
-                // 用 AbortController 管理监听器生命周期，页面卸载/重载时可整体中止，避免监听器泄漏
-                var flowCountTimer = setInterval(loadFlowCounts, 30000);
-                page.data("qarepFlowStop", function () {
-                    visibilityAbort.abort();
-                    clearInterval(flowCountTimer);
-                    clearTimeout(loadFlowCountsTimer);
-                });
-                var visibilityAbort = new AbortController();
                 document.addEventListener('visibilitychange', function () {
-                    if (document.hidden) {
-                        clearInterval(flowCountTimer);
+                    if (!document.hidden) loadFlowCounts();
+                }, {signal: listListeners.signal});
+                root.addEventListener('pagehide', function (event) {
+                    if (event.persisted) {
+                        pageSuspended = true;
+                        clearFlowCounts();
                     } else {
-                        loadFlowCounts();
-                        flowCountTimer = setInterval(loadFlowCounts, 30000);
+                        disposeListListeners();
                     }
-                }, {signal: visibilityAbort.signal});
-                window.addEventListener('pagehide', function () {
-                    visibilityAbort.abort();
-                    clearInterval(flowCountTimer);
-                }, {once: true});
+                }, {signal: listListeners.signal});
+                root.addEventListener('pageshow', function (event) {
+                    if (event.persisted) {
+                        pageSuspended = false;
+                        loadFlowCounts();
+                    }
+                }, {signal: listListeners.signal});
 
                 // PDF 查看链接防缓存：捕获阶段委托（第三参 true，先于 JBolt data-openpage 的冒泡委托执行），
                 // 从 data-pdf-url（dataset 读取，天然免字符串拼接注入）取原始地址并拼时间戳改写 href，
@@ -3529,7 +3617,7 @@
                     if (pdfUrl) {
                         link.setAttribute('href', pdfUrl + (pdfUrl.indexOf('?') >= 0 ? '&t=' : '?t=') + Date.now());
                     }
-                }, {capture: true, signal: visibilityAbort.signal});
+                }, {capture: true, signal: listListeners.signal});
             });
 
 // 打开删除确认弹窗
@@ -3608,57 +3696,15 @@
                 });
             }
 
-// 刷新当前Tab + "全部"Tab，其余Tab标记为脏（切换时再刷新）
+// 业务数据变化后，立即刷新当前页签，其他页签在下次显示时刷新。
             function refreshAllQarepTables() {
-                // 始终刷新"全部"Tab
-                refreshJBoltTableById('allreport_mgrtable_' + pageId + '');
-                var currentIdx = getCurrentTabIndex();
-                // 刷新当前激活的Tab（非"全部"时）
-                if (currentIdx > 0) {
-                    refreshJBoltTableById(tableIds[currentIdx] + '_mgrtable_' + pageId + '');
-                }
-                // 清除当前Tab的脏标记（已刷新，无需再标记）
-                dirtyTabs[currentIdx] = false;
-                // 标记其余Tab为脏，切换时自动刷新
-                for (var i = 1; i < tableIds.length; i++) {
-                    if (i !== currentIdx) {
-                        dirtyTabs[i] = true;
-                    }
-                }
+                tableIds.forEach(function (_, index) { dirtyTabs[index] = true; });
+                loadTabTable(getCurrentTabIndex());
                 loadFlowCounts();
             }
 
 // 暴露刷新入口供审批 iframe 跨窗口调用（须位于 refreshAllQarepTables 声明之后，函数声明提升不受影响）
             window._qarepRefresh = refreshAllQarepTables;
-
-// 框架标签页切换自动刷新：切回本页（报单号）时刷新一次列表数据与流程数量
-// 复用平台自身的 tab 点击事件委托（与平台切换逻辑同源）：
-// - 捕获阶段监听（先于平台在 jboltBody 上的冒泡 handler 执行），此时能读到 tab 点击前的激活状态
-// - 仅"从其他标签页切回本页"（点击的 tab 非当前激活，且其 key 就是本页所在 tabcontent 的 key）时刷新一次
-// - 非 data-auto-refresh 周期机制，无周期轮询；页面整页刷新后重新执行脚本时先移除旧监听，避免累积泄漏
-            (function () {
-                if (window.__qarepTabRefreshCapture) {
-                    document.removeEventListener('click', window.__qarepTabRefreshCapture, true);
-                }
-                var handler = function (e) {
-                    var t = e.target;
-                    var li = t && t.closest ? t.closest('ul.jbolt_tabs>li') : null;
-                    if (!li || li.classList.contains('active')) return; // 点击的是当前激活 tab，跳过
-                    if (t.closest && t.closest('i.close')) return; // 点击关闭按钮不触发刷新
-                    var clickedKey = li.getAttribute('data-key');
-                    setTimeout(function () {
-                        var portal = $('.jbolt_page[data-page-id="' + pageId + '"]').closest('.jbolt_tabcontent');
-                        // portal 仍挂载、本页已激活、且其 tab key 与点击的 tab 一致 → 确实切回了本页，刷新一次
-                        if (portal.length === 1 && portal[0].isConnected && portal.hasClass('active') && portal.attr('data-key') === clickedKey) {
-                            refreshAllQarepTables();
-                        }
-                    }, 80);
-                };
-                window.__qarepTabRefreshCapture = handler;
-                page.data("qarepTabCapture", handler);
-                document.addEventListener('click', handler, true);
-            })();
-
 
             window['switchTabByIndex_' + pageId] = switchTabByIndex;
             window['openDeleteDialog_' + pageId] = openDeleteDialog;
@@ -3668,17 +3714,20 @@
             page.data("qarepRefresh", refreshAllQarepTables);
             root.SiargoQarepPdf.init(page);
 
+        }, restoreSuccess: function (action) {
+            refreshJBoltTable(action);
+            var owner = root.frameElement ? root.parent : root;
+            if (typeof owner._qarepRefresh === 'function') owner._qarepRefresh();
         }, close: function (container) {
-            var page = root.jQuery(container), stop = page.data("qarepFlowStop"),
-                capture = page.data("qarepTabCapture"), pageId = page.attr("data-page-id");
-            if (stop) stop();
-            if (capture) document.removeEventListener('click', capture, true);
-            if (root.__qarepTabRefreshCapture === capture) delete root.__qarepTabRefreshCapture;
-            page.off('.qarepPdf').removeData("qarepListReady");
+            var page = root.jQuery(container), dispose = page.data("qarepListDispose"),
+                pageId = page.attr("data-page-id");
+            if (dispose) dispose();
+            page.off('.qarepPdf');
             ['switchTabByIndex', 'openDeleteDialog', 'openApprovalDrawer', 'refreshAllQarepTables'].forEach(function (name) {
                 delete root[name + '_' + pageId];
             });
             if (root._qarepRefresh === page.data("qarepRefresh")) delete root._qarepRefresh;
+            page.removeData("qarepListReady qarepListDispose qarepRefresh");
         }
     };
 }(window));

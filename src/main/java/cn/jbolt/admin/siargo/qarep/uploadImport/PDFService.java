@@ -12,10 +12,13 @@ import com.jfinal.kit.PathKit;
 import com.jfinal.kit.Ret;
 import com.jfinal.log.Log;
 
-import java.nio.file.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 编排检验报告 PDF 的手动生成、正式发布及月度归档。
@@ -24,6 +27,7 @@ import java.util.*;
  */
 public class PDFService {
     private static final Log LOG = Log.getLog(PDFService.class);
+    private static final Set<String> ACTIVE_ARCHIVE_PERIODS = ConcurrentHashMap.newKeySet();
     @Inject
     private QareportService reports;
     @Inject
@@ -46,13 +50,30 @@ public class PDFService {
      * warnings 仅提示模板字段、缺参或清理问题，不改变已发布 PDF 的成功状态。
      */
     public Ret generate(List<Long> ids, Mode mode) {
+        if (ids == null || ids.isEmpty()) {
+            return Ret.fail("请选择有效的产品记录");
+        }
         return generate(ids, mode, YearMonth.now().minusMonths(1).toString());
     }
 
     private Ret generate(List<Long> ids, Mode mode, String archivePeriod) {
-        if (mode == null || ids == null || ids.isEmpty() || ids.stream().anyMatch(id -> id == null || id <= 0)) {
+        if (mode == null || ids.stream().anyMatch(id -> id == null || id <= 0)) {
             return Ret.fail("请选择有效的产品记录");
         }
+        if (mode == Mode.FORMAL) {
+            return generatePdfs(ids, mode, archivePeriod);
+        }
+        if (!ACTIVE_ARCHIVE_PERIODS.add(archivePeriod)) {
+            return Ret.fail("所选月份区间正在导出，请等待本次导出结束");
+        }
+        try {
+            return generatePdfs(ids, mode, archivePeriod);
+        } finally {
+            ACTIVE_ARCHIVE_PERIODS.remove(archivePeriod);
+        }
+    }
+
+    private Ret generatePdfs(List<Long> ids, Mode mode, String archivePeriod) {
         List<String> failures = new ArrayList<>(), warnings = new ArrayList<>(), outputs = new ArrayList<>();
         List<Path> archiveInputs = new ArrayList<>();
         SiargoStorage templateStorage = SiargoStorage.forReportTemplates();
@@ -62,14 +83,18 @@ public class PDFService {
         String archiveUrl = null;
         // 区间用于归档目录与文件名；本方法不按日期再次过滤传入的产品 ID。
         try {
-            // 先检查压缩程序路径，再创建任务，避免程序缺失时仍逐个生成月度副本。
             if (mode == Mode.MONTHLY_ARCHIVE) {
-                rar = archiver.executable(JBoltConfig.prop.get("winrar_exe_path"));
+                if (!ids.isEmpty()) {
+                    rar = archiver.executable(JBoltConfig.prop.get("winrar_exe_path"));
+                }
+                clearArchivePeriod(storage, archivePeriod);
+                if (ids.isEmpty()) {
+                    return Ret.fail("所选月份区间没有可归档的报告单");
+                }
+                task = storage.ensureDirectory("archives", archivePeriod, UUID.randomUUID().toString());
+            } else {
+                task = storage.ensureDirectory("pdf-tasks", UUID.randomUUID().toString());
             }
-            // 两种模式都隔离每次任务，防止重复提交或并发任务混用中间产物。
-            // 正式中间文件存于 pdf-tasks，月度副本存于 archives；生成失败明细写入任务目录。
-            task = mode == Mode.MONTHLY_ARCHIVE ? storage.ensureDirectory("archives", archivePeriod,
-                    UUID.randomUUID().toString()) : storage.ensureDirectory("pdf-tasks", UUID.randomUUID().toString());
         } catch (Exception e) {
             return Ret.fail("PDF 任务准备失败：" + e.getMessage());
         }
@@ -203,11 +228,43 @@ public class PDFService {
         YearMonth end = YearMonth.of(year, endMonth);
         List<com.jfinal.plugin.activerecord.Record> rows = reports.getIdsByReleaseMonthRange(start.atDay(1),
                 end.plusMonths(1).atDay(1));
-        if (rows == null || rows.isEmpty()) {
-            return Ret.fail("所选月份区间没有可归档的报告单");
-        }
         String archivePeriod = start.equals(end) ? start.toString() : start + "至" + end;
         return generate(rows.stream().map(row -> row.getLong("id")).toList(), Mode.MONTHLY_ARCHIVE, archivePeriod);
+    }
+
+    private static void clearArchivePeriod(SiargoStorage storage, String archivePeriod) throws IOException {
+        Path period = storage.path("archives", archivePeriod);
+        if (Files.notExists(period, LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        if (!Files.isDirectory(period, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("归档路径不是目录：" + period);
+        }
+        Files.walkFileTree(period, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attrs) throws IOException {
+                // Windows 目录联接也可能指向导出根内的其他月份或正式报告目录。
+                if (!directory.equals(storage.checked(directory).toRealPath())) {
+                    throw new IOException("归档目录不允许使用目录联接：" + directory);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                storage.deleteFile(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path directory, IOException error) throws IOException {
+                if (error != null) {
+                    throw error;
+                }
+                Files.delete(storage.checked(directory));
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     static String validateMonthRange(Integer year, Integer startMonth, Integer endMonth, YearMonth currentMonth) {
